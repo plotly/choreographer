@@ -3,6 +3,8 @@ import json
 
 class Session:
     def __init__(self, command, params):
+        if not isinstance(command, str):
+            raise TypeError("You must use an string for the command parameter")
         self._command = command
         self._params = params
 
