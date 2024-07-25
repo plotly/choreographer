@@ -1,3 +1,6 @@
+import json
+
+
 class Session:
     def __init__(self, command, params):
         self._command = command
@@ -18,3 +21,7 @@ class Session:
     @params.setter
     def params(self, params):
         self._params = params
+
+    def send_command(self):
+        json_command = {"method": self.command, "params": self.params}
+        return json.dumps(json_command)
