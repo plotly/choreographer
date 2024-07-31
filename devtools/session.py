@@ -4,7 +4,7 @@ import json
 class Session:
     def __init__(self, sessionId):
         if isinstance(sessionId, str):
-            self._sessionId = sessionId
+            self.sessionId = sessionId
         else:
             raise TypeError("You must use an string object for sessionId")
         
