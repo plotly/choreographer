@@ -18,7 +18,7 @@ class Session:
         if cb:
             try:
                 user_cb = cb(args)
-                self.messageCbs[self.messageId] = cb
+                self.messageCbs[self.messageId] = user_cb
             except ValueError:
                 raise ValueError("The arg that you use, is not able at cb")
             
