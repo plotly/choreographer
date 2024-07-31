@@ -8,8 +8,26 @@ class Session:
         else:
             raise TypeError("You must use an string object for sessionId")
 
+        self._eventCbs = {}
+        self._messageCbs = {}
         self._messageId = 0
         
+        @property
+        def eventCbs(self):
+            return self._eventCbs
+        
+        @eventCbs.setter
+        def eventCbs(self, eventCbs):
+            self._eventCbs = eventCbs
+
+        @property
+        def messageCbs(self):
+            return self._messageCbs
+        
+        @messageCbs.setter
+        def messageCbs(self, messageCbs):
+            self._messageCbs = messageCbs
+
         @property
         def messageId(self):
             return self._messageId
