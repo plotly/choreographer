@@ -12,12 +12,16 @@ class Session:
         self.messageCbs = {}
         self.messageId = 0
 
-    def send_command(self, command, params, **kwargs):
+    def send_command(self, command, params, *args,**kwargs):
         cb = kwargs("cb", None)
 
         if cb:
-            self.messageCbs[self.messageId] = cb
-
+            try:
+                user_cb = cb(args)
+                self.messageCbs[self.messageId] = cb
+            except ValueError:
+                raise ValueError("The arg that you use, is not able at cb")
+            
         if not isinstance(command, str):
             raise TypeError("You must use an string for the command parameter")
         json_command = {
