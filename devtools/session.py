@@ -15,11 +15,11 @@ class Session:
     def send_command(self, command, params, cb=None):
         if cb and not callable(cb):
             raise TypeError("The arg that you use, is not able at cb")
+        if not isinstance(command, str):
+            raise TypeError("You must use an string for the command parameter")
 
         self.messageCbs[self.messageId] = cb
 
-        if not isinstance(command, str):
-            raise TypeError("You must use an string for the command parameter")
         json_command = {
             "method": command,
             "params": params,
