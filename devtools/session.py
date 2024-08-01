@@ -17,7 +17,7 @@ class Session:
         if callable(cb) is False and cb is not None:
             raise TypeError("The arg that you use, is not able at cb")
         
-        self.messageCbs[str(self.messageId)] = cb
+        self.messageCbs[self.messageId] = cb
 
         if not isinstance(command, str):
             raise TypeError("You must use an string for the command parameter")
