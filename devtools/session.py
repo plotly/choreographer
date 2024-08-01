@@ -12,15 +12,12 @@ class Session:
         self.messageCbs = {}
         self.messageId = 0
 
-    def send_command(self, command, params, *args, **kwargs):
-        cb = kwargs("cb", None)
+    def send_command(self, command, params, cb=None):
 
-        if cb:
-            try:
-                user_cb = cb(args)
-                self.messageCbs[str(self.messageId)] = user_cb
-            except ValueError:
-                raise ValueError("The arg that you use, is not able at cb")
+        if callable(cb) is False and cb is not None:
+            raise ValueError("The arg that you use, is not able at cb")
+        
+        self.messageCbs[str(self.messageId)] = cb
 
         if not isinstance(command, str):
             raise TypeError("You must use an string for the command parameter")
