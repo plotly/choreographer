@@ -14,8 +14,9 @@ class Session:
 
     def send_command(self, command, params, cb=None):
 
-        if callable(cb) is False and cb is not None:
-            raise TypeError("The arg that you use, is not able at cb")
+        if cb is not None:
+            if callable(cb) is False:
+                raise TypeError("The arg that you use, is not able at cb")
         
         self.messageCbs[self.messageId] = cb
 
