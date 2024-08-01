@@ -13,10 +13,9 @@ class Session:
         self.messageId = 0
 
     def send_command(self, command, params, cb=None):
-
         if cb and not callable(cb):
             raise TypeError("The arg that you use, is not able at cb")
-        
+
         self.messageCbs[self.messageId] = cb
 
         if not isinstance(command, str):
