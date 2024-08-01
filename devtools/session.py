@@ -12,11 +12,12 @@ class Session:
         self.messageCbs = {}
         self.messageId = 0
 
-    def send_command(self, command, params, cb=None):
+    def send_command(self, command, params, cb=False):
 
-        if cb is not None:
-            if callable(cb) is False:
+        if cb is False and callable(cb) is False:
                 raise TypeError("The arg that you use, is not able at cb")
+        elif cb is False:
+            cb = None
         
         self.messageCbs[self.messageId] = cb
 
