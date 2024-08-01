@@ -7,3 +7,8 @@ class Connection:
         self.session = Session(*args)
         self.sessions = OrderedDict()
         self.sessions[self.session.sessionId] = self.session
+
+    def add_session(self, *args):
+        user_session = Session(*args)
+        self.session = user_session
+        self.sessions[self.session.sessionId] = self.session
