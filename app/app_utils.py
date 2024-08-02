@@ -166,7 +166,7 @@ def start_browser(path=None):
     os.set_inheritable(stderr_pipe[0], True)
     os.set_inheritable(stderr_pipe[1], True)
     proc = subprocess.Popen(
-            ["/usr/bin/google-chrome-stable",
+            [path,
                 "--headless",
                 "--remote-debugging-pipe",
                 "--disable-breakpad",
