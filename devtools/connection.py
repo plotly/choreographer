@@ -1,4 +1,4 @@
-from session import Session
+from .session import Session
 from collections import OrderedDict
 
 
