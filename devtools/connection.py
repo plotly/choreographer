@@ -17,7 +17,9 @@ class Connection:
         print("The session were created and added!")
 
     def open_tab(self):
-        print(self.tab_sessions)
+        print("Current sessions:")
+        for session, session_info in self.tab_sessions.items():
+            print(f"Session: {session}, UUID: {session_info[1]}")
 
     def add_tab(self, session_id):
         self.browser_session = Session(session_id)
