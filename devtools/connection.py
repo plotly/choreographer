@@ -3,7 +3,7 @@ from collections import OrderedDict
 
 
 class Connection:
-    def __init__(self, browser):
-        self.session = Session(sessionId="")
-        self.sessions = OrderedDict()
-        self.sessions[self.session.sessionId] = self.session
+    def __init__(self, browser_process):
+        self.browser_process = browser_process
+        self.browser_session = Session(sessionId="")
+        self.tab_sessions = OrderedDict()
