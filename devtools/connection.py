@@ -18,8 +18,8 @@ class Connection:
 
     def open_tab(self):
         print("Current sessions:")
-        for session, session_info in self.tab_sessions.items():
-            print(f"Session: {session}, UUID: {session_info[1]}")
+        for session, session_uuid in self.tab_sessions.items():
+            print(f"Session: {session}, UUID: {session_uuid[1]}")
 
     def add_tab(self, session_id):
         self.browser_session = Session(session_id)
@@ -28,6 +28,6 @@ class Connection:
     
     def close_tab(self):
         print("The following sessions were deleted:")
-        for session_info in self.tab_sessions.values():
-            print(session_info[1])
+        for session_uuid in self.tab_sessions.values():
+            print(session_uuid[1])
         self.tab_sessions = OrderedDict()
