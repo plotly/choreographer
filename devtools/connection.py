@@ -13,7 +13,10 @@ class Connection:
     def create_tab(self):
         self.browser_session = Session(str(self._i))
         self._i += 1
-        self.tab_sessions[self.browser_session.sessionId] = (self.browser_session, str(uuid.uuid4()))
+        self.tab_sessions[self.browser_session.sessionId] = (
+            self.browser_session,
+            str(uuid.uuid4()),
+        )
         print("The session were created and added!")
 
     def open_tab(self):
@@ -23,9 +26,12 @@ class Connection:
 
     def add_tab(self, session_id):
         self.browser_session = Session(session_id)
-        self.tab_sessions[self.browser_session.sessionId] = (self.browser_session, str(uuid.uuid4()))
+        self.tab_sessions[self.browser_session.sessionId] = (
+            self.browser_session,
+            str(uuid.uuid4()),
+        )
         print("The session was added!")
-    
+
     def close_tab(self):
         print("The following sessions were deleted:")
         for session_uuid in self.tab_sessions.values():
