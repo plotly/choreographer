@@ -126,8 +126,6 @@ def main():
         pos = 0
         res = []
         while not pos == len(str(result)):
-            #print(" Decoding:")
-            #print(" " + result[pos:])
             j, json_len = dec.raw_decode(result[pos:])
             pos += json_len
             res.append(j)

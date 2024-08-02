@@ -1,8 +1,33 @@
 import platform
 import os
+import sys
 import subprocess
 
+class Pipe():
+    def __init__(self):
+        self.read_from_chromium, self.write_from_chromium = list(os.pipe())
+        self.read_to_chromium, self.write_to_chromium = list(os.pipe())
+    def read(self, debug=False):
+        raw_message = os.read(self.read_from_chromium, 10000)
+        if debug:
+            print(raw_message, file=sys.stderr)
+        return bytes.decode(raw_message).replace('\0','')
+    def write(self, msg):
+        os.write(self.write_to_chromium, str.encode(msg+'\0'))
+
+def raw_to_json():
+#        decoder = json.JSONDecoder()
+#        raw_message = pipe.read()
+#        pos = 0
+#        messages = []
+#        while not pos == len(str(raw_message)):
+#            msg, json_len = decoder.raw_decode(result[pos:])
+#            pos += json_len
+#            messages.append(msg)
+#        return message
+
 def start_browser(path=None):
+    pipe = Pipe()
     if not path:
         if platform.system() == "Windows":
             path = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
@@ -10,200 +35,18 @@ def start_browser(path=None):
             path = "/usr/bin/google-chrome-stable"
         else:
             raise ValueError("You must set path to a chrome-like browser")
-
-    #chromium is going to output on 4 (make it out stdin), read on 3 (make it our stdout)
-    #os.dup2(from_chromium[1], 4)
-    #os.dup2(to_chromium[0], 3)
-    #os.set_inheritable(to_chromium[0], True)
-    #os.set_inheritable(to_chromium[1], True)
-    return subprocess.Popen(
-            [path,
-                "--headless",
-                "--remote-debugging-pipe",
-                "--disable-breakpad",
-                "--allow-file-access-from-files"],
-            close_fds=False,
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
+    new_env = os.environ.copy()
+    new_env['CHROMIUM_PATH']=path
+    proc = subprocess.Popen(
+            [sys.executable, os.path.join(os.path.dirname(os.path.realpath(__file__)), "chrome_wrapper.py")],
+            close_fds=True,
+            stdin=pipe.read_to_chromium,
+            stdout=pipe.write_from_chromium,
             stderr=None,
+            env=new_env,
             text=True,
-            bufsize=1
+            bufsize=1,
             )
-
-def start_browser_pipes(path=None):
-    if not path:
-        if platform.system() == "Windows":
-            path = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
-        elif platform.system() == "Linux":
-            path = "/usr/bin/google-chrome-stable"
-        else:
-            raise ValueError("You must set path to a chrome-like browser")
-
-    #t chromium is going to output on 4
-    # we will read on result_stream to get chromium's output
-    from_chromium = list(os.pipe())
-    to_chromium = list(os.pipe())
-
-    print(f"from_chromium read: {from_chromium[0]} write: {from_chromium[1]}")
-    print(f"to_chromium read: {to_chromium[0]} write: {to_chromium[1]}")
-
-
-    if (from_chromium[1] != 4):
-        print("from_chromium write is not 4")
-        if (from_chromium[0] == 4):
-            print("from_chromium[0] is!")
-            temp = from_chromium[0]
-            from_chromium[0] = os.dup(from_chromium[0])
-            os.close(temp)
-            print(f"from_chromium[0] is now {from_chromium}!")
-        if (to_chromium[0] == 4):
-            print("to_chromium[0] is!")
-            temp = to_chromium[0]
-            to_chromium[0] = os.dup(to_chromium[0])
-            os.close(temp)
-            print(f"to_chromium[0] is now {to_chromium}!")
-        if (to_chromium[1] == 4):
-            print("to_chromium[1] is!")
-            temp = to_chromium[1]
-            to_chromium[1] = os.dup(to_chromium[1])
-            os.close(temp)
-            print(f"to_chromium[1] is now {to_chromium}!")
-
-        os.dup2(from_chromium[1], 4)
-        os.close(from_chromium[1])
-        from_chromium[1] = 4
-        print("Finished the swap")
-
-    if (to_chromium[0] != 3):
-        print("to_chromium read is not 3")
-        if (to_chromium[1] == 3):
-            print("to_chromium[1] is!")
-            temp = to_chromium[1]
-            to_chromium[1] = os.dup(to_chromium[1])
-            os.close(temp)
-            print(f"to_chromium[1] is now {to_chromium}!")
-        if (from_chromium[0] == 3):
-            print("from_chromium[0] is!")
-            temp = from_chromium[0]
-            from_chromium[0] = os.dup(from_chromium[0])
-            os.close(temp)
-            print(f"from_chromium[0] is now {from_chromium}!")
-        if (from_chromium[1] == 3):
-            print("from_chromium[1] is!")
-            temp = from_chromium[1]
-            from_chromium[1] = os.dup(from_chromium[1])
-            os.close(temp)
-            print(f"from_chromium[1] is now {from_chromium}!")
-
-        os.dup2(to_chromium[0], 3)
-        os.close(to_chromium[0])
-        to_chromium[0] = 3
-        print("Finished the swap")
-
-    print(f"from_chromium read: {from_chromium[0]} write: {from_chromium[1]}")
-    print(f"to_chromium read: {to_chromium[0]} write: {to_chromium[1]}")
-    os.set_inheritable(to_chromium[0], True)
-    os.set_inheritable(to_chromium[1], True)
-    os.set_inheritable(from_chromium[0], True)
-    os.set_inheritable(from_chromium[1], True)
-
-    stderr_pipe = list(os.pipe())
-    os.set_inheritable(stderr_pipe[0], True)
-    os.set_inheritable(stderr_pipe[1], True)
-    proc = subprocess.Popen(
-            [path,
-                "--headless",
-                "--remote-debugging-pipe",
-                "--disable-breakpad",
-                "--allow-file-access-from-files"],
-            close_fds=False,
-            stdout=stderr_pipe[1],
-            stderr=subprocess.STDOUT,
-            text=True,
-            bufsize=1
-            )
-    # chromium is going to output on 4
-    # we will read on result_stream to get chromium's output
-    from_chromium = list(os.pipe())
-    to_chromium = list(os.pipe())
-
-    print(f"from_chromium read: {from_chromium[0]} write: {from_chromium[1]}")
-    print(f"to_chromium read: {to_chromium[0]} write: {to_chromium[1]}")
-
-
-    if (from_chromium[1] != 4):
-        print("from_chromium write is not 4")
-        if (from_chromium[0] == 4):
-            print("from_chromium[0] is!")
-            temp = from_chromium[0]
-            from_chromium[0] = os.dup(from_chromium[0])
-            os.close(temp)
-            print(f"from_chromium[0] is now {from_chromium}!")
-        if (to_chromium[0] == 4):
-            print("to_chromium[0] is!")
-            temp = to_chromium[0]
-            to_chromium[0] = os.dup(to_chromium[0])
-            os.close(temp)
-            print(f"to_chromium[0] is now {to_chromium}!")
-        if (to_chromium[1] == 4):
-            print("to_chromium[1] is!")
-            temp = to_chromium[1]
-            to_chromium[1] = os.dup(to_chromium[1])
-            os.close(temp)
-            print(f"to_chromium[1] is now {to_chromium}!")
-
-        os.dup2(from_chromium[1], 4)
-        os.close(from_chromium[1])
-        from_chromium[1] = 4
-        print("Finished the swap")
-
-    if (to_chromium[0] != 3):
-        print("to_chromium read is not 3")
-        if (to_chromium[1] == 3):
-            print("to_chromium[1] is!")
-            temp = to_chromium[1]
-            to_chromium[1] = os.dup(to_chromium[1])
-            os.close(temp)
-            print(f"to_chromium[1] is now {to_chromium}!")
-        if (from_chromium[0] == 3):
-            print("from_chromium[0] is!")
-            temp = from_chromium[0]
-            from_chromium[0] = os.dup(from_chromium[0])
-            os.close(temp)
-            print(f"from_chromium[0] is now {from_chromium}!")
-        if (from_chromium[1] == 3):
-            print("from_chromium[1] is!")
-            temp = from_chromium[1]
-            from_chromium[1] = os.dup(from_chromium[1])
-            os.close(temp)
-            print(f"from_chromium[1] is now {from_chromium}!")
-
-        os.dup2(to_chromium[0], 3)
-        os.close(to_chromium[0])
-        to_chromium[0] = 3
-        print("Finished the swap")
-
-    print(f"from_chromium read: {from_chromium[0]} write: {from_chromium[1]}")
-    print(f"to_chromium read: {to_chromium[0]} write: {to_chromium[1]}")
-    os.set_inheritable(to_chromium[0], True)
-    os.set_inheritable(to_chromium[1], True)
-    os.set_inheritable(from_chromium[0], True)
-    os.set_inheritable(from_chromium[1], True)
-
-    stderr_pipe = list(os.pipe())
-    os.set_inheritable(stderr_pipe[0], True)
-    os.set_inheritable(stderr_pipe[1], True)
-    proc = subprocess.Popen(
-            [path,
-                "--headless",
-                "--remote-debugging-pipe",
-                "--disable-breakpad",
-                "--allow-file-access-from-files"],
-            close_fds=False,
-            stdout=stderr_pipe[1],
-            stderr=subprocess.STDOUT,
-            text=True,
-            bufsize=1
-            )
-    return proc
-
+    os.close(pipe.read_to_chromium)
+    os.close(pipe.write_from_chromium)
+    return (proc, pipe)
