@@ -11,6 +11,34 @@ def start_browser(path=None):
         else:
             raise ValueError("You must set path to a chrome-like browser")
 
+    #chromium is going to output on 4 (make it out stdin), read on 3 (make it our stdout)
+    #os.dup2(from_chromium[1], 4)
+    #os.dup2(to_chromium[0], 3)
+    #os.set_inheritable(to_chromium[0], True)
+    #os.set_inheritable(to_chromium[1], True)
+    return subprocess.Popen(
+            [path,
+                "--headless",
+                "--remote-debugging-pipe",
+                "--disable-breakpad",
+                "--allow-file-access-from-files"],
+            close_fds=False,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=None,
+            text=True,
+            bufsize=1
+            )
+
+def start_browser_pipes(path=None):
+    if not path:
+        if platform.system() == "Windows":
+            path = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
+        elif platform.system() == "Linux":
+            path = "/usr/bin/google-chrome-stable"
+        else:
+            raise ValueError("You must set path to a chrome-like browser")
+
     #t chromium is going to output on 4
     # we will read on result_stream to get chromium's output
     from_chromium = list(os.pipe())
