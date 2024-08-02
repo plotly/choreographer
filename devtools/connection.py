@@ -7,12 +7,11 @@ class Connection:
         self.browser_process = browser_process
         self.browser_session = Session(sessionId="")
         self.tab_sessions = OrderedDict()
+        self._i = 0
 
-    i=0
     def create_tab(self):
-        global i
-        self.browser_session = Session(str(i))
-        global i = i + 1
+        self.browser_session = Session(str(self._i))
+        self._i += 1
         self.tab_sessions[self.browser_session.sessionId] = self.browser_session
         print("The session was created and added!")
 
