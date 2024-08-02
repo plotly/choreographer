@@ -1,5 +1,6 @@
 from .session import Session
 from collections import OrderedDict
+import uuid
 
 
 class Connection:
@@ -12,17 +13,19 @@ class Connection:
     def create_tab(self):
         self.browser_session = Session(str(self._i))
         self._i += 1
-        self.tab_sessions[self.browser_session.sessionId] = self.browser_session
-        print("The session was created and added!")
+        self.tab_sessions[self.browser_session.sessionId] = (self.browser_session, str(uuid.uuid4()))
+        print("The session were created and added!")
 
     def open_tab(self):
         print(self.tab_sessions)
 
     def add_tab(self, session_id):
         self.browser_session = Session(session_id)
-        self.tab_sessions[self.browser_session.sessionId] = self.browser_session
+        self.tab_sessions[self.browser_session.sessionId] = (self.browser_session, str(uuid.uuid4()))
         print("The session was added!")
     
     def close_tab(self):
+        print("The following sessions were deleted:")
+        for session_info in self.tab_sessions.values():
+            print(session_info[1])
         self.tab_sessions = OrderedDict()
-        print("The sessions was deleted!")
