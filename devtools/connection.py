@@ -8,6 +8,7 @@ class Connection:
         self.browser_process = browser_process
         self.browser_session = Session(session_id="")
         self.tab_sessions = OrderedDict()
+        self.tab_sessions[self.browser_session.session_id] = self.browser_session
 
     def create_tab(self, session_id=None):
         str_uuid = str(uuid.uuid4())
