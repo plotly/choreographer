@@ -2,11 +2,11 @@ import json
 
 
 class Session:
-    def __init__(self, sessionId):
-        if isinstance(sessionId, str):
-            self.sessionId = sessionId
+    def __init__(self, session_id):
+        if isinstance(session_id, str):
+            self.session_id = session_id
         else:
-            raise TypeError("You must use an string object for sessionId")
+            raise TypeError("You must use an string object for session_id")
 
         self.eventCbs = {}
         self.messageCbs = {}
