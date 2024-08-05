@@ -4,7 +4,7 @@ import uuid
 
 
 class Connection:
-    def __init__(self, browser_process):
+    def __init__(self, browser_process=None):
         self.browser_process = browser_process
         self.browser_session = Session(session_id="")
         self.tab_sessions = OrderedDict()
