@@ -27,6 +27,6 @@ class Connection:
 
     def close_tab(self):
         print("The following sessions were deleted:")
-        for session_uuid in self.tab_sessions.values():
-            print(session_uuid[1])
+        for session_uuid in self.tab_sessions:
+            print(session_uuid)
         self.tab_sessions = OrderedDict()
