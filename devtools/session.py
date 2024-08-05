@@ -18,7 +18,8 @@ class Session:
         if not isinstance(command, str):
             raise TypeError("You must use an string for the command parameter")
 
-        self.message_cbs[self.message_id] = cb
+        if cb:
+            self.message_cbs[self.message_id] = cb
 
         json_command = {
             "method": command,
