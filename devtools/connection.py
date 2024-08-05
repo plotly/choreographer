@@ -10,9 +10,8 @@ class Connection:
         self.tab_sessions = OrderedDict()
         self.tab_sessions[self.browser_session.session_id] = self.browser_session
 
-    def create_tab(self, session_id=None):
-        str_uuid = str(uuid.uuid4())
-        session_obj = Session(session_id) if session_id else Session(str_uuid)
+    def create_tab(self):
+        session_obj = Session(str(uuid.uuid4()))
         self.tab_sessions[self.browser_session.session_id] = session_obj
         print("The session were created and added!")
         print("Current sessions".center(50,'-'))
