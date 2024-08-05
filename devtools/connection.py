@@ -16,6 +16,11 @@ class Connection:
         self.tab_sessions[session_id] = session_obj
         print("The session were created and added!")
 
+    def list_tabs(self):
+        print("Current sessions".center(50,'-'))
+        for session_id, session_instance in self.tab_sessions.items():
+            print(f"Session ID: {session_id}, Session instance: {session_instance}")
+
     def close_tab(self):
         print("The following sessions were deleted:")
         for session_uuid in self.tab_sessions:
