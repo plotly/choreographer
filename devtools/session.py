@@ -26,5 +26,5 @@ class Session:
             "params": params,
             "id": self.message_id,
         }
-        self.message_id = +1
+        self.message_id += 1
         return json.dumps(json_command)
