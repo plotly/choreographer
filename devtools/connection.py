@@ -8,28 +8,20 @@ class Connection:
         self.browser_process = browser_process
         self.browser_session = Session(sessionId="")
         self.tab_sessions = OrderedDict()
-        self._i = 0
 
     def create_tab(self):
-        self.browser_session = Session(str(self._i))
-        self._i += 1
-        self.tab_sessions[self.browser_session.sessionId] = (
-            self.browser_session,
-            str(uuid.uuid4()),
-        )
+        self.browser_session = Session(str(uuid.uuid4()))
+        self.tab_sessions[self.browser_session.sessionId] = self.browser_session
         print("The session were created and added!")
 
     def open_tab(self):
         print("Current sessions:")
-        for session_id, session_info in self.tab_sessions.items():
-            print(f"Session ID: {session_id}, UUID: {session_info[1]}")
+        for session_id in self.tab_sessions:
+            print(f"Session ID: {session_id}")
 
     def add_tab(self, session_id):
         self.browser_session = Session(session_id)
-        self.tab_sessions[self.browser_session.sessionId] = (
-            self.browser_session,
-            str(uuid.uuid4()),
-        )
+        self.tab_sessions[self.browser_session.sessionId] = self.browser_session
         print("The session was added!")
 
     def close_tab(self):
