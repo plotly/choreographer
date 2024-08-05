@@ -20,8 +20,6 @@ class Connection:
         for session_id, session_instance in self.tab_sessions.items():
             print(f"Session ID: {session_id}, Session instance: {session_instance}")
 
-    def close_tab(self):
-        print("The following sessions were deleted:")
-        for session_uuid in self.tab_sessions:
-            print(session_uuid)
-        self.tab_sessions = OrderedDict()
+    def close_tab(self, session_id):
+        self.tab_sessions.pop(session_id)
+        print(f"The following session was deleted: {session_id}")
