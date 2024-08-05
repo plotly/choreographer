@@ -24,7 +24,7 @@ class Session:
         json_command = {
             "method": command,
             "params": params,
-            "Id": self.message_id,
+            "id": self.message_id,
             "message_cbs": self.message_cbs,
         }
         self.message_id = +1
