@@ -8,9 +8,9 @@ class Session:
         else:
             raise TypeError("You must use an string object for session_id")
 
-        self.eventCbs = {}
-        self.messageCbs = {}
-        self.messageId = 0
+        self.event_cbs = {}
+        self.message_cbs = {}
+        self.message_id = 0
 
     def send_command(self, command, params, cb=None):
         if cb and not callable(cb):
@@ -18,13 +18,13 @@ class Session:
         if not isinstance(command, str):
             raise TypeError("You must use an string for the command parameter")
 
-        self.messageCbs[self.messageId] = cb
+        self.message_cbs[self.message_id] = cb
 
         json_command = {
             "method": command,
             "params": params,
-            "Id": self.messageId,
-            "messageCbs": self.messageCbs,
+            "Id": self.message_id,
+            "message_cbs": self.message_cbs,
         }
-        self.messageId = +1
+        self.message_id = +1
         return json.dumps(json_command)
