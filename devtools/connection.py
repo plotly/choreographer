@@ -9,21 +9,14 @@ class Connection:
         self.browser_session = Session(session_id="")
         self.tab_sessions = OrderedDict()
 
-    def create_tab(self):
+    def create_tab(self, session_id=None):
         str_uuid = str(uuid.uuid4())
-        self.browser_session = Session(str_uuid)
-        self.tab_sessions[self.browser_session.session_id] = self.browser_session
+        session_obj = Session(session_id) if session_id else Session(str_uuid)
+        self.tab_sessions[self.browser_session.session_id] = session_obj
         print("The session were created and added!")
-
-    def open_tab(self):
-        print("Current sessions:")
+        print("Current sessions".center(50,'-'))
         for session_id in self.tab_sessions:
             print(f"Session ID: {session_id}, Session instance: {self.tab_sessions[session_id]}")
-
-    def add_tab(self, session_id):
-        self.browser_session = Session(session_id)
-        self.tab_sessions[self.browser_session.session_id] = self.browser_session
-        print("The session was added!")
 
     def close_tab(self):
         print("The following sessions were deleted:")
