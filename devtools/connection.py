@@ -18,8 +18,8 @@ class Connection:
 
     def list_tabs(self):
         print("Current sessions".center(50,'-'))
-        for session_id, session_instance in self.tab_sessions.items():
-            print(f"Session ID: {session_id}, Session instance: {session_instance}")
+        for message_id, session_instance in self.tab_sessions.items():
+            print(f"ID: {message_id}, Session instance: {session_instance}")
 
     def close_tab(self, session_id):
         del self.tab_sessions[session_id]
