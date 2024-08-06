@@ -21,18 +21,14 @@ class Session:
         if cb:
             self.message_cbs[self.message_id] = cb
 
-        if self.session_id == "" or self.session_id == " ":
-            json_command = {
-                "id": self.message_id,
-                "method": command,
-                "params": params,
-            }
-        else:
-            json_command = {
-                "session_id": self.session_id,
-                "id": self.message_id,
-                "method": command,
-                "params": params,
-            }
+        json_command = {
+            "id": self.message_id,
+            "method": command,
+            "params": params,
+        }
+
+        if self.session_id != "" or self.session_id != " ":
+            json_command["session_id"] = self.session_id
+
         self.message_id += 1
         return json.dumps(json_command)
