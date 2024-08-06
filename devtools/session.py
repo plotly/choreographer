@@ -3,7 +3,7 @@ from .connection import Connection
 
 
 class Session:
-    def __init__(self, session_id=""):
+    def __init__(self, session_id="", parent=None):
         if isinstance(session_id, str):
             self.session_id = session_id
         else:
@@ -12,7 +12,10 @@ class Session:
         self.event_cbs = {}
         self.message_cbs = {}
         self.message_id = 0
-        self.parent_connection = Connection()
+        if parent is None:
+            self.parent_connection = Connection()
+        else:
+            self.parent_connection = parent
 
     def send_command(self, command, params, cb=None):
         if cb and not callable(cb):
