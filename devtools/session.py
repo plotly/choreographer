@@ -1,5 +1,5 @@
 import json
-
+from .connection import Connection
 
 class Session:
     def __init__(self, session_id=""):
@@ -28,8 +28,11 @@ class Session:
             "params": params,
         }
 
-        if self.session_id != "" or self.session_id != " ":
+        if self.session_id != "":
             json_command["session_id"] = self.session_id
 
         self.message_id += 1
         return json.dumps(json_command)
+
+    def close_tab(self, session_obj):
+        Connection().close_tab(session_obj)
