@@ -11,7 +11,8 @@ def main():
     # print(pipe.read(debug=True)) # this will block
 
     proc.terminate()
-    proc.wait()
+    proc.wait(10)
+    proc.kill()
 
 ## NOTES
 #
