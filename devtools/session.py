@@ -1,5 +1,4 @@
 import json
-from .connection import Connection
 
 
 class Session:
@@ -35,5 +34,5 @@ class Session:
         self.message_id += 1
         return json.dumps(json_command)
 
-    def close_tab(self, session_obj):
-        Connection().close_tab(session_obj)
+    def close_tab(self):
+        self.parent.close_tab(self)
