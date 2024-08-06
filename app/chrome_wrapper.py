@@ -18,7 +18,7 @@ path=""
 if system == "Linux":
     path = os.environ.get("BROWSER_PATH", "/usr/bin/google-chrome-stable")
 elif system == "Windows":
-    path = os.environ.get("BROWSER_PATH", r"c:\Program Files\Google\Chrome\Aprint_jsonslication\chrome.exe")
+    path = os.environ.get("BROWSER_PATH", r"c:\Program Files\Google\Chrome\Application\chrome.exe")
 else:
     path = os.environ['CHROMIUM_PATH']
 
