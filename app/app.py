@@ -6,7 +6,7 @@ def main():
     proc, pipe = start_browser()
 
     pipe.write("{}")
-    print(pipe.read(debug=True))
+    print(pipe.read_jsons())
 
     # print(pipe.read(debug=True)) # this will block
 

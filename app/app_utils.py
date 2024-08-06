@@ -12,7 +12,7 @@ class Pipe():
         self.read_from_chromium, self.write_from_chromium = list(os.pipe())
         self.read_to_chromium, self.write_to_chromium = list(os.pipe())
 
-    def write(self, msg):
+    def write(self, msg): # this should accept an objects not a string
         os.write(self.write_to_chromium, str.encode(msg+'\0'))
 
     def read_jsons(self, blocking=True):
