@@ -6,12 +6,12 @@ import uuid
 class Connection:
     def __init__(self, browser_process=None):
         self.browser_process = browser_process
-        self.browser_session = Session(session_id="", parent=self)
+        self.browser_session = Session(self, session_id="")
         self.tab_sessions = OrderedDict()
 
     def create_tab(self):
         session_id = str(uuid.uuid4())
-        session_obj = Session(session_id, parent=self)
+        session_obj = Session(self, session_id=session_id)
         self.tab_sessions[id(session_obj)] = session_obj
         print("The session were created and added!")
         return session_obj
