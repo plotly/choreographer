@@ -14,6 +14,7 @@ class Connection:
         session_obj = Session(session_id)
         self.tab_sessions[session_id] = session_obj
         print("The session were created and added!")
+        return session_obj
 
     def list_tabs(self):
         print("Current sessions".center(50,'-'))
