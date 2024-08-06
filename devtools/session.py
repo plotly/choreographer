@@ -1,6 +1,7 @@
 import json
 from .connection import Connection
 
+
 class Session:
     def __init__(self, session_id=""):
         if isinstance(session_id, str):
@@ -11,7 +12,7 @@ class Session:
         self.event_cbs = {}
         self.message_cbs = {}
         self.message_id = 0
-        self.parent_connection = None
+        self.parent_connection = Connection()
 
     def send_command(self, command, params, cb=None):
         if cb and not callable(cb):
