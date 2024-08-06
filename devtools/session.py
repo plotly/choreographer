@@ -11,6 +11,7 @@ class Session:
         self.event_cbs = {}
         self.message_cbs = {}
         self.message_id = 0
+        self.parent_connection = None
 
     def send_command(self, command, params, cb=None):
         if cb and not callable(cb):
