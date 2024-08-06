@@ -1,13 +1,24 @@
+#!/usr/bin/env -S python3 -u
 import os
 import subprocess
 import time
 import json
-#from multiprocessing import Process
+from pathlib import Path
+import platform
+system = platform.system()
+if system == "Windows": import msvcrt # noqa
 
-#def read_results():
-#    os.read
+path=""
+if system == "Linux":
+    path = os.environ.get("BROWSER_PATH", "/usr/bin/google-chrome-stable")
+elif system == "Windows":
+    path = os.environ.get("BROWSER_PATH", r"c:\Program Files\Google\Chrome\Aprint_jsonslication\chrome.exe")
+cwd = Path(__file__).parent.resolve()
 
 def main():
+    global path
+    global cwd
+    global system
     # chromium is going to output on 4
     # we will read on result_stream to get chromium's output
     from_chromium = list(os.pipe())
@@ -76,160 +87,173 @@ def main():
     os.set_inheritable(from_chromium[0], True)
     os.set_inheritable(from_chromium[1], True)
 
-    stderr_pipe = list(os.pipe())
-    os.set_inheritable(stderr_pipe[0], True)
-    os.set_inheritable(stderr_pipe[1], True)
-    proc = subprocess.Popen(
-            ["/usr/bin/google-chrome-stable",
+    cli = [path,
                 "--headless",
                 "--remote-debugging-pipe",
                 "--disable-breakpad",
-                "--allow-file-access-from-files"],
+                "--allow-file-access-from-files"]
+    if system == "Windows":
+        to_chromium_handle = msvcrt.get_osfhandle(to_chromium[0])
+        os.set_handle_inheritable(to_chromium_handle, True)
+        from_chromium_handle = msvcrt.get_osfhandle(from_chromium[1])
+        os.set_handle_inheritable(from_chromium_handle, True)
+        cli += [f"--remote-debugging-io-pipes={str(to_chromium_handle)},{str(from_chromium_handle)}"]
+
+    proc = subprocess.Popen(
+            cli,
             close_fds=False,
-            stdout=stderr_pipe[1],
-            stderr=subprocess.STDOUT,
+            stdout=None,
+            stderr=None,
             text=True,
             bufsize=1
             )
-    def pp(data):
-        print("Result:")
+    prefix = ">>>>>>>>>>>>>> "
+    class PipeClosedError(IOError):
+        pass
+
+    # semi blocking to get whole message
+    # for full non-blocking, we need a global
+    # state object
+    def read_jsons(blocking=True):
+        jsons = []
+        os.set_blocking(from_chromium[0], blocking)
+        try:
+            raw_buffer = os.read(from_chromium[0], 10000) # 10MB buffer, nbd, doesn't matter w/ this
+            if not raw_buffer:
+                raise PipeClosedError()
+            while raw_buffer[-1] != 0:
+                os.set_blocking(from_chromium[0], True)
+                raw_buffer += os.read(from_chromium[0], 10000)
+        except BlockingIOError:
+            return jsons
+        for raw_message in raw_buffer.decode('utf-8').split('\0'):
+            if raw_message:
+                jsons.aprint_jsonsend(json.loads(raw_message))
+        return jsons
+
+    def print_jsons(data):
+        print("Result".center(25,"*"))
         for datum in data:
             print(json.dumps(datum, indent=4))
+        print("*".center(25,"*"))
 
-    prefix=">>>>>>>> "
-    def check():
-        os.set_blocking(from_chromium[0], False)
-        try:
-            result = bytes.decode(os.read(from_chromium[0], 10000)).replace('\0','')
-            dec = json.JSONDecoder()
-            pos = 0
-            res = []
-            while not pos == len(str(result)):
-                #print(" Decoding:")
-                #print(" " + result[pos:])
-                j, json_len = dec.raw_decode(result[pos:])
-                pos += json_len
-                res.append(j)
-            pp(res)
-        except BlockingIOError:
-            print(prefix + "No message")
-            return None
-
-    def x(msg, check=True):
-        os.set_blocking(from_chromium[0], True)
-        print("\n\nNew:")
-        print(f" Message: {msg}")
+    def write(msg, check=True):
         os.write(to_chromium[1], str.encode(msg+'\0'))
-        if not check: return
-        result = bytes.decode(os.read(from_chromium[0], 10000)).replace('\0','')
-        dec = json.JSONDecoder()
-        pos = 0
-        res = []
-        while not pos == len(str(result)):
-            j, json_len = dec.raw_decode(result[pos:])
-            pos += json_len
-            res.append(j)
-        return res
+        if not check:
+            return
+        return read_jsons(blocking=True)
 
+    # We need to see what events look like
 
-    r = x('{"id":0, "method":"Browser.setDownloadBehavior", "params":{"behavior":"allowAndName", "downloadPath":"/home/ajp/test/downloads/", "eventsEnabled":true}}')
-    pp(r)
-    r = x('{"id":1, "method":"Target.getTargets"}')
-    pp(r)
-    r = x('{"id":2, "method":"Target.createTarget","params":{"url":"file:///home/ajp/test/test.html"}}')
-    pp(r)
+    write('{"id":0, "method":"Browser.setDownloadBehavior", "params":{"behavior":"allowAndName", "downloadPath":"'+str(cwd.as_posix())+'", "eventsEnabled":true}}')
+    print_jsons(read_jsons(blocking=True))
+    print_jsons(read_jsons(blocking=False))
+    print_jsons(read_jsons(blocking=False))
+    write('{"id":1, "method":"Target.getTargets"}')
+    print_jsons(read_jsons(blocking=True))
+    print_jsons(read_jsons(blocking=False))
+    time.sleep(.1)
+    print_jsons(read_jsons(blocking=False))
+    write('{"id":2, "method":"Target.createTarget","params":{"url":"file://'+str( (cwd / "test.html").as_posix() )+'"}}')
+    print_jsons(read_jsons(blocking=True))
     tId = '"'+str(r[0]['result']['targetId'])+'"'
     print(prefix + "targetID:" + tId)
-    r = x('{"id":3, "method":"Target.attachToTarget","params":{"flatten": true, "targetId":'+tId+'}}')
-    pp(r)
-    sId='"' + r[1]['result']['sessionId'] + '"'
-    print(prefix + "sessionId:" + sId)
+    print_jsons(read_jsons(blocking=False))
+    time.sleep(.1)
+    print_jsons(read_jsons(blocking=False))
+    write('{"id":3, "method":"Target.attachToTarget","params":{"flatten": true, "targetId":'+tId+'}}')
+    print_jsons(read_jsons(blocking=True))
+    #sId='"' + r[1]['result']['sessionId'] + '"'
+    #print(prefix + "sessionId:" + sId)
+    print_jsons(read_jsons(blocking=False))
+    time.sleep(.1)
+    print_jsons(read_jsons(blocking=False))
+    time.sleep(.1)
+    print_jsons(read_jsons(blocking=False))
+    time.sleep(.1)
+    print_jsons(read_jsons(blocking=False))
+    proc.terminate()
+    proc.wait(2)
+    proc.kill()
+    exit()
+    write('{"sessionId":'+sId+', "id":0, "method":"Page.enable"}')
+    print_jsons(read_jsons(blocking=True))
+    #time.sleep(.5)
+    #print_jsons(read_jsons(blocking=False))
+    #time.sleep(.5)
+    #print_jsons(read_jsons(blocking=False))
+    #time.sleep(.5)
+    #print_jsons(read_jsons(blocking=False))
+    #time.sleep(.5)
+    #print_jsons(read_jsons(blocking=False))
+    write('{"sessionId":'+sId+', "id":2, "method":"Page.reload"}')
+    print_jsons(read_jsons(blocking=True))
     time.sleep(.5)
-    check()
+    #print_jsons(read_jsons(blocking=False))
     time.sleep(.5)
-    check()
+    #print_jsons(read_jsons(blocking=False))
     time.sleep(.5)
-    check()
+    #print_jsons(read_jsons(blocking=False))
     time.sleep(.5)
-    check()
-    r = x('{"sessionId":'+sId+', "id":0, "method":"Page.enable"}')
-    pp(r)
-    time.sleep(.5)
-    check()
-    time.sleep(.5)
-    check()
-    time.sleep(.5)
-    check()
-    time.sleep(.5)
-    check()
-    r = x('{"sessionId":'+sId+', "id":2, "method":"Page.reload"}')
-    pp(r)
-    time.sleep(.5)
-    check()
-    time.sleep(.5)
-    check()
-    time.sleep(.5)
-    check()
-    time.sleep(.5)
-    check()
-    r = x('{"sessionId":'+sId+', "id":3, "method":"Browser.setDownloadBehavior", "params":{"behavior":"allow", "downloadPath":"/home/ajp/test/downloads/", "eventsEnabled":true}}')
-    pp(r)
+    print_jsons(read_jsons(blocking=False))
+    write('{"sessionId":'+sId+', "id":3, "method":"Browser.setDownloadBehavior", "params":{"behavior":"allow", "downloadPath":"'+str(cwd.as_posix())+'", "eventsEnabled":true}}')
+    print_jsons(read_jsons(blocking=True))
+    #time.sleep(1)
+    #print_jsons(read_jsons(blocking=False))
+    #time.sleep(1)
+    write('{"sessionId":'+sId+', "id":13, "method":"Page.setDownloadBehavior", "params":{"behavior":"allow", "downloadPath":"'+str(cwd.as_posix())+'", "eventsEnabled":true}}')
+    print_jsons(read_jsons(blocking=True))
+    #print_jsons(read_jsons(blocking=False))
+    #time.sleep(1)
+    #print_jsons(read_jsons(blocking=False))
+    #time.sleep(1)
+    write('{"sessionId":'+sId+', "id":23, "method":"Page.setInterceptFileChooserDialog", "params":{"enabled":true}}')
+    print_jsons(read_jsons(blocking=True))
+    #print_jsons(read_jsons(blocking=False))
+    #write('{"id":4, "method":"Target.getTargets"}')
+    #print_jsons(read_jsons(blocking=True))
+    #time.sleep(1)
+    #print_jsons(read_jsons(blocking=False))
+    write('{"sessionId":'+sId+', "id":4, "method":"Runtime.enable"}')
+    print_jsons(read_jsons(blocking=True))
     time.sleep(1)
-    check()
+    #print_jsons(read_jsons(blocking=False))
     time.sleep(1)
-    r = x('{"sessionId":'+sId+', "id":13, "method":"Page.setDownloadBehavior", "params":{"behavior":"allow", "downloadPath":"/home/ajp/test/downloads/", "eventsEnabled":true}}')
-    pp(r)
-    check()
-    time.sleep(1)
-    check()
-    time.sleep(1)
-    r = x('{"sessionId":'+sId+', "id":23, "method":"Page.setInterceptFileChooserDialog", "params":{"behavior":true}')
-    pp(r)
-    check()
-    r = x('{"id":4, "method":"Target.getTargets"}')
-    pp(r)
-    time.sleep(1)
-    check()
-    r = x('{"sessionId":'+sId+', "id":4, "method":"Runtime.enable"}')
-    pp(r)
-    time.sleep(1)
-    check()
-    time.sleep(1)
-    check()
-    r = x('{"sessionId":'+sId+', "id":5, "method":"Runtime.compileScript", "params":{"expression": "console.log(5); 10; let goose = document.getElementById(\\"agoose2\\"); goose.download=\\"goose.jpg\\";goose.click();", "sourceURL":"/home/ajp/test/test.html", "persistScript":true}}')
-    pp(r)
+    print_jsons(read_jsons(blocking=False))
+    write('{"sessionId":'+sId+', "id":5, "method":"Runtime.compileScript", "params":{"expression": "console.log(document.getElementsByTagName(\\"body\\")[0].innerHTML); 10; let goose = document.getElementById(\\"agoose2\\"); goose.download=\\"goose.jpg\\";goose.click();", "sourceURL":"'+str( (cwd / "test.html").as_posix() )+'", "persistScript":true}}')
+    print_jsons(read_jsons(blocking=True))
     scriptId = '"' + r[0]['result']['scriptId'] + '"'
     print(prefix + "scriptId: " + scriptId)
+    #time.sleep(1)
+    #print_jsons(read_jsons(blocking=False))
+    #time.sleep(1)
+    #print_jsons(read_jsons(blocking=False))
+    write('{"sessionId":'+sId+', "id":6, "method":"Runtime.runScript", "params":{"scriptId":'+scriptId+'}}')
+    print_jsons(read_jsons(blocking=True))
     time.sleep(1)
-    check()
+    print_jsons(read_jsons(blocking=False))
     time.sleep(1)
-    check()
-    r = x('{"sessionId":'+sId+', "id":6, "method":"Runtime.runScript", "params":{"scriptId":'+scriptId+'}}')
-    pp(r)
+    print_jsons(read_jsons(blocking=False))
     time.sleep(1)
-    check()
+    print_jsons(read_jsons(blocking=False))
     time.sleep(1)
-    check()
-    time.sleep(1)
-    check()
-    time.sleep(1)
-    check()
+    print_jsons(read_jsons(blocking=False))
     #x('{"sessionId":'+sId+', "id":7, "method":"Runtime.handleJavaScriptDialog", "params":{"accept":false}}', check=False)
     time.sleep(1)
-    check()
+    print_jsons(read_jsons(blocking=False))
     #x('{"sessionId":'+sId+', "id":8, "method":"Runtime.handleJavaScriptDialog", "params":{"accept":true}}', check=False)
     time.sleep(1)
-    check()
+    print_jsons(read_jsons(blocking=False))
     #x('{"sessionId":'+sId+', "id":9, "method":"Runtime.handleJavaScriptDialog", "params":{"accept":false}}', check=False)
-    time.sleep(1)
-    check()
+    #time.sleep(1)
+    #print_jsons(read_jsons(blocking=False))
     #x('{"sessionId":'+sId+', "id":10, "method":"Runtime.handleJavaScriptDialog", "params":{"accept":true}}', check=False)
-    time.sleep(1)
-    check()
-    time.sleep(1)
-    check()
-    time.sleep(1)
-    check()
+    #time.sleep(1)
+    #print_jsons(read_jsons(blocking=False))
+    #time.sleep(1)
+    #print_jsons(read_jsons(blocking=False))
+    #time.sleep(1)
+    #print_jsons(read_jsons(blocking=False))
 
     # restructure a bit... no, not now...
     # get back to the other work
