@@ -15,17 +15,6 @@ class Pipe():
     def write(self, msg):
         os.write(self.write_to_chromium, str.encode(msg+'\0'))
 
-def raw_to_json():
-#        decoder = json.JSONDecoder()
-#        raw_message = pipe.read()
-#        pos = 0
-#        messages = []
-#        while not pos == len(str(raw_message)):
-#            msg, json_len = decoder.raw_decode(result[pos:])
-#            pos += json_len
-#            messages.append(msg)
-#        return message
-
 def start_browser(path=None):
     pipe = Pipe()
     if not path:
