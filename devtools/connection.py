@@ -21,6 +21,6 @@ class Connection:
         for instance_id, session_instance in self.tab_sessions.items():
             print(f"ID: {instance_id}, Session instance: {session_instance}")
 
-    def close_tab(self, session_id):
-        del self.tab_sessions[session_id]
-        print(f"The following session was deleted: {session_id}")
+    def close_tab(self, instance_id):
+        del self.tab_sessions[instance_id]
+        print(f"The following session was deleted: {instance_id}")
