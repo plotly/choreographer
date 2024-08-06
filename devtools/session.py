@@ -32,6 +32,7 @@ class Session:
             json_command["session_id"] = self.session_id
 
         self.message_id += 1
+
         return json.dumps(json_command)
 
     def close_tab(self):
