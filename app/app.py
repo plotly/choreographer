@@ -1,4 +1,4 @@
-import devtools
+#import devtools
 
 from app_utils import start_browser
 
