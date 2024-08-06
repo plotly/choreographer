@@ -1,28 +1,25 @@
-#import devtools
+import devtools
 
 from app_utils import start_browser
 
 def main():
+    # Interface Test
+    browser = devtools.Connection()
+    browser.list_tabs()
+    myTab = browser.create_tab()
+    browser.list_tabs()
+    browser.close_tab(myTab)
+    browser.list_tabs()
+
+    # Process/Pipes Test
     proc, pipe = start_browser()
 
     pipe.write("{}")
     print(pipe.read_jsons())
 
-    # print(pipe.read(debug=True)) # this will block
-
     proc.terminate()
     proc.wait(10)
     proc.kill()
-
-## NOTES
-#
-# os.set_blocking(from_chromium[0], False)
-# except BlockingIOError:
-#
-#
-# # read reach file close or EOF, empty  bytes, else block
-#
-
 
 if __name__ == '__main__':
     main()

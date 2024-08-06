@@ -13,14 +13,15 @@ class Connection:
         session_id = str(uuid.uuid4())
         session_obj = Session(self, session_id=session_id)
         self.tab_sessions[id(session_obj)] = session_obj
-        print("The session were created and added!")
+        print(f"New Session Created: {session_obj.session_id}")
         return session_obj
 
     def list_tabs(self):
-        print("Current sessions".center(50,'-'))
+        print("Sessions".center(50,'-'))
         for session_instance in self.tab_sessions.values():
-            print(f"Session ID: {session_instance.session_id}, Session instance: {session_instance}")
+            print(str(session_instance.session_id).center(50,' '))
+        print("End".center(50,'-'))
 
     def close_tab(self, session_obj):
         del self.tab_sessions[id(session_obj)]
-        print(f"The following session was deleted: {session_obj}")
+        print(f"The following session was deleted: {session_obj.session_id}")
