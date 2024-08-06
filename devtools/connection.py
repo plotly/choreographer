@@ -12,7 +12,7 @@ class Connection:
     def create_tab(self):
         session_id = str(uuid.uuid4())
         session_obj = Session(session_id)
-        self.tab_sessions[session_id] = session_obj
+        self.tab_sessions[session_obj.message_id] = session_obj
         print("The session were created and added!")
         return session_obj
 
