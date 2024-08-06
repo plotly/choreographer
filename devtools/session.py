@@ -13,7 +13,6 @@ class Session:
         self.message_id = 0
 
     def send_command(self, command, params, cb=None):
-        
         if cb and not callable(cb):
             raise TypeError("The arg that you use, is not able at cb")
         if not isinstance(command, str):
@@ -22,7 +21,7 @@ class Session:
         if cb:
             self.message_cbs[self.message_id] = cb
 
-        if self.session_id == "":
+        if self.session_id == "" or self.session_id == " ":
             json_command = {
                 "id": self.message_id,
                 "method": command,
@@ -30,10 +29,10 @@ class Session:
             }
         else:
             json_command = {
-            "session_id": self.session_id,
-            "id": self.message_id,
-            "method": command,
-            "params": params,
-        }
+                "session_id": self.session_id,
+                "id": self.message_id,
+                "method": command,
+                "params": params,
+            }
         self.message_id += 1
         return json.dumps(json_command)
