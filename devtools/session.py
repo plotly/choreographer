@@ -12,8 +12,7 @@ class Session:
         self.message_cbs = {}
         self.message_id = 0
 
-    def send_command(self, command, params, cb=None, **kwargs):
-        session_id = kwargs.pop("session_id", None)
+    def send_command(self, command, params, cb=None):
         
         if cb and not callable(cb):
             raise TypeError("The arg that you use, is not able at cb")
@@ -23,18 +22,18 @@ class Session:
         if cb:
             self.message_cbs[self.message_id] = cb
 
-        if session_id:
-            json_command = {
-            "session_id": session_id,
-            "id": self.message_id,
-            "method": command,
-            "params": params,
-        }
-        else:
+        if self.session_id == "":
             json_command = {
                 "id": self.message_id,
                 "method": command,
                 "params": params,
             }
-            self.message_id += 1
+        else:
+            json_command = {
+            "session_id": self.session_id,
+            "id": self.message_id,
+            "method": command,
+            "params": params,
+        }
+        self.message_id += 1
         return json.dumps(json_command)
