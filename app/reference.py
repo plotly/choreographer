@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 import platform
 system = platform.system()
-if system == "Windows": import msvcrt # noqa
+if system == "Windows": import msvcrt
 
 path=""
 if system == "Linux":
@@ -128,7 +128,7 @@ def main():
             return jsons
         for raw_message in raw_buffer.decode('utf-8').split('\0'):
             if raw_message:
-                jsons.aprint_jsonsend(json.loads(raw_message))
+                jsons.append(json.loads(raw_message))
         return jsons
 
     def print_jsons(data):
