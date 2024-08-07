@@ -27,7 +27,7 @@ class Pipe():
                 raw_buffer += os.read(self.read_from_chromium, 10000)
         except BlockingIOError:
             return jsons
-        if debug: print(raw_buffer, file=sys.stderr)
+        if debug: print(raw_buffer, file=sys.stderr) # noqa
         for raw_message in raw_buffer.decode('utf-8').split('\0'):
             if raw_message:
                 jsons.append(json.loads(raw_message))
