@@ -15,7 +15,7 @@ class Pipe():
     def write(self, msg): # this should accept an objects not a string
         os.write(self.write_to_chromium, str.encode(msg+'\0'))
 
-    def read_jsons(self, blocking=True):
+    def read_jsons(self, blocking=True, debug=False):
         jsons = []
         os.set_blocking(self.read_from_chromium, blocking)
         try:
@@ -27,6 +27,7 @@ class Pipe():
                 raw_buffer += os.read(self.read_from_chromium, 10000)
         except BlockingIOError:
             return jsons
+        if debug: print(raw_buffer, file=sys.stderr)
         for raw_message in raw_buffer.decode('utf-8').split('\0'):
             if raw_message:
                 jsons.append(json.loads(raw_message))
