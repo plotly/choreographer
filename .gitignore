@@ -4,3 +4,6 @@
 *.egg-info/
 build/
 __pycache__
+
+# editor files
+*.sw*

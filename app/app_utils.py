@@ -2,29 +2,37 @@ import platform
 import os
 import sys
 import subprocess
+import json
+
+class PipeClosedError(IOError):
+    pass
 
 class Pipe():
     def __init__(self):
         self.read_from_chromium, self.write_from_chromium = list(os.pipe())
         self.read_to_chromium, self.write_to_chromium = list(os.pipe())
-    def read(self, debug=False):
-        raw_message = os.read(self.read_from_chromium, 10000)
-        if debug:
-            print(raw_message, file=sys.stderr)
-        return bytes.decode(raw_message).replace('\0','')
-    def write(self, msg):
+
+    def write(self, msg): # this should accept an objects not a string
         os.write(self.write_to_chromium, str.encode(msg+'\0'))
 
-def raw_to_json():
-#        decoder = json.JSONDecoder()
-#        raw_message = pipe.read()
-#        pos = 0
-#        messages = []
-#        while not pos == len(str(raw_message)):
-#            msg, json_len = decoder.raw_decode(result[pos:])
-#            pos += json_len
-#            messages.append(msg)
-#        return message
+    def read_jsons(self, blocking=True, debug=False):
+        if debug: print("Debug enabled", file=sys.stderr)
+        jsons = []
+        os.set_blocking(self.read_from_chromium, blocking)
+        try:
+            raw_buffer = os.read(self.read_from_chromium, 10000) # 10MB buffer, nbd, doesn't matter w/ this
+            if not raw_buffer:
+                raise PipeClosedError()
+            while raw_buffer[-1] != 0:
+                os.set_blocking(self.read_from_chromium, True)
+                raw_buffer += os.read(self.read_from_chromium, 10000)
+        except BlockingIOError:
+            return jsons
+        if debug: print(raw_buffer, file=sys.stderr) # noqa
+        for raw_message in raw_buffer.decode('utf-8').split('\0'):
+            if raw_message:
+                jsons.append(json.loads(raw_message))
+        return jsons
 
 def start_browser(path=None):
     pipe = Pipe()
@@ -37,6 +45,9 @@ def start_browser(path=None):
             raise ValueError("You must set path to a chrome-like browser")
     new_env = os.environ.copy()
     new_env['CHROMIUM_PATH']=path
+    win_only = {}
+    if platform.system() == "Windows":
+        win_only = {"creationflags":subprocess.CREATE_NEW_PROCESS_GROUP}
     proc = subprocess.Popen(
             [sys.executable, os.path.join(os.path.dirname(os.path.realpath(__file__)), "chrome_wrapper.py")],
             close_fds=True,
@@ -44,9 +55,6 @@ def start_browser(path=None):
             stdout=pipe.write_from_chromium,
             stderr=None,
             env=new_env,
-            text=True,
-            bufsize=1,
+            **win_only
             )
-    os.close(pipe.read_to_chromium)
-    os.close(pipe.write_from_chromium)
     return (proc, pipe)

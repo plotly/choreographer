@@ -15,3 +15,6 @@ version = "0.0.1"
 dev = [
   "pytest",
   ]
+
+[tool.ruff.lint]
+ignore = ["E701"]
