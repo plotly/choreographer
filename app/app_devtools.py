@@ -52,34 +52,8 @@ r12 = {
 }
 
 
-list_r = [r1, r3, r4]
-list_r_session_id = [r7, r8, r9, r11, r12]
+list_r = [r1, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12]
 
 session_1 = devtools.Session()
 for r in list_r:
     print(session_1.send_command(command=r["method"], params=r["params"]))
-
-print(session_1.send_command(command=r2["method"], params=None))
-
-print(
-    devtools.Session(str(r5["sessionId"])).send_command(
-        command=r5["method"], params=None
-    )
-)
-print(
-    devtools.Session(str(r6["sessionId"])).send_command(
-        command=r6["method"], params=None
-    )
-)
-print(
-    devtools.Session(str(r10["sessionId"])).send_command(
-        command=r10["method"], params=None
-    )
-)
-
-for r in list_r_session_id:
-    print(
-        devtools.Session(str(r["sessionId"])).send_command(
-            command=r["method"], params=r["params"]
-        )
-    )
