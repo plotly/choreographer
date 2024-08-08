@@ -1,6 +1,4 @@
 import devtools
-import os
-from pathlib import Path
 
 r1 = {
     "id": 0,
