@@ -45,6 +45,9 @@ def start_browser(path=None):
             raise ValueError("You must set path to a chrome-like browser")
     new_env = os.environ.copy()
     new_env['CHROMIUM_PATH']=path
+    win_only = {}
+    if platform.system() == "Windows":
+        win_only = {"creationflags":subprocess.CREATE_NEW_PROCESS_GROUP}
     proc = subprocess.Popen(
             [sys.executable, os.path.join(os.path.dirname(os.path.realpath(__file__)), "chrome_wrapper.py")],
             close_fds=True,
@@ -52,10 +55,6 @@ def start_browser(path=None):
             stdout=pipe.write_from_chromium,
             stderr=None,
             env=new_env,
-            text=True,
-            bufsize=1,
-
+            **win_only
             )
-    os.close(pipe.read_to_chromium)
-    os.close(pipe.write_from_chromium)
     return (proc, pipe)

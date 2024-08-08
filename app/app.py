@@ -1,3 +1,5 @@
+import signal
+import platform
 import devtools
 
 from app_utils import start_browser
@@ -35,12 +37,16 @@ def main():
 
     pipe.write("{}")
     print(pipe.read_jsons(debug=True))
+    print(pipe.read_jsons(blocking=False,debug=True))
+    print(pipe.read_jsons(blocking=False,debug=True))
+    print(pipe.read_jsons(blocking=False,debug=True))
 
-    import time
-    time.sleep(2)
-
-    proc.terminate()
-    proc.wait(1)
+    if platform.system() == "Windows":
+        # No way to catch this on windows yet, just pushes stderr through
+        proc.send_signal(signal.CTRL_BREAK_EVENT)
+    else:
+        proc.terminate()
+    proc.wait(5)
     proc.kill()
 
 if __name__ == '__main__':
