@@ -37,7 +37,8 @@ def main():
     print(pipe.read_jsons(debug=True))
 
     import time
-    time.sleep(1)
+    time.sleep(2)
+
     proc.terminate()
     proc.wait(1)
     proc.kill()
