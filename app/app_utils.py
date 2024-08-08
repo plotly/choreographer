@@ -16,6 +16,7 @@ class Pipe():
         os.write(self.write_to_chromium, str.encode(msg+'\0'))
 
     def read_jsons(self, blocking=True, debug=False):
+        if debug: print("Debug enabled", file=sys.stderr)
         jsons = []
         os.set_blocking(self.read_from_chromium, blocking)
         try:
@@ -53,6 +54,7 @@ def start_browser(path=None):
             env=new_env,
             text=True,
             bufsize=1,
+
             )
     os.close(pipe.read_to_chromium)
     os.close(pipe.write_from_chromium)

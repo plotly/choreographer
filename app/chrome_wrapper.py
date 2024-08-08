@@ -51,12 +51,12 @@ def kill_proc(*nope):
     process.wait(3) # 3 seconds to clean up nicely, it's a lot
     process.kill()
 
+if system == "Windows":
+    signal.signal(signal.SIGBREAK, kill_proc)
+
 signal.signal(signal.SIGTERM, kill_proc)
 signal.signal(signal.SIGINT, kill_proc)
 
-if platform.system() == "Windows":
-    os.system('pause')
-else:
-    signal.pause()
+process.wait() # signal pause maybe, not sure
 
 print("Wrapper closing")

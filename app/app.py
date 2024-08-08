@@ -34,10 +34,12 @@ def main():
     proc, pipe = start_browser()
 
     pipe.write("{}")
-    print(pipe.read_jsons())
+    print(pipe.read_jsons(debug=True))
 
+    import time
+    time.sleep(1)
     proc.terminate()
-    proc.wait(10)
+    proc.wait(1)
     proc.kill()
 
 if __name__ == '__main__':
