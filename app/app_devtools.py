@@ -54,6 +54,10 @@ r12 = {
 
 list_r = [r1, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12]
 
-session_1 = devtools.Session()
+
+browser = devtools.Connection()
+
+browser.list_tabs()
+
 for r in list_r:
-    print(session_1.send_command(command=r["method"], params=r["params"]))
+    print(browser.browser_session.send_command(command=r["method"], params=r["params"]))
