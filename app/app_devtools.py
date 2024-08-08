@@ -60,4 +60,7 @@ browser = devtools.Connection()
 browser.list_tabs()
 
 for r in list_r:
-    print(browser.browser_session.send_command(command=r["method"], params=r["params"]))
+    if "params" in r.keys():
+        print(browser.browser_session.send_command(command=r["method"], params=r["params"]))
+    else:
+        print(browser.browser_session.send_command(command=r["method"], params=None))
