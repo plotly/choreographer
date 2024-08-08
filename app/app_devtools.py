@@ -60,4 +60,8 @@ browser.list_tabs()
 
 ## Print Commands
 for r in list_r:
-    print(browser.browser_session.send_command(command=r["method"], params=r["params"] if "params" in r else None))
+    print(
+        browser.browser_session.send_command(
+            command=r["method"], params=r["params"] if "params" in r else None
+        )
+    )
