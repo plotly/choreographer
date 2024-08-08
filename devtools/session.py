@@ -25,8 +25,10 @@ class Session:
         json_command = {
             "id": self.message_id,
             "method": command,
-            "params": params,
         }
+
+        if params:
+            json_command["params"] = params
 
         if self.session_id != "":
             json_command["session_id"] = self.session_id
