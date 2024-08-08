@@ -52,12 +52,10 @@ r12 = {
     "params": {"scriptId": "scriptId"},
 }
 
-
 list_r = [r1, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12]
 
 ## Create Connection
 browser = devtools.Connection()
-
 browser.list_tabs()
 
 ## Print Commands
