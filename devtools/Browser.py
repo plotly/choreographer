@@ -34,6 +34,9 @@ class Browser:
                 env=new_env,
                 **win_only
                 )
+        self.pipes[id(pipe)] = pipe
+        self.subprocess[id(proc)] = proc
+        
         return (proc, pipe)
 
     def close_browser(self):
