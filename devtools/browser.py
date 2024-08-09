@@ -10,13 +10,13 @@ class Browser:
     def __init__(self, debug=None, path=None):
         self.pipe = Pipe()
 
-        if not debug: # false o None
-            stderr=subprocess.DEVNULL
+        if not debug:  # false o None
+            stderr = subprocess.DEVNULL
         elif debug is True:
-            stderr=None
+            stderr = None
         else:
-            stderr=debug
-            
+            stderr = debug
+
         if not path:
             if platform.system() == "Windows":
                 path = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
@@ -24,13 +24,13 @@ class Browser:
                 path = "/usr/bin/google-chrome-stable"
             else:
                 raise ValueError("You must set path to a chrome-like browser")
-            
+
         new_env = os.environ.copy()
         new_env["CHROMIUM_PATH"] = path
         win_only = {}
         if platform.system() == "Windows":
             win_only = {"creationflags": subprocess.CREATE_NEW_PROCESS_GROUP}
-            
+
         proc = subprocess.Popen(
             [
                 sys.executable,
