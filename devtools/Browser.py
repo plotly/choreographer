@@ -38,7 +38,6 @@ class Browser:
         )
         self.subprocess = proc
 
-
     def close_browser(self, proc=None):
         if not proc:
             raise ValueError(
