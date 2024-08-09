@@ -9,8 +9,8 @@ import signal
 
 class Browser:
     def __init__(self):
-        self.pipes = OrderedDict()
-        self.subprocess = OrderedDict()
+        self.pipes = Pipe()
+        self.subprocess = subprocess.Popen()
 
     def start_browser(self, path=None):
         pipe = Pipe()
