@@ -1,5 +1,4 @@
-from app.app_utils import Pipe
-from collections import OrderedDict
+from .pipe import Pipe
 import platform
 import os
 import sys
