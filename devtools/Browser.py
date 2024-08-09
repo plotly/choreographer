@@ -4,6 +4,7 @@ import platform
 import os
 import sys
 import subprocess
+import signal
 
 class Browser:
     def __init__(self):
@@ -34,3 +35,13 @@ class Browser:
                 **win_only
                 )
         return (proc, pipe)
+
+    def close_browser(self):
+        proc, _ = self.start_browser()
+
+        if platform.system() == "Windows":
+            proc.send_signal(signal.CTRL_BREAK_EVENT)
+        else:
+            proc.terminate()
+        proc.wait(5)
+        proc.kill()
