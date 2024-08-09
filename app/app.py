@@ -1,4 +1,5 @@
 import devtools
+import time
 
 def main():
     # Interface Test
@@ -38,6 +39,8 @@ def main():
     print(pipe.read_jsons(blocking=False,debug=True))
     print(pipe.read_jsons(blocking=False,debug=True))
     print(pipe.read_jsons(blocking=False,debug=True))
+
+    time.sleep(10)
 
     browser.close_browser(proc)
 
