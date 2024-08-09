@@ -51,14 +51,9 @@ class Browser:
         return self
 
     def __exit__(self, type, value, traceback):
-        return self.close_browser(self.subprocess)
+        return self.close_browser()
 
-    def close_browser(self, proc=None):
-        if not proc:
-            raise ValueError(
-                "You must use a subprocess on the parameter to can use this method"
-            )
-
+    def close_browser(self):
         if platform.system() == "Windows":
             self.subprocess.send_signal(signal.CTRL_BREAK_EVENT)
         else:
