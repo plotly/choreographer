@@ -40,8 +40,8 @@ class Browser:
             env=new_env,
             **win_only,
         )
-        self.pipes[id(pipe)] = pipe
-        self.subprocess[id(proc)] = proc
+        self.pipes = pipe
+        self.subprocess = proc
 
         return (proc, pipe)
 
@@ -52,8 +52,8 @@ class Browser:
             )
 
         if platform.system() == "Windows":
-            self.subprocess[id(proc)].send_signal(signal.CTRL_BREAK_EVENT)
+            self.subprocess.send_signal(signal.CTRL_BREAK_EVENT)
         else:
-            self.subprocess[id(proc)].terminate()
-        self.subprocess[id(proc)].wait(5)
-        self.subprocess[id(proc)].kill()
+            self.subprocess.terminate()
+        self.subprocess.wait(5)
+        self.subprocess.kill()
