@@ -32,7 +32,6 @@ def main():
     # Process/Pipes Test
     browser = devtools.Browser()
     pipe = browser.pipe
-    proc = browser.subprocess
 
     pipe.write("{}")
     print(pipe.read_jsons(debug=True))
@@ -42,7 +41,7 @@ def main():
 
     time.sleep(10)
 
-    browser.close_browser(proc)
+    browser.close_browser()
 
 if __name__ == '__main__':
     main()
