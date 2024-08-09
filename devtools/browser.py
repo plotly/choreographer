@@ -50,6 +50,9 @@ class Browser:
     def __enter__(self):
         return self
 
+    def __exit__(self, type, value, traceback):
+        return self.close_browser(self.subprocess)
+
     def close_browser(self, proc=None):
         if not proc:
             raise ValueError(
