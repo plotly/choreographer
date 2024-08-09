@@ -39,12 +39,13 @@ class Browser:
         
         return (proc, pipe)
 
-    def close_browser(self):
-        proc, _ = self.start_browser()
+    def close_browser(self, proc=None):
+        if not proc:
+            proc, _ = self.start_browser()
 
         if platform.system() == "Windows":
-            proc.send_signal(signal.CTRL_BREAK_EVENT)
+            self.subprocess[id(proc)].send_signal(signal.CTRL_BREAK_EVENT)
         else:
-            proc.terminate()
-        proc.wait(5)
-        proc.kill()
+            self.subprocess[id(proc)].terminate()
+        self.subprocess[id(proc)].wait(5)
+        self.subprocess[id(proc)].kill()
