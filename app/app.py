@@ -1,5 +1,3 @@
-import signal
-import platform
 import devtools
 
 def main():
