@@ -8,7 +8,7 @@ import signal
 
 class Browser:
     def __init__(self, debug=None, path=None):
-        self.pipes = Pipe()
+        self.pipe = Pipe()
 
         if not debug: # false o None
             stderr=subprocess.DEVNULL
