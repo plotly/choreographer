@@ -47,6 +47,9 @@ class Browser:
         )
         self.subprocess = proc
 
+    def __enter__(self):
+        return self
+
     def close_browser(self, proc=None):
         if not proc:
             raise ValueError(
