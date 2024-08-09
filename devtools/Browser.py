@@ -47,7 +47,9 @@ class Browser:
 
     def close_browser(self, proc=None):
         if not proc:
-            proc, _ = self.start_browser()
+            raise ValueError(
+                "You must use a subprocess on the parameter to can use this method"
+            )
 
         if platform.system() == "Windows":
             self.subprocess[id(proc)].send_signal(signal.CTRL_BREAK_EVENT)
