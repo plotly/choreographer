@@ -7,12 +7,9 @@ import signal
 
 
 class Browser:
-    def __init__(self):
+    def __init__(self, path=None):
         self.pipes = Pipe()
-        self.subprocess = subprocess.Popen()
 
-    def start_browser(self, path=None):
-        pipe = Pipe()
         if not path:
             if platform.system() == "Windows":
                 path = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
@@ -33,16 +30,14 @@ class Browser:
                 ),
             ],
             close_fds=True,
-            stdin=pipe.read_to_chromium,
-            stdout=pipe.write_from_chromium,
+            stdin=self.pipe.read_to_chromium,
+            stdout=self.pipe.write_from_chromium,
             stderr=None,
             env=new_env,
             **win_only,
         )
-        self.pipes = pipe
         self.subprocess = proc
 
-        return (proc, pipe)
 
     def close_browser(self, proc=None):
         if not proc:
