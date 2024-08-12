@@ -3,7 +3,7 @@ from collections import OrderedDict
 import uuid
 
 
-class Connection:
+class Protocol:
     def __init__(self):
         self.browser_session = Session(self, session_id="")
         self.tab_sessions = OrderedDict()

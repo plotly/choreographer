@@ -5,8 +5,8 @@ import time
 def main():
     # Interface Test
 
-    ## Create Connection
-    connection = devtools.Connection()
+    ## Create Protocol
+    connection = devtools.Protocol()
 
     connection.list_tabs()
 
