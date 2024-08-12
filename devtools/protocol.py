@@ -1,12 +1,14 @@
 from .session import Session
+from .pipe import Pipe
 from collections import OrderedDict
 import uuid
 
 
 class Protocol:
-    def __init__(self):
+    def __init__(self, browser_pipe=Pipe()):
         self.browser_session = Session(self, session_id="")
         self.tab_sessions = OrderedDict()
+        self.browser_pipe = browser_pipe
 
     def create_tab(self):
         session_id = str(uuid.uuid4())

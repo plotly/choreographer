@@ -47,7 +47,7 @@ class Browser:
             **win_only,
         )
         self.subprocess = proc
-        self.connection_protocol = devtools.Protocol()
+        self.connection_protocol = devtools.Protocol(self.pipe)
 
     def __enter__(self):
         return self
