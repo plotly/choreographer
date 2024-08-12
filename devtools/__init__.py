@@ -1,4 +1,4 @@
 from .browser import Browser
-from .connection import Connection
+from .protocol import Protocol
 
-__all__ = [Browser, Connection]
+__all__ = [Browser, Protocol]
