@@ -62,3 +62,6 @@ class Browser:
             self.subprocess.terminate()
         self.subprocess.wait(5)
         self.subprocess.kill()
+
+    def send_command(self, command, params=None, cb=None):
+        return self.connection_protocol.send_command(self, command, params, cb)
