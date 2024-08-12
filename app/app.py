@@ -47,18 +47,16 @@ def main():
     )
 
     # Process/Pipes Test
-    browser = devtools.Browser()
-    pipe = browser.pipe
+    with devtools.Browser() as browser:
+        pipe = browser.pipe
 
-    pipe.write("{}")
-    print(pipe.read_jsons(debug=True))
-    print(pipe.read_jsons(blocking=False, debug=True))
-    print(pipe.read_jsons(blocking=False, debug=True))
-    print(pipe.read_jsons(blocking=False, debug=True))
+        pipe.write("{}")
+        print(pipe.read_jsons(debug=True))
+        print(pipe.read_jsons(blocking=False, debug=True))
+        print(pipe.read_jsons(blocking=False, debug=True))
+        print(pipe.read_jsons(blocking=False, debug=True))
 
-    time.sleep(10)
-
-    browser.close_browser()
+        time.sleep(10)
 
 
 if __name__ == "__main__":
