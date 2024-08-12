@@ -4,6 +4,7 @@ import os
 import sys
 import subprocess
 import signal
+import devtools
 
 
 class Browser:
@@ -46,6 +47,7 @@ class Browser:
             **win_only,
         )
         self.subprocess = proc
+        self.connection_protocol = devtools.Protocol()
 
     def __enter__(self):
         return self
