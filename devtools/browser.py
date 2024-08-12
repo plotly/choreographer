@@ -1,10 +1,10 @@
 from .pipe import Pipe
+from .protocol import Protocol
 import platform
 import os
 import sys
 import subprocess
 import signal
-import devtools
 
 
 class Browser:
@@ -47,7 +47,7 @@ class Browser:
             **win_only,
         )
         self.subprocess = proc
-        self.connection_protocol = devtools.Protocol(self.pipe)
+        self.connection_protocol = Protocol(self.pipe)
 
     def __enter__(self):
         return self
