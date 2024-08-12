@@ -54,14 +54,14 @@ r12 = {
 
 list_r = [r1, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12]
 
-## Create Connection
-browser = devtools.Connection()
-browser.list_tabs()
+## Create Protocol
+connection = devtools.Protocol()
+connection.list_tabs()
 
 ## Print Commands
 for r in list_r:
     print(
-        browser.browser_session.send_command(
+        connection.browser_session.send_command(
             command=r["method"], params=r["params"] if "params" in r else None
         )
     )
