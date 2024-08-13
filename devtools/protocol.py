@@ -5,7 +5,7 @@ from collections import OrderedDict
 
 class Protocol:
     def __init__(self, browser_pipe=Pipe()):
-        self.browser_tab = Tab()
+        self.tab = Tab()
         self.tabs = OrderedDict()
         self.browser_pipe = browser_pipe
 
@@ -27,4 +27,4 @@ class Protocol:
         print(f"The following tab was deleted: {tab_id}")
 
     def send_command(self, command, params=None, cb=None):
-        return self.browser_tab.send_command(self, command, params, cb)
+        return self.tab.send_command(self, command, params, cb)
