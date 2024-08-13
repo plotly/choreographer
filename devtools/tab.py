@@ -7,6 +7,7 @@ class Tab:
     def __init__(self):
         self.browser_session = Session(self, session_id="")
         self.tab_sessions = OrderedDict()
+        self.id = 0
 
     def add_session(self):
         session_id = str(uuid.uuid4())
