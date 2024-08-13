@@ -4,7 +4,7 @@ from collections import OrderedDict
 
 
 class Protocol:
-    def __init__(self, browser_pipe=Pipe()):
+    def __init__(self, browser_pipe):
         self.tab = Tab()
         self.tabs = OrderedDict()
         self.browser_pipe = browser_pipe
