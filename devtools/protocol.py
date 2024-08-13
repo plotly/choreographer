@@ -1,5 +1,4 @@
 from .tab import Tab
-from .pipe import Pipe
 from collections import OrderedDict
 
 
