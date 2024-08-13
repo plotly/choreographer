@@ -21,9 +21,9 @@ class Protocol:
             print(str(tab.session_id).center(50,' '))
         print("End".center(50,'-'))
 
-    def close_tab(self, session_obj):
-        del self.tab_sessions[id(session_obj)]
-        print(f"The following session was deleted: {session_obj.session_id}")
+    def close_tab(self, tab_obj):
+        del self.tabs[id(tab_obj)]
+        print(f"The following tab was deleted: {tab_obj}")
 
     def send_command(self, command, params=None, cb=None):
         return self.browser_session.send_command(self, command, params, cb)
