@@ -16,10 +16,10 @@ class Protocol:
         return tab_obj
 
     def list_tabs(self):
-        print("Tabs".center(50,'-'))
+        print("Tabs".center(50, "-"))
         for tab in self.tab.values():
-            print(str(tab.session_id).center(50,' '))
-        print("End".center(50,'-'))
+            print(str(tab.session_id).center(50, " "))
+        print("End".center(50, "-"))
 
     def close_tab(self, tab_obj):
         del self.tabs[id(tab_obj)]
