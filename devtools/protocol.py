@@ -1,8 +1,6 @@
-from .session import Session
 from .tab import Tab
 from .pipe import Pipe
 from collections import OrderedDict
-import uuid
 
 
 class Protocol:
@@ -12,11 +10,10 @@ class Protocol:
         self.browser_pipe = browser_pipe
 
     def create_tab(self):
-        session_id = str(uuid.uuid4())
-        session_obj = Session(self, session_id=session_id)
-        self.tab_sessions[id(session_obj)] = session_obj
-        print(f"New Session Created: {session_obj.session_id}")
-        return session_obj
+        tab_obj = Tab()
+        self.tabs[id(tab_obj)] = tab_obj
+        print("New Tab Created")
+        return tab_obj
 
     def list_tabs(self):
         print("Sessions".center(50,'-'))
