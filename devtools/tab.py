@@ -16,10 +16,10 @@ class Tab:
         return session_obj
 
     def list_sessions(self):
-        print("Sessions".center(50,'-'))
+        print("Sessions".center(50, "-"))
         for session_instance in self.tab_sessions.values():
-            print(str(session_instance.session_id).center(50,' '))
-        print("End".center(50,'-'))
+            print(str(session_instance.session_id).center(50, " "))
+        print("End".center(50, "-"))
 
     def close_session(self, session_obj):
         del self.tab_sessions[id(session_obj)]
