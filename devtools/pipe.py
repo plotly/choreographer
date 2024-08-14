@@ -12,7 +12,7 @@ class Pipe:
         self.read_from_chromium, self.write_from_chromium = list(os.pipe())
         self.read_to_chromium, self.write_to_chromium = list(os.pipe())
 
-    def write(self, command, params=None):  # this should accept an objects not a string
+    def write_json(self, command, params=None):  # this should accept an objects not a string
         if params is None:
             message = {"command": command}
         else:
