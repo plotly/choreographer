@@ -18,7 +18,9 @@ class Pipe:
         else:
             message = {"command": command, "params": params}
 
-        os.write(self.write_to_chromium, str.encode(message + "\0"))
+        encoded_message = json.dumps(message).encode + "\0"
+
+        os.write(self.write_to_chromium, encoded_message)
 
     def read_jsons(self, blocking=True, debug=False):
         if debug:
