@@ -10,7 +10,7 @@ class Protocol:
 
     def create_tab(self):
         tab_obj = Tab()
-        tab_obj.id = list(self.tabs.keys())[-1] + 1
+        tab_obj.id =  next(reversed(self.tabs.keys())) + 1
         self.tabs[tab_obj.id] = tab_obj
         print(f"New Tab Created: {tab_obj.id}")
         return tab_obj
