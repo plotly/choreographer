@@ -1,10 +1,11 @@
 from .tab import Tab
+from .session import Session
 from collections import OrderedDict
 
 
 class Protocol:
     def __init__(self, browser_pipe):
-        self.browser_session = self.tab.browser_session
+        self.browser_session = Session(self, session_id="")
         self.tabs = OrderedDict()
         self.browser_pipe = browser_pipe
 
