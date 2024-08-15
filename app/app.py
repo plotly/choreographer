@@ -5,7 +5,7 @@ import time
 def main():
     # Interface Test
     # Process/Pipes Test
-    with devtools.Browser() as browser:
+    with devtools.Browser(headless=False) as browser:
         pipe = browser.pipe
     ## Create Protocol
         connection = browser.connection_protocol
