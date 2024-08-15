@@ -9,8 +9,7 @@ class Tab:
         self.target_id = str(uuid.uuid4())
 
     def add_session(self):
-        session_id = str(uuid.uuid4())
-        session_obj = Session(self, session_id=session_id)
+        session_obj = Session(self)
         self.tab_sessions[id(session_obj)] = session_obj
         print(f"New Session Added: {session_obj.session_id}")
         return session_obj
