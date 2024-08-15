@@ -13,7 +13,7 @@ class Protocol:
     def create_tab(self):
         tab_obj = Tab()
         self.tabs[tab_obj.target_id] = tab_obj
-        print(f"New Tab Created: {tab_obj.id}")
+        print(f"New Tab Created: {tab_obj.target_id}")
         return tab_obj
 
     def list_tabs(self):
