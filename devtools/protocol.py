@@ -6,6 +6,7 @@ from collections import OrderedDict
 class Protocol:
     def __init__(self, browser_pipe):
         self.browser_session = Session(self, session_id="")
+        self.target_id = 0
         self.tabs = OrderedDict()
         self.browser_pipe = browser_pipe
         self._id_zero = True
