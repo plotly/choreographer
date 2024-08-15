@@ -33,4 +33,4 @@ class Protocol:
         print(f"The following tab was deleted: {tab_id}")
 
     def send_command(self, command, params=None, cb=None):
-        return self.tab.send_command(self, command, params, cb)
+        return self.browser_session.send_command(self, command, params, cb)
