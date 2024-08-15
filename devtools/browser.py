@@ -8,7 +8,7 @@ import signal
 
 
 class Browser:
-    def __init__(self, debug=None, path=None):
+    def __init__(self, debug=None, path=None, headless=True):
         self.pipe = Pipe()
 
         if not debug:  # false o None
@@ -28,6 +28,10 @@ class Browser:
 
         new_env = os.environ.copy()
         new_env["CHROMIUM_PATH"] = path
+        if headless:
+            new_env["CLI_FLAG"] = "--headless"
+        else:
+            new_env["CLI_FLAG"] = ""
         win_only = {}
         if platform.system() == "Windows":
             win_only = {"creationflags": subprocess.CREATE_NEW_PROCESS_GROUP}
