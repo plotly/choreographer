@@ -13,12 +13,7 @@ class Protocol:
 
     def create_tab(self):
         tab_obj = Tab()
-        if self._id_zero and 0 not in self.tabs.keys():
-            self._id_zero = False
-            self.tabs[tab_obj.id] = tab_obj
-        else:
-            tab_obj.id =  next(reversed(self.tabs.keys())) + 1
-            self.tabs[tab_obj.id] = tab_obj
+        self.tabs[tab_obj.target_id] = tab_obj
         print(f"New Tab Created: {tab_obj.id}")
         return tab_obj
 
