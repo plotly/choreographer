@@ -15,10 +15,10 @@ class Pipe:
     def write_json(
         self, command, params=None
     ):  # this should accept an objects not a string
-        if params is None:
-            message = {"command": command}
-        else:
+        if params:
             message = {"command": command, "params": params}
+        else:
+            message = {"command": command}
 
         encoded_message = json.dumps(message).encode + "\0"
 
