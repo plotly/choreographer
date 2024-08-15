@@ -1,8 +1,9 @@
 import json
+import uuid
 
 
 class Session:
-    def __init__(self, parent, session_id=""):
+    def __init__(self, parent, session_id=str(uuid.uuid4())):
         if isinstance(session_id, str):
             self.session_id = session_id
         else:
