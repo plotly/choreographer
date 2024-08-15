@@ -37,6 +37,3 @@ class Session:
         self.message_id += 1
 
         return json.dumps(json_command)
-
-    def close_tab(self):
-        self.parent.close_tab(self)
