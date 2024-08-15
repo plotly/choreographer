@@ -42,7 +42,7 @@ else:
         "--disable-breakpad",
         "--allow-file-access-from-files",
     ]
-    
+
 if system == "Windows":
     to_chromium_handle = msvcrt.get_osfhandle(3)
     os.set_handle_inheritable(to_chromium_handle, True)
