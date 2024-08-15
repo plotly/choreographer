@@ -19,8 +19,8 @@ class Protocol:
 
     def list_tabs(self):
         print("Tabs".center(50, "-"))
-        for tab in self.tabs.values():
-            print(str(tab.id).center(50, " "))
+        for target_id in self.tabs.keys():
+            print(str(target_id).center(50, " "))
         print("End".center(50, "-"))
 
     def close_tab(self, tab_id):
