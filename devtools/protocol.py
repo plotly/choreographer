@@ -9,7 +9,6 @@ class Protocol:
         self.target_id = 0
         self.tabs = OrderedDict()
         self.browser_pipe = browser_pipe
-        self._id_zero = True
 
     def create_tab(self):
         tab_obj = Tab()
