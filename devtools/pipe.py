@@ -20,7 +20,7 @@ class Pipe:
         else:
             message = {"command": command}
 
-        encoded_message = json.dumps(message).encode + "\0"
+        encoded_message = json.dumps(message).encode() + "\0"
 
         os.write(self.write_to_chromium, encoded_message)
 
