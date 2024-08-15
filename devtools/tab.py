@@ -6,6 +6,7 @@ import uuid
 class Tab:
     def __init__(self):
         self.tab_sessions = OrderedDict()
+        self.target_id = str(uuid.uuid4())
         self.id = 0
 
     def add_session(self):
