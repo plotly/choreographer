@@ -10,7 +10,7 @@ class Tab:
 
     def add_session(self):
         session_obj = Session(self)
-        self.tab_sessions[id(session_obj)] = session_obj
+        self.tab_sessions[session_obj.session_id] = session_obj
         print(f"New Session Added: {session_obj.session_id}")
         return session_obj
 
