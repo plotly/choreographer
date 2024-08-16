@@ -10,6 +10,9 @@ class Tab:
 
     def add_session(self):
         session_obj = Session(self)
+        self.send_command(
+            command="Target.attachToTarget", params={"targetId": ""}
+        )
         self.tab_sessions[session_obj.session_id] = session_obj
         print(f"New Session Added: {session_obj.session_id}")
         return session_obj
