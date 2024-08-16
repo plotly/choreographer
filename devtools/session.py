@@ -34,14 +34,14 @@ class Session:
         if params:
             json_command["params"] = params
 
-            self.parent_connection.browser_pipe.write_json(
+            self.parent_connection.pipe.write_json(
                 message_id=json_command["id"],
                 method=json_command["method"],
                 params=json_command["params"],
                 session_id=self.session_id,
             )
         else:
-            self.parent_connection.browser_pipe.write_json(
+            self.parent_connection.pipe.write_json(
                 message_id=json_command["id"],
                 method=json_command["method"],
                 session_id=self.session_id,

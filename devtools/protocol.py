@@ -8,7 +8,7 @@ class Protocol:
         self.browser_session = Session(self, session_id="")
         self.target_id = 0
         self.tabs = OrderedDict()
-        self.browser_pipe = browser_pipe
+        self.pipe = browser_pipe
 
     def create_tab(self):
         tab_obj = Tab()
