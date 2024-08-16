@@ -25,7 +25,13 @@ class Tab:
 
     def close_session(self, session_obj):
         if isinstance(session_obj, str):
+            self.send_command(
+                command="Target.detachFromTarget", params={"sessionId": session_obj}
+            )
             del self.tab_sessions[session_obj]
         else:
+            self.send_command(
+                command="Target.detachFromTarget", params={"sessionId": session_obj.session_id}
+            )
             del self.tab_sessions[session_obj.session_id]
         print(f"The following session was deleted: {session_obj.session_id}")
