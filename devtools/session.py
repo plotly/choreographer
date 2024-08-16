@@ -28,11 +28,24 @@ class Session:
             "method": command,
         }
 
+        if self.session_id != "":
+            json_command["session_id"] = self.session_id
+
         if params:
             json_command["params"] = params
 
-        if self.session_id != "":
-            json_command["session_id"] = self.session_id
+            self.parent_connection.browser_pipe.write_jsons(
+                message_id=json_command["id"],
+                method=json_command["method"],
+                params=json_command["params"],
+                session_id=self.session_id,
+            )
+        else:
+            self.parent_connection.browser_pipe.write_jsons(
+                message_id=json_command["id"],
+                method=json_command["method"],
+                session_id=self.session_id,
+            )
 
         self.message_id += 1
 
