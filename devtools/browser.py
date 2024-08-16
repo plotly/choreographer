@@ -58,6 +58,15 @@ class Browser:
     def __exit__(self, type, value, traceback):
         return self.close_browser()
 
+    def create_tab(self):
+        self.protocol.create_tab()
+
+    def list_tabs(self):
+        self.protocol.list_tabs()
+
+    def close_tab(self, tab_id):
+        self.protocol.close_tab(tab_id)
+
     def close_browser(self):
         if platform.system() == "Windows":
             self.subprocess.send_signal(signal.CTRL_BREAK_EVENT)
