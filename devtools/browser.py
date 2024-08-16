@@ -51,7 +51,7 @@ class Browser:
             **win_only,
         )
         self.subprocess = proc
-        self.connection_protocol = Protocol(self.pipe)
+        self.protocol = Protocol(self.pipe)
 
     def __enter__(self):
         return self
@@ -68,4 +68,4 @@ class Browser:
         self.subprocess.kill()
 
     def send_command(self, command, params=None, cb=None):
-        return self.connection_protocol.send_command(self, command, params, cb)
+        return self.protocol.send_command(self, command, params, cb)

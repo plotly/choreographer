@@ -56,7 +56,7 @@ list_r = [r1, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12]
 
 ## Create Protocol
 browser = devtools.Browser()
-connection = browser.connection_protocol
+connection = browser.protocol
 connection.list_tabs()
 
 ## Print Commands
