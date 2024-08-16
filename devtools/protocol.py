@@ -1,7 +1,6 @@
 from .tab import Tab
 from .session import Session
 from collections import OrderedDict
-import json
 
 
 class Protocol:
