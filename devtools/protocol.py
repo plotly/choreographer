@@ -10,6 +10,9 @@ class Protocol:
         self.tabs = OrderedDict()
         self.pipe = browser_pipe
 
+    def send_command(self, command, params=None, cb=None):
+        return self.browser_session.send_command(command, params, cb)
+
     def create_tab(self):
         tab_obj = Tab()
         self.tabs[tab_obj.target_id] = tab_obj
@@ -28,6 +31,3 @@ class Protocol:
         else:
             del self.tabs[tab_id.target_id]
         print(f"The following tab was deleted: {tab_id}")
-
-    def send_command(self, command, params=None, cb=None):
-        return self.browser_session.send_command(command, params, cb)
