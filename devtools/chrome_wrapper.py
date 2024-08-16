@@ -26,22 +26,15 @@ elif system == "Windows":
 else:
     path = os.environ["CHROMIUM_PATH"]
 
-headless = os.environ["CLI_FLAG"]
-if headless:
-    cli = [
-        path,
-        headless,
-        "--remote-debugging-pipe",
-        "--disable-breakpad",
-        "--allow-file-access-from-files",
-    ]
-else:
-    cli = [
-        path,
-        "--remote-debugging-pipe",
-        "--disable-breakpad",
-        "--allow-file-access-from-files",
-    ]
+cli = [
+    path,
+    "--remote-debugging-pipe",
+    "--disable-breakpad",
+    "--allow-file-access-from-files",
+]
+
+if "HEADLESS" in os.environ:
+    cli.append("--headless")
 
 if system == "Windows":
     to_chromium_handle = msvcrt.get_osfhandle(3)
