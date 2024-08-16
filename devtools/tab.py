@@ -31,7 +31,8 @@ class Tab:
             del self.tab_sessions[session_obj]
         else:
             self.send_command(
-                command="Target.detachFromTarget", params={"sessionId": session_obj.session_id}
+                command="Target.detachFromTarget",
+                params={"sessionId": session_obj.session_id},
             )
             del self.tab_sessions[session_obj.session_id]
         print(f"The following session was deleted: {session_obj.session_id}")
