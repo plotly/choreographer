@@ -29,9 +29,8 @@ class Browser:
         new_env = os.environ.copy()
         new_env["CHROMIUM_PATH"] = path
         if headless:
-            new_env["CLI_FLAG"] = "--headless"
-        else:
-            new_env["CLI_FLAG"] = ""
+            new_env["HEADLESS"] = "--headless"
+
         win_only = {}
         if platform.system() == "Windows":
             win_only = {"creationflags": subprocess.CREATE_NEW_PROCESS_GROUP}
