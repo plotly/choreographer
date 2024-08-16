@@ -12,8 +12,7 @@ def main():
         connection.create_tab()
         connection.create_tab()
         connection.create_tab()
-
-        print(connection.send_command(command="Target.getTargets"))
+        time.sleep(10)
 
         connection.pipe.read_jsons(debug=True)
         connection.pipe.read_jsons(blocking=False, debug=True)
