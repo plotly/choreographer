@@ -13,12 +13,15 @@ class Pipe:
         self.read_to_chromium, self.write_to_chromium = list(os.pipe())
 
     def write_json(
-        self, command, params=None
+        self, message_id, method, params=None, session_id=""
     ):  # this should accept an objects not a string
         if params:
-            message = {"command": command, "params": params}
+            message = {"id": message_id, "method": method, "params": params}
         else:
-            message = {"command": command}
+            message = {"id": message_id, "method": method}
+
+        if session_id != "":
+            message["session_id"] = session_id
 
         encoded_message = json.dumps(message).encode() + b"\0"
 
