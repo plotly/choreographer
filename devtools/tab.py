@@ -10,7 +10,7 @@ class Tab:
 
     def add_session(self):
         session_obj = Session(self)
-        self.send_command(
+        session_obj.session_id = self.send_command(
             command="Target.attachToTarget", params={"targetId": ""}
         )
         self.tab_sessions[session_obj.session_id] = session_obj
