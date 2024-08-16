@@ -1,6 +1,7 @@
 from .tab import Tab
 from .session import Session
 from collections import OrderedDict
+import json
 
 
 class Protocol:
@@ -15,10 +16,14 @@ class Protocol:
 
     def create_tab(self):
         tab_obj = Tab()
-        self.tabs[tab_obj.target_id] = tab_obj
         self.send_command(
             command="Target.createTarget", params={"url": "chrome://new-tab-page/"}
         )
+        data = self.pipe.read_jsons(debug=True)
+        json_obj = data[0]
+        tab_obj.target_id = json_obj["result"]["targetId"]
+        self.tabs[tab_obj.target_id] = tab_obj
+
         print(f"New Tab Created: {tab_obj.target_id}")
         return tab_obj
 
