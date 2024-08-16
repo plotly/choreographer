@@ -16,6 +16,9 @@ class Protocol:
     def create_tab(self):
         tab_obj = Tab()
         self.tabs[tab_obj.target_id] = tab_obj
+        self.send_command(
+            command="Target.createTarget", params={"url": "chrome://new-tab-page/"}
+        )
         print(f"New Tab Created: {tab_obj.target_id}")
         return tab_obj
 
