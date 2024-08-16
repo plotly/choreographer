@@ -48,5 +48,3 @@ class Session:
             )
 
         self.message_id += 1
-
-        return json.dumps(json_command)
