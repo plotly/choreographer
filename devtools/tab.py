@@ -21,5 +21,8 @@ class Tab:
         print("End".center(50, "-"))
 
     def close_session(self, session_obj):
-        del self.tab_sessions[id(session_obj)]
+        if isinstance(session_obj, str):
+            del self.tab_sessions[session_obj]
+        else:
+            del self.tab_sessions[session_obj.session_id]
         print(f"The following session was deleted: {session_obj.session_id}")
