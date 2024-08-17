@@ -32,13 +32,13 @@ class Protocol:
             print(target_id.center(50, " "))
         print("End".center(50, "-"))
 
-    def close_tab(self, tab_id):
-        if isinstance(tab_id, str):
-            self.send_command(command="Target.closeTarget", params={"targetId": tab_id})
-            del self.tabs[tab_id]
+    def close_tab(self, tab):
+        if isinstance(tab, str):
+            self.send_command(command="Target.closeTarget", params={"targetId": tab})
+            del self.tabs[tab]
         else:
             self.send_command(
-                command="Target.closeTarget", params={"targetId": tab_id.target_id}
+                command="Target.closeTarget", params={"targetId": tab.target_id}
             )
-            del self.tabs[tab_id.target_id]
-        print(f"The following tab was deleted: {tab_id}")
+            del self.tabs[tab.target_id]
+        print(f"The following tab was deleted: {tab}")
