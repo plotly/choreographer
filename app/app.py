@@ -9,12 +9,6 @@ def main():
         browser.create_tab()
         browser.create_tab()
         browser.create_tab()
-        time.sleep(10)
-
-        browser.pipe.read_jsons(debug=True)
-        browser.pipe.read_jsons(blocking=False, debug=True)
-        browser.pipe.read_jsons(blocking=False, debug=True)
-        browser.pipe.read_jsons(blocking=False, debug=True)
 
         time.sleep(10)
 
