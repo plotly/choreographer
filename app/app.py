@@ -11,6 +11,7 @@ def main():
         browser.create_tab()
         time.sleep(3)
         browser.close_tab(next(reversed(browser.protocol.tabs.keys())))
+        time.sleep(3)
         browser.close_tab(next(reversed(browser.protocol.tabs.keys())))
 
         time.sleep(10)
