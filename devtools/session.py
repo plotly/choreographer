@@ -1,8 +1,9 @@
 import json
+import uuid
 
 
 class Session:
-    def __init__(self, parent, session_id=""):
+    def __init__(self, parent, session_id=str(uuid.uuid4())):
         if isinstance(session_id, str):
             self.session_id = session_id
         else:
@@ -27,15 +28,25 @@ class Session:
             "method": command,
         }
 
+        if self.session_id != "":
+            json_command["session_id"] = self.session_id
+
         if params:
             json_command["params"] = params
 
-        if self.session_id != "":
-            json_command["session_id"] = self.session_id
+            self.parent_connection.pipe.write_json(
+                message_id=json_command["id"],
+                method=json_command["method"],
+                params=json_command["params"],
+                session_id=self.session_id,
+            )
+        else:
+            self.parent_connection.pipe.write_json(
+                message_id=json_command["id"],
+                method=json_command["method"],
+                session_id=self.session_id,
+            )
 
         self.message_id += 1
 
         return json.dumps(json_command)
-
-    def close_tab(self):
-        self.parent.close_tab(self)

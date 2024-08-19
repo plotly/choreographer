@@ -28,11 +28,13 @@ else:
 
 cli = [
     path,
-    "--headless",
     "--remote-debugging-pipe",
     "--disable-breakpad",
     "--allow-file-access-from-files",
 ]
+
+if "HEADLESS" in os.environ:
+    cli.append("--headless")
 
 if system == "Windows":
     to_chromium_handle = msvcrt.get_osfhandle(3)

@@ -1,4 +1,5 @@
 from .pipe import Pipe
+from .protocol import Protocol
 import platform
 import os
 import sys
@@ -7,7 +8,7 @@ import signal
 
 
 class Browser:
-    def __init__(self, debug=None, path=None):
+    def __init__(self, debug=None, path=None, headless=True):
         self.pipe = Pipe()
 
         if not debug:  # false o None
@@ -27,6 +28,9 @@ class Browser:
 
         new_env = os.environ.copy()
         new_env["CHROMIUM_PATH"] = path
+        if headless:
+            new_env["HEADLESS"] = "--headless"
+
         win_only = {}
         if platform.system() == "Windows":
             win_only = {"creationflags": subprocess.CREATE_NEW_PROCESS_GROUP}
@@ -46,6 +50,7 @@ class Browser:
             **win_only,
         )
         self.subprocess = proc
+        self.protocol = Protocol(self.pipe)
 
     def __enter__(self):
         return self
@@ -60,3 +65,6 @@ class Browser:
             self.subprocess.terminate()
         self.subprocess.wait(5)
         self.subprocess.kill()
+
+    def send_command(self, command, params=None, cb=None):
+        return self.protocol.send_command(self, command, params, cb)
