@@ -4,14 +4,19 @@ import platform
 import os
 import sys
 import subprocess
-import signal
 import tempfile
 
+from .system import which_browser
+
+default_path=which_browser()
 
 class Browser:
-    def __init__(self, debug=None, path=None, headless=True):
+    def __init__(self, debug=None, path=default_path, headless=True):
         self.pipe = Pipe()
-        self.temp_dir = tempfile.TemporaryDirectory()
+        if platform.system() != "Windows":
+            self.temp_dir = tempfile.TemporaryDirectory()
+        else:
+            self.temp_dir = tempfile.TemporaryDirectory(delete=False, ignore_cleanup_errors=True)
 
         if not debug:  # false o None
             stderr = subprocess.DEVNULL
@@ -20,17 +25,9 @@ class Browser:
         else:
             stderr = debug
 
-        if not path:
-            if platform.system() == "Windows":
-                path = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
-            elif platform.system() == "Linux":
-                path = "/usr/bin/google-chrome-stable"
-            else:
-                raise ValueError("You must set path to a chrome-like browser")
-
         new_env = os.environ.copy()
-        new_env["CHROMIUM_PATH"] = path
-        new_env["USER_DATA_DIR"] = self.temp_dir.name
+        new_env["CHROMIUM_PATH"] = str(path)
+        new_env["USER_DATA_DIR"] = str(self.temp_dir.name)
         if headless:
             new_env["HEADLESS"] = "--headless"
 
@@ -72,12 +69,25 @@ class Browser:
 
     def close_browser(self):
         if platform.system() == "Windows":
-            self.subprocess.send_signal(signal.CTRL_BREAK_EVENT)
-        else:
-            self.subprocess.terminate()
-        self.subprocess.wait(5)
+            # maybe we don't need chrome_wrapper for windows because of how handles are needed
+            # if we're not chaining process, this might not be necessary
+            # otherwise, win behaves strangely in the face of signals, so call a command to kill the process instead
+            # NB: chrome accepts being killed like this because it knows windows is a nightmare
+            subprocess.call(['taskkill', '/F', '/T', '/PID',  str(self.subprocess.pid)]) # this output should be handled better by where there is debug
+            self.subprocess.wait(2)
+        self.subprocess.terminate()
+        self.subprocess.wait(2)
         self.subprocess.kill()
         self.temp_dir.cleanup()
+        # windows doesn't like python's default cleanup
+        if platform.system() == "Windows":
+            import stat
+            import shutil
+            def remove_readonly(func, path, excinfo):
+                os.chmod(path, stat.S_IWUSR)
+                func(path)
+            shutil.rmtree(self.temp_dir.name, onerror=remove_readonly)
+            del self.temp_dir
 
     def send_command(self, command, params=None, cb=None):
         return self.protocol.send_command(self, command, params, cb)
