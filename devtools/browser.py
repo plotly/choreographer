@@ -7,9 +7,12 @@ import subprocess
 import signal
 import tempfile
 
+from .system import which_browser
+
+default_path=which_browser()
 
 class Browser:
-    def __init__(self, debug=None, path=None, headless=True):
+    def __init__(self, debug=None, path=default_path, headless=True):
         self.pipe = Pipe()
         self.temp_dir = tempfile.TemporaryDirectory()
 
@@ -19,14 +22,6 @@ class Browser:
             stderr = None
         else:
             stderr = debug
-
-        if not path:
-            if platform.system() == "Windows":
-                path = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
-            elif platform.system() == "Linux":
-                path = "/usr/bin/google-chrome-stable"
-            else:
-                raise ValueError("You must set path to a chrome-like browser")
 
         new_env = os.environ.copy()
         new_env["CHROMIUM_PATH"] = path
