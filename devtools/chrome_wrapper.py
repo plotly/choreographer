@@ -19,7 +19,7 @@ if system == "Windows":
 path = ""
 default_paths = {
     "Linux": "/usr/bin/google-chrome-stable",
-    "Windows": r"c:\Program Files\Google\Chrome\Application\chrome.exe"
+    "Windows": r"c:\Program Files\Google\Chrome\Application\chrome.exe",
 }
 if system in default_paths:
     path = os.environ.get("BROWSER_PATH", default_paths[system])
@@ -34,7 +34,7 @@ cli = [
     "--disable-breakpad",
     "--allow-file-access-from-files",
     f"--user-data-dir={user_data_dir}",
-    "--no-first-run"
+    "--no-first-run",
 ]
 
 if "HEADLESS" in os.environ:
