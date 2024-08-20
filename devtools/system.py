@@ -22,12 +22,11 @@ def which_browser(executable_name = chrome):
         executable_name = [executable_name]
     for exe in executable_name:
         if platform.system() == "Windows":
-            win_path = None
             try:
                 path = which_windows()
                 print(path)
                 break
-            except:
+            except: # noqa # no bare except according to ruff but who knows what errors we'll get from this
                 os.environ['NoDefaultCurrentDirectoryInExePath']="0"
         path = shutil.which(exe)
         if path: break
