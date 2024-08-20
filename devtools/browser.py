@@ -59,7 +59,7 @@ class Browser:
         return self
 
     def __exit__(self, type, value, traceback):
-        return self.close_browser()
+        self.close_browser()
 
     def create_tab(self):
         self.protocol.create_tab()
