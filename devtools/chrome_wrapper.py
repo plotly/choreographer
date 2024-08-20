@@ -26,11 +26,15 @@ elif system == "Windows":
 else:
     path = os.environ["CHROMIUM_PATH"]
 
+user_data_dir = os.environ["USER_DATA_DIR"]
+
 cli = [
     path,
     "--remote-debugging-pipe",
     "--disable-breakpad",
     "--allow-file-access-from-files",
+    f"--user-data-dir={user_data_dir}",
+    "--no-first-run"
 ]
 
 if "HEADLESS" in os.environ:

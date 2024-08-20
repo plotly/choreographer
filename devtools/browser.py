@@ -5,11 +5,13 @@ import os
 import sys
 import subprocess
 import signal
+import tempfile
 
 
 class Browser:
     def __init__(self, debug=None, path=None, headless=True):
         self.pipe = Pipe()
+        self.temp_dir = tempfile.TemporaryDirectory()
 
         if not debug:  # false o None
             stderr = subprocess.DEVNULL
@@ -28,6 +30,7 @@ class Browser:
 
         new_env = os.environ.copy()
         new_env["CHROMIUM_PATH"] = path
+        new_env["USER_DATA_DIR"] = self.temp_dir.name
         if headless:
             new_env["HEADLESS"] = "--headless"
 
@@ -74,6 +77,7 @@ class Browser:
             self.subprocess.terminate()
         self.subprocess.wait(5)
         self.subprocess.kill()
+        self.temp_dir.cleanup()
 
     def send_command(self, command, params=None, cb=None):
         return self.protocol.send_command(self, command, params, cb)
