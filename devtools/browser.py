@@ -24,8 +24,8 @@ class Browser:
             stderr = debug
 
         new_env = os.environ.copy()
-        new_env["CHROMIUM_PATH"] = path
-        new_env["USER_DATA_DIR"] = self.temp_dir.name
+        new_env["CHROMIUM_PATH"] = str(path)
+        new_env["USER_DATA_DIR"] = str(self.temp_dir.name)
         if headless:
             new_env["HEADLESS"] = "--headless"
 
