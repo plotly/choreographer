@@ -21,10 +21,10 @@ default_paths = {
     "Linux": "/usr/bin/google-chrome-stable",
     "Windows": r"c:\Program Files\Google\Chrome\Application\chrome.exe",
 }
-if system in default_paths:
-    path = os.environ.get("BROWSER_PATH", default_paths[system])
-else:
-    path = os.environ["CHROMIUM_PATH"]
+
+path = os.environ.get(
+    "BROWSER_PATH", default_paths.get(system, os.environ["CHROMIUM_PATH"])
+)
 
 user_data_dir = os.environ["USER_DATA_DIR"]
 
