@@ -17,12 +17,12 @@ if system == "Windows":
     import msvcrt  # noqa
 
 path = ""
-if system == "Linux":
-    path = os.environ.get("BROWSER_PATH", "/usr/bin/google-chrome-stable")
-elif system == "Windows":
-    path = os.environ.get(
-        "BROWSER_PATH", r"c:\Program Files\Google\Chrome\Application\chrome.exe"
-    )
+default_paths = {
+    "Linux": "/usr/bin/google-chrome-stable",
+    "Windows": r"c:\Program Files\Google\Chrome\Application\chrome.exe"
+}
+if system in default_paths:
+    path = os.environ.get("BROWSER_PATH", default_paths[system])
 else:
     path = os.environ["CHROMIUM_PATH"]
 
