@@ -86,7 +86,7 @@ class Browser:
             def remove_readonly(func, path, excinfo):
                 os.chmod(path, stat.S_IWUSR)
                 func(path)
-            shutil.rmtree(self.temp_dir.name, onerror=remove_readonly)
+            shutil.rmtree(self.temp_dir.name, onexc=remove_readonly)
             del self.temp_dir
 
     def send_command(self, command, params=None, cb=None):
