@@ -4,7 +4,6 @@ import platform
 import os
 import sys
 import subprocess
-import signal
 import tempfile
 
 from .system import which_browser
