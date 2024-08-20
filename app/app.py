@@ -26,6 +26,7 @@ def main():
         browser.protocol.pipe.read_jsons(blocking=False, debug=True)
         browser.protocol.pipe.read_jsons(blocking=False, debug=True)
         time.sleep(3)
+    time.sleep(3)
 
 if __name__ == "__main__":
     main()
