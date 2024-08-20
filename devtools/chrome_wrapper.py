@@ -16,7 +16,6 @@ system = platform.system()
 if system == "Windows":
     import msvcrt  # noqa
 
-path = ""
 default_paths = {
     "Linux": "/usr/bin/google-chrome-stable",
     "Windows": r"c:\Program Files\Google\Chrome\Application\chrome.exe",
