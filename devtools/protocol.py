@@ -18,7 +18,7 @@ class Protocol:
         to_chromium = os.read(
                 self.pipe.read_to_chromium, 10000
             )
-        to_chromium = json.load(to_chromium.decode("utf-8").split("\0"))
+        to_chromium = json.load(to_chromium.decode("utf-8").split("\0")) #DEBO AGREGAR UN FOR PARA QUE LEA LAS ID Y LAS COMPARE
         if to_chromium.id in json:
             return json
 
