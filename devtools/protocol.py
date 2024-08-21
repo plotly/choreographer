@@ -34,8 +34,6 @@ class Protocol:
 
     def close_tab(self, tab):
         target_id = tab.target_id if hasattr(tab, "target_id") else tab
-        self.send_command(
-            command="Target.closeTarget", params={"targetId": target_id}
-        )
+        self.send_command(command="Target.closeTarget", params={"targetId": target_id})
         del self.tabs[target_id]
         print(f"The following tab was deleted: {target_id}")
