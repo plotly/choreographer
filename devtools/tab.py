@@ -25,8 +25,8 @@ class Tab:
 
     def close_session(self, session):
         session_id = session.session_id if hasattr(session, "session_id") else session
-        print(f"The following session was deleted: {session_id}")
         self.send_command(
             command="Target.detachFromTarget", params={"sessionId": session_id}
         )
         del self.tab_sessions[session_id]
+        print(f"The following session was deleted: {session_id}")
