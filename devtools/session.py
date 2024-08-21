@@ -13,7 +13,7 @@ class Session:
         self.message_id = 0
         self.parent_connection = parent
 
-    def send_command(self, command, params=None, cb=None):
+    def send_command(self, command, params=None, cb=None, session_id=None):
         if cb and not callable(cb):
             raise TypeError("The arg that you use, is not able at cb")
         if not isinstance(command, str):
@@ -27,7 +27,9 @@ class Session:
             "method": command,
         }
 
-        if self.session_id != "":
+        if session_id:
+            json_command["session_id"] = session_id
+        elif self.session_id != "":
             json_command["session_id"] = self.session_id
 
         if params:
