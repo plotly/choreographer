@@ -27,6 +27,10 @@ class Pipe:
 
         os.write(self.write_to_chromium, encoded_message)
 
+    def verify_json(self, json):
+        if self.read_to_chromium.id in json:
+            return json
+
     def read_jsons(self, blocking=True, debug=False):
         if debug:
             print("Debug enabled", file=sys.stderr)
@@ -47,5 +51,7 @@ class Pipe:
             print(raw_buffer, file=sys.stderr)  # noqa
         for raw_message in raw_buffer.decode("utf-8").split("\0"):
             if raw_message:
-                jsons.append(json.loads(raw_message))
+                json_load = json.loads(raw_message)
+                self.verify_json(json_load)
+                jsons.append(json_load)
         return jsons
