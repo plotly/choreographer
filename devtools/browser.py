@@ -14,6 +14,9 @@ default_path = which_browser()
 class Browser:
     def __init__(self, debug=None, path=default_path, headless=True):
         self.pipe = Pipe()
+        if path is None:
+            raise ValueError("You must specify a path")
+
         if platform.system() != "Windows":
             self.temp_dir = tempfile.TemporaryDirectory()
         else:
