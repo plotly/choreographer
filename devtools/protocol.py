@@ -16,10 +16,8 @@ class Protocol:
         return self.browser_session.send_command(command, params, cb)
 
     def verify_json_id(self, json_list):
-        to_chromium = os.read(
-                self.pipe.read_to_chromium, 10000
-            )
-        to_chromium = json.load(to_chromium.decode("utf-8").split("\0")) #DEBO AGREGAR UN FOR PARA QUE LEA LAS ID Y LAS COMPARE
+        to_chromium = os.read(self.pipe.read_to_chromium, 10000)
+        to_chromium = json.load(to_chromium.decode("utf-8").split("\0"))
         for json_ in json_list:
             if to_chromium.id == json_.id:
                 return json_
