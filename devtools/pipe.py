@@ -52,6 +52,6 @@ class Pipe:
         for raw_message in raw_buffer.decode("utf-8").split("\0"):
             if raw_message:
                 json_load = json.loads(raw_message)
-                self.verify_json(json_load)
-                jsons.append(json_load)
+                json_load_id = self.verify_json(json_load)
+                jsons.append(json_load_id)
         return jsons
