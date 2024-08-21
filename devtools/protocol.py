@@ -17,9 +17,9 @@ class Protocol:
 
     def verify_json_id(self, json_list):
         to_chromium = os.read(self.pipe.read_to_chromium, 10000)
-        to_chromium = json.load(to_chromium.decode("utf-8").split("\0"))
+        json_chromium = json.load(to_chromium.decode("utf-8").split("\0"))
         for json_ in json_list:
-            if to_chromium["id"] == json_["id"]:
+            if json_chromium["id"] == json_["id"]:
                 return json_
         raise ValueError("Your ID and the received ID are different")
 
