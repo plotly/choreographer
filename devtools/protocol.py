@@ -1,8 +1,7 @@
 from .tab import Tab
 from .session import Session
 from collections import OrderedDict
-import os
-import json
+from .utils import verify_json_id
 
 
 class Protocol:
@@ -15,14 +14,6 @@ class Protocol:
     def send_command(self, command, params=None, cb=None):
         return self.browser_session.send_command(command, params, cb)
 
-    def verify_json_id(self, json_list):
-        to_chromium = os.read(self.pipe.read_to_chromium, 10000)
-        json_chromium = json.load(to_chromium.decode("utf-8").split("\0"))
-        for json_ in json_list:
-            if json_chromium["id"] == json_["id"]:
-                return json_
-        raise ValueError("Your ID and the received ID are different")
-
     def create_tab(self):
         tab_obj = Tab()
         self.send_command(
@@ -30,7 +21,7 @@ class Protocol:
         )
         data = self.pipe.read_jsons(debug=True)
         self.verify_json(data)
-        json_obj = self.verify_json_id(data)
+        json_obj = verify_json_id(self.pipe, data)
         tab_obj.target_id = json_obj["result"]["targetId"]
         self.tabs[tab_obj.target_id] = tab_obj
 
