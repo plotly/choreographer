@@ -27,7 +27,7 @@ class Pipe:
 
         os.write(self.write_to_chromium, encoded_message)
 
-    def verify_json(self, json):
+    def verify_json_id(self, json):
         if self.read_to_chromium.id in json:
             return json
 
@@ -52,6 +52,6 @@ class Pipe:
         for raw_message in raw_buffer.decode("utf-8").split("\0"):
             if raw_message:
                 json_load = json.loads(raw_message)
-                json_load_id = self.verify_json(json_load)
+                json_load_id = self.verify_json_id(json_load)
                 jsons.append(json_load_id)
         return jsons
