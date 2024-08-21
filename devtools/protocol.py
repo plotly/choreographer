@@ -2,6 +2,7 @@ from .tab import Tab
 from .session import Session
 from collections import OrderedDict
 import os
+import json
 
 
 class Protocol:
@@ -14,13 +15,14 @@ class Protocol:
     def send_command(self, command, params=None, cb=None):
         return self.browser_session.send_command(command, params, cb)
 
-    def verify_json_id(self, json):
+    def verify_json_id(self, json_list):
         to_chromium = os.read(
                 self.pipe.read_to_chromium, 10000
             )
         to_chromium = json.load(to_chromium.decode("utf-8").split("\0")) #DEBO AGREGAR UN FOR PARA QUE LEA LAS ID Y LAS COMPARE
-        if to_chromium.id in json:
-            return json
+        for json_ in json_list:
+            if to_chromium.id == json_.id:
+                return json_
 
     def create_tab(self):
         tab_obj = Tab()
