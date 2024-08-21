@@ -22,6 +22,16 @@ class Protocol:
             if to_chromium.id == json_.id:
                 return json_
 
+    def verify_json(self, json_list):
+        to_chromium = os.read(self.pipe.read_to_chromium, 10000)
+        to_chromium = json.load(to_chromium.decode("utf-8").split("\0"))
+        list_bool = []
+        for json_ in json_list:
+            if to_chromium.id != json_.id:
+                list_bool = list_bool.append(True)
+        if False not in list_bool:
+            raise ValueError("Your ID and the received ID are differents")
+
     def create_tab(self):
         tab_obj = Tab()
         self.send_command(
