@@ -22,8 +22,11 @@ default_paths = {
 }
 
 path = os.environ.get(
-    "BROWSER_PATH", default_paths.get(system, os.environ["CHROMIUM_PATH"])
+    "BROWSER_PATH", default_paths.get(system, os.environ.get("CHROMIUM_PATH"))
 )
+
+if path is None:
+    raise ValueError("You must specify a path")
 
 user_data_dir = os.environ["USER_DATA_DIR"]
 
