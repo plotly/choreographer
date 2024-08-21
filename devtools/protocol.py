@@ -38,6 +38,7 @@ class Protocol:
             command="Target.createTarget", params={"url": "chrome://new-tab-page/"}
         )
         data = self.pipe.read_jsons(debug=True)
+        self.verify_json(data)
         json_obj = self.verify_json_id(data)
         tab_obj.target_id = json_obj["result"]["targetId"]
         self.tabs[tab_obj.target_id] = tab_obj
