@@ -14,6 +14,9 @@ class Tab:
         session_obj.send_command(
             command="Target.attachToTarget", params={"targetId": self.target_id}
         )
+        data = self.pipe.read_jsons(debug=True)
+        json_obj = data[0]
+        session_obj.target_id = json_obj["result"]["sessionId"]
         self.tab_sessions[session_obj.session_id] = session_obj
         print(f"New Session Added: {session_obj.session_id}")
         return session_obj
