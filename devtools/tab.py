@@ -11,7 +11,7 @@ class Tab:
         self.pipe = browser_pipe
 
     def add_session(self, debug=False):
-        session_obj = Session(self)
+        session_obj = Session(self, session_id="")
         session_obj.send_command(
             command="Target.attachToTarget",
             params={"targetId": self.target_id},
@@ -22,7 +22,11 @@ class Tab:
         data = self.pipe.read_jsons(debug=True)
         json_obj = data[0]
         verify_json_error(json_obj)
-        session_obj.session_id = json_obj["result"]["sessionId"]
+        session_obj.session_id = (
+            json_obj["result"]["sessionId"]
+            if "result" in json_obj
+            else json_obj["params"]["sessionId"]
+        )
         if debug:
             print(f"The json at add_session() is: {data}")
             print(f"The session_id is: {session_obj.session_id}")
