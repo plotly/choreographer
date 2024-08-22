@@ -24,6 +24,7 @@ class Pipe:
             message["sessionId"] = session_id
         
         if debug:
+            print("You are using write_json()")
             print(f"This is the message: {message}")
 
         encoded_message = json.dumps(message).encode() + b"\0"
