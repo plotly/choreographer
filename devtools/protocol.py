@@ -21,7 +21,7 @@ class Protocol:
         )
         if debug:
             print("The tab was created with Target.createTarget")
-        data = self.pipe.read_jsons(debug=True)
+        data = self.pipe.read_jsons(debug)
         json_obj = data[0]
         tab_obj.target_id = json_obj["result"]["targetId"]
         if debug:
