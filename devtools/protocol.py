@@ -11,8 +11,8 @@ class Protocol:
         self.tabs = OrderedDict()
         self.pipe = browser_pipe
 
-    def send_command(self, command, params=None, cb=None):
-        return self.browser_session.send_command(command, params, cb)
+    def send_command(self, command, params=None, cb=None, session_id=None):
+        return self.browser_session.send_command(command, params, cb, session_id)
 
     def create_tab(self):
         tab_obj = Tab()

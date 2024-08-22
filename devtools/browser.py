@@ -99,5 +99,5 @@ class Browser:
             shutil.rmtree(self.temp_dir.name, onexc=remove_readonly)
             del self.temp_dir
 
-    def send_command(self, command, params=None, cb=None):
-        return self.protocol.send_command(self, command, params, cb)
+    def send_command(self, command, params=None, cb=None, session_id=None):
+        return self.protocol.send_command(self, command, params, cb, session_id)
