@@ -21,7 +21,7 @@ class Pipe:
             message = {"id": message_id, "method": method}
 
         if session_id != "":
-            message["session_id"] = session_id
+            message["sessionId"] = session_id
         
         if debug:
             print(f"This is the message: {message}")
