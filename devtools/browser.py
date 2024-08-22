@@ -70,8 +70,8 @@ class Browser:
     def list_tabs(self):
         self.protocol.list_tabs()
 
-    def close_tab(self, tab_id):
-        self.protocol.close_tab(tab_id)
+    def close_tab(self, tab):
+        self.protocol.close_tab(tab)
 
     def close_browser(self):
         if platform.system() == "Windows":
