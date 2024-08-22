@@ -14,7 +14,6 @@ def main():
         browser.create_tab()
         browser.create_tab()
         browser.create_tab()
-        print(browser.protocol.tabs[next(reversed(browser.protocol.tabs))])
         browser.protocol.tabs[next(reversed(browser.protocol.tabs))].add_session()
         tab = browser.protocol.tabs[next(reversed(browser.protocol.tabs))]
         browser.protocol.send_command(
