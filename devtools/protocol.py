@@ -15,7 +15,7 @@ class Protocol:
         return self.browser_session.send_command(command, params, cb, session_id)
 
     def create_tab(self):
-        tab_obj = Tab()
+        tab_obj = Tab(self.pipe)
         self.send_command(
             command="Target.createTarget", params={"url": "chrome://new-tab-page/"}
         )

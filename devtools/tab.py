@@ -4,9 +4,10 @@ import uuid
 
 
 class Tab:
-    def __init__(self):
+    def __init__(self, browser_pipe):
         self.tab_sessions = OrderedDict()
         self.target_id = str(uuid.uuid4())
+        self.pipe = browser_pipe
 
     def add_session(self):
         session_obj = Session(self)
