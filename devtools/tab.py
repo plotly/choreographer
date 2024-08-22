@@ -20,6 +20,8 @@ class Tab:
         if debug:
             print("The tab was created with Target.createTarget")
         data = self.pipe.read_jsons(debug=True)
+        if debug:
+            print(f"The json at create_tab() is: {data}")
         json_obj = data[0]
         verify_json_error(json_obj)
         session_obj.session_id = (
@@ -28,7 +30,6 @@ class Tab:
             else json_obj["params"]["sessionId"]
         )
         if debug:
-            print(f"The json at add_session() is: {data}")
             print(f"The session_id is: {session_obj.session_id}")
         self.tab_sessions[session_obj.session_id] = session_obj
         print(f"New Session Added: {session_obj.session_id}")
