@@ -26,7 +26,11 @@ class Protocol:
         data = self.pipe.read_jsons(debug)
         json_obj = data[0]
         verify_json_error(json_obj)
-        tab_obj.target_id = json_obj["result"]["targetId"]
+        tab_obj.target_id = (
+            json_obj["result"]["targetId"]
+            if "result" in json_obj
+            else json_obj["params"]["targetId"]
+        )
         if debug:
             print(f"The json at create_tab() is: {data}")
             print(f"The target_id is: {tab_obj.target_id}")
