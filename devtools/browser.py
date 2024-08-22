@@ -64,8 +64,8 @@ class Browser:
     def __exit__(self, type, value, traceback):
         self.close_browser()
 
-    def create_tab(self, debug=False):
-        self.protocol.create_tab(debug)
+    def create_tab(self, url="chrome://new-tab-page/", debug=False):
+        self.protocol.create_tab(url, debug)
 
     def list_tabs(self):
         self.protocol.list_tabs()

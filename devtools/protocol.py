@@ -14,11 +14,11 @@ class Protocol:
     def send_command(self, command, params=None, cb=None, session_id=None, debug=False):
         return self.browser_session.send_command(command, params, cb, session_id, debug)
 
-    def create_tab(self, debug=False):
+    def create_tab(self, url="chrome://new-tab-page/", debug=False):
         tab_obj = Tab(self.pipe)
         self.send_command(
             command="Target.createTarget",
-            params={"url": "chrome://new-tab-page/"},
+            params={"url": url},
             debug=debug,
         )
         if debug:
