@@ -9,14 +9,21 @@ class Tab:
         self.target_id = str(uuid.uuid4())
         self.pipe = browser_pipe
 
-    def add_session(self):
+    def add_session(self, debug=False):
         session_obj = Session(self)
         session_obj.send_command(
-            command="Target.attachToTarget", params={"targetId": self.target_id}
+            command="Target.attachToTarget",
+            params={"targetId": self.target_id},
+            debug=debug,
         )
+        if debug:
+            print("The tab was created with Target.createTarget")
         data = self.pipe.read_jsons(debug=True)
         json_obj = data[0]
         session_obj.target_id = json_obj["result"]["sessionId"]
+        if debug:
+            print(f"The json at add_session() is: {data}")
+            print(f"The session_id is: {session_obj.target_id}")
         self.tab_sessions[session_obj.session_id] = session_obj
         print(f"New Session Added: {session_obj.session_id}")
         return session_obj
