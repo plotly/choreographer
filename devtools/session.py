@@ -13,7 +13,7 @@ class Session:
         self.message_id = 0
         self.parent_connection = parent
 
-    def send_command(self, command, params=None, cb=None, session_id=None):
+    def send_command(self, command, params=None, cb=None, session_id=None, debug=False):
         if cb and not callable(cb):
             raise TypeError("The arg that you use, is not able at cb")
         if not isinstance(command, str):
@@ -34,6 +34,9 @@ class Session:
 
         if params:
             json_command["params"] = params
+        
+        if debug:
+            print(f"The json created for send_command() is: {json_command}")
 
         self.parent_connection.pipe.write_json(**json_command)
 

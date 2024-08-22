@@ -11,13 +11,15 @@ class Protocol:
         self.tabs = OrderedDict()
         self.pipe = browser_pipe
 
-    def send_command(self, command, params=None, cb=None, session_id=None):
-        return self.browser_session.send_command(command, params, cb, session_id)
+    def send_command(self, command, params=None, cb=None, session_id=None, debug=False):
+        return self.browser_session.send_command(command, params, cb, session_id, debug)
 
     def create_tab(self, debug=False):
         tab_obj = Tab(self.pipe)
         self.send_command(
-            command="Target.createTarget", params={"url": "chrome://new-tab-page/"}
+            command="Target.createTarget",
+            params={"url": "chrome://new-tab-page/"},
+            debug=debug,
         )
         if debug:
             print("The tab was created with Target.createTarget")
