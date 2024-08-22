@@ -64,8 +64,8 @@ class Browser:
     def __exit__(self, type, value, traceback):
         self.close_browser()
 
-    def create_tab(self):
-        self.protocol.create_tab()
+    def create_tab(self, debug=False):
+        self.protocol.create_tab(debug)
 
     def list_tabs(self):
         self.protocol.list_tabs()
@@ -99,5 +99,5 @@ class Browser:
             shutil.rmtree(self.temp_dir.name, onexc=remove_readonly)
             del self.temp_dir
 
-    def send_command(self, command, params=None, cb=None, session_id=None):
-        return self.protocol.send_command(self, command, params, cb, session_id)
+    def send_command(self, command, params=None, cb=None, session_id=None, debug=debug):
+        return self.protocol.send_command(self, command, params, cb, session_id, debug)
