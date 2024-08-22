@@ -9,3 +9,10 @@ def verify_json_id(pipe, json_list):
         if json_chromium["id"] == json_["id"]:
             return json_
     raise ValueError("Your ID and the received ID are different")
+
+
+def verify_json_error(json):
+    if "error" in json:
+        raise ValueError(
+            f"Error code: {json["error"]["code"]}. {json["error"]["message"]}"
+        )
