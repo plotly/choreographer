@@ -11,15 +11,14 @@ def main():
         browser.protocol.pipe.read_jsons(blocking=False, debug=True)
         browser.protocol.pipe.read_jsons(blocking=False, debug=True)
         browser.protocol.pipe.read_jsons(blocking=False, debug=True)
-        browser.create_tab()
-        browser.create_tab()
-        browser.create_tab()
+        browser.create_tab(True)
+        browser.create_tab(True)
+        browser.create_tab(True)
         browser.protocol.tabs[next(reversed(browser.protocol.tabs))].add_session()
-        tab = browser.protocol.tabs[next(reversed(browser.protocol.tabs))]
+        tab_browser = browser.protocol.tabs[next(reversed(browser.protocol.tabs))]
         browser.protocol.send_command(
             command="Page.navigate",
-            params={"url": "https://github.com/"},
-            session_id=next(reversed(tab.tab_sessions)),
+            params={"url": "https://github.com/", "targetId": next(reversed(tab_browser.tab_sessions))},
         )
         time.sleep(4)
         browser.protocol.send_command(
