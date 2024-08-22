@@ -1,4 +1,5 @@
 from .session import Session
+from .utils import verify_json_error
 from collections import OrderedDict
 import uuid
 
@@ -20,6 +21,7 @@ class Tab:
             print("The tab was created with Target.createTarget")
         data = self.pipe.read_jsons(debug=True)
         json_obj = data[0]
+        verify_json_error(json_obj)
         session_obj.session_id = json_obj["result"]["sessionId"]
         if debug:
             print(f"The json at add_session() is: {data}")
