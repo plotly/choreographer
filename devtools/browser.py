@@ -5,6 +5,7 @@ import os
 import sys
 import subprocess
 import tempfile
+import warnings
 
 from .system import which_browser
 
@@ -95,9 +96,11 @@ class Browser:
             def remove_readonly(func, path, excinfo):
                 os.chmod(path, stat.S_IWUSR)
                 func(path)
-
-            shutil.rmtree(self.temp_dir.name, onexc=remove_readonly)
-            del self.temp_dir
+            try:
+                shutil.rmtree(self.temp_dir.name, onexc=remove_readonly)
+                del self.temp_dir
+            except PermissionError:
+                warnings.warn("The temporary directory could not be deleted, but execution will continue.")
 
     def send_command(self, command, params=None, cb=None, session_id=None, debug=False):
         return self.protocol.send_command(self, command, params, cb, session_id, debug)
