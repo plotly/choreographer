@@ -15,14 +15,16 @@ class Pipe:
     def write_json(
         self, message_id, method, params=None, session_id="", debug=False
     ):  # this should accept an objects not a string
-        if params:
-            message = {"id": message_id, "method": method, "params": params}
-        else:
-            message = {"id": message_id, "method": method}
-
+        message = {}
         if session_id != "":
             message["sessionId"] = session_id
-        
+        message["id"] = message_id
+        if params:
+            message["method"] = method
+            message["params"] = params
+        else:
+            message["method"] = method
+
         if debug:
             print("You are using write_json()")
             print(f"This is the message created at write_json(): {message}")
