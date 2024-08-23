@@ -2,11 +2,9 @@ import os
 import json
 
 
-def verify_json_id(pipe, json_list):
-    to_chromium = os.read(pipe.read_to_chromium, 10000)
-    json_chromium = json.load(to_chromium.decode("utf-8").split("\0"))
+def verify_json_id(json_list, message_id):
     for json_ in json_list:
-        if json_chromium["id"] == json_["id"]:
+        if message_id in json_ and message_id == json["id"]:
             return json_
     raise ValueError("Your ID and the received ID are different")
 
