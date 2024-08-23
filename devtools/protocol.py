@@ -27,7 +27,11 @@ class Protocol:
         if debug:
             print(f"The json at create_tab() is: {data}")
         json_obj = data[0]
-        verify_json_error(json_obj)
+        for json_ in data:
+            verify_json_error(json_)
+            if "targetId" in json_:
+                json_obj = json_
+                break
         if "result" in json_obj:
             tab_obj.target_id = json_obj["result"]["targetId"]
         else:
