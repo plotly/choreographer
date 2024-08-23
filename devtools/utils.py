@@ -13,6 +13,7 @@ def verify_json_id(json_list, message_id, session_id=None, target_id=None):
                     return json_
     return None
 
+
 def verify_json_error(json):
     if "error" in json:
         raise ValueError(
