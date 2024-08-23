@@ -24,11 +24,13 @@ class Tab:
             print(f"The json at create_tab() is: {data}")
         json_obj = data[0]
         verify_json_error(json_obj)
-        session_obj.session_id = (
-            json_obj["result"]["sessionId"]
-            if "result" in json_obj
-            else json_obj["params"]["sessionId"]
-        )
+        if "result" in json_obj:
+            session_obj.session_id = json_obj["result"]["sessionId"]
+        else:
+            try:
+                session_obj.session_id = json_obj["sessionId"]
+            except:
+                session_obj.session_id = json_obj["params"]["sessionId"]
         if debug:
             print(f"The session_id is: {session_obj.session_id}")
         self.tab_sessions[session_obj.session_id] = session_obj
