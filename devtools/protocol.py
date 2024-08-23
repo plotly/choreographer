@@ -32,7 +32,7 @@ class Protocol:
             if "targetId" in json_:
                 json_obj = json_
                 break
-        if "result" in json_obj:
+        if "result" in json_obj and "targetId" in json_obj["result"]:
             tab_obj.target_id = json_obj["result"]["targetId"]
         else:
             try:
