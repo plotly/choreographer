@@ -25,7 +25,7 @@ class Pipe:
         
         if debug:
             print("You are using write_json()")
-            print(f"This is the message: {message}")
+            print(f"This is the message created at write_json(): {message}")
 
         encoded_message = json.dumps(message).encode() + b"\0"
 
