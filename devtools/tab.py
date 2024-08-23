@@ -14,7 +14,8 @@ class Tab:
         session_obj = Session(self, session_id="")
         session_obj.send_command(
             command="Target.attachToTarget",
-            params={"targetId": self.target_id},
+            params={"targetId": self.target_id,
+                    "flatten": True},
             debug=debug,
         )
         if debug:
