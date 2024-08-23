@@ -28,11 +28,13 @@ class Protocol:
             print(f"The json at create_tab() is: {data}")
         json_obj = data[0]
         verify_json_error(json_obj)
-        tab_obj.target_id = (
-            json_obj["result"]["targetId"]
-            if "result" in json_obj
-            else json_obj["params"]["targetId"]
-        )
+        if "result" in json_obj:
+            tab_obj.target_id = json_obj["result"]["targetId"]
+        else:
+            try:
+                tab_obj.target_id = json_obj["params"]["targetId"]
+            except:
+                tab_obj.target_id = json_obj["params"]["targetInfo"]["targetId"]
         if debug:
             print(f"The target_id is: {tab_obj.target_id}")
         self.tabs[tab_obj.target_id] = tab_obj
