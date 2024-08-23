@@ -6,7 +6,6 @@ def verify_json_id(json_list, message_id):
     for json_ in json_list:
         if message_id in json_ and message_id == json["id"]:
             return json_
-    raise ValueError("Your ID and the received ID are different")
 
 
 def verify_json_error(json):
