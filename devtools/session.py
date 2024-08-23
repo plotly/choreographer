@@ -36,6 +36,7 @@ class Session:
             json_command["params"] = params
         
         if debug:
+            json_command["debug"] = debug
             print(f"The json created for send_command() is: {json_command}")
 
         self.parent_connection.pipe.write_json(**json_command)
