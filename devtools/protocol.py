@@ -1,7 +1,7 @@
 from .tab import Tab
 from .session import Session
 from collections import OrderedDict
-from .utils import verify_json_id, verify_json_error
+from .utils import verify_json_id, verify_json_error, verify_target_id
 
 
 class Protocol:
@@ -32,13 +32,7 @@ class Protocol:
             if "targetId" in json_:
                 json_obj = json_
                 break
-        if "result" in json_obj and "targetId" in json_obj["result"]:
-            tab_obj.target_id = json_obj["result"]["targetId"]
-        else:
-            try:
-                tab_obj.target_id = json_obj["params"]["targetId"]
-            except:
-                tab_obj.target_id = json_obj["params"]["targetInfo"]["targetId"]
+        tab_obj.target_id = verify_target_id(json_obj)
         if debug:
             print(f"The target_id is: {tab_obj.target_id}")
         self.tabs[tab_obj.target_id] = tab_obj
