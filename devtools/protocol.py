@@ -1,7 +1,7 @@
 from .tab import Tab
 from .session import Session
 from collections import OrderedDict
-from .utils import verify_json_id, verify_json_error, verify_target_id
+from .utils import verify_json_id, verify_json_error, verify_target_id, verify_json_list
 
 
 class Protocol:
@@ -26,16 +26,8 @@ class Protocol:
         data = self.pipe.read_jsons(debug)
         if debug:
             print(f"The json at create_tab() is: {data}")
-        json_obj = data[0]
         target_bool = False
-        for json_ in data:
-            verify_json_error(json_)
-            target_bool = verify_target_id(json_)
-            if target_bool:
-                json_obj = json_
-                if debug:
-                    print(f">>>>>This is the json_obj: {json_obj}")
-                break
+        json_obj = verify_json_list(data, verify_target_id, target_bool, debug)
         tab_obj.target_id = verify_target_id(json_obj)
         if debug:
             print(f"The target_id is: {tab_obj.target_id}")
