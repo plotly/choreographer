@@ -24,6 +24,15 @@ def verify_target_id(json_obj):
             return json_obj["params"]["targetInfo"]["targetId"]
 
 
+def verify_session_id(json_obj):
+    if "sessionId" in json_obj:
+        return json_obj["sessionId"]
+    elif "result" in json_obj and "sessionId" in json_obj["result"]:
+        return json_obj["result"]["sessionId"]
+    else:
+        return json_obj["params"]["sessionId"]
+
+
 def verify_json_error(json):
     if "error" in json:
         raise ValueError(
