@@ -1,5 +1,5 @@
 from .session import Session
-from .utils import verify_json_error
+from .utils import verify_json_error, verify_session_id, verify_json_list
 from collections import OrderedDict
 import uuid
 
@@ -14,8 +14,7 @@ class Tab:
         session_obj = Session(self, session_id="")
         session_obj.send_command(
             command="Target.attachToTarget",
-            params={"targetId": self.target_id,
-                    "flatten": True},
+            params={"targetId": self.target_id, "flatten": True},
             debug=debug,
         )
         if debug:
@@ -23,15 +22,9 @@ class Tab:
         data = self.pipe.read_jsons(debug=True)
         if debug:
             print(f"The json at create_tab() is: {data}")
-        json_obj = data[0]
-        verify_json_error(json_obj)
-        if "result" in json_obj:
-            session_obj.session_id = json_obj["result"]["sessionId"]
-        else:
-            try:
-                session_obj.session_id = json_obj["sessionId"]
-            except:
-                session_obj.session_id = json_obj["params"]["sessionId"]
+        session_bool = False
+        json_obj = verify_json_list(data, verify_session_id, session_bool, debug)
+        session_obj.session_id = verify_session_id(json_obj)
         if debug:
             print(f"The session_id is: {session_obj.session_id}")
         self.tab_sessions[session_obj.session_id] = session_obj
