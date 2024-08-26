@@ -14,6 +14,16 @@ def verify_json_id(json_list, message_id, session_id=None, target_id=None):
     return None
 
 
+def verify_target_id(json_obj):
+    if "result" in json_obj and "targetId" in json_obj["result"]:
+        return json_obj["result"]["targetId"]
+    else:
+        if "targetId" in json_obj["params"]:
+            return json_obj["params"]["targetId"]
+        elif "targetInfo" in json_obj["params"]:
+            return json_obj["params"]["targetInfo"]["targetId"]
+
+
 def verify_json_error(json):
     if "error" in json:
         raise ValueError(
