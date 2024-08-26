@@ -1,7 +1,7 @@
 from .tab import Tab
 from .session import Session
 from collections import OrderedDict
-from .utils import verify_json_id, verify_json_error, verify_target_id, verify_json_list
+from .utils import verify_target_id, verify_json_list
 
 
 class Protocol:
