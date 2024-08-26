@@ -33,6 +33,17 @@ def verify_session_id(json_obj):
         return json_obj["params"]["sessionId"]
 
 
+def verify_json_list(json_list, verify_function, verify_boolean=False, debug=False):
+    for json_ in json_list:
+        verify_json_error(json_)
+        verify_boolean = verify_function(json_)
+        if verify_boolean:
+            json_obj = json_
+            if debug:
+                print(f">>>>>This is the json_obj: {json_obj}")
+            return json_obj
+
+
 def verify_json_error(json):
     if "error" in json:
         raise ValueError(
