@@ -8,13 +8,16 @@ class PipeClosedError(IOError):
 
 
 class Pipe:
-    def __init__(self):
+    def __init__(self, debug=False):
         self.read_from_chromium, self.write_from_chromium = list(os.pipe())
         self.read_to_chromium, self.write_to_chromium = list(os.pipe())
+        self.debug = debug
 
     def write_json(
-        self, message_id, method, params=None, session_id="", debug=False
+        self, message_id, method, params=None, session_id="", debug=None
     ):  # this should accept an objects not a string
+        if not debug: debug = self.debug
+        if debug: print("write_json:", file=sys.stderr)
         message = {}
         if session_id != "":
             message["sessionId"] = session_id
@@ -25,17 +28,16 @@ class Pipe:
         else:
             message["method"] = method
 
-        if debug:
-            print("You are using write_json()")
-            print(f"This is the message created at write_json(): {message}")
 
         encoded_message = json.dumps(message).encode() + b"\0"
 
+        if debug:
+            print(f">> write: {encoded_message}", file=sys.stderr)
         os.write(self.write_to_chromium, encoded_message)
 
-    def read_jsons(self, blocking=True, debug=False):
-        if debug:
-            print("Debug enabled", file=sys.stderr)
+    def read_jsons(self, blocking=True, debug=None):
+        if not debug: debug = self.debug
+        if debug: print(f"read_jsons ({'blocking' if blocking else 'not blocking'}):", file=sys.stderr)
         jsons = []
         os.set_blocking(self.read_from_chromium, blocking)
         try:
@@ -48,9 +50,12 @@ class Pipe:
                 os.set_blocking(self.read_from_chromium, True)
                 raw_buffer += os.read(self.read_from_chromium, 10000)
         except BlockingIOError:
+            if debug:
+                print("BlockingIOError caught.", file=sys.stderr)
+                print(f"read: {raw_buffer}", file=sys.stderr)
             return jsons
         if debug:
-            print(raw_buffer, file=sys.stderr)  # noqa
+            print(f"read: {raw_buffer}", file=sys.stderr)
         for raw_message in raw_buffer.decode("utf-8").split("\0"):
             if raw_message:
                 jsons.append(json.loads(raw_message))
