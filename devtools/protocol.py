@@ -33,6 +33,8 @@ class Protocol:
             target_bool = verify_target_id(json_)
             if target_bool:
                 json_obj = json_
+                if debug:
+                    print(f">>>>>This is the json_obj: {json_obj}")
                 break
         tab_obj.target_id = verify_target_id(json_obj)
         if debug:
