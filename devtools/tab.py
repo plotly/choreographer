@@ -1,5 +1,5 @@
 from .session import Session
-from .utils import verify_json_error, verify_session_id, verify_json_list
+from .utils import verify_session_id, verify_json_list
 from collections import OrderedDict
 import uuid
 
