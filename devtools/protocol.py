@@ -25,8 +25,6 @@ class Protocol:
             print("The tab was created with Target.createTarget")
         return tab_obj
 
-        data = self.pipe.read_jsons(debug)
-
     def create_tab_2(self, tab_obj, data, debug=False):
         if debug:
             print(f"The json at create_tab() is: {data}")
@@ -39,6 +37,13 @@ class Protocol:
 
         print(f"New Tab Created: {tab_obj.target_id}")
         return tab_obj
+
+    def create_tab_3(self, url="chrome://new-tab-page/", debug=False):
+        tab_obj = self.create_tab_1(url, debug)
+        data = self.pipe.read_jsons(debug)
+        while data["id"] != tab_obj.message_id:
+            data = self.pipe.read_jsons(debug)
+        return self.create_tab_2(tab_obj, data, debug)
 
     def list_tabs(self):
         print("Tabs".center(50, "-"))
