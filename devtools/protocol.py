@@ -34,7 +34,6 @@ class Protocol:
         if debug:
             print(f"The target_id is: {tab_obj.target_id}")
         self.tabs[tab_obj.target_id] = tab_obj
-
         print(f"New Tab Created: {tab_obj.target_id}")
         return tab_obj
 
