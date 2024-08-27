@@ -49,10 +49,11 @@ class Pipe:
             while raw_buffer[-1] != 0:
                 os.set_blocking(self.read_from_chromium, True)
                 raw_buffer += os.read(self.read_from_chromium, 10000)
+            if debug:
+                print(f"read: {raw_buffer}", file=sys.stderr)
         except BlockingIOError:
             if debug:
                 print("BlockingIOError caught.", file=sys.stderr)
-                print(f"read: {raw_buffer}", file=sys.stderr)
             return jsons
         if debug:
             print(f"read: {raw_buffer}", file=sys.stderr)
