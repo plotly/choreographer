@@ -14,7 +14,7 @@ class Protocol:
     def send_command(self, command, params=None, cb=None, session_id=None, debug=False):
         return self.browser_session.send_command(command, params, cb, session_id, debug)
 
-    def create_tab(self, url="chrome://new-tab-page/", debug=False):
+    def create_tab_1(self, url="chrome://new-tab-page/", debug=False):
         tab_obj = Tab(self.pipe)
         self.send_command(
             command="Target.createTarget",
@@ -23,7 +23,11 @@ class Protocol:
         )
         if debug:
             print("The tab was created with Target.createTarget")
+        return tab_obj
+
         data = self.pipe.read_jsons(debug)
+
+    def create_tab_2(self, tab_obj, data, debug=False):
         if debug:
             print(f"The json at create_tab() is: {data}")
         target_bool = False
