@@ -10,7 +10,7 @@ class Tab:
         self.target_id = str(uuid.uuid4())
         self.pipe = browser_pipe
 
-    def add_session(self, debug=False):
+    def add_session_1(self, debug=False):
         session_obj = Session(self, session_id="")
         session_obj.send_command(
             command="Target.attachToTarget",
@@ -19,7 +19,11 @@ class Tab:
         )
         if debug:
             print("The tab was created with Target.createTarget")
+        return session_obj
+
         data = self.pipe.read_jsons(debug=True)
+
+    def add_session_2(self, session_obj, data, debug=False):
         if debug:
             print(f"The json at create_tab() is: {data}")
         session_bool = False
