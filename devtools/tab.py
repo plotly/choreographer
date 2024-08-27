@@ -21,8 +21,6 @@ class Tab:
             print("The tab was created with Target.createTarget")
         return session_obj
 
-        data = self.pipe.read_jsons(debug=True)
-
     def add_session_2(self, session_obj, data, debug=False):
         if debug:
             print(f"The json at create_tab() is: {data}")
@@ -34,6 +32,13 @@ class Tab:
         self.tab_sessions[session_obj.session_id] = session_obj
         print(f"New Session Added: {session_obj.session_id}")
         return session_obj
+
+    def add_session_3(self, debug=False):
+        session_obj = self.add_session_1(debug)
+        data = self.pipe.read_jsons(debug)
+        while data["id"] != session_obj.message_id:
+            data = self.pipe.read_jsons(debug)
+        return self.add_session_2(session_obj, data, debug)
 
     def list_sessions(self):
         print("Sessions".center(50, "-"))
