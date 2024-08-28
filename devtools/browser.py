@@ -14,7 +14,7 @@ default_path = which_browser()
 
 class Browser:
     def __init__(self, debug=None, path=default_path, headless=True):
-        self.pipe = Pipe()
+        self.pipe = Pipe(debug=debug)
         if path is None:
             raise ValueError("You must specify a path")
 
