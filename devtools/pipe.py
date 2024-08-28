@@ -16,8 +16,10 @@ class Pipe:
     def write_json(
         self, message_id, method, params=None, session_id="", debug=None
     ):  # this should accept an objects not a string
+        if debug:
+            print(">>>>>>>>>write_json")
         if not debug: debug = self.debug
-        if debug: print("write_json:", file=sys.stderr)
+        if debug: print(">>>>>>>>>write_json:", file=sys.stderr)
         message = {}
         if session_id != "":
             message["sessionId"] = session_id
@@ -32,7 +34,7 @@ class Pipe:
         encoded_message = json.dumps(message).encode() + b"\0"
 
         if debug:
-            print(f">> write: {encoded_message}", file=sys.stderr)
+            print(f">>>>>>>>>write: {encoded_message}", file=sys.stderr)
         os.write(self.write_to_chromium, encoded_message)
 
     def read_jsons(self, blocking=True, debug=None):
