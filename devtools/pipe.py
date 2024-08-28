@@ -18,8 +18,10 @@ class Pipe:
     ):  # this should accept an objects not a string
         if debug:
             print(">>>>>>>>>write_json")
-        if not debug: debug = self.debug
-        if debug: print(">>>>>>>>>write_json:", file=sys.stderr)
+        if not debug:
+            debug = self.debug
+        if debug:
+            print(">>>>>>>>>write_json:", file=sys.stderr)
         message = {}
         if session_id != "":
             message["sessionId"] = session_id
@@ -30,7 +32,6 @@ class Pipe:
         else:
             message["method"] = method
 
-
         encoded_message = json.dumps(message).encode() + b"\0"
 
         if debug:
@@ -38,8 +39,13 @@ class Pipe:
         os.write(self.write_to_chromium, encoded_message)
 
     def read_jsons(self, blocking=True, debug=None):
-        if not debug: debug = self.debug
-        if debug: print(f"read_jsons ({'blocking' if blocking else 'not blocking'}):", file=sys.stderr)
+        if not debug:
+            debug = self.debug
+        if debug:
+            print(
+                f"read_jsons ({'blocking' if blocking else 'not blocking'}):",
+                file=sys.stderr,
+            )
         jsons = []
         os.set_blocking(self.read_from_chromium, blocking)
         try:
