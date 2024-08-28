@@ -52,10 +52,10 @@ def verify_json_error(json):
         )
 
 
-def run_output_thread(pipe_obj):
+def run_output_thread(pipe_obj, blocking=True, debug=None):
     while True:
         try:
-            json_list = pipe_obj.read_jsons()
+            json_list = pipe_obj.read_jsons(blocking, debug)
             if json_list:
                 print("JSON list:", json_list)
         except PipeClosedError:
