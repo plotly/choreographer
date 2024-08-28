@@ -1,4 +1,5 @@
 import json
+from .pipe import PipeClosedError()
 
 
 def verify_json_id(json_list, message_id, session_id=None, target_id=None):
@@ -49,3 +50,14 @@ def verify_json_error(json):
         raise ValueError(
             f"Error code: {json["error"]["code"]}. {json["error"]["message"]}"
         )
+
+
+def run_output_thread(pipe_obj):
+    while True:
+        try:
+            json_list = pipe_obj.read_jsons()
+            if json_list:
+                print("JSON list:", json_list)
+        except PipeClosedError:
+            print("Pipe closed".center(10, "--"))
+            break
