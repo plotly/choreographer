@@ -40,22 +40,6 @@ class Protocol:
         print(f"New Tab Created: {tab_obj.target_id}")
         return tab_obj
 
-    def create_tab_3(self, url="chrome://new-tab-page/", session_obj=None, debug=False):
-        if debug:
-            print(">create_tab_3")
-        tab_obj = self.create_tab_1(url, debug)
-        data = self.pipe.read_jsons(debug)
-        if session_obj:
-            while any(dict_data["id"] != session_obj.message_id for dict_data in data):
-                data = self.pipe.read_jsons(debug)
-        else:
-            while any(
-                dict_data["id"] != tab_obj.browser_session.message_id
-                for dict_data in data
-            ):
-                data = self.pipe.read_jsons(debug)
-        return self.create_tab_2(tab_obj, data, debug)
-
     def list_tabs(self):
         print("Tabs".center(50, "-"))
         for target_id in self.tabs.keys():
