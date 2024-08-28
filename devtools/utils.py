@@ -1,5 +1,5 @@
 import json
-from .pipe import PipeClosedError()
+from .pipe import PipeClosedError
 
 
 def verify_json_id(json_list, message_id, session_id=None, target_id=None):
