@@ -91,12 +91,15 @@ class Browser:
         self.subprocess.terminate()
         self.subprocess.wait(2)
         self.subprocess.kill()
-        self.temp_dir.cleanup()
+        try:
+            self.temp_dir.cleanup()
+        except Exception as e: # TODO- handle specific errors
+            print(str(e))
+
         # windows doesn't like python's default cleanup
         if platform.system() == "Windows":
             import stat
             import shutil
-
             def remove_readonly(func, path, excinfo):
                 os.chmod(path, stat.S_IWUSR)
                 func(path)
