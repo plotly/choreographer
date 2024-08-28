@@ -109,8 +109,12 @@ class Browser:
                 del self.temp_dir
             except PermissionError:
                 warnings.warn(
-                    "The temporary directory could not be deleted, but execution will continue."
-                )
+                        "The temporary directory could not be deleted, but execution will continue."
+                        )
+            except Exception:
+                warnings.warn(
+                        "The temporary directory could not be deleted, but execution will continue."
+                        )
 
     def send_command(self, command, params=None, cb=None, session_id=None, debug=False):
         return self.protocol.send_command(self, command, params, cb, session_id, debug)

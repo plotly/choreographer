@@ -2,10 +2,8 @@ import os
 import sys
 import json
 
-
 class PipeClosedError(IOError):
     pass
-
 
 class Pipe:
     def __init__(self, debug=False):
