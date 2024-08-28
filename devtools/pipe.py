@@ -43,7 +43,7 @@ class Pipe:
             debug = self.debug
         if debug:
             print(
-                f"read_jsons ({'blocking' if blocking else 'not blocking'}):",
+                f">>>>>>>>>read_jsons ({'blocking' if blocking else 'not blocking'}):",
                 file=sys.stderr,
             )
         jsons = []
@@ -59,10 +59,10 @@ class Pipe:
                 raw_buffer += os.read(self.read_from_chromium, 10000)
         except BlockingIOError:
             if debug:
-                print("BlockingIOError caught.", file=sys.stderr)
+                print(">>>>>>>>>BlockingIOError caught.", file=sys.stderr)
             return jsons
         if debug:
-            print(f"read: {raw_buffer}", file=sys.stderr)
+            print(f">>>>>>>>>read: {raw_buffer}", file=sys.stderr)
         for raw_message in raw_buffer.decode("utf-8").split("\0"):
             if raw_message:
                 jsons.append(json.loads(raw_message))
