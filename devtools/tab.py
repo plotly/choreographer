@@ -36,15 +36,6 @@ class Tab:
         print(f"New Session Added: {session_obj.session_id}")
         return session_obj
 
-    def add_session_3(self, debug=False):
-        if debug:
-            print(">>>Add_session_3")
-        session_obj = self.add_session_1(debug)
-        data = self.pipe.read_jsons(debug)
-        while data["id"] != session_obj.message_id:
-            data = self.pipe.read_jsons(debug)
-        return self.add_session_2(session_obj, data, debug)
-
     def list_sessions(self):
         print("Sessions".center(50, "-"))
         for session_instance in self.tab_sessions.values():
