@@ -46,10 +46,13 @@ class Protocol:
         tab_obj = self.create_tab_1(url, debug)
         data = self.pipe.read_jsons(debug)
         if session_obj:
-            while data["id"] != session_obj.message_id:
+            while any(dict_data["id"] != session_obj.message_id for dict_data in data):
                 data = self.pipe.read_jsons(debug)
         else:
-            while data["id"] != tab_obj.browser_session.message_id:
+            while any(
+                dict_data["id"] != tab_obj.browser_session.message_id
+                for dict_data in data
+            ):
                 data = self.pipe.read_jsons(debug)
         return self.create_tab_2(tab_obj, data, debug)
 
