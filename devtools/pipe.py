@@ -24,20 +24,18 @@ class Pipe:
         if params:
             message["params"] = params
 
-        encoded_message = json.dumps(message).encode() + b"\0"
+        encoded_message = json.dumps(message).encode("utf-8") + b"\0"
 
         if debug:
-            print(f">>>>>>>>>write: {encoded_message}", file=sys.stderr)
+            print(f"write_json: {encoded_message}", file=sys.stderr)
+            # windows may print weird characters if we set utf-8 instead of utf-16
         os.write(self.write_to_chromium, encoded_message)
 
     def read_jsons(self, blocking=True, debug=None):
         if not debug:
             debug = self.debug
         if debug:
-            print(
-                f">>>>>>>>>read_jsons ({'blocking' if blocking else 'not blocking'}):",
-                file=sys.stderr,
-            )
+            print(f"read_jsons ({'blocking' if blocking else 'not blocking'}):", file=sys.stderr)
         jsons = []
         os.set_blocking(self.read_from_chromium, blocking)
         try:
@@ -53,9 +51,10 @@ class Pipe:
             if debug:
                 print(">>>>>>>>>BlockingIOError caught.", file=sys.stderr)
             return jsons
+        decoded_buffer = raw_buffer.decode("utf-8")
         if debug:
-            print(f">>>>>>>>>read: {raw_buffer}", file=sys.stderr)
-        for raw_message in raw_buffer.decode("utf-8").split("\0"):
+            print(f"read_jsons: {decoded_buffer}", file=sys.stderr)
+        for raw_message in decoded_buffer.split("\0"):
             if raw_message:
                 jsons.append(json.loads(raw_message))
         return jsons
