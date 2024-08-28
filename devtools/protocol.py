@@ -15,6 +15,8 @@ class Protocol:
         return self.browser_session.send_command(command, params, cb, session_id, debug)
 
     def create_tab_1(self, url="chrome://new-tab-page/", debug=False):
+        if debug:
+            print(">create_tab_1")
         tab_obj = Tab(self.pipe)
         self.send_command(
             command="Target.createTarget",
@@ -27,6 +29,7 @@ class Protocol:
 
     def create_tab_2(self, tab_obj, data, debug=False):
         if debug:
+            print(">create_tab_2")
             print(f"The json at create_tab() is: {data}")
         target_bool = False
         json_obj = verify_json_list(data, verify_target_id, target_bool, debug)
@@ -38,6 +41,8 @@ class Protocol:
         return tab_obj
 
     def create_tab_3(self, url="chrome://new-tab-page/", session_obj=None, debug=False):
+        if debug:
+            print(">create_tab_3")
         tab_obj = self.create_tab_1(url, debug)
         data = self.pipe.read_jsons(debug)
         if session_obj:
