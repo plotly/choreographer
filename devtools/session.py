@@ -36,7 +36,7 @@ class Session:
 
         if params:
             json_command["params"] = params
-        
+
         if debug:
             json_command["debug"] = debug
             print(f">>>>>>The json created for send_command() is: {json_command}")
