@@ -11,24 +11,18 @@ class Pipe:
         self.read_to_chromium, self.write_to_chromium = list(os.pipe())
         self.debug = debug
 
-    def write_json(
-        self, message_id, method, params=None, session_id="", debug=None
-    ):  # this should accept an objects not a string
+    # TODO: accept already formed object
+    def write_json(self, msg_id, method, params=None, session_id="", debug=None):
+        if not debug: debug = self.debug
         if debug:
-            print(">>>>>>>>>write_json")
-        if not debug:
-            debug = self.debug
-        if debug:
-            print(">>>>>>>>>write_json:", file=sys.stderr)
+            print("write_json:", file=sys.stderr)
         message = {}
-        if session_id != "":
+        if session_id:
             message["sessionId"] = session_id
-        message["id"] = message_id
+        message["id"] = msg_id
+        message["method"] = method
         if params:
-            message["method"] = method
             message["params"] = params
-        else:
-            message["method"] = method
 
         encoded_message = json.dumps(message).encode() + b"\0"
 
