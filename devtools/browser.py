@@ -116,5 +116,5 @@ class Browser:
                         "The temporary directory could not be deleted, but execution will continue."
                         )
 
-    def send_command(self, command, params=None, cb=None, session_id=None, debug=False):
-        return self.protocol.send_command(self, command, params, cb, session_id, debug)
+    def send_command(self, command, params=None, session_id=None):
+        return self.protocol.send_command(self, command, params, session_id)
