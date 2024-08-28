@@ -13,10 +13,11 @@ default_path = which_browser()
 
 
 class Browser:
-    def __init__(self, debug=None, path=default_path, headless=True):
-        self.pipe = Pipe(debug=debug)
+    def __init__(self, path=default_path, headless=True, debug=False, debug_browser=None):
         if path is None:
             raise ValueError("You must specify a path")
+
+        self.pipe = Pipe(debug=debug)
 
         if platform.system() != "Windows":
             self.temp_dir = tempfile.TemporaryDirectory()
@@ -25,9 +26,9 @@ class Browser:
                 delete=False, ignore_cleanup_errors=True
             )
 
-        if not debug:  # false o None
+        if not debug_browser:  # false o None
             stderr = subprocess.DEVNULL
-        elif debug is True:
+        elif debug_browser is True:
             stderr = None
         else:
             stderr = debug
@@ -36,7 +37,7 @@ class Browser:
         new_env["CHROMIUM_PATH"] = str(path)
         new_env["USER_DATA_DIR"] = str(self.temp_dir.name)
         if headless:
-            new_env["HEADLESS"] = "--headless"
+            new_env["HEADLESS"] = "--headless" # unset if false
 
         win_only = {}
         if platform.system() == "Windows":
