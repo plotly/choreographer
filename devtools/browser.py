@@ -1,5 +1,6 @@
 from .pipe import Pipe
 from .protocol import Protocol
+from .utils import run_output_thread
 import platform
 import os
 import sys
@@ -110,3 +111,6 @@ class Browser:
 
     def send_command(self, command, params=None, cb=None, session_id=None, debug=False):
         return self.protocol.send_command(self, command, params, cb, session_id, debug)
+
+    def run_output_thread(self, blocking=True, debug=None):
+        run_output_thread(self.pipe, blocking, debug)
