@@ -43,13 +43,15 @@ class Pipe:
                 self.read_from_chromium, 10000
             )  # 10MB buffer, nbd, doesn't matter w/ this
             if not raw_buffer:
+                if debug: print("read_jsons pipe was closed")
                 raise PipeClosedError()
             while raw_buffer[-1] != 0:
+                # still not great, return what you have
                 os.set_blocking(self.read_from_chromium, True)
                 raw_buffer += os.read(self.read_from_chromium, 10000)
         except BlockingIOError:
             if debug:
-                print(">>>>>>>>>BlockingIOError caught.", file=sys.stderr)
+                print("read_jsons: BlockingIOError caught.", file=sys.stderr)
             return jsons
         decoded_buffer = raw_buffer.decode("utf-8")
         if debug:
