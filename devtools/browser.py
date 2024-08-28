@@ -65,8 +65,14 @@ class Browser:
     def __exit__(self, type, value, traceback):
         self.close_browser()
 
-    def create_tab(self, url="chrome://new-tab-page/", debug=False):
-        self.protocol.create_tab(url, debug)
+    def create_tab_1(self, url="chrome://new-tab-page/", debug=False):
+        self.protocol.create_tab_1(url, debug)
+
+    def create_tab_2(self, tab_obj, data, debug=False):
+        self.protocol.create_tab_2(self, tab_obj, data, debug)
+
+    def create_tab_3(self, url="chrome://new-tab-page/", session_obj=None, debug=False):
+        self.protocol.create_tab_3(url, session_obj, debug)
 
     def list_tabs(self):
         self.protocol.list_tabs()
@@ -96,11 +102,14 @@ class Browser:
             def remove_readonly(func, path, excinfo):
                 os.chmod(path, stat.S_IWUSR)
                 func(path)
+
             try:
                 shutil.rmtree(self.temp_dir.name, onexc=remove_readonly)
                 del self.temp_dir
             except PermissionError:
-                warnings.warn("The temporary directory could not be deleted, but execution will continue.")
+                warnings.warn(
+                    "The temporary directory could not be deleted, but execution will continue."
+                )
 
     def send_command(self, command, params=None, cb=None, session_id=None, debug=False):
         return self.protocol.send_command(self, command, params, cb, session_id, debug)
