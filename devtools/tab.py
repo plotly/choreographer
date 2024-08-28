@@ -11,6 +11,8 @@ class Tab:
         self.pipe = browser_pipe
 
     def add_session_1(self, debug=False):
+        if debug:
+            print(">>>Add_session_1")
         session_obj = Session(self, session_id="")
         session_obj.send_command(
             command="Target.attachToTarget",
@@ -23,6 +25,7 @@ class Tab:
 
     def add_session_2(self, session_obj, data, debug=False):
         if debug:
+            print(">>>Add_session_2")
             print(f"The json at create_tab() is: {data}")
         session_bool = False
         json_obj = verify_json_list(data, verify_session_id, session_bool, debug)
@@ -34,6 +37,8 @@ class Tab:
         return session_obj
 
     def add_session_3(self, debug=False):
+        if debug:
+            print(">>>Add_session_3")
         session_obj = self.add_session_1(debug)
         data = self.pipe.read_jsons(debug)
         while data["id"] != session_obj.message_id:
