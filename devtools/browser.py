@@ -114,6 +114,7 @@ class Browser:
         return self.protocol.send_command(self, command, params, cb, session_id, debug)
 
     def run_output_thread(self, debug=None):
+        print("Start run_output_thread() to improve debugging".center(5, "--"))
         def run_print(debug):
             while True:
                 try:
