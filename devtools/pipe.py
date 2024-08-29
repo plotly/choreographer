@@ -17,7 +17,7 @@ class Pipe:
         if debug:
             print("write_json:", file=sys.stderr)
 
-        encoded_message = json.dumps(message).encode("utf-8") + b"\0"
+        encoded_message = json.dumps(obj).encode("utf-8") + b"\0"
 
         if debug:
             print(f"write_json: {encoded_message}", file=sys.stderr)
