@@ -113,7 +113,7 @@ class Browser(Target):
                         "The temporary directory could not be deleted, but execution will continue."
                         )
     def add_tab(self, tab):
-        if not isinstance(session, Tab):
+        if not isinstance(tab, Tab):
             raise TypeError("tab must be an object of class Tab")
         self.sessions[tab.target_id] = tab
 
