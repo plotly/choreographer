@@ -9,6 +9,7 @@ from collections import OrderedDict
 from .pipe import Pipe
 from .protocol import Protocol
 from .target import Target
+from .session import Session
 from .tab import Tab
 
 
@@ -25,7 +26,7 @@ class Browser(Target):
         self.pipe = Pipe(debug=debug)
         self.protocol = Protocol(self.pipe)
         super().__init__("0", self.protocol) # TODO not sure about target id "0"
-        self.add_session(self, "")
+        self.add_session(Session(self, ""))
 
         if platform.system() != "Windows":
             self.temp_dir = tempfile.TemporaryDirectory()
