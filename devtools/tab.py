@@ -2,4 +2,5 @@ from .target import Target
 
 
 class Tab(Target):
-    pass
+    def __init__(self, target_id, browser):
+        super().__init__(self, target_id, browser.protocol)
