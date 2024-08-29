@@ -66,9 +66,9 @@ class Browser(Target):
         return self
 
     def __exit__(self, type, value, traceback):
-        self.close_browser()
+        self.close()
 
-    def close_browser(self):
+    def close(self):
         if platform.system() == "Windows":
             # maybe we don't need chrome_wrapper for windows because of how handles are needed
             # if we're not chaining process, this might not be necessary
