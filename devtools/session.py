@@ -1,11 +1,8 @@
-from .target import Target
-
-
 class Session:
     def __init__(self, parent_target, session_id):
         if not isinstance(session_id, str):
             raise TypeError("session_id must be a string")
-        if not isinstance(parent_target, Target):
+        if not hasattr(parent_target, "target_id"):
             raise TypeError("parent must be a target object")
 
         self.session_id = session_id
