@@ -26,3 +26,5 @@ class Session:
             json_command["params"] = params
 
         self.parent_target.protocol.write_json(json_command)
+
+        return {"sessionId":self.session_id, "id": current_id}

@@ -20,9 +20,12 @@ class Target:
             session_id = session_id.session_id
         del self.sessions[session_id]
 
+    # def create_session():
+    # def close_session():
+
     def send_command(self, command, params=None):
         if not self.sessions.values():
             raise RuntimeError("Cannot send_command without at least one valid session")
-        list(self.sessions.values())[0].send_command(command, params)
+        return list(self.sessions.values())[0].send_command(command, params)
 
 

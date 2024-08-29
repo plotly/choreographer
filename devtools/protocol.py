@@ -1,5 +1,3 @@
-import json
-
 class Protocol:
     def __init__(self, browser_pipe):
         self.pipe = browser_pipe
@@ -10,6 +8,7 @@ class Protocol:
             n_keys += 2
         else:
             raise RuntimeError("Each message object must contain an id and method key")
+
         if "params" in obj:
             n_keys += 1
         if "sessionId" in obj:
@@ -20,4 +19,5 @@ class Protocol:
 
         self.pipe.write_json(obj)
 
-    # def find message
+    def search_message(self, session_id, message_id):
+        pass
