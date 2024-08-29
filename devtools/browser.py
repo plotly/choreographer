@@ -1,12 +1,16 @@
-from .pipe import Pipe
-from .protocol import Protocol
-from .target import Target
 import platform
 import os
 import sys
 import subprocess
 import tempfile
 import warnings
+from collections import OrderedDict
+
+from .pipe import Pipe
+from .protocol import Protocol
+from .target import Target
+from .tab import Tab
+
 
 from .system import which_browser
 
@@ -61,6 +65,7 @@ class Browser(Target):
             **win_only,
         )
         self.subprocess = proc
+        self.tabs = OrderedDict()
 
     def __enter__(self):
         return self
@@ -105,3 +110,13 @@ class Browser(Target):
                 warnings.warn(
                         "The temporary directory could not be deleted, but execution will continue."
                         )
+    def add_tab(self, tab):
+        if not isinstance(session, Tab):
+            raise TypeError("tab must be an object of class Tab")
+        self.sessions[tab.target_id] = tab
+
+    def remove_session(self, target_id):
+        if isinstance(target_id, Tab):
+            target_id = target_id.target_id
+        del self.sessions[target_id]
+
