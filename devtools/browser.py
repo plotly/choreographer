@@ -8,6 +8,7 @@ import sys
 import subprocess
 import tempfile
 import warnings
+import json
 
 from .system import which_browser
 
@@ -115,12 +116,14 @@ class Browser:
 
     def run_output_thread(self, debug=False):
         print("Start run_output_thread() to improve debugging".center(5, "-"))
+
         def run_print(debug):
             while True:
                 try:
                     json_list = self.pipe.read_jsons(debug=debug)
                     if json_list:
-                        print("JSON list:", json_list)
+                        for json_ in json_list:
+                            print(json.dumps(json_, indent=4))
                 except PipeClosedError:
                     print("Pipe closed".center(10, "-"))
                     break
