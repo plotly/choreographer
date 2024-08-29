@@ -16,13 +16,13 @@ class Session:
         current_id = self.message_id
         self.message_id += 1
         json_command = {
-            "message_id": current_id,
+            "id": current_id,
             "method": command,
         }
 
         if self.session_id:
-            json_command["session_id"] = self.session_id
+            json_command["sessionId"] = self.session_id
         if params:
             json_command["params"] = params
 
-        self.parent_target.pipe.write_json(**json_command)
+        self.parent_target.protocol.write_json(json_command)

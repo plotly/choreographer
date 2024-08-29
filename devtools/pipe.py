@@ -12,23 +12,17 @@ class Pipe:
         self.debug = debug
 
     # TODO: accept already formed object
-    def write_json(self, msg_id, method, params=None, session_id="", debug=None):
+    def write_json(self, obj, debug=None):
         if not debug: debug = self.debug
         if debug:
             print("write_json:", file=sys.stderr)
-        message = {}
-        if session_id:
-            message["sessionId"] = session_id
-        message["id"] = msg_id
-        message["method"] = method
-        if params:
-            message["params"] = params
 
         encoded_message = json.dumps(message).encode("utf-8") + b"\0"
 
         if debug:
             print(f"write_json: {encoded_message}", file=sys.stderr)
             # windows may print weird characters if we set utf-8 instead of utf-16
+            # check this TODO
         os.write(self.write_to_chromium, encoded_message)
 
     def read_jsons(self, blocking=True, debug=None):
