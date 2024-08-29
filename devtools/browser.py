@@ -113,8 +113,8 @@ class Browser:
     def send_command(self, command, params=None, cb=None, session_id=None, debug=False):
         return self.protocol.send_command(self, command, params, cb, session_id, debug)
 
-    def run_output_thread(self, debug=None):
-        print("Start run_output_thread() to improve debugging".center(5, "--"))
+    def run_output_thread(self, debug=False):
+        print("Start run_output_thread() to improve debugging".center(5, "-"))
         def run_print(debug):
             while True:
                 try:
@@ -122,8 +122,8 @@ class Browser:
                     if json_list:
                         print("JSON list:", json_list)
                 except PipeClosedError:
-                    print("Pipe closed".center(10, "--"))
+                    print("Pipe closed".center(10, "-"))
                     break
 
-        thread_print = Thread(target=run_print, args=(self.pipe, debug))
+        thread_print = Thread(target=run_print, args=(debug,))
         thread_print.start()
