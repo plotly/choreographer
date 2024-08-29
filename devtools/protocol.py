@@ -19,5 +19,19 @@ class Protocol:
 
         self.pipe.write_json(obj)
 
-    def search_message(self, session_id, message_id):
-        pass
+    def verify_response(self, response, session_id, message_id):
+        if "session_id" not in response and session_id == "":
+            pass
+        elif "session_id" in response and response["session_id"] == session_id:
+            pass
+        else:
+            return False
+
+        if "id" in response and str(response["id"]) == str(message_id):
+            pass
+        else:
+            return False
+
+        return True
+
+    # we need to do something for errors

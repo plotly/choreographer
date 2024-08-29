@@ -27,4 +27,4 @@ class Session:
 
         self.parent_target.protocol.write_json(json_command)
 
-        return {"sessionId":self.session_id, "id": current_id}
+        return {"session_id":self.session_id, "message_id": current_id}
