@@ -1,6 +1,7 @@
 from .pipe import Pipe
 from .protocol import Protocol
-from .utils import run_output_thread
+from .pipe import PipeClosedError
+from threading import Thread
 import platform
 import os
 import sys
@@ -113,4 +114,15 @@ class Browser:
         return self.protocol.send_command(self, command, params, cb, session_id, debug)
 
     def run_output_thread(self, blocking=True, debug=None):
-        run_output_thread(self.pipe, blocking, debug)
+        def run_print(blocking, debug):
+            while True:
+                try:
+                    json_list = self.pipe.read_jsons(blocking, debug)
+                    if json_list:
+                        print("JSON list:", json_list)
+                except PipeClosedError:
+                    print("Pipe closed".center(10, "--"))
+                    break
+
+        thread_print = Thread(target=run_print, args=(self.pipe, blocking, debug))
+        thread_print.start()
