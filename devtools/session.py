@@ -1,16 +1,16 @@
-from .tab import Tab
+from .target import Target
 
 
 class Session:
-    def __init__(self, parent_tab, session_id):
+    def __init__(self, parent_target, session_id):
         if not isinstance(session_id, str):
             raise TypeError("session_id must be a string")
-        if not isinstance(parent_tab, Tab):
-            raise TypeError("parent must be a tab object")
+        if not isinstance(parent_target, Target):
+            raise TypeError("parent must be a target object")
 
         self.session_id = session_id
         self.message_id = 0
-        self.parent_tab = parent_tab
+        self.parent_target = parent_target
 
     def send_command(self, command, params=None):
         current_id = self.message_id
@@ -25,4 +25,4 @@ class Session:
         if params:
             json_command["params"] = params
 
-        self.parent_connection.pipe.write_json(**json_command)
+        self.parent_target.pipe.write_json(**json_command)
