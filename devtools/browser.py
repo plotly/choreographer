@@ -24,7 +24,8 @@ class Browser(Target):
 
         self.pipe = Pipe(debug=debug)
         self.protocol = Protocol(self.pipe)
-        super().__init__("", self.protocol)
+        super().__init__("0", self.protocol) # TODO not sure about target id "0"
+        self.add_session(self, "")
 
         if platform.system() != "Windows":
             self.temp_dir = tempfile.TemporaryDirectory()

@@ -6,7 +6,7 @@ def main():
     # Interface Test
     # Process/Pipes Test
     with devtools.Browser(headless=False) as browser:
-        browser.protocol.send_command(command="Target.getTargets")
+        browser.send_command(command="Target.getTargets")
         browser.protocol.pipe.read_jsons(debug=True)
         browser.protocol.pipe.read_jsons(blocking=False, debug=True)
         browser.protocol.pipe.read_jsons(blocking=False, debug=True)
