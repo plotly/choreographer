@@ -4,6 +4,8 @@ import sys
 import subprocess
 import tempfile
 import warnings
+import json
+
 from collections import OrderedDict
 from .pipe import PipeClosedError
 from threading import Thread
@@ -13,22 +15,21 @@ from .protocol import Protocol
 from .target import Target
 from .session import Session
 from .tab import Tab
-
-import json
-
 from .system import which_browser
 
 default_path = which_browser()
 
 
 class Browser(Target):
-    def __init__(self, path=default_path, headless=True, debug=False, debug_browser=None):
+    def __init__(
+        self, path=default_path, headless=True, debug=False, debug_browser=None
+    ):
         if path is None:
             raise ValueError("You must specify a path")
 
         self.pipe = Pipe(debug=debug)
         self.protocol = Protocol(self.pipe)
-        super().__init__("0", self.protocol) # TODO not sure about target id "0"
+        super().__init__("0", self.protocol)  # TODO not sure about target id "0"
         self.add_session(Session(self, ""))
 
         if platform.system() != "Windows":
@@ -49,7 +50,7 @@ class Browser(Target):
         new_env["CHROMIUM_PATH"] = str(path)
         new_env["USER_DATA_DIR"] = str(self.temp_dir.name)
         if headless:
-            new_env["HEADLESS"] = "--headless" # unset if false
+            new_env["HEADLESS"] = "--headless"  # unset if false
 
         win_only = {}
         if platform.system() == "Windows":
@@ -93,13 +94,14 @@ class Browser(Target):
         self.subprocess.kill()
         try:
             self.temp_dir.cleanup()
-        except Exception as e: # TODO- handle specific errors
+        except Exception as e:  # TODO- handle specific errors
             print(str(e))
 
         # windows doesn't like python's default cleanup
         if platform.system() == "Windows":
             import stat
             import shutil
+
             def remove_readonly(func, path, excinfo):
                 os.chmod(path, stat.S_IWUSR)
                 func(path)
@@ -109,12 +111,13 @@ class Browser(Target):
                 del self.temp_dir
             except PermissionError:
                 warnings.warn(
-                        "The temporary directory could not be deleted, but execution will continue."
-                        )
+                    "The temporary directory could not be deleted, but execution will continue."
+                )
             except Exception:
                 warnings.warn(
-                        "The temporary directory could not be deleted, but execution will continue."
-                        )
+                    "The temporary directory could not be deleted, but execution will continue."
+                )
+
     def add_tab(self, tab):
         if not isinstance(tab, Tab):
             raise TypeError("tab must be an object of class Tab")
@@ -124,7 +127,6 @@ class Browser(Target):
         if isinstance(target_id, Tab):
             target_id = target_id.target_id
         del self.sessions[target_id]
-
 
     def run_output_thread(self, debug=False):
         print("Start run_output_thread() to improve debugging".center(6, "-"))
