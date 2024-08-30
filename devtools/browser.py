@@ -13,10 +13,11 @@ default_path = which_browser()
 
 
 class Browser:
-    def __init__(self, debug=None, path=default_path, headless=True):
-        self.pipe = Pipe()
+    def __init__(self, path=default_path, headless=True, debug=False, debug_browser=None):
         if path is None:
             raise ValueError("You must specify a path")
+
+        self.pipe = Pipe(debug=debug)
 
         if platform.system() != "Windows":
             self.temp_dir = tempfile.TemporaryDirectory()
@@ -25,9 +26,9 @@ class Browser:
                 delete=False, ignore_cleanup_errors=True
             )
 
-        if not debug:  # false o None
+        if not debug_browser:  # false o None
             stderr = subprocess.DEVNULL
-        elif debug is True:
+        elif debug_browser is True:
             stderr = None
         else:
             stderr = debug
@@ -36,7 +37,7 @@ class Browser:
         new_env["CHROMIUM_PATH"] = str(path)
         new_env["USER_DATA_DIR"] = str(self.temp_dir.name)
         if headless:
-            new_env["HEADLESS"] = "--headless"
+            new_env["HEADLESS"] = "--headless" # unset if false
 
         win_only = {}
         if platform.system() == "Windows":
@@ -65,11 +66,11 @@ class Browser:
     def __exit__(self, type, value, traceback):
         self.close_browser()
 
-    def create_tab_1(self, url="chrome://new-tab-page/", debug=False):
-        self.protocol.create_tab_1(url, debug)
+    def create_tab_1(self, url="chrome://new-tab-page/"):
+        self.protocol.create_tab_1(url)
 
-    def create_tab_2(self, tab_obj, data, debug=False):
-        self.protocol.create_tab_2(self, tab_obj, data, debug)
+    def create_tab_2(self, tab_obj, data):
+        self.protocol.create_tab_2(self, tab_obj, data)
 
     def list_tabs(self):
         self.protocol.list_tabs()
@@ -90,12 +91,15 @@ class Browser:
         self.subprocess.terminate()
         self.subprocess.wait(2)
         self.subprocess.kill()
-        self.temp_dir.cleanup()
+        try:
+            self.temp_dir.cleanup()
+        except Exception as e: # TODO- handle specific errors
+            print(str(e))
+
         # windows doesn't like python's default cleanup
         if platform.system() == "Windows":
             import stat
             import shutil
-
             def remove_readonly(func, path, excinfo):
                 os.chmod(path, stat.S_IWUSR)
                 func(path)
@@ -105,8 +109,12 @@ class Browser:
                 del self.temp_dir
             except PermissionError:
                 warnings.warn(
-                    "The temporary directory could not be deleted, but execution will continue."
-                )
+                        "The temporary directory could not be deleted, but execution will continue."
+                        )
+            except Exception:
+                warnings.warn(
+                        "The temporary directory could not be deleted, but execution will continue."
+                        )
 
-    def send_command(self, command, params=None, cb=None, session_id=None, debug=False):
-        return self.protocol.send_command(self, command, params, cb, session_id, debug)
+    def send_command(self, command, params=None, session_id=""):
+        return self.protocol.send_command(self, command, params, session_id)
