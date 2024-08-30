@@ -2,10 +2,8 @@ import os
 import sys
 import json
 
-
 class PipeClosedError(IOError):
     pass
-
 
 class Pipe:
     def __init__(self, debug=False):
@@ -13,39 +11,31 @@ class Pipe:
         self.read_to_chromium, self.write_to_chromium = list(os.pipe())
         self.debug = debug
 
-    def write_json(
-        self, message_id, method, params=None, session_id="", debug=None
-    ):  # this should accept an objects not a string
+    # TODO: accept already formed object
+    def write_json(self, msg_id, method, params=None, session_id="", debug=None):
+        if not debug: debug = self.debug
         if debug:
-            print(">>>>>>>>>write_json")
-        if not debug:
-            debug = self.debug
-        if debug:
-            print(">>>>>>>>>write_json:", file=sys.stderr)
+            print("write_json:", file=sys.stderr)
         message = {}
-        if session_id != "":
+        if session_id:
             message["sessionId"] = session_id
-        message["id"] = message_id
+        message["id"] = msg_id
+        message["method"] = method
         if params:
-            message["method"] = method
             message["params"] = params
-        else:
-            message["method"] = method
 
-        encoded_message = json.dumps(message).encode() + b"\0"
+        encoded_message = json.dumps(message).encode("utf-8") + b"\0"
 
         if debug:
-            print(f">>>>>>>>>write: {encoded_message}", file=sys.stderr)
+            print(f"write_json: {encoded_message}", file=sys.stderr)
+            # windows may print weird characters if we set utf-8 instead of utf-16
         os.write(self.write_to_chromium, encoded_message)
 
     def read_jsons(self, blocking=True, debug=None):
         if not debug:
             debug = self.debug
         if debug:
-            print(
-                f">>>>>>>>>read_jsons ({'blocking' if blocking else 'not blocking'}):",
-                file=sys.stderr,
-            )
+            print(f"read_jsons ({'blocking' if blocking else 'not blocking'}):", file=sys.stderr)
         jsons = []
         os.set_blocking(self.read_from_chromium, blocking)
         try:
@@ -53,17 +43,20 @@ class Pipe:
                 self.read_from_chromium, 10000
             )  # 10MB buffer, nbd, doesn't matter w/ this
             if not raw_buffer:
+                if debug: print("read_jsons pipe was closed")
                 raise PipeClosedError()
             while raw_buffer[-1] != 0:
+                # still not great, return what you have
                 os.set_blocking(self.read_from_chromium, True)
                 raw_buffer += os.read(self.read_from_chromium, 10000)
         except BlockingIOError:
             if debug:
-                print(">>>>>>>>>BlockingIOError caught.", file=sys.stderr)
+                print("read_jsons: BlockingIOError caught.", file=sys.stderr)
             return jsons
+        decoded_buffer = raw_buffer.decode("utf-8")
         if debug:
-            print(f">>>>>>>>>read: {raw_buffer}", file=sys.stderr)
-        for raw_message in raw_buffer.decode("utf-8").split("\0"):
+            print(f"read_jsons: {decoded_buffer}", file=sys.stderr)
+        for raw_message in decoded_buffer.split("\0"):
             if raw_message:
                 jsons.append(json.loads(raw_message))
         return jsons
