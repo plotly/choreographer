@@ -46,6 +46,11 @@ def verify_json_list(json_list, verify_function, verify_boolean=False, debug=Fal
 
 def verify_json_error(json):
     if "error" in json:
-        raise ValueError(
-            f"Error code: {json["error"]["code"]}. {json["error"]["message"]}"
-        )
+        if "id" in json:
+            raise ValueError(
+                f"The command with id {json["id"]} raise an error. Error code: {json["error"]["code"]}. {json["error"]["message"]}"
+            )
+        else:
+            raise ValueError(
+                f"Error code: {json["error"]["code"]}. {json["error"]["message"]}"
+            )
