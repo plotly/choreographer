@@ -4,11 +4,8 @@ import sys
 import subprocess
 import tempfile
 import warnings
-import json
 
 from collections import OrderedDict
-from .pipe import PipeClosedError
-from threading import Thread
 
 from .pipe import Pipe
 from .protocol import Protocol
@@ -127,20 +124,3 @@ class Browser(Target):
         if isinstance(target_id, Tab):
             target_id = target_id.target_id
         del self.sessions[target_id]
-
-    def run_output_thread(self, debug=False):
-        print("Start run_output_thread() to improve debugging".center(6, "-"))
-
-        def run_print(debug):
-            while True:
-                try:
-                    json_list = self.pipe.read_jsons(debug=debug)
-                    if json_list:
-                        for json_ in json_list:
-                            print(json.dumps(json_, indent=4))
-                except PipeClosedError:
-                    print("Pipe closed".center(10, "-"))
-                    break
-
-        thread_print = Thread(target=run_print, args=(debug,))
-        thread_print.start()

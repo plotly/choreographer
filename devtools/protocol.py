@@ -1,3 +1,9 @@
+import json
+
+from .pipe import PipeClosedError
+from threading import Thread
+
+
 class Protocol:
     def __init__(self, browser_pipe):
         self.pipe = browser_pipe
@@ -15,7 +21,9 @@ class Protocol:
             n_keys += 1
 
         if len(obj.keys()) != n_keys:
-            raise RuntimeError("Message objects must have id and method keys, and may have params and sessionId keys")
+            raise RuntimeError(
+                "Message objects must have id and method keys, and may have params and sessionId keys"
+            )
 
         self.pipe.write_json(obj)
 
@@ -33,5 +41,22 @@ class Protocol:
             return False
 
         return True
+
+    def run_output_thread(self, debug=False):
+        print("Start run_output_thread() to improve debugging".center(6, "-"))
+
+        def run_print(debug):
+            while True:
+                try:
+                    json_list = self.pipe.read_jsons(debug=debug)
+                    if json_list:
+                        for json_ in json_list:
+                            print(json.dumps(json_, indent=4))
+                except PipeClosedError:
+                    print("Pipe closed".center(10, "-"))
+                    break
+
+        thread_print = Thread(target=run_print, args=(debug,))
+        thread_print.start()
 
     # we need to do something for errors
