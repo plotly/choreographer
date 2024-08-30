@@ -1,13 +1,19 @@
-from .pipe import Pipe
-from .protocol import Protocol
-from .pipe import PipeClosedError
-from threading import Thread
 import platform
 import os
 import sys
 import subprocess
 import tempfile
 import warnings
+from collections import OrderedDict
+from .pipe import PipeClosedError
+from threading import Thread
+
+from .pipe import Pipe
+from .protocol import Protocol
+from .target import Target
+from .session import Session
+from .tab import Tab
+
 import json
 
 from .system import which_browser
@@ -15,12 +21,15 @@ from .system import which_browser
 default_path = which_browser()
 
 
-class Browser:
+class Browser(Target):
     def __init__(self, path=default_path, headless=True, debug=False, debug_browser=None):
         if path is None:
             raise ValueError("You must specify a path")
 
         self.pipe = Pipe(debug=debug)
+        self.protocol = Protocol(self.pipe)
+        super().__init__("0", self.protocol) # TODO not sure about target id "0"
+        self.add_session(Session(self, ""))
 
         if platform.system() != "Windows":
             self.temp_dir = tempfile.TemporaryDirectory()
@@ -61,27 +70,15 @@ class Browser:
             **win_only,
         )
         self.subprocess = proc
-        self.protocol = Protocol(self.pipe)
+        self.tabs = OrderedDict()
 
     def __enter__(self):
         return self
 
     def __exit__(self, type, value, traceback):
-        self.close_browser()
+        self.close()
 
-    def create_tab_1(self, url="chrome://new-tab-page/"):
-        self.protocol.create_tab_1(url)
-
-    def create_tab_2(self, tab_obj, data):
-        self.protocol.create_tab_2(self, tab_obj, data)
-
-    def list_tabs(self):
-        self.protocol.list_tabs()
-
-    def close_tab(self, tab):
-        self.protocol.close_tab(tab)
-
-    def close_browser(self):
+    def close(self):
         if platform.system() == "Windows":
             # maybe we don't need chrome_wrapper for windows because of how handles are needed
             # if we're not chaining process, this might not be necessary
@@ -118,9 +115,16 @@ class Browser:
                 warnings.warn(
                         "The temporary directory could not be deleted, but execution will continue."
                         )
+    def add_tab(self, tab):
+        if not isinstance(tab, Tab):
+            raise TypeError("tab must be an object of class Tab")
+        self.sessions[tab.target_id] = tab
 
-    def send_command(self, command, params=None, session_id=""):
-        return self.protocol.send_command(self, command, params, session_id)
+    def remove_session(self, target_id):
+        if isinstance(target_id, Tab):
+            target_id = target_id.target_id
+        del self.sessions[target_id]
+
 
     def run_output_thread(self, debug=False):
         print("Start run_output_thread() to improve debugging".center(6, "-"))
