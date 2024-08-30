@@ -93,7 +93,7 @@ class Protocol:
         self, json_list, verify_function, verify_boolean=False, debug=False
     ):
         for json_ in json_list:
-            verify_json_error(json_)
+            self.verify_json_error(json_)
             verify_boolean = verify_function(json_)
             if verify_boolean:
                 json_obj = json_
