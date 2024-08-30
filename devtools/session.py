@@ -1,46 +1,27 @@
-import uuid
-
-
 class Session:
-    def __init__(self, parent, session_id=str(uuid.uuid4())):
-        if isinstance(session_id, str):
-            self.session_id = session_id
-        else:
-            raise TypeError("You must use an string object for session_id")
+    def __init__(self, parent_target, session_id):
+        if not isinstance(session_id, str):
+            raise TypeError("session_id must be a string")
+        if not hasattr(parent_target, "target_id"):
+            raise TypeError("parent must be a target object")
 
-        self.event_cbs = {}
-        self.message_cbs = {}
+        self.session_id = session_id
         self.message_id = 0
-        self.parent_connection = parent
+        self.parent_target = parent_target
 
-    def send_command(self, command, params=None, cb=None, session_id=None, debug=False):
-        if debug:
-            print(">>>>>>send_command")
-        if cb and not callable(cb):
-            raise TypeError("The arg that you use, is not able at cb")
-        if not isinstance(command, str):
-            raise TypeError("You must use an string for the command parameter")
-
-        if cb:
-            self.message_cbs[self.message_id] = cb
-
+    def send_command(self, command, params=None):
+        current_id = self.message_id
+        self.message_id += 1
         json_command = {
-            "message_id": self.message_id,
+            "id": current_id,
             "method": command,
         }
 
-        if session_id:
-            json_command["session_id"] = session_id
-        elif self.session_id != "":
-            json_command["session_id"] = self.session_id
-
+        if self.session_id:
+            json_command["sessionId"] = self.session_id
         if params:
             json_command["params"] = params
 
-        if debug:
-            json_command["debug"] = debug
-            print(f">>>>>>The json created for send_command() is: {json_command}")
+        self.parent_target.protocol.write_json(json_command)
 
-        self.parent_connection.pipe.write_json(**json_command)
-
-        self.message_id += 1
+        return {"session_id":self.session_id, "message_id": current_id}
