@@ -35,6 +35,7 @@ cli = [
     "--remote-debugging-pipe",
     "--disable-breakpad",
     "--allow-file-access-from-files",
+    "--enable-logging=stderr",
     f"--user-data-dir={user_data_dir}",
     "--no-first-run",
 ]
