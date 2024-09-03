@@ -42,56 +42,43 @@ class Protocol:
             return False
         return True
 
+    def has_id(self, response):
+        return "id" in response
+
+    def get_targetId(self, response):
+        if "result" in response and "targetId" in response["result"]:
+            return response["result"]["targetId"]
+        else:
+            if "targetId" in response["params"]:
+                return response["params"]["targetId"]
+            elif "targetInfo" in response["params"]:
+                return response["params"]["targetInfo"]["targetId"]
+
+    def get_sessionId(self, response):
+        if "sessionId" in response:
+            return response["sessionId"]
+        elif "result" in response and "sessionId" in response["result"]:
+            return response["result"]["sessionId"]
+        else:
+            return response["params"]["sessionId"]
+
+    def get_error(self, response):
+        if "error" in response:
+            return response["error"]
+        else:
+            return None
+
     def run_output_thread(self, debug=False):
         def run_print(debug):
             while True:
                 try:
                     json_list = self.pipe.read_jsons(debug=debug)
                     if json_list:
-                        for json_ in json_list:
-                            print(json.dumps(json_, indent=4))
+                        for json in json_list:
+                            print(json.dumps(json, indent=4))
                 except PipeClosedError:
                     print("Pipe closed", file=sys.stderr)
                     break
 
         Thread(target=run_print, args=(debug,)).start()
 
-    def verify_target_id(self, json_obj):
-        if "result" in json_obj and "targetId" in json_obj["result"]:
-            return json_obj["result"]["targetId"]
-        else:
-            if "targetId" in json_obj["params"]:
-                return json_obj["params"]["targetId"]
-            elif "targetInfo" in json_obj["params"]:
-                return json_obj["params"]["targetInfo"]["targetId"]
-
-    def verify_session_id(self, json_obj):
-        if "sessionId" in json_obj:
-            return json_obj["sessionId"]
-        elif "result" in json_obj and "sessionId" in json_obj["result"]:
-            return json_obj["result"]["sessionId"]
-        else:
-            return json_obj["params"]["sessionId"]
-
-    def verify_json_list(
-        self, json_list, verify_function, verify_boolean=False, debug=False
-    ):
-        for json_ in json_list:
-            self.verify_json_error(json_)
-            verify_boolean = verify_function(json_)
-            if verify_boolean:
-                json_obj = json_
-                if debug:
-                    print(f">>>>>This is the json_obj: {json_obj}")
-                return json_obj
-
-    def verify_json_error(self, json):
-        if "error" in json:
-            if "id" in json:
-                raise ValueError(
-                    f"The command with id {json["id"]} raise an error. Error code: {json["error"]["code"]}. {json["error"]["message"]}"
-                )
-            else:
-                raise ValueError(
-                    f"Error code: {json["error"]["code"]}. {json["error"]["message"]}"
-                )
