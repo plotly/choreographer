@@ -22,6 +22,7 @@ class Session:
         if params:
             json_command["params"] = params
 
-        self.parent_target.protocol.write_json(json_command)
+        possible_future = self.parent_target.protocol.write_json(json_command)
+        if possible_future: return possible_future
 
         return {"session_id":self.session_id, "message_id": current_id}

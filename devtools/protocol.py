@@ -1,13 +1,22 @@
 import json
 import sys
+#from functools import partial
 
 from .pipe import PipeClosedError
 from threading import Thread
 
 
 class Protocol:
-    def __init__(self, browser_pipe):
+    # TODO: detect default loop?
+    def __init__(self, browser_pipe, loop=None, executor=None, debug=False):
         self.pipe = browser_pipe
+        self.loop = loop
+        self.executor = executor
+        self.debug = debug
+        self.futures = None
+        if loop:
+            self.futures = {}
+            self.run_read_loop(loop)
 
     def write_json(self, obj):
         n_keys = 0
@@ -25,8 +34,16 @@ class Protocol:
             raise RuntimeError(
                 "Message objects must have id and method keys, and may have params and sessionId keys"
             )
+        if self.loop:
+            key = (obj["id"],
+                   obj["sessionId"] if "sessionId" in obj else "")
+            future = self.loop.create_future()
+            self.futures[key] = future
 
-        self.pipe.write_json(obj)
+            self.loop.run_in_executor(self.executor, self.pipe.write_json, obj) # ignore
+            return future
+        else:
+            self.pipe.write_json(obj)
 
     def verify_response(self, response, session_id, message_id):
         if "session_id" not in response and session_id == "":
@@ -68,7 +85,22 @@ class Protocol:
         else:
             return None
 
-    def run_output_thread(self, debug=False):
+    def run_read_loop(self, loop):
+        async def read_loop():
+            try: # this wont catch the error
+                responses = await loop.run_in_executor(self.executor, self.pipe.read_jsons, True, self.debug)
+                for response in responses:
+                    # TODO this is where we match futures
+                    pass
+            except PipeClosedError:
+                return
+            loop.create_task(read_loop())
+        loop.create_task(read_loop())
+
+    def run_output_thread(self, debug=None):
+        if not debug:
+            debug = self.debug
+
         def run_print(debug):
             while True:
                 try:

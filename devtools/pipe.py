@@ -35,7 +35,8 @@ class Pipe:
             raw_buffer = os.read(
                 self.read_from_chromium, 10000
             )  # 10MB buffer, nbd, doesn't matter w/ this
-            if not raw_buffer:
+            if not raw_buffer or raw_buffer == b'{bye}\n':
+                # we seem to need {bye} even if chrome closes NOTE
                 if debug: print("read_jsons pipe was closed")
                 raise PipeClosedError()
             while raw_buffer[-1] != 0:
