@@ -1,4 +1,5 @@
 import json
+import sys
 
 from .pipe import PipeClosedError
 from threading import Thread
@@ -39,12 +40,9 @@ class Protocol:
             pass
         else:
             return False
-
         return True
 
     def run_output_thread(self, debug=False):
-        print("Start run_output_thread() to improve debugging".center(6, "-"))
-
         def run_print(debug):
             while True:
                 try:
@@ -53,11 +51,10 @@ class Protocol:
                         for json_ in json_list:
                             print(json.dumps(json_, indent=4))
                 except PipeClosedError:
-                    print("Pipe closed".center(10, "-"))
+                    print("Pipe closed", file=sys.stderr)
                     break
 
-        thread_print = Thread(target=run_print, args=(debug,))
-        thread_print.start()
+        Thread(target=run_print, args=(debug,)).start()
 
     def verify_target_id(self, json_obj):
         if "result" in json_obj and "targetId" in json_obj["result"]:
