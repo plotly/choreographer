@@ -12,17 +12,17 @@ def main():
         browser.protocol.pipe.read_jsons(blocking=False, debug=True)
         browser.protocol.pipe.read_jsons(blocking=False, debug=True)
         time.sleep(4)
-        browser.protocol.send_command(
+        browser.send_command(
             command="Target.createTarget", params={"url": "https://www.youtube.com"}
         )
         time.sleep(5)
-        browser.protocol.send_command(command="Target.getTargets")
+        browser.send_command(command="Target.getTargets")
         browser.protocol.pipe.read_jsons(debug=True)
         browser.protocol.pipe.read_jsons(blocking=False, debug=True)
         browser.protocol.pipe.read_jsons(blocking=False, debug=True)
         browser.protocol.pipe.read_jsons(blocking=False, debug=True)
         time.sleep(3)
-        browser.protocol.send_command(command="Target.getTargets")
+        browser.send_command(command="Target.getTargets")
         browser.protocol.pipe.read_jsons(debug=True)
         browser.protocol.pipe.read_jsons(blocking=False, debug=True)
         browser.protocol.pipe.read_jsons(blocking=False, debug=True)
