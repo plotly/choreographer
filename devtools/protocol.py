@@ -72,10 +72,9 @@ class Protocol:
         def run_print(debug):
             while True:
                 try:
-                    json_list = self.pipe.read_jsons(debug=debug)
-                    if json_list:
-                        for json in json_list:
-                            print(json.dumps(json, indent=4))
+                    responses = self.pipe.read_jsons(debug=debug)
+                    for response in responses:
+                        print(json.dumps(response, indent=4))
                 except PipeClosedError:
                     print("Pipe closed", file=sys.stderr)
                     break
