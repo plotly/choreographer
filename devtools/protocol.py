@@ -59,19 +59,6 @@ class Protocol:
         thread_print = Thread(target=run_print, args=(debug,))
         thread_print.start()
 
-    def verify_json_id(self, json_list, message_id, session_id=None, target_id=None):
-        for json_ in json_list:
-            if message_id in json_ and message_id == json["id"]:
-                if session_id in json_ and session_id == json["sessionId"]:
-                    return json_
-                elif target_id in json_:
-                    if (
-                        "results" in json_
-                        and target_id == json_["results"]["target_id"]
-                    ) or (target_id == json_["target_id"]):
-                        return json_
-        return None
-
     def verify_target_id(self, json_obj):
         if "result" in json_obj and "targetId" in json_obj["result"]:
             return json_obj["result"]["targetId"]
