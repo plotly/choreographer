@@ -11,7 +11,6 @@ class Pipe:
         self.read_to_chromium, self.write_to_chromium = list(os.pipe())
         self.debug = debug
 
-    # TODO: accept already formed object
     def write_json(self, obj, debug=None):
         if not debug: debug = self.debug
         if debug:
