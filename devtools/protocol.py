@@ -41,8 +41,7 @@ class Protocol:
                 "Message objects must have id and method keys, and may have params and sessionId keys"
             )
         if self.loop:
-            key = (obj["id"],
-                   obj["sessionId"] if "sessionId" in obj else "")
+            key = self.key_from_obj(obj)
             future = self.loop.create_future()
             self.futures[key] = future
 
