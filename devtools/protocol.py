@@ -16,7 +16,7 @@ class Protocol:
         self.futures = None
         if loop:
             self.futures = {}
-            self.run_read_loop(loop)
+            self.run_read_loop()
 
     def key_from_obj(self, response):
         session_id = response["sessionId"] if "sessionId" in response else ""
@@ -91,17 +91,17 @@ class Protocol:
         else:
             return None
 
-    def run_read_loop(self, loop):
+    def run_read_loop(self):
         async def read_loop():
             try: # this wont catch the error
-                responses = await loop.run_in_executor(self.executor, self.pipe.read_jsons, True, self.debug)
+                responses = await self.loop.run_in_executor(self.executor, self.pipe.read_jsons, True, self.debug)
                 for response in responses:
                     # TODO this is where we match futures
                     pass
             except PipeClosedError:
                 return
-            loop.create_task(read_loop())
-        loop.create_task(read_loop())
+            self.loop.create_task(read_loop())
+        self.loop.create_task(read_loop())
 
     def run_output_thread(self, debug=None):
         if not debug:

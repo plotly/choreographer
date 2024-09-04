@@ -25,6 +25,7 @@ class Browser(Target):
             raise ValueError("You must specify a path")
 
         self.pipe = Pipe(debug=debug)
+        self.loop = loop
         self.protocol = Protocol(self.pipe, loop=loop, debug=debug)
         super().__init__("0", self.protocol)  # TODO not sure about target id "0"
         self.add_session(Session(self, ""))
