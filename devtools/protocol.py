@@ -1,5 +1,6 @@
 import json
 import sys
+import warnings
 #from functools import partial
 
 from .pipe import PipeClosedError
@@ -95,8 +96,26 @@ class Protocol:
             try: # this wont catch the error
                 responses = await self.loop.run_in_executor(self.executor, self.pipe.read_jsons, True, self.debug)
                 for response in responses:
-                    # TODO this is where we match futures
-                    pass
+                    error = self.get_error(response)
+                    key = self.key_from_obj(response)
+                    if not self.has_id(response) and error:
+                        raise RuntimeError(error) # do this everywhere?
+                    elif key:
+                        future = None
+                        if key in self.futures:
+                            future = self.futures.pop(key)
+                        else:
+                            raise RuntimeError(f"Couldn't find a future for key: {key}")
+                        if error: # could be set exception NOTE
+                            future.set_result(error)
+                        else:
+                            future.set_result(response["result"]) # correcto?
+                    else:
+                        warnings.warn(f"Unhandled message type: {response}")
+                        warnings.warn(f"Current futures: {self.futures.keys()}")
+
+
+
             except PipeClosedError:
                 return
             self.loop.create_task(read_loop())
