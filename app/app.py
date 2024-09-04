@@ -37,9 +37,11 @@ def main_sync():
 async def main_async():
     with devtools.Browser(headless=False, loop=asyncio.get_running_loop()) as browser:
         await asyncio.sleep(2)
-        browser.send_command(command="Target.getTargets")
+        res1 = await browser.send_command(command="Target.getTargets")
+        print(res1)
         await asyncio.sleep(2)
-        browser.send_command(command="Target.getTargets")
+        res2 = await browser.send_command(command="Target.getTargets")
+        print(res2)
         await asyncio.sleep(2)
 
 if __name__ == "__main__":

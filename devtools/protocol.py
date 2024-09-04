@@ -45,7 +45,6 @@ class Protocol:
             key = self.key_from_obj(obj)
             future = self.loop.create_future()
             self.futures[key] = future
-
             self.loop.run_in_executor(self.executor, self.pipe.write_json, obj) # ignore
             return future
         else:
@@ -111,8 +110,10 @@ class Protocol:
                         else:
                             future.set_result(response["result"]) # correcto?
                     else:
-                        warnings.warn(f"Unhandled message type: {response}")
-                        warnings.warn(f"Current futures: {self.futures.keys()}")
+                        warnings.warn("Unhandled message type:")
+                        warnings.warn(response)
+                        warnings.warn("Current futures:")
+                        warnings.warn(self.futures.keys())
 
 
 
