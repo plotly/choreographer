@@ -18,6 +18,12 @@ class Protocol:
             self.futures = {}
             self.run_read_loop(loop)
 
+    def key_from_obj(self, response):
+        session_id = response["sessionId"] if "sessionId" in response else ""
+        message_id = response["id"] if "id" in response else None
+        if message_id is None: return None
+        return (session_id, message_id)
+
     def write_json(self, obj):
         n_keys = 0
         if "id" in obj and "method" in obj:
