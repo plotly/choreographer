@@ -16,21 +16,28 @@ system = platform.system()
 if system == "Windows":
     import msvcrt  # noqa
 
-path = ""
-if system == "Linux":
-    path = os.environ.get("BROWSER_PATH", "/usr/bin/google-chrome-stable")
-elif system == "Windows":
-    path = os.environ.get(
-        "BROWSER_PATH", r"c:\Program Files\Google\Chrome\Application\chrome.exe"
-    )
-else:
-    path = os.environ["CHROMIUM_PATH"]
+default_paths = {
+    "Linux": "/usr/bin/google-chrome-stable",
+    "Windows": r"c:\Program Files\Google\Chrome\Application\chrome.exe",
+}
+
+path = os.environ.get(
+    "BROWSER_PATH", default_paths.get(system, os.environ.get("CHROMIUM_PATH"))
+)
+
+if path is None:
+    raise ValueError("You must specify a path")
+
+user_data_dir = os.environ["USER_DATA_DIR"]
 
 cli = [
     path,
     "--remote-debugging-pipe",
     "--disable-breakpad",
     "--allow-file-access-from-files",
+    "--enable-logging=stderr",
+    f"--user-data-dir={user_data_dir}",
+    "--no-first-run",
 ]
 
 if "HEADLESS" in os.environ:

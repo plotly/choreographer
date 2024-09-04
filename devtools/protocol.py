@@ -1,33 +1,83 @@
-from .tab import Tab
-from .session import Session
-from collections import OrderedDict
+import json
+import sys
+
+from .pipe import PipeClosedError
+from threading import Thread
 
 
 class Protocol:
     def __init__(self, browser_pipe):
-        self.browser_session = Session(self, session_id="")
-        self.target_id = 0
-        self.tabs = OrderedDict()
         self.pipe = browser_pipe
 
-    def create_tab(self):
-        tab_obj = Tab()
-        self.tabs[tab_obj.target_id] = tab_obj
-        print(f"New Tab Created: {tab_obj.target_id}")
-        return tab_obj
-
-    def list_tabs(self):
-        print("Tabs".center(50, "-"))
-        for target_id in self.tabs.keys():
-            print(target_id.center(50, " "))
-        print("End".center(50, "-"))
-
-    def close_tab(self, tab_id):
-        if isinstance(tab_id, str):
-            del self.tabs[tab_id]
+    def write_json(self, obj):
+        n_keys = 0
+        if "id" in obj and "method" in obj:
+            n_keys += 2
         else:
-            del self.tabs[tab_id.target_id]
-        print(f"The following tab was deleted: {tab_id}")
+            raise RuntimeError("Each message object must contain an id and method key")
 
-    def send_command(self, command, params=None, cb=None):
-        return self.browser_session.send_command(command, params, cb)
+        if "params" in obj:
+            n_keys += 1
+        if "sessionId" in obj:
+            n_keys += 1
+
+        if len(obj.keys()) != n_keys:
+            raise RuntimeError(
+                "Message objects must have id and method keys, and may have params and sessionId keys"
+            )
+
+        self.pipe.write_json(obj)
+
+    def verify_response(self, response, session_id, message_id):
+        if "session_id" not in response and session_id == "":
+            pass
+        elif "session_id" in response and response["session_id"] == session_id:
+            pass
+        else:
+            return False
+
+        if "id" in response and str(response["id"]) == str(message_id):
+            pass
+        else:
+            return False
+        return True
+
+    def has_id(self, response):
+        return "id" in response
+
+    def get_targetId(self, response):
+        if "result" in response and "targetId" in response["result"]:
+            return response["result"]["targetId"]
+        else:
+            if "targetId" in response["params"]:
+                return response["params"]["targetId"]
+            elif "targetInfo" in response["params"]:
+                return response["params"]["targetInfo"]["targetId"]
+
+    def get_sessionId(self, response):
+        if "sessionId" in response:
+            return response["sessionId"]
+        elif "result" in response and "sessionId" in response["result"]:
+            return response["result"]["sessionId"]
+        else:
+            return response["params"]["sessionId"]
+
+    def get_error(self, response):
+        if "error" in response:
+            return response["error"]
+        else:
+            return None
+
+    def run_output_thread(self, debug=False):
+        def run_print(debug):
+            while True:
+                try:
+                    responses = self.pipe.read_jsons(debug=debug)
+                    for response in responses:
+                        print(json.dumps(response, indent=4))
+                except PipeClosedError:
+                    print("Pipe closed", file=sys.stderr)
+                    break
+
+        Thread(target=run_print, args=(debug,)).start()
+
