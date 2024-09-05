@@ -8,7 +8,7 @@ class Target:
             raise TypeError("target_id must be string")
         self.sessions = OrderedDict()
         self.target_id = target_id
-        self.protocol = browser.protocol
+        self.browser = browser
 
     def add_session(self, session):
         if not isinstance(session, Session):
