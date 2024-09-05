@@ -145,4 +145,5 @@ class Browser(Target):
         new_tab = Tab(target_id, self)
         self.add_tab(new_tab)
         await new_tab.create_session()
+        return new_tab
 

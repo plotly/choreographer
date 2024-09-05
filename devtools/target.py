@@ -9,6 +9,7 @@ class Target:
         self.sessions = OrderedDict()
         self.target_id = target_id
         self.browser = browser
+        self.protocol = browser.protocol
 
     def add_session(self, session):
         if not isinstance(session, Session):
@@ -31,7 +32,9 @@ class Target:
         if "error" in response:
             raise RuntimeError("Could not create session") from Exception(response["error"])
         session_id = response["result"]["sessionId"]
-        self.add_session(Session(self, session_id))
+        new_session = Session(self, session_id)
+        self.add_session(new_session)
+        return new_session
 
     # def close_session():
 

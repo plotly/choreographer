@@ -111,7 +111,8 @@ class Protocol:
                             future.set_result({"result":response["result"]}) # correcto?
                     else:
                         warnings.warn("Unhandled message type:")
-                        warnings.warn(response)
+                        continue
+                        warnings.warn(json.dumps(response))
                         warnings.warn("Current futures:")
                         warnings.warn(self.futures.keys())
 

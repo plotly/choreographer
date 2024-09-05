@@ -43,9 +43,14 @@ async def main_async():
         res2 = await browser.send_command(command="Target.getTargets")
         print(res2)
         await asyncio.sleep(2)
+        tab = await browser.create_tab("https://www.youtube.com")
+        print("created tab")
+        await asyncio.sleep(5)
+        await tab.send_command("Page.navigate", params=dict(url="https://github.com"))
+        await asyncio.sleep(5)
 
 if __name__ == "__main__":
-    main_sync()
+    #main_sync()
     asyncio.run(main_async())
 
 
