@@ -106,9 +106,9 @@ class Protocol:
                         else:
                             raise RuntimeError(f"Couldn't find a future for key: {key}")
                         if error: # could be set exception NOTE
-                            future.set_result(error)
+                            future.set_result({"error":error})
                         else:
-                            future.set_result(response["result"]) # correcto?
+                            future.set_result({"result":response["result"]}) # correcto?
                     else:
                         warnings.warn("Unhandled message type:")
                         warnings.warn(response)
