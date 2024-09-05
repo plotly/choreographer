@@ -3,12 +3,12 @@ from collections import OrderedDict
 from .session import Session
 
 class Target:
-    def __init__(self, target_id, protocol):
+    def __init__(self, target_id, browser):
         if not isinstance(target_id, str):
             raise TypeError("target_id must be string")
         self.sessions = OrderedDict()
         self.target_id = target_id
-        self.protocol = protocol
+        self.protocol = browser.protocol
 
     def add_session(self, session):
         if not isinstance(session, Session):
