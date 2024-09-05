@@ -148,13 +148,13 @@ class Browser(Target):
         return new_tab
 
     async def close_session(self, target):
-        if not self.browser.loop:
+        if not self.loop:
             raise RuntimeError(
                 "There is no eventloop, or was not passed to browser. Cannot use async methods"
             )
         if isinstance(target, Tab):
             target_id = target.target_id
-        response = await self.browser.send_command(
+        response = await self.send_command(
             command="Target.closeTarget",
             params={"targetId": target_id},
         )
