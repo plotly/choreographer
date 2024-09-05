@@ -39,16 +39,23 @@ class Target:
         self.add_session(new_session)
         return new_session
 
-    def close_session(self, session):
+    async def close_session(self, session):
+        if not self.browser.loop:
+            raise RuntimeError(
+                "There is no eventloop, or was not passed to browser. Cannot use async methods"
+            )
         if isinstance(session, Session):
             session_id = session.session_id
-        data_command = self.send_command(
+        response = await self.browser.send_command(
             command="Target.detachFromTarget",
             params={"sessionId": session_id},
         )
+        error = self.protocol.get_error(response)
+        if error:
+            raise RuntimeError("Could not close session") from Exception(error)
         print(f"The session {session_id} has been closed")
         self.remove_session(session)
-        return data_command
+        return response
 
     def send_command(self, command, params=None):
         if not self.sessions.values():
