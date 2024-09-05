@@ -19,7 +19,12 @@ default_path = which_browser()
 
 class Browser(Target):
     def __init__(
-        self, path=default_path, headless=True, debug=False, debug_browser=None, loop=None
+        self,
+        path=default_path,
+        headless=True,
+        debug=False,
+        debug_browser=None,
+        loop=None,
     ):
         if path is None:
             raise ValueError("You must specify a path")
@@ -128,17 +133,22 @@ class Browser(Target):
 
     async def create_tab(self, url="", width=None, height=None):
         if not self.loop:
-            raise RuntimeError("There is no eventloop, or was not passed to browser. Cannot use async methods")
+            raise RuntimeError(
+                "There is no eventloop, or was not passed to browser. Cannot use async methods"
+            )
         if self.headless and (width or height):
-            warnings.warn("Width and height only work for headless chrome mode, they will be ignored")
-            width=None
-            height=None
+            warnings.warn(
+                "Width and height only work for headless chrome mode, they will be ignored"
+            )
+            width = None
+            height = None
         params = dict(url=url)
-        if width: params["width"] = width
-        if height: params["height"] = height
+        if width:
+            params["width"] = width
+        if height:
+            params["height"] = height
 
-        response = await self.browser.send_command("Target.createTarget",
-                                                  params=params)
+        response = await self.browser.send_command("Target.createTarget", params=params)
         if "error" in response:
             raise RuntimeError("Could not create tab") from Exception(response["error"])
         target_id = response["result"]["targetId"]
