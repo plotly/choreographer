@@ -121,7 +121,7 @@ class Browser(Target):
             raise TypeError("tab must be an object of class Tab")
         self.tabs[tab.target_id] = tab
 
-    def remove_session(self, target_id):
+    def remove_tab(self, target_id):
         if isinstance(target_id, Tab):
             target_id = target_id.target_id
         del self.tabs[target_id]
