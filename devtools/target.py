@@ -45,15 +45,15 @@ class Target:
                 "There is no eventloop, or was not passed to browser. Cannot use async methods"
             )
         if isinstance(session, Session):
-            session_id = session.session_id
+            session = session.session_id
         response = await self.browser.send_command(
             command="Target.detachFromTarget",
-            params={"sessionId": session_id},
+            params={"sessionId": session},
         )
         error = self.protocol.get_error(response)
         if error:
             raise RuntimeError("Could not close session") from Exception(error)
-        print(f"The session {session_id} has been closed")
+        print(f"The session {session} has been closed")
         self.remove_session(session)
         return response
 
