@@ -23,7 +23,7 @@ class Browser(Target):
     ):
         if path is None:
             raise ValueError("You must specify a path")
-
+        self.headless = headless
         self.pipe = Pipe(debug=debug)
         self.loop = loop
         self.protocol = Protocol(self.pipe, loop=loop, debug=debug)
