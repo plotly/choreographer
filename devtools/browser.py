@@ -180,8 +180,12 @@ class Browser(Target):
             raise RuntimeError(
                 "There is no eventloop, or was not passed to browser. Cannot use async methods"
             )
+        warnings.warn(
+            "This method only works with some versions of Chrome, it is experimental"
+        )
         response = await self.browser.send_command(
-            "Target.attachToBrowserTarget", params=dict(targetId=self.target_id, flatten=True)
+            "Target.attachToBrowserTarget",
+            params=dict(targetId=self.target_id, flatten=True),
         )
         if "error" in response:
             raise RuntimeError("Could not create session") from Exception(
