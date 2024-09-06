@@ -174,3 +174,20 @@ class Browser(Target):
         print(f"The tab {target} has been closed")
         self.remove_tab(target)
         return response
+
+    async def create_session(self):
+        if not self.browser.loop:
+            raise RuntimeError(
+                "There is no eventloop, or was not passed to browser. Cannot use async methods"
+            )
+        response = await self.browser.send_command(
+            "Target.attachToBrowserTarget", params=dict(targetId=self.target_id, flatten=True)
+        )
+        if "error" in response:
+            raise RuntimeError("Could not create session") from Exception(
+                response["error"]
+            )
+        session_id = response["result"]["sessionId"]
+        new_session = Session(self, session_id)
+        self.add_session(new_session)
+        return new_session
