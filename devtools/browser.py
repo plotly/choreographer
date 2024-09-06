@@ -204,7 +204,10 @@ class Browser(Target):
             )
         targets = {}
         for json_response in response["result"]["targetInfos"]:
-            if json_response["type"] == "page":
+            if (
+                json_response["type"] == "page"
+                and json_response["targetId"] not in self.tabs
+            ):
                 target_id = json_response["targetId"]
                 new_tab = Tab(target_id, self)
                 self.add_tab(new_tab)
