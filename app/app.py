@@ -35,19 +35,26 @@ def main_sync():
     time.sleep(3)
 
 async def main_async():
-    with devtools.Browser(headless=False, loop=asyncio.get_running_loop()) as browser:
-        await asyncio.sleep(2)
-        res1 = await browser.send_command(command="Target.getTargets")
-        print(res1)
-        await asyncio.sleep(2)
-        res2 = await browser.send_command(command="Target.getTargets")
-        print(res2)
-        await asyncio.sleep(2)
-        tab = await browser.create_tab("https://www.youtube.com")
+    with devtools.Browser(debug=True, loop=asyncio.get_running_loop()) as browser:
+        tab1 = await browser.create_tab("https://www.youtube.com")
         print("created tab")
         await asyncio.sleep(5)
-        await tab.send_command("Page.navigate", params=dict(url="https://github.com"))
+        await tab1.send_command("Page.navigate", params=dict(url="https://github.com"))
         await asyncio.sleep(5)
+        tab2 = await browser.create_tab("https://plotly.com/python/")
+        await asyncio.sleep(3)
+        tab3 = await browser.create_tab("https://plotly.com/")
+        await asyncio.sleep(3)
+        browser.create_session()
+        print("Create session in browser")
+        session1 = await tab3.create_session()
+        print("create session in plotly page")
+        await asyncio.sleep(3)
+        await tab3.close_session(session1)
+        await browser.close_tab(tab2)
+        await asyncio.sleep(4)
+        await browser.populate_targets()
+        print("All is done")
 
 if __name__ == "__main__":
     #main_sync()
