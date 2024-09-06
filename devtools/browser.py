@@ -204,9 +204,10 @@ class Browser(Target):
             )
         targets = {}
         for json_response in response["result"]["targetInfos"]:
-            target_id = json_response["targetId"]
-            new_tab = Tab(target_id, self)
-            self.add_tab(new_tab)
-            targets[target_id] = new_tab
-            print(f"The target {target_id} was added")
+            if json_response["type"] == "page":
+                target_id = json_response["targetId"]
+                new_tab = Tab(target_id, self)
+                self.add_tab(new_tab)
+                targets[target_id] = new_tab
+                print(f"The target {target_id} was added")
         return targets
