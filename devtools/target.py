@@ -50,12 +50,12 @@ class Target:
             command="Target.detachFromTarget",
             params={"sessionId": session},
         )
+        self.remove_session(session)
         if "error" in response:
             raise RuntimeError("Could not close session") from Exception(
                 response["error"]
             )
         print(f"The session {session} has been closed")
-        self.remove_session(session)
         return response
 
     def send_command(self, command, params=None):
