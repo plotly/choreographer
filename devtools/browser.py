@@ -182,10 +182,7 @@ class Browser(Target):
         warnings.warn(
             "This method only works with some versions of Chrome, it is experimental"
         )
-        response = await self.browser.send_command(
-            "Target.attachToBrowserTarget",
-            params=dict(targetId=self.target_id, flatten=True),
-        )
+        response = await self.browser.send_command("Target.attachToBrowserTarget")
         if "error" in response:
             raise RuntimeError("Could not create session") from Exception(
                 response["error"]
