@@ -191,3 +191,22 @@ class Browser(Target):
         new_session = Session(self, session_id)
         self.add_session(new_session)
         return new_session
+
+    async def populate_targets(self):
+        if not self.headless:
+            raise ValueError("You must use this function with headless=False")
+        elif not self.browser.loop:
+            warnings.warn("This method it is working without loop")
+        response = await self.browser.send_command("Target.getTargets")
+        if "error" in response:
+            raise RuntimeError("Could not get targets") from Exception(
+                response["error"]
+            )
+        targets = {}
+        for json_response in response["result"]["targetInfos"]:
+            target_id = json_response["targetId"]
+            new_tab = Tab(target_id, self)
+            self.add_tab(new_tab)
+            targets[target_id] = new_tab
+            print(f"The target {target_id} was added")
+        return targets
