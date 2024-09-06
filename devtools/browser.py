@@ -213,4 +213,8 @@ class Browser(Target):
                 self.add_tab(new_tab)
                 targets[target_id] = new_tab
                 print(f"The target {target_id} was added")
-        return targets
+        if len(targets) > 0:
+            return targets
+        else:
+            print("All targets are registered, there are no unregistered targets")
+            return None
