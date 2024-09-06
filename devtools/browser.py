@@ -168,9 +168,8 @@ class Browser(Target):
             command="Target.closeTarget",
             params={"targetId": target},
         )
-        error = self.protocol.get_error(response)
-        if error:
-            raise RuntimeError("Could not close tab") from Exception(error)
+        if "error" in response:
+            raise RuntimeError("Could not close tab") from Exception(response["error"])
         print(f"The tab {target} has been closed")
         self.remove_tab(target)
         return response
