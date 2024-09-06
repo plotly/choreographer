@@ -168,10 +168,10 @@ class Browser(Target):
             command="Target.closeTarget",
             params={"targetId": target_id},
         )
+        self.remove_tab(target_id)
         if "error" in response:
             raise RuntimeError("Could not close tab") from Exception(response["error"])
         print(f"The tab {target_id} has been closed")
-        self.remove_tab(target_id)
         return response
 
     async def create_session(self):
