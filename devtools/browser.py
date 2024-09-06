@@ -162,7 +162,7 @@ class Browser(Target):
             raise RuntimeError(
                 "There is no eventloop, or was not passed to browser. Cannot use async methods"
             )
-        if isinstance(target, Tab):
+        if isinstance(target, Target):
             target = target.target_id
         response = await self.send_command(
             command="Target.closeTarget",
