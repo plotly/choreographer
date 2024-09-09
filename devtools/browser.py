@@ -208,7 +208,7 @@ class Browser(Target):
             raise RuntimeError("Could not get targets") from Exception(
                 response["error"]
             )
-        targets = {}
+
         for json_response in response["result"]["targetInfos"]:
             if (
                 json_response["type"] == "page"
@@ -217,10 +217,10 @@ class Browser(Target):
                 target_id = json_response["targetId"]
                 new_tab = Tab(target_id, self)
                 self.add_tab(new_tab)
-                targets[target_id] = new_tab
-                print(f"The target {target_id} was added")
-        if len(targets) > 0:
-            return targets
-        else:
-            print("All targets are registered, there are no unregistered targets")
-            return None
+                if self.debug:
+                    print(f"The target {target_id} was added", file=sys.stderr)
+
+    def get_tab(self):
+        if self.tabs.values():
+            return list(self.tabs.values())[0]
+
