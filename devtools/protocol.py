@@ -78,18 +78,13 @@ class Protocol:
         if "result" in response and "targetId" in response["result"]:
             return response["result"]["targetId"]
         else:
-            if "targetId" in response["params"]:
-                return response["params"]["targetId"]
-            elif "targetInfo" in response["params"]:
-                return response["params"]["targetInfo"]["targetId"]
+            return None
 
     def get_sessionId(self, response):
-        if "sessionId" in response:
-            return response["sessionId"]
-        elif "result" in response and "sessionId" in response["result"]:
+        if "result" in response and "sessionId" in response["result"]:
             return response["result"]["sessionId"]
         else:
-            return response["params"]["sessionId"]
+            return None
 
     def get_error(self, response):
         if "error" in response:
