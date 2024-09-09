@@ -23,6 +23,7 @@ class Target:
     def remove_session(self, session_id):
         if isinstance(session_id, Session):
             session_id = session_id.session_id
+        if session_id not in self.sessions: return
         del self.sessions[session_id]
 
     async def create_session(self):
