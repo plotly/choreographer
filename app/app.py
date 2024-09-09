@@ -35,29 +35,23 @@ def main_sync():
     time.sleep(3)
 
 async def main_async():
-    with devtools.Browser(debug=True, loop=asyncio.get_running_loop()) as browser:
+    with devtools.Browser(headless=False, debug=True, loop=asyncio.get_running_loop()) as browser:
         tab1 = await browser.create_tab("https://www.youtube.com")
-        print("created tab")
-        await asyncio.sleep(5)
         await tab1.send_command("Page.navigate", params=dict(url="https://github.com"))
-        await asyncio.sleep(5)
-        tab2 = await browser.create_tab("https://plotly.com/python/")
-        await asyncio.sleep(3)
-        tab3 = await browser.create_tab("https://plotly.com/")
-        await asyncio.sleep(3)
-        browser.create_session()
-        print("Create session in browser")
-        session1 = await tab3.create_session()
-        print("create session in plotly page")
-        await asyncio.sleep(3)
-        await tab3.close_session(session1)
+        tab2 = await browser.create_tab("https://plotly.com/")
+        await asyncio.sleep(1)
+        tab2_session2 = await tab2.create_session()
+        await tab2.send_command("Page.navigate", params=dict(url="https://duckduckgo.com"))
+        browser_session2 = await browser.create_session()
+        await browser_session2.send_command("Target.getTargets")
+        await tab2.close_session(tab2_session2)
         await browser.close_tab(tab2)
-        await asyncio.sleep(4)
-        await browser.populate_targets()
         print("All is done")
+        await asyncio.sleep(5)
 
 if __name__ == "__main__":
-    #main_sync()
+    main_sync()
+    time.sleep(2)
     asyncio.run(main_async())
 
 
