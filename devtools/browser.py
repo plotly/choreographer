@@ -26,13 +26,19 @@ class Browser(Target):
         debug_browser=None,
         loop=None,
     ):
-        if path is None:
-            raise ValueError("You must specify a path")
+        # Configuration
         self.headless = headless
+
+        # Resources
         self.pipe = Pipe(debug=debug)
         self.loop = loop
         self.protocol = Protocol(self.pipe, loop=loop, debug=debug)
-        super().__init__("0", self)  # TODO not sure about target id "0"
+
+        # State
+        self.tabs = OrderedDict()
+
+        # Initializing
+        super().__init__("0", self)  # NOTE: 0 can't really be used externally
         self.add_session(Session(self, ""))
 
         if platform.system() != "Windows":
@@ -74,7 +80,7 @@ class Browser(Target):
             **win_only,
         )
         self.subprocess = proc
-        self.tabs = OrderedDict()
+
 
     def __enter__(self):
         return self
@@ -138,7 +144,7 @@ class Browser(Target):
             )
         if self.headless and (width or height):
             warnings.warn(
-                "Width and height only work for headless chrome mode, they will be ignored"
+                "Width and height only work for headless chrome mode, they will be ignored."
             )
             width = None
             height = None
@@ -180,7 +186,7 @@ class Browser(Target):
                 "There is no eventloop, or was not passed to browser. Cannot use async methods"
             )
         warnings.warn(
-            "This method only works with some versions of Chrome, it is experimental"
+            "Creating new sessions on Browser() only works with some versions of Chrome, it is experimental"
         )
         response = await self.browser.send_command("Target.attachToBrowserTarget")
         if "error" in response:

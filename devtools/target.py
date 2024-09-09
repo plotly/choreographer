@@ -7,10 +7,13 @@ class Target:
     def __init__(self, target_id, browser):
         if not isinstance(target_id, str):
             raise TypeError("target_id must be string")
-        self.sessions = OrderedDict()
-        self.target_id = target_id
+        # Resources
         self.browser = browser
         self.protocol = browser.protocol
+
+        # States
+        self.sessions = OrderedDict()
+        self.target_id = target_id
 
     def add_session(self, session):
         if not isinstance(session, Session):

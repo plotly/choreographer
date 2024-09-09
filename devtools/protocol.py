@@ -10,11 +10,18 @@ from threading import Thread
 class Protocol:
     # TODO: detect default loop?
     def __init__(self, browser_pipe, loop=None, executor=None, debug=False):
+        # Stored Resources
         self.pipe = browser_pipe
         self.loop = loop
         self.executor = executor
+
+        # Configuration
         self.debug = debug
+
+        # State Variables
         self.futures = None
+
+        # Init
         if loop:
             self.futures = {}
             self.run_read_loop()
@@ -39,13 +46,13 @@ class Protocol:
 
         if len(obj.keys()) != n_keys:
             raise RuntimeError(
-                "Message objects must have id and method keys, and may have params and sessionId keys"
+                "Message objects must have id and method keys, and may have params and sessionId keys."
             )
         if self.loop:
             key = self.key_from_obj(obj)
             future = self.loop.create_future()
             self.futures[key] = future
-            self.loop.run_in_executor(self.executor, self.pipe.write_json, obj) # ignore
+            self.loop.run_in_executor(self.executor, self.pipe.write_json, obj) # ignore result
             return future
         else:
             self.pipe.write_json(obj)
@@ -92,26 +99,26 @@ class Protocol:
 
     def run_read_loop(self):
         async def read_loop():
-            try: # this wont catch the error
+            try:
                 responses = await self.loop.run_in_executor(self.executor, self.pipe.read_jsons, True, self.debug)
                 for response in responses:
                     error = self.get_error(response)
                     key = self.key_from_obj(response)
                     if not self.has_id(response) and error:
-                        raise RuntimeError(error) # do this everywhere?
+                        raise RuntimeError(error)
                     elif key:
                         future = None
                         if key in self.futures:
                             future = self.futures.pop(key)
                         else:
                             raise RuntimeError(f"Couldn't find a future for key: {key}")
-                        if error: # could be set exception NOTE
+                        if error:
                             future.set_result({"error":error})
                         else:
                             future.set_result({"result":response["result"]}) # correcto?
                     else:
                         warnings.warn("Unhandled message type:")
-                        continue
+                        continue # TODO make this work
                         warnings.warn(json.dumps(response))
                         warnings.warn("Current futures:")
                         warnings.warn(self.futures.keys())
@@ -119,6 +126,7 @@ class Protocol:
 
 
             except PipeClosedError:
+                # TODO this isn't being caught
                 return
             self.loop.create_task(read_loop())
         self.loop.create_task(read_loop())
@@ -134,7 +142,7 @@ class Protocol:
                     for response in responses:
                         print(json.dumps(response, indent=4))
                 except PipeClosedError:
-                    print("Pipe closed", file=sys.stderr)
+                    print("Pipe closed.", file=sys.stderr)
                     break
 
         Thread(target=run_print, args=(debug,)).start()
