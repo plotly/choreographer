@@ -1,7 +1,7 @@
 import json
 import sys
 import warnings
-#from functools import partial
+# from functools import partial
 
 from .pipe import PipeClosedError
 from threading import Thread
@@ -29,7 +29,8 @@ class Protocol:
     def key_from_obj(self, response):
         session_id = response["sessionId"] if "sessionId" in response else ""
         message_id = response["id"] if "id" in response else None
-        if message_id is None: return None
+        if message_id is None:
+            return None
         return (session_id, message_id)
 
     def write_json(self, obj):
@@ -52,7 +53,9 @@ class Protocol:
             key = self.key_from_obj(obj)
             future = self.loop.create_future()
             self.futures[key] = future
-            self.loop.run_in_executor(self.executor, self.pipe.write_json, obj) # ignore result
+            self.loop.run_in_executor(
+                self.executor, self.pipe.write_json, obj
+            )  # ignore result
             return future
         else:
             self.pipe.write_json(obj)
@@ -101,7 +104,9 @@ class Protocol:
     def run_read_loop(self):
         async def read_loop():
             try:
-                responses = await self.loop.run_in_executor(self.executor, self.pipe.read_jsons, True, self.debug)
+                responses = await self.loop.run_in_executor(
+                    self.executor, self.pipe.read_jsons, True, self.debug
+                )
                 for response in responses:
                     error = self.get_error(response)
                     key = self.key_from_obj(response)
@@ -116,22 +121,23 @@ class Protocol:
                         else:
                             raise RuntimeError(f"Couldn't find a future for key: {key}")
                         if error:
-                            future.set_result({"error":error})
+                            future.set_result({"error": error})
                         else:
-                            future.set_result({"result":response["result"]}) # correcto?
+                            future.set_result(
+                                {"result": response["result"]}
+                            )  # correcto?
                     else:
                         warnings.warn("Unhandled message type:")
-                        continue # TODO make this work
+                        continue  # TODO make this work
                         warnings.warn(json.dumps(response))
                         warnings.warn("Current futures:")
                         warnings.warn(self.futures.keys())
-
-
 
             except PipeClosedError:
                 # TODO this isn't being caught
                 return
             self.loop.create_task(read_loop())
+
         self.loop.create_task(read_loop())
 
     def run_output_thread(self, debug=None):
@@ -149,4 +155,3 @@ class Protocol:
                     break
 
         Thread(target=run_print, args=(debug,)).start()
-
