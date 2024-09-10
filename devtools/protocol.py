@@ -92,6 +92,12 @@ class Protocol:
         else:
             return None
 
+    def is_event(self, response):
+        required_keys = ["method", "params", "sessionId"]
+        if all(key in response for key in required_keys) and "id" not in response:
+            return True
+        return False
+
     def run_read_loop(self):
         async def read_loop():
             try:
