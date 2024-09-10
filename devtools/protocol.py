@@ -96,7 +96,7 @@ class Protocol:
             return None
 
     def is_event(self, response):
-        required_keys = {"method", "params", "sessionId"}
+        required_keys = {"method", "params"}
         if required_keys <= response.keys() and "id" not in response:
             return True
         return False
