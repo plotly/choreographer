@@ -113,6 +113,7 @@ class Protocol:
                     if not self.has_id(response) and error:
                         raise RuntimeError(error)
                     elif self.is_event(response):
+                        session_id = response["sessionId"] if "sessionId" in response else ""
                         continue
                     elif key:
                         future = None
