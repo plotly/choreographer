@@ -93,8 +93,8 @@ class Protocol:
             return None
 
     def is_event(self, response):
-        required_keys = ["method", "params", "sessionId"]
-        if all(key in response for key in required_keys) and "id" not in response:
+        required_keys = {"method", "params", "sessionId"}
+        if required_keys.issubset(response.keys()) and "id" not in response:
             return True
         return False
 
