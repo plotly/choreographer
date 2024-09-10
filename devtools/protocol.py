@@ -107,6 +107,8 @@ class Protocol:
                     key = self.key_from_obj(response)
                     if not self.has_id(response) and error:
                         raise RuntimeError(error)
+                    elif self.is_event(response):
+                        continue
                     elif key:
                         future = None
                         if key in self.futures:
