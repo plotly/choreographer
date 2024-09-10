@@ -5,6 +5,7 @@ import warnings
 
 from .pipe import PipeClosedError
 from threading import Thread
+from collections import OrderedDict
 
 
 class Protocol:
@@ -20,6 +21,7 @@ class Protocol:
 
         # State Variables
         self.futures = None
+        self.sessions = OrderedDict()
 
         # Init
         if loop:
