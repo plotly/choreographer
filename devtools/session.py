@@ -28,3 +28,9 @@ class Session:
         if possible_future: return possible_future
 
         return {"session_id": self.session_id, "message_id": current_id}
+
+    def suscribe(self, string, callback):
+        pass
+
+    def unsuscrib(self, string, callback):
+        pass
