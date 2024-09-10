@@ -52,6 +52,7 @@ class Target:
         session_id = response["result"]["sessionId"]
         new_session = Session(self, session_id)
         self.add_session(new_session)
+        self.add_session_protocol(new_session)
         return new_session
 
     async def close_session(self, session):
@@ -66,6 +67,7 @@ class Target:
             params={"sessionId": session},
         )
         self.remove_session(session)
+        self.remove_session_protocol(session)
         if "error" in response:
             raise RuntimeError("Could not close session") from Exception(
                 response["error"]
