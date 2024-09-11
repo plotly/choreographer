@@ -13,6 +13,7 @@ class Session:
         # State
         self.session_id = session_id
         self.message_id = 0
+        self.suscribe_dict = {}
 
     def send_command(self, command, params=None):
         current_id = self.message_id
@@ -35,7 +36,7 @@ class Session:
     def suscribe(self, string, callback):
         if not inspect.isawaitable(callback):
             raise TypeError("You may use a callback in this method")
-        return {string : callback}
+        self.suscribe_dict[string] = callback
 
     def unsuscrib(self, string, callback):
         pass
