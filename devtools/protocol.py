@@ -119,6 +119,7 @@ class Protocol:
                     elif self.is_event(response):
                         session_id = response["sessionId"] if "sessionId" in response else ""
                         new_session = Session(self, session_id)
+                        new_session.suscribe(session_id, response["method"])
                         self.sessions[new_session.session_id] = new_session
                         continue
                     elif key:
