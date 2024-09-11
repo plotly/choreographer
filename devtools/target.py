@@ -26,12 +26,6 @@ class Target:
         if session_id not in self.sessions: return
         del self.sessions[session_id]
 
-    def remove_session_protocol(self, session_id):
-        if isinstance(session_id, Session):
-            session_id = session_id.session_id
-        if session_id not in self.sessions: return
-        del self.protocol.sessions[session_id]
-
     async def create_session(self):
         def add_session_protocol(session):
             if not isinstance(session, Session):
@@ -55,6 +49,11 @@ class Target:
         return new_session
 
     async def close_session(self, session):
+        def remove_session_protocol(session_id):
+            if isinstance(session_id, Session):
+                session_id = session_id.session_id
+            if session_id not in self.sessions: return
+            del self.protocol.sessions[session_id]
         if not self.browser.loop:
             raise RuntimeError(
                 "There is no eventloop, or was not passed to browser. Cannot use async methods"
@@ -66,7 +65,7 @@ class Target:
             params={"sessionId": session},
         )
         self.remove_session(session)
-        self.remove_session_protocol(session)
+        remove_session_protocol(session)
         if "error" in response:
             raise RuntimeError("Could not close session") from Exception(
                 response["error"]
