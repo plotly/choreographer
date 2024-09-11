@@ -7,7 +7,6 @@ from .pipe import PipeClosedError
 from threading import Thread
 
 
-
 class Protocol:
     # TODO: detect default loop?
     def __init__(self, browser_pipe, loop=None, executor=None, debug=False):
@@ -115,8 +114,14 @@ class Protocol:
                     if not self.has_id(response) and error:
                         raise RuntimeError(error)
                     elif self.is_event(response):
-                        session_id = response["sessionId"] if "sessionId" in response else ""
-                        session = self.sessions[session_id] if session_id in self.sessions else None
+                        session_id = (
+                            response["sessionId"] if "sessionId" in response else ""
+                        )
+                        session = (
+                            self.sessions[session_id]
+                            if session_id in self.sessions
+                            else None
+                        )
                         subscriptions = session.subscriptions
                         continue
                     elif key:

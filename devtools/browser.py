@@ -81,7 +81,6 @@ class Browser(Target):
         )
         self.subprocess = proc
 
-
     def __enter__(self):
         return self
 
@@ -223,4 +222,3 @@ class Browser(Target):
     def get_tab(self):
         if self.tabs.values():
             return list(self.tabs.values())[0]
-
