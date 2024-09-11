@@ -36,7 +36,7 @@ class Session:
 
     def suscribe(self, string, callback):
         if string in self.subscriptions:
-            print("This value is in subscriptions")
+            raise ValueError("This value is in subscriptions")
         elif not inspect.isawaitable(callback):
             raise TypeError("You may use a callback in this method")
         else:
