@@ -119,6 +119,13 @@ class Protocol:
                         )
                         session = self.sessions[session_id]
                         subscriptions = session.subscriptions
+                        for key in subscriptions:
+                            similar_strings = key.endswith("*") and response[
+                                "method"
+                            ].startswith(key[:-1])
+                            equals_method = response["method"] == key
+                            if similar_strings or equals_method:
+                                pass
                         continue
                     elif key:
                         future = None
