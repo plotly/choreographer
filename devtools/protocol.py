@@ -117,6 +117,7 @@ class Protocol:
                     elif self.is_event(response):
                         session_id = response["sessionId"] if "sessionId" in response else ""
                         session = self.sessions[session_id] if session_id in self.sessions else None
+                        subscriptions = session.subscriptions
                         continue
                     elif key:
                         future = None
