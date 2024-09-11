@@ -1,3 +1,6 @@
+import inspect
+
+
 class Session:
     def __init__(self, parent_target, session_id):
         if not isinstance(session_id, str):
@@ -30,7 +33,9 @@ class Session:
         return {"session_id": self.session_id, "message_id": current_id}
 
     def suscribe(self, string, callback):
-        pass
+        if not inspect.isawaitable(callback):
+            raise TypeError("You may use a callback in this method")
+        return {string : callback}
 
     def unsuscrib(self, string, callback):
         pass
