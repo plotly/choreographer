@@ -4,8 +4,10 @@ import warnings
 # from functools import partial
 
 from .pipe import PipeClosedError
+from .session import Session
 from threading import Thread
 from collections import OrderedDict
+
 
 
 class Protocol:
@@ -116,6 +118,8 @@ class Protocol:
                         raise RuntimeError(error)
                     elif self.is_event(response):
                         session_id = response["sessionId"] if "sessionId" in response else ""
+                        new_session = Session(self, session_id)
+                        self.sessions[new_session.session_id] = new_session
                         continue
                     elif key:
                         future = None
