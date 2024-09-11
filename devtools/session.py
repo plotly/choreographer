@@ -38,5 +38,8 @@ class Session:
             raise TypeError("You may use a callback in this method")
         self.suscribe_dict[string] = callback
 
-    def unsuscrib(self, string, callback):
-        pass
+    def unsuscrib(self, string):
+        if string in self.subscribe_dict:
+            self.suscribe_dict.pop(string)
+        else:
+            raise ValueError("The String is not in suscribe_dict")
