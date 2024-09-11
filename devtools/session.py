@@ -13,7 +13,7 @@ class Session:
         # State
         self.session_id = session_id
         self.message_id = 0
-        self.suscribe_dict = {}
+        self.subscriptions = {}
 
     def send_command(self, command, params=None):
         current_id = self.message_id
@@ -35,15 +35,15 @@ class Session:
         return {"session_id": self.session_id, "message_id": current_id}
 
     def suscribe(self, string, callback):
-        if string in self.suscribe_dict:
-            print("This value is in suscribe_dict")
+        if string in self.subscriptions:
+            print("This value is in subscriptions")
         else:
             if not inspect.isawaitable(callback):
                 raise TypeError("You may use a callback in this method")
-            self.suscribe_dict[string] = callback
+            self.subscriptions[string] = callback
 
     def unsuscrib(self, string):
         if string in self.subscribe_dict:
-            self.suscribe_dict.pop(string)
+            self.subscriptions.pop(string)
         else:
-            raise ValueError("The String is not in suscribe_dict")
+            raise ValueError("The String is not in subscriptions")
