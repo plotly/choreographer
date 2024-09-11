@@ -35,7 +35,7 @@ class Session:
 
     def suscribe(self, string, callback):
         if string in self.suscribe_dict:
-            raise ValueError("This value is in suscribe_dict")
+            print("This value is in suscribe_dict")
         if not inspect.isawaitable(callback):
             raise TypeError("You may use a callback in this method")
         self.suscribe_dict[string] = callback
