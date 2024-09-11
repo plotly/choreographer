@@ -117,11 +117,7 @@ class Protocol:
                         session_id = (
                             response["sessionId"] if "sessionId" in response else ""
                         )
-                        session = (
-                            self.sessions[session_id]
-                            if session_id in self.sessions
-                            else None
-                        )
+                        session = self.sessions[session_id]
                         subscriptions = session.subscriptions
                         continue
                     elif key:
