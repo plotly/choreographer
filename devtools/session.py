@@ -42,7 +42,7 @@ class Session:
         else:
             self.subscriptions[string] = callback
 
-    def unsuscrib(self, string):
+    def unsuscribe(self, string):
         if string not in self.subscribe_dict:
             raise ValueError("The String is not in subscriptions")
         self.subscriptions.pop(string)
