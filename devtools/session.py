@@ -34,7 +34,7 @@ class Session:
 
         return {"session_id": self.session_id, "message_id": current_id}
 
-    def suscribe(self, string, callback):
+    def subscribe(self, string, callback):
         if string in self.subscriptions:
             raise ValueError("This String was allready in subscriptions")
         elif not inspect.isawaitable(callback):
@@ -42,7 +42,7 @@ class Session:
         else:
             self.subscriptions[string] = callback
 
-    def unsuscribe(self, string):
+    def unsubscribe(self, string):
         if string not in self.subscribe_dict:
             raise ValueError("The String is not in subscriptions")
         self.subscriptions.pop(string)
