@@ -4,7 +4,6 @@ import warnings
 # from functools import partial
 
 from .pipe import PipeClosedError
-from .session import Session
 from threading import Thread
 
 
@@ -117,9 +116,7 @@ class Protocol:
                         raise RuntimeError(error)
                     elif self.is_event(response):
                         session_id = response["sessionId"] if "sessionId" in response else ""
-                        new_session = Session(self, session_id)
-                        new_session.suscribe(session_id, response["method"])
-                        self.sessions[new_session.session_id] = new_session
+                        session = self.sessions[session_id] if session_id in self.sessions else None
                         continue
                     elif key:
                         future = None
