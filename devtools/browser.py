@@ -20,7 +20,7 @@ default_path = which_browser()
 class Browser(Target):
     def __init__(
         self,
-        path=default_path,
+        path=None,
         headless=True,
         debug=False,
         debug_browser=None,
@@ -56,7 +56,13 @@ class Browser(Target):
             stderr = debug
 
         new_env = os.environ.copy()
-        new_env["CHROMIUM_PATH"] = str(path)
+        if not path:
+            path = os.environ.get("BROWSER_PATH", None)
+        if not path:
+            path = default_path
+        if path:
+            new_env["BROWSER_PATH"] = path
+
         new_env["USER_DATA_DIR"] = str(self.temp_dir.name)
         if headless:
             new_env["HEADLESS"] = "--headless"  # unset if false

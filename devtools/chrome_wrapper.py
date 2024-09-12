@@ -17,17 +17,20 @@ system = platform.system()
 if system == "Windows":
     import msvcrt  # noqa
 
-default_paths = {
-    "Linux": "/usr/bin/google-chrome-stable",
-    "Windows": r"c:\Program Files\Google\Chrome\Application\chrome.exe",
-}
+default_path = None
+if system == "Windows":
+    default_path = r"c:\Program Files\Google\Chrome\Application\chrome.exe"
+elif system == "Linux":
+    default_path = "/usr/bin/google-chrome-stable"
+else:
+    pass
 
-path = os.environ.get(
-    "BROWSER_PATH", default_paths.get(system, os.environ.get("CHROMIUM_PATH"))
-)
+path = os.environ.get("BROWSER_PATH", default_path)
 
 if path is None:
-    raise ValueError("You must specify a path")
+    raise ValueError("You must specify a path with environmental variable BROWSER_PATH")
+
+print(f"Sent path: {path}", file=sys.stderr)
 
 user_data_dir = os.environ["USER_DATA_DIR"]
 
