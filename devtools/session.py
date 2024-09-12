@@ -41,8 +41,18 @@ class Session:
             raise ValueError("This String was allready in subscriptions")
         else:
             self.subscriptions[string] = callback
+            if self.parent_target.protocol.debug:
+                print(
+                    f"Subscribe to {self.session_id} the key-value: {string} and {callback}"
+                )
+                print(f"Your subscriptions are: {self.subscriptions}")
 
     def unsubscribe(self, string):
         if string not in self.subscribe_dict:
             raise ValueError("The String is not in subscriptions")
         self.subscriptions.pop(string)
+        if self.parent_target.protocol.debug:
+            print(
+                f"Unsubscribe to {self.session_id} the key-value: {string} and {self.subscribe_dict[string]}"
+            )
+            print(f"Your subscriptions are: {self.subscriptions}")
