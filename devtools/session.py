@@ -30,6 +30,8 @@ class Session:
 
         possible_future = self.parent_target.protocol.write_json(json_command)
         if possible_future:
+            if self.parent_target.protocol.debug:
+                print("Waiting Future in send_command")
             return possible_future
 
         return {"session_id": self.session_id, "message_id": current_id}
@@ -37,8 +39,6 @@ class Session:
     def subscribe(self, string, callback):
         if string in self.subscriptions:
             raise ValueError("This String was allready in subscriptions")
-        elif not inspect.isawaitable(callback):
-            raise TypeError("This method needs a callback parameter that may be awaitable")
         else:
             self.subscriptions[string] = callback
 
