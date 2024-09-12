@@ -82,8 +82,8 @@ class Browser(Target):
                 env=new_env,
             )
         else:
-            import .chrome_wrapper as wrapper
-            self.subprocess = wrapper.open_browser(to_chromium=self.pipe.read_to_chromium,
+            from .chrome_wrapper import open_browser
+            self.subprocess = open_browser(to_chromium=self.pipe.read_to_chromium,
                                                    from_chromium=self.pipe.write_from_chromium,
                                                    stderr=stderr,
                                                    env=new_env)
