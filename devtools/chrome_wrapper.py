@@ -33,7 +33,7 @@ elif system == "Linux":
 else:
     pass
 
-def open_browser(to_chromium, from_chromium, env = None):
+def open_browser(to_chromium, from_chromium, stderr=None, env = None):
     path = env.get("BROWSER_PATH", default_path)
 
     if path is None:
@@ -62,9 +62,16 @@ def open_browser(to_chromium, from_chromium, env = None):
         cli += [
             f"--remote-debugging-io-pipes={str(to_chromium_handle)},{str(from_chromium_handle)}"
         ]
+        win_only = {}
+        if platform.system() == "Windows":
+            win_only = {"creationflags": subprocess.CREATE_NEW_PROCESS_GROUP}
 
     return subprocess.Popen(
-        cli, close_fds=False, pass_fds=(to_chromium, from_chromium) if system != "Windows" else None
+        cli,
+        close_fds=False,
+        pass_fds=(to_chromium, from_chromium) if system != "Windows" else None,
+        stderr=stderr,
+        **win_only,
     )
 
 
