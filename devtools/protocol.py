@@ -111,6 +111,7 @@ class Protocol:
                 for response in responses:
                     if self.debug:
                         print("Processing response:", response)
+                        print(f"Futures at the beginning of the response processing: {self.futures}")
                     error = self.get_error(response)
                     key = self.key_from_obj(response)
                     if not self.has_id(response) and error:
@@ -129,23 +130,33 @@ class Protocol:
                             if similar_strings or equals_method:
                                 if self.debug:
                                     print("run_read_loop() and create_task for event")
+                                    print(f"Futures before create_task for event: {self.futures}")
                                 self.loop.create_task(subscriptions[key], response)
+                                if self.debug:
+                                    print(f"Futures after run_read_loop() and create_task for event: {self.futures}")
                     elif key:
                         future = None
                         if key in self.futures:
                             if self.debug:
                                 print(f"run_read_loop() delete the Future with the key {key}")
                             future = self.futures.pop(key)
+                            if self.debug:
+                                print(f"Futures after run_read_loop() and set_result: {self.futures}")
                         else:
                             raise RuntimeError(f"Couldn't find a future for key: {key}")
                         if error:
+                            if self.debug:
+                                print("run_read_loop() get error")
                             future.set_result({"error": error})
                         else:
                             if self.debug:
                                 print("run_read_loop() and set_result about future")
+                                print(f"Futures before set_result: {self.futures}")
                             future.set_result(
                                 {"result": response["result"]}
                             )  # correcto?
+                            if self.debug:
+                                print(f"Futures after run_read_loop() and set_result: {self.futures}")
                     else:
                         warnings.warn("Unhandled message type:")
                         continue  # TODO make this work
