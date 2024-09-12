@@ -133,6 +133,8 @@ class Protocol:
                     elif key:
                         future = None
                         if key in self.futures:
+                            if self.debug:
+                                print(f"run_read_loop() delete the Future with the key {key}")
                             future = self.futures.pop(key)
                         else:
                             raise RuntimeError(f"Couldn't find a future for key: {key}")
