@@ -5,7 +5,7 @@ import asyncio
 def main_sync():
     # Interface Test
     # Process/Pipes Test
-    with devtools.Browser(headless=False, debug=True, debug_browser=False) as browser:
+    with devtools.Browser(headless=False, debug=True, debug_browser=True) as browser:
         browser.send_command(command="Target.getTargets")
         browser.protocol.pipe.read_jsons()
         browser.protocol.pipe.read_jsons(blocking=False)
@@ -35,7 +35,7 @@ def main_sync():
     time.sleep(3)
 
 async def main_async():
-    with devtools.Browser(headless=False, debug=True, loop=asyncio.get_running_loop()) as browser:
+    with devtools.Browser(headless=False, debug=True, loop=asyncio.get_running_loop(), debug_browser=True) as browser:
         tab1 = await browser.create_tab("https://www.youtube.com")
         await tab1.send_command("Page.navigate", params=dict(url="https://github.com"))
         tab2 = await browser.create_tab("https://plotly.com/")
