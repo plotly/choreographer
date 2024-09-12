@@ -125,6 +125,8 @@ class Protocol:
                             ].startswith(key[:-1])
                             equals_method = response["method"] == key
                             if similar_strings or equals_method:
+                                if self.debug:
+                                    print("run_read_loop() and create_task for event")
                                 self.loop.create_task(subscriptions[key], response)
                     elif key:
                         future = None
@@ -135,6 +137,8 @@ class Protocol:
                         if error:
                             future.set_result({"error": error})
                         else:
+                            if self.debug:
+                                print("run_read_loop() and set_result about future")
                             future.set_result(
                                 {"result": response["result"]}
                             )  # correcto?
