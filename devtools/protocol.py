@@ -109,6 +109,8 @@ class Protocol:
                     self.executor, self.pipe.read_jsons, True, self.debug
                 )
                 for response in responses:
+                    if self.debug:
+                        print("Processing response:", response)
                     error = self.get_error(response)
                     key = self.key_from_obj(response)
                     if not self.has_id(response) and error:
