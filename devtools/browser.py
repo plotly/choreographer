@@ -67,25 +67,27 @@ class Browser(Target):
         if headless:
             new_env["HEADLESS"] = "--headless"  # unset if false
 
-        win_only = {}
-        if platform.system() == "Windows":
-            win_only = {"creationflags": subprocess.CREATE_NEW_PROCESS_GROUP}
+        if platform.system() != "Windows":
+            self.subprocess = subprocess.Popen(
+                [
+                    sys.executable,
+                    os.path.join(
+                        os.path.dirname(os.path.realpath(__file__)), "chrome_wrapper.py"
+                    ),
+                ],
+                close_fds=True,
+                stdin=self.pipe.read_to_chromium,
+                stdout=self.pipe.write_from_chromium,
+                stderr=stderr,
+                env=new_env,
+            )
+        else:
+            import .chrome_wrapper as wrapper
+            self.subprocess = wrapper.open_browser(to_chromium=self.pipe.read_to_chromium,
+                                                   from_chromium=self.pipe.write_from_chromium,
+                                                   stderr=stderr,
+                                                   env=new_env)
 
-        proc = subprocess.Popen(
-            [
-                sys.executable,
-                os.path.join(
-                    os.path.dirname(os.path.realpath(__file__)), "chrome_wrapper.py"
-                ),
-            ],
-            close_fds=True,
-            stdin=self.pipe.read_to_chromium,
-            stdout=self.pipe.write_from_chromium,
-            stderr=stderr,
-            env=new_env,
-            **win_only,
-        )
-        self.subprocess = proc
 
 
     def __enter__(self):
