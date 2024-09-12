@@ -126,7 +126,6 @@ class Protocol:
                             equals_method = response["method"] == key
                             if similar_strings or equals_method:
                                 self.loop.create_task(subscriptions[key], response)
-                        continue
                     elif key:
                         future = None
                         if key in self.futures:
