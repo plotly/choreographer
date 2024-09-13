@@ -33,8 +33,8 @@ async def main_async():
     print("All is done") # do we need to close loop?
 
 if __name__ == "__main__":
-    #main_sync()
-    #time.sleep(2)
+    main_sync()
+    time.sleep(2)
     asyncio.run(main_async())
     time.sleep(1)
 

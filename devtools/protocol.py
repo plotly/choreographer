@@ -181,14 +181,9 @@ class Protocol:
                                     f"Futures after run_read_loop() and set_result: {self.futures}"
                                 )
                     else:
-                        warnings.warn("Unhandled message type:")
-                        continue  # TODO make this work
-                        warnings.warn(json.dumps(response))
-                        warnings.warn("Current futures:")
-                        warnings.warn(self.futures.keys())
-
+                        warnings.warn(f"Unhandled message type:{str(response)}")
             except PipeClosedError:
-                if self.debug:
+                if self.debug: # TODO: why wont this execute?
                     print("PipeClosedError caught", file=sys.stderr)
                 return
             self.loop.create_task(read_loop())
@@ -207,6 +202,8 @@ class Protocol:
                     for response in responses:
                         print(json.dumps(response, indent=4))
                 except PipeClosedError:
+                    if self.debug:
+                        print("PipeClosedError caught", file=sys.stderr)
                     break
 
         Thread(target=run_print, args=(debug,)).start()

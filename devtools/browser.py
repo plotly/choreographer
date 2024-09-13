@@ -125,13 +125,15 @@ class Browser(Target):
             try:
                 shutil.rmtree(self.temp_dir.name, onexc=remove_readonly)
                 del self.temp_dir
+            except FileNotFoundError:
+                pass
             except PermissionError:
                 warnings.warn(
                     "The temporary directory could not be deleted, due to permission error, execution will continue."
                 )
             except Exception as e:
                 warnings.warn(
-                    f"The temporary directory could not be deleted, execution will continue. {e}"
+                        f"The temporary directory could not be deleted, execution will continue. {type(e)}: {e}"
                 )
                 # We can ignore not found here TODO
         self.pipe.close()
