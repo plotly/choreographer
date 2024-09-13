@@ -127,6 +127,12 @@ class Protocol:
                                 "method"
                             ].startswith(sub_key[:-1])
                             equals_method = response["method"] == sub_key
+                            if self.debug:
+                                print(f"Checking subscription key: {sub_key}")
+                                print(f"Event method: {response['method']}")
+                                print(f"similar_strings result: {similar_strings}")
+                                print(f"equals_method result: {equals_method}")
+                                
                             if similar_strings or equals_method:
                                 if self.debug:
                                     print("run_read_loop() and create_task for event")
