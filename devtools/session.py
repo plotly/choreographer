@@ -36,14 +36,14 @@ class Session:
 
         return {"session_id": self.session_id, "message_id": current_id}
 
-    def subscribe(self, string, callback):
+    def subscribe(self, string, callback, repeating):
         if string in self.subscriptions:
             raise ValueError("This String was allready in subscriptions")
         else:
-            self.subscriptions[string] = callback
+            self.subscriptions[string] = (callback, repeating)
             if self.parent_target.protocol.debug:
                 print(
-                    f"Subscribe to {self.session_id} the key-value: {string} and {callback}"
+                    f"Subscribe to {self.session_id} the key-value: {string} and ({callback} - {repeating})"
                 )
                 print(f"Your subscriptions are: {self.subscriptions}")
 
@@ -53,6 +53,6 @@ class Session:
         self.subscriptions.pop(string)
         if self.parent_target.protocol.debug:
             print(
-                f"Unsubscribe to {self.session_id} the key-value: {string} and {self.subscribe_dict[string]}"
+                f"Unsubscribe to {self.session_id} the key-value: {string} and {self.subscribe_dict[string][0]}"
             )
             print(f"Your subscriptions are: {self.subscriptions}")
