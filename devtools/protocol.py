@@ -142,10 +142,12 @@ class Protocol:
                                 self.loop.create_task(subscriptions[sub_key][0](response))
                                 if self.debug:
                                     print(f"Futures after run_read_loop() and create_task for event: {self.futures}")
-                            if not subscriptions[sub_key][1]:
-                                self.sessions[session_id].unsubscribe(sub_key)
-                                if self.debug:
-                                    print(f"Unsubscribed from {sub_key} as repeating is False.")
+                                if not subscriptions[sub_key][1]:
+                                    self.sessions[session_id].unsubscribe(sub_key)
+                                    if self.debug:
+                                        print(f"Unsubscribed from {sub_key} as repeating is False.")
+                            else:
+                                print(f"Your key {sub_key} for the subcription is invalid for the methods of this event")
                     elif key:
                         future = None
                         if key in self.futures:
