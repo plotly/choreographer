@@ -15,8 +15,8 @@ def main_sync():
         )
         time.sleep(3)
         browser.send_command(command="Target.getTargets")
-        time.sleep(3)
-        print("Done")
+        time.sleep(1)
+    print("Done")
 
 async def main_async():
     with devtools.Browser(headless=False, debug=True, loop=asyncio.get_running_loop(), debug_browser=True) as browser:
