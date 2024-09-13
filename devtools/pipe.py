@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import platform
 
 class PipeClosedError(IOError):
     pass
@@ -57,7 +58,13 @@ class Pipe:
         return jsons
 
     def close(self):
+        if platform.system() == "Windows":
+            try:
+                os.set_blocking(self.write_from_chromium, False)
+                os.write(self.write_from_chromium, b'{bye}\n')
+            except:
+                pass
+        os.close(self.write_to_chromium)
         os.close(self.read_from_chromium)
         os.close(self.write_from_chromium)
         os.close(self.read_to_chromium)
-        os.close(self.write_to_chromium)

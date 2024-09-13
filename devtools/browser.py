@@ -128,12 +128,13 @@ class Browser(Target):
                 del self.temp_dir
             except PermissionError:
                 warnings.warn(
-                    "The temporary directory could not be deleted, but execution will continue."
+                    "The temporary directory could not be deleted, due to permission error, execution will continue."
                 )
             except Exception:
                 warnings.warn(
-                    "The temporary directory could not be deleted, but execution will continue."
+                    "The temporary directory could not be deleted, execution will continue."
                 )
+        self.pipe.close()
 
     def add_tab(self, tab):
         if not isinstance(tab, Tab):
