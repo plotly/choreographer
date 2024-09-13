@@ -1,6 +1,3 @@
-import inspect
-
-
 class Session:
     def __init__(self, parent_target, session_id):
         if not isinstance(session_id, str):
