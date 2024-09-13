@@ -122,18 +122,18 @@ class Protocol:
                         )
                         session = self.sessions[session_id]
                         subscriptions = session.subscriptions
-                        for key in subscriptions:
-                            similar_strings = key.endswith("*") and response[
+                        for sub_key in subscriptions:
+                            similar_strings = sub_key.endswith("*") and response[
                                 "method"
-                            ].startswith(key[:-1])
-                            equals_method = response["method"] == key
+                            ].startswith(sub_key[:-1])
+                            equals_method = response["method"] == sub_key
                             if similar_strings or equals_method:
                                 if self.debug:
                                     print("run_read_loop() and create_task for event")
-                                    print(f"The key-value are: {key} and {subscriptions[key]}")
+                                    print(f"The key-value are: {sub_key} and {subscriptions[sub_key]}")
                                     print(f"The event is: {response}")
                                     print(f"Futures before create_task for event: {self.futures}")
-                                self.loop.create_task(subscriptions[key](response))
+                                self.loop.create_task(subscriptions[sub_key](response))
                                 if self.debug:
                                     print(f"Futures after run_read_loop() and create_task for event: {self.futures}")
                     elif key:
