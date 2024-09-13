@@ -48,11 +48,11 @@ class Session:
                 print(f"Your subscriptions are: {self.subscriptions}")
 
     def unsubscribe(self, string):
-        if string not in self.subscribe_dict:
+        if string not in self.subscriptions:
             raise ValueError("The String is not in subscriptions")
-        self.subscriptions.pop(string)
+        removed_subscription = self.subscriptions.pop(string)
         if self.parent_target.protocol.debug:
             print(
-                f"Unsubscribe to {self.session_id} the key-value: {string} and {self.subscribe_dict[string][0]}"
+                f"Unsubscribe to {self.session_id} the key-value: {string} and {removed_subscription[0]}"
             )
             print(f"Your subscriptions are: {self.subscriptions}")
