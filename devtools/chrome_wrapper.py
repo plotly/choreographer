@@ -82,7 +82,6 @@ def kill_proc(*nope):
     process.kill()
 
 if __name__ == "__main__":
-    print("In main", file=sys.stderr)
     process = open_browser(to_chromium=3, from_chromium=4, env = os.environ)
     signal.signal(signal.SIGTERM, kill_proc)
     signal.signal(signal.SIGINT, kill_proc)
