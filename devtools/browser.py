@@ -134,6 +134,7 @@ class Browser(Target):
                 warnings.warn(
                     f"The temporary directory could not be deleted, execution will continue. {e}"
                 )
+                # We can ignore not found here TODO
         self.pipe.close()
 
     def add_tab(self, tab):
