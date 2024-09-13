@@ -130,9 +130,9 @@ class Protocol:
                             if similar_strings or equals_method:
                                 if self.debug:
                                     print("run_read_loop() and create_task for event")
-                                    print(f"Futures before create_task for event: {self.futures}")
                                     print(f"The key-value are: {key} and {subscriptions[key]}")
                                     print(f"The event is: {response}")
+                                    print(f"Futures before create_task for event: {self.futures}")
                                 self.loop.create_task(subscriptions[key](), response)
                                 if self.debug:
                                     print(f"Futures after run_read_loop() and create_task for event: {self.futures}")
