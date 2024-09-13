@@ -108,6 +108,7 @@ class Protocol:
                 responses = await self.loop.run_in_executor(
                     self.executor, self.pipe.read_jsons, True, self.debug
                 )
+                one_time = None
                 for response in responses:
                     if self.debug:
                         print("Processing response:", response)
@@ -123,6 +124,8 @@ class Protocol:
                         session = self.sessions[session_id]
                         subscriptions = session.subscriptions
                         for sub_key in subscriptions:
+                            if one_time and one_time[0] == session_id and one_time[0] == sub_key:
+                                continue
                             similar_strings = sub_key.endswith("*") and response[
                                 "method"
                             ].startswith(sub_key[:-1])
@@ -136,12 +139,14 @@ class Protocol:
                             if similar_strings or equals_method:
                                 if self.debug:
                                     print("run_read_loop() and create_task for event")
-                                    print(f"The key-value are: {sub_key} and {subscriptions[sub_key]}")
+                                    print(f"The key-value are: {sub_key} and ({subscriptions[sub_key][0]} - {subscriptions[sub_key][1]})")
                                     print(f"The event is: {response}")
                                     print(f"Futures before create_task for event: {self.futures}")
-                                self.loop.create_task(subscriptions[sub_key](response))
+                                self.loop.create_task(subscriptions[sub_key][0](response))
                                 if self.debug:
                                     print(f"Futures after run_read_loop() and create_task for event: {self.futures}")
+                                if not subscriptions[sub_key][1]: 
+                                    one_time = (session_id, sub_key)
                     elif key:
                         future = None
                         if key in self.futures:
