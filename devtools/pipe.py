@@ -55,3 +55,9 @@ class Pipe:
                     # allows escaping unicode characters, which chrome does (oof)
                     print(f"read_jsons: {jsons[-1]}", file=sys.stderr)
         return jsons
+
+    def close():
+        os.close(self.read_from_chromium)
+        os.close(self.write_from_chromium)
+        os.close(self.read_to_chromium)
+        os.close(self.write_to_chromium)
