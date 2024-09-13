@@ -142,8 +142,8 @@ class Protocol:
                                 self.loop.create_task(subscriptions[sub_key][0](response))
                                 if self.debug:
                                     print(f"Futures after run_read_loop() and create_task for event: {self.futures}")
-                                if not subscriptions[sub_key][1]: 
-                                    session.unsubscribe(sub_key)
+                                if not subscriptions[sub_key][1]:
+                                    self.sessions[session_id].unsubscribe(sub_key)
                     elif key:
                         future = None
                         if key in self.futures:
