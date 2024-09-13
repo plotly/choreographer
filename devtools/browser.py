@@ -87,6 +87,8 @@ class Browser(Target):
                                                    from_chromium=self.pipe.write_from_chromium,
                                                    stderr=stderr,
                                                    env=new_env)
+        if not self.headless and self.loop:
+            self.populate_targets()
 
 
     def __enter__(self):
