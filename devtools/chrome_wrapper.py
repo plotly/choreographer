@@ -11,6 +11,7 @@ os.set_inheritable(3, True)
 import subprocess  # noqa
 import signal  # noqa
 import platform  # noqa
+import sys # noqa
 
 system = platform.system()
 if system == "Windows":
@@ -72,4 +73,10 @@ if system == "Windows":
 else:
     signal.pause()
 
-print("Wrapper closing")
+# NOTE is bad but we don't detect closed pipe (stdout doesn't close from other end?)
+# doesn't seem to impact in sync, maybe because we're doing manual cleanup in sequence
+# should try to see if shutting down chrome browser can provoke pipeerror in threadmode and asyncmode
+# i think getting rid of this would be really good, and seeing what's going on in both
+# async and sync mode would help
+# see NOTE in pipe.py (line 38?)
+print("{bye}")

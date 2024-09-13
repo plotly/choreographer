@@ -19,13 +19,14 @@ default_path = which_browser()
 
 class Browser(Target):
     def __init__(
-        self, path=default_path, headless=True, debug=False, debug_browser=None
+        self, path=default_path, headless=True, debug=False, debug_browser=None, loop=None
     ):
         if path is None:
             raise ValueError("You must specify a path")
 
         self.pipe = Pipe(debug=debug)
-        self.protocol = Protocol(self.pipe)
+        self.loop = loop
+        self.protocol = Protocol(self.pipe, loop=loop, debug=debug)
         super().__init__("0", self.protocol)  # TODO not sure about target id "0"
         self.add_session(Session(self, ""))
 

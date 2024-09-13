@@ -1,13 +1,29 @@
 import json
 import sys
+import warnings
+#from functools import partial
 
 from .pipe import PipeClosedError
 from threading import Thread
 
 
 class Protocol:
-    def __init__(self, browser_pipe):
+    # TODO: detect default loop?
+    def __init__(self, browser_pipe, loop=None, executor=None, debug=False):
         self.pipe = browser_pipe
+        self.loop = loop
+        self.executor = executor
+        self.debug = debug
+        self.futures = None
+        if loop:
+            self.futures = {}
+            self.run_read_loop()
+
+    def key_from_obj(self, response):
+        session_id = response["sessionId"] if "sessionId" in response else ""
+        message_id = response["id"] if "id" in response else None
+        if message_id is None: return None
+        return (session_id, message_id)
 
     def write_json(self, obj):
         n_keys = 0
@@ -25,8 +41,14 @@ class Protocol:
             raise RuntimeError(
                 "Message objects must have id and method keys, and may have params and sessionId keys"
             )
-
-        self.pipe.write_json(obj)
+        if self.loop:
+            key = self.key_from_obj(obj)
+            future = self.loop.create_future()
+            self.futures[key] = future
+            self.loop.run_in_executor(self.executor, self.pipe.write_json, obj) # ignore
+            return future
+        else:
+            self.pipe.write_json(obj)
 
     def verify_response(self, response, session_id, message_id):
         if "session_id" not in response and session_id == "":
@@ -68,7 +90,42 @@ class Protocol:
         else:
             return None
 
-    def run_output_thread(self, debug=False):
+    def run_read_loop(self):
+        async def read_loop():
+            try: # this wont catch the error
+                responses = await self.loop.run_in_executor(self.executor, self.pipe.read_jsons, True, self.debug)
+                for response in responses:
+                    error = self.get_error(response)
+                    key = self.key_from_obj(response)
+                    if not self.has_id(response) and error:
+                        raise RuntimeError(error) # do this everywhere?
+                    elif key:
+                        future = None
+                        if key in self.futures:
+                            future = self.futures.pop(key)
+                        else:
+                            raise RuntimeError(f"Couldn't find a future for key: {key}")
+                        if error: # could be set exception NOTE
+                            future.set_result(error)
+                        else:
+                            future.set_result(response["result"]) # correcto?
+                    else:
+                        warnings.warn("Unhandled message type:")
+                        warnings.warn(response)
+                        warnings.warn("Current futures:")
+                        warnings.warn(self.futures.keys())
+
+
+
+            except PipeClosedError:
+                return
+            self.loop.create_task(read_loop())
+        self.loop.create_task(read_loop())
+
+    def run_output_thread(self, debug=None):
+        if not debug:
+            debug = self.debug
+
         def run_print(debug):
             while True:
                 try:
