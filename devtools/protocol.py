@@ -130,14 +130,11 @@ class Protocol:
                             if self.debug:
                                 print(f"Checking subscription key: {sub_key}")
                                 print(f"Event method: {response['method']}")
-                                print(f"similar_strings result: {similar_strings}")
-                                print(f"equals_method result: {equals_method}")
                                 
                             if similar_strings or equals_method:
                                 if self.debug:
                                     print("run_read_loop() and create_task for event")
                                     print(f"The key-value are: {sub_key} and ({subscriptions[sub_key][0]} - {subscriptions[sub_key][1]})")
-                                    print(f"The event is: {response}")
                                     print(f"Futures before create_task for event: {self.futures}")
                                 self.loop.create_task(subscriptions[sub_key][0](response))
                                 if self.debug:
