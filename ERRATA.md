@@ -1,8 +1,7 @@
 TODO: Mark lack of gracefulness.
-TODO: See if this works with async.
 TODO: Try browser.close() w/ devtools command.
-TODO: Make sure no-debug is silent silent.
 TODO: Make a "kill"
+TODO: Make sure no-debug is silent silent.
 TODO: Try moving over to async. process
 TODO: Are we growing massive temporary directories.
 TOOD: POPULATE

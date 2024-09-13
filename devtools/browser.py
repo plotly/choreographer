@@ -130,9 +130,9 @@ class Browser(Target):
                 warnings.warn(
                     "The temporary directory could not be deleted, due to permission error, execution will continue."
                 )
-            except Exception:
+            except Exception as e:
                 warnings.warn(
-                    "The temporary directory could not be deleted, execution will continue."
+                    f"The temporary directory could not be deleted, execution will continue. {e}"
                 )
         self.pipe.close()
 
