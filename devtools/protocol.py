@@ -108,7 +108,6 @@ class Protocol:
                 responses = await self.loop.run_in_executor(
                     self.executor, self.pipe.read_jsons, True, self.debug
                 )
-                one_time = None
                 for response in responses:
                     if self.debug:
                         print("Processing response:", response)
@@ -124,8 +123,6 @@ class Protocol:
                         session = self.sessions[session_id]
                         subscriptions = session.subscriptions
                         for sub_key in subscriptions:
-                            if one_time and one_time[0] == session_id and one_time[0] == sub_key:
-                                continue
                             similar_strings = sub_key.endswith("*") and response[
                                 "method"
                             ].startswith(sub_key[:-1])
@@ -146,7 +143,7 @@ class Protocol:
                                 if self.debug:
                                     print(f"Futures after run_read_loop() and create_task for event: {self.futures}")
                                 if not subscriptions[sub_key][1]: 
-                                    one_time = (session_id, sub_key)
+                                    session.unsubscribe(sub_key)
                     elif key:
                         future = None
                         if key in self.futures:
