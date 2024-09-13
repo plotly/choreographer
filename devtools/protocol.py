@@ -133,7 +133,7 @@ class Protocol:
                                     print(f"The key-value are: {key} and {subscriptions[key]}")
                                     print(f"The event is: {response}")
                                     print(f"Futures before create_task for event: {self.futures}")
-                                self.loop.create_task(subscriptions[key](), response)
+                                self.loop.create_task(subscriptions[key](response))
                                 if self.debug:
                                     print(f"Futures after run_read_loop() and create_task for event: {self.futures}")
                     elif key:
