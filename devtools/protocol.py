@@ -188,7 +188,8 @@ class Protocol:
                         warnings.warn(self.futures.keys())
 
             except PipeClosedError:
-                # TODO this isn't being caught
+                if self.debug:
+                    print("PipeClosedError caught", file=sys.stderr)
                 return
             self.loop.create_task(read_loop())
 
@@ -199,13 +200,13 @@ class Protocol:
             debug = self.debug
 
         def run_print(debug):
+            if debug: print("Starting run_print loop", file=sys.stderr)
             while True:
                 try:
                     responses = self.pipe.read_jsons(debug=debug)
                     for response in responses:
                         print(json.dumps(response, indent=4))
                 except PipeClosedError:
-                    print("Pipe closed.", file=sys.stderr)
                     break
 
         Thread(target=run_print, args=(debug,)).start()

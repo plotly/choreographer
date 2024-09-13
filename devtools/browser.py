@@ -20,7 +20,7 @@ default_path = which_browser()
 class Browser(Target):
     def __init__(
         self,
-        path=default_path,
+        path=None,
         headless=True,
         debug=False,
         debug_browser=None,
@@ -56,30 +56,38 @@ class Browser(Target):
             stderr = debug
 
         new_env = os.environ.copy()
-        new_env["CHROMIUM_PATH"] = str(path)
+        if not path:
+            path = os.environ.get("BROWSER_PATH", None)
+        if not path:
+            path = default_path
+        if path:
+            new_env["BROWSER_PATH"] = path
+
         new_env["USER_DATA_DIR"] = str(self.temp_dir.name)
         if headless:
             new_env["HEADLESS"] = "--headless"  # unset if false
 
-        win_only = {}
-        if platform.system() == "Windows":
-            win_only = {"creationflags": subprocess.CREATE_NEW_PROCESS_GROUP}
+        if platform.system() != "Windows":
+            self.subprocess = subprocess.Popen(
+                [
+                    sys.executable,
+                    os.path.join(
+                        os.path.dirname(os.path.realpath(__file__)), "chrome_wrapper.py"
+                    ),
+                ],
+                close_fds=True,
+                stdin=self.pipe.read_to_chromium,
+                stdout=self.pipe.write_from_chromium,
+                stderr=stderr,
+                env=new_env,
+            )
+        else:
+            from .chrome_wrapper import open_browser
+            self.subprocess = open_browser(to_chromium=self.pipe.read_to_chromium,
+                                                   from_chromium=self.pipe.write_from_chromium,
+                                                   stderr=stderr,
+                                                   env=new_env)
 
-        proc = subprocess.Popen(
-            [
-                sys.executable,
-                os.path.join(
-                    os.path.dirname(os.path.realpath(__file__)), "chrome_wrapper.py"
-                ),
-            ],
-            close_fds=True,
-            stdin=self.pipe.read_to_chromium,
-            stdout=self.pipe.write_from_chromium,
-            stderr=stderr,
-            env=new_env,
-            **win_only,
-        )
-        self.subprocess = proc
 
     def __enter__(self):
         return self
@@ -119,12 +127,14 @@ class Browser(Target):
                 del self.temp_dir
             except PermissionError:
                 warnings.warn(
-                    "The temporary directory could not be deleted, but execution will continue."
+                    "The temporary directory could not be deleted, due to permission error, execution will continue."
                 )
-            except Exception:
+            except Exception as e:
                 warnings.warn(
-                    "The temporary directory could not be deleted, but execution will continue."
+                    f"The temporary directory could not be deleted, execution will continue. {e}"
                 )
+                # We can ignore not found here TODO
+        self.pipe.close()
 
     def add_tab(self, tab):
         if not isinstance(tab, Tab):
@@ -176,7 +186,6 @@ class Browser(Target):
         self.remove_tab(target_id)
         if "error" in response:
             raise RuntimeError("Could not close tab") from Exception(response["error"])
-        print(f"The tab {target_id} has been closed")
         return response
 
     async def create_session(self):
