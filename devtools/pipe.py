@@ -62,7 +62,7 @@ class Pipe:
             try:
                 os.set_blocking(self.write_from_chromium, False)
                 os.write(self.write_from_chromium, b'{bye}\n')
-            except:
+            except Exception:
                 pass
         os.close(self.write_to_chromium)
         os.close(self.read_from_chromium)
