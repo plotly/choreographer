@@ -1,4 +1,3 @@
-TODO: Go through all three options again (no close, write close, close) on sync and async. close your first
 TODO: Mark lack of gracefulness.
 TODO: Try browser.close() w/ devtools command.
 TODO: Make a "kill"
