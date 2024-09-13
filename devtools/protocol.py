@@ -122,7 +122,7 @@ class Protocol:
                         )
                         session = self.sessions[session_id]
                         subscriptions = session.subscriptions
-                        for sub_key in subscriptions:
+                        for sub_key in list(subscriptions):
                             similar_strings = sub_key.endswith("*") and response[
                                 "method"
                             ].startswith(sub_key[:-1])
