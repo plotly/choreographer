@@ -75,6 +75,7 @@ def open_browser(to_chromium, from_chromium, stderr=None, env = None):
     )
 
 
+# THIS MAY BE PART OF KILL
 def kill_proc(*nope):
     global process
     process.terminate()
