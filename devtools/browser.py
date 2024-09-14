@@ -61,6 +61,11 @@ class Browser(Target):
         self._stderr = stderr
         self._env = new_env
 
+        if loop is None:
+            try:
+                loop = asyncio.get_running_loop()
+            except Exception:
+                loop = False
         self.loop = loop
 
         # Resources
