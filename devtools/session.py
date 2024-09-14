@@ -4,10 +4,13 @@ class Session:
             raise TypeError("session_id must be a string")
         if not hasattr(parent_target, "target_id"):
             raise TypeError("parent must be a target object")
+        # Resources
+        self.parent_target = parent_target
 
+        # State
         self.session_id = session_id
         self.message_id = 0
-        self.parent_target = parent_target
+        self.subscriptions = {}
 
     def send_command(self, command, params=None):
         current_id = self.message_id
@@ -23,6 +26,18 @@ class Session:
             json_command["params"] = params
 
         possible_future = self.parent_target.protocol.write_json(json_command)
-        if possible_future: return possible_future
+        if possible_future:
+            return possible_future
 
-        return {"session_id":self.session_id, "message_id": current_id}
+        return {"session_id": self.session_id, "message_id": current_id}
+
+    def subscribe(self, string, callback, repeating):
+        if string in self.subscriptions:
+            raise ValueError("You are already subscribed to this string, duplicate subscriptions are not allowed.")
+        else:
+            self.subscriptions[string] = (callback, repeating)
+
+    def unsubscribe(self, string):
+        if string not in self.subscriptions:
+            raise ValueError("Cannot unsubscribe as string is not present in subscriptions")
+        self.subscriptions.remove(string)
