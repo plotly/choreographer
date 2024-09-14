@@ -3,9 +3,8 @@
 * TODO: Make a "kill"
 * TODO: Make sure no-debug is silent silent.
 * TODO: Try moving over to async. process
-* TODO: Are we growing massive temporary directories.
-* TODO: POPULATE
 * TODO: async contexts
+* TODO: POPULATE
 
 
 Windows:
