@@ -1,20 +1,30 @@
 import json
 import sys
 import warnings
-#from functools import partial
+# from functools import partial
 
 from .pipe import PipeClosedError
 from threading import Thread
 
+class UnhandledMessageWarning(UserWarning):
+    pass
 
 class Protocol:
     # TODO: detect default loop?
     def __init__(self, browser_pipe, loop=None, executor=None, debug=False):
+        # Stored Resources
         self.pipe = browser_pipe
         self.loop = loop
         self.executor = executor
+
+        # Configuration
         self.debug = debug
+
+        # State Variables
         self.futures = None
+        self.sessions = {}
+
+        # Init
         if loop:
             self.futures = {}
             self.run_read_loop()
@@ -22,7 +32,8 @@ class Protocol:
     def key_from_obj(self, response):
         session_id = response["sessionId"] if "sessionId" in response else ""
         message_id = response["id"] if "id" in response else None
-        if message_id is None: return None
+        if message_id is None:
+            return None
         return (session_id, message_id)
 
     def write_json(self, obj):
@@ -39,13 +50,15 @@ class Protocol:
 
         if len(obj.keys()) != n_keys:
             raise RuntimeError(
-                "Message objects must have id and method keys, and may have params and sessionId keys"
+                "Message objects must have id and method keys, and may have params and sessionId keys."
             )
         if self.loop:
             key = self.key_from_obj(obj)
             future = self.loop.create_future()
             self.futures[key] = future
-            self.loop.run_in_executor(self.executor, self.pipe.write_json, obj) # ignore
+            self.loop.run_in_executor(
+                self.executor, self.pipe.write_json, obj
+            )  # ignore result
             return future
         else:
             self.pipe.write_json(obj)
@@ -71,18 +84,13 @@ class Protocol:
         if "result" in response and "targetId" in response["result"]:
             return response["result"]["targetId"]
         else:
-            if "targetId" in response["params"]:
-                return response["params"]["targetId"]
-            elif "targetInfo" in response["params"]:
-                return response["params"]["targetInfo"]["targetId"]
+            return None
 
     def get_sessionId(self, response):
-        if "sessionId" in response:
-            return response["sessionId"]
-        elif "result" in response and "sessionId" in response["result"]:
+        if "result" in response and "sessionId" in response["result"]:
             return response["result"]["sessionId"]
         else:
-            return response["params"]["sessionId"]
+            return None
 
     def get_error(self, response):
         if "error" in response:
@@ -90,36 +98,64 @@ class Protocol:
         else:
             return None
 
+    def is_event(self, response):
+        required_keys = {"method", "params"}
+        if required_keys <= response.keys() and "id" not in response:
+            return True
+        return False
+
     def run_read_loop(self):
         async def read_loop():
-            try: # this wont catch the error
-                responses = await self.loop.run_in_executor(self.executor, self.pipe.read_jsons, True, self.debug)
+            try:
+                responses = await self.loop.run_in_executor(
+                    self.executor, self.pipe.read_jsons, True, self.debug
+                )
                 for response in responses:
                     error = self.get_error(response)
                     key = self.key_from_obj(response)
                     if not self.has_id(response) and error:
-                        raise RuntimeError(error) # do this everywhere?
+                        raise RuntimeError(error)
+                    elif self.is_event(response):
+                        session_id = (
+                            response["sessionId"] if "sessionId" in response else ""
+                        )
+                        session = self.sessions[session_id]
+                        subscriptions = session.subscriptions
+                        for sub_key in list(subscriptions):
+                            similar_strings = sub_key.endswith("*") and response[
+                                "method"
+                            ].startswith(sub_key[:-1])
+                            equals_method = response["method"] == sub_key
+                            if self.debug:
+                                print(f"Checking subscription key: {sub_key} against event method {response['method']}", file=sys.stderr)
+                            if similar_strings or equals_method:
+                                self.loop.create_task(
+                                    subscriptions[sub_key][0](response)
+                                )
+                                if not subscriptions[sub_key][1]: # if not repeating
+                                    self.sessions[session_id].unsubscribe(sub_key)
                     elif key:
                         future = None
                         if key in self.futures:
+                            if self.debug:
+                                print(
+                                    f"run_read_loop() found future foor key {key}"
+                                )
                             future = self.futures.pop(key)
                         else:
                             raise RuntimeError(f"Couldn't find a future for key: {key}")
-                        if error: # could be set exception NOTE
-                            future.set_result(error)
+                        if error:
+                            future.set_result(response)
                         else:
-                            future.set_result(response["result"]) # correcto?
+                            future.set_result(response)
                     else:
-                        warnings.warn("Unhandled message type:")
-                        warnings.warn(response)
-                        warnings.warn("Current futures:")
-                        warnings.warn(self.futures.keys())
-
-
-
+                        warnings.warn(f"Unhandled message type:{str(response)}", UnhandledMessageWarning)
             except PipeClosedError:
+                if self.debug:
+                    print("PipeClosedError caught", file=sys.stderr)
                 return
             self.loop.create_task(read_loop())
+
         self.loop.create_task(read_loop())
 
     def run_output_thread(self, debug=None):
@@ -127,14 +163,15 @@ class Protocol:
             debug = self.debug
 
         def run_print(debug):
+            if debug: print("Starting run_print loop", file=sys.stderr)
             while True:
                 try:
                     responses = self.pipe.read_jsons(debug=debug)
                     for response in responses:
                         print(json.dumps(response, indent=4))
                 except PipeClosedError:
-                    print("Pipe closed", file=sys.stderr)
+                    if self.debug:
+                        print("PipeClosedError caught", file=sys.stderr)
                     break
 
         Thread(target=run_print, args=(debug,)).start()
-
