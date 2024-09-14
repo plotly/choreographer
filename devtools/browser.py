@@ -22,24 +22,15 @@ class Browser(Target):
         self,
         path=None,
         headless=True,
+        loop=None,
         debug=False,
         debug_browser=None,
-        loop=None,
     ):
-        # Configuration
-        self.headless = headless
-
-        # Resources
-        self.pipe = Pipe(debug=debug)
-        self.loop = loop
-        self.protocol = Protocol(self.pipe, loop=loop, debug=debug)
-
         # State
         self.tabs = OrderedDict()
 
-        # Initializing
-        super().__init__("0", self)  # NOTE: 0 can't really be used externally
-        self.add_session(Session(self, ""))
+        # Configuration
+        self.headless = headless
 
         if platform.system() != "Windows":
             self.temp_dir = tempfile.TemporaryDirectory()
@@ -67,6 +58,27 @@ class Browser(Target):
         if headless:
             new_env["HEADLESS"] = "--headless"  # unset if false
 
+        self._stderr = stderr
+        self._env = new_env
+
+        self.loop = loop
+
+        # Resources
+        self.pipe = Pipe(debug=debug) # this is a little weird TODO
+        self.protocol = Protocol(self.pipe, loop=loop, debug=debug) # this is a little weird TODO
+        # must take executor
+
+        # Initializing
+        super().__init__("0", self)  # NOTE: 0 can't really be used externally
+        self.add_session(Session(self, ""))
+
+        self._open()
+
+
+
+    def _open(self):
+        stderr = self._stderr
+        env = self._env
         if platform.system() != "Windows":
             self.subprocess = subprocess.Popen(
                 [
@@ -79,14 +91,14 @@ class Browser(Target):
                 stdin=self.pipe.read_to_chromium,
                 stdout=self.pipe.write_from_chromium,
                 stderr=stderr,
-                env=new_env,
+                env=env,
             )
         else:
             from .chrome_wrapper import open_browser
             self.subprocess = open_browser(to_chromium=self.pipe.read_to_chromium,
                                                    from_chromium=self.pipe.write_from_chromium,
                                                    stderr=stderr,
-                                                   env=new_env)
+                                                   env=env)
 
 
     def __enter__(self):
