@@ -145,7 +145,7 @@ class Protocol:
                         else:
                             raise RuntimeError(f"Couldn't find a future for key: {key}")
                         if error:
-                            future.set_result(reponse)
+                            future.set_result(response)
                         else:
                             future.set_result(response)
                     else:
