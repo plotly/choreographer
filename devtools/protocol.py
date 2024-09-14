@@ -6,6 +6,8 @@ import warnings
 from .pipe import PipeClosedError
 from threading import Thread
 
+class UnhandledMessageWarning(UserWarning):
+    pass
 
 class Protocol:
     # TODO: detect default loop?
@@ -109,11 +111,6 @@ class Protocol:
                     self.executor, self.pipe.read_jsons, True, self.debug
                 )
                 for response in responses:
-                    if self.debug:
-                        print("Processing response:", response)
-                        print(
-                            f"Futures at the beginning of the response processing: {self.futures}"
-                        )
                     error = self.get_error(response)
                     key = self.key_from_obj(response)
                     if not self.has_id(response) and error:
@@ -130,60 +127,31 @@ class Protocol:
                             ].startswith(sub_key[:-1])
                             equals_method = response["method"] == sub_key
                             if self.debug:
-                                print(f"Checking subscription key: {sub_key}")
-                                print(f"Event method: {response['method']}")
-
+                                print(f"Checking subscription key: {sub_key} against event method {response['method']}", file=sys.stderr)
                             if similar_strings or equals_method:
-                                if self.debug:
-                                    print("run_read_loop() and create_task for event")
                                 self.loop.create_task(
                                     subscriptions[sub_key][0](response)
                                 )
-                                if self.debug:
-                                    print("create_task for event done!")
-                                if not subscriptions[sub_key][1]:
+                                if not subscriptions[sub_key][1]: # if not repeating
                                     self.sessions[session_id].unsubscribe(sub_key)
-                                    if self.debug:
-                                        print(
-                                            f"Unsubscribed from {sub_key} as repeating is False."
-                                        )
-                            else:
-                                print(
-                                    f"Your key {sub_key} for the subcription is invalid for the methods of this event"
-                                )
                     elif key:
                         future = None
                         if key in self.futures:
                             if self.debug:
                                 print(
-                                    f"run_read_loop() delete the Future with the key {key}"
+                                    f"run_read_loop() found future foor key {key}"
                                 )
                             future = self.futures.pop(key)
-                            if self.debug:
-                                print(
-                                    f"Futures after run_read_loop() and set_result: {self.futures}"
-                                )
                         else:
                             raise RuntimeError(f"Couldn't find a future for key: {key}")
                         if error:
-                            if self.debug:
-                                print("run_read_loop() get error")
-                            future.set_result({"error": error})
+                            future.set_result(response)
                         else:
-                            if self.debug:
-                                print("run_read_loop() and set_result about future")
-                                print(f"Futures before set_result: {self.futures}")
-                            future.set_result(
-                                {"result": response["result"]}
-                            )  # correcto?
-                            if self.debug:
-                                print(
-                                    f"Futures after run_read_loop() and set_result: {self.futures}"
-                                )
+                            future.set_result(response)
                     else:
-                        warnings.warn(f"Unhandled message type:{str(response)}")
+                        warnings.warn(f"Unhandled message type:{str(response)}", UnhandledMessageWarning)
             except PipeClosedError:
-                if self.debug: # TODO: why wont this execute?
+                if self.debug:
                     print("PipeClosedError caught", file=sys.stderr)
                 return
             self.loop.create_task(read_loop())
