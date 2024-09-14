@@ -89,7 +89,6 @@ class Browser(Target):
                                                    env=new_env)
 
 
-
     def __enter__(self):
         return self
 
@@ -136,7 +135,7 @@ class Browser(Target):
                 warnings.warn(
                         f"The temporary directory could not be deleted, execution will continue. {type(e)}: {e}"
                 )
-                # We can ignore not found here TODO
+
         self.pipe.close()
 
     def add_tab(self, tab):
@@ -197,7 +196,7 @@ class Browser(Target):
                 "There is no eventloop, or was not passed to browser. Cannot use async methods"
             )
         warnings.warn(
-            "Creating new sessions on Browser() only works with some versions of Chrome, it is experimental"
+            "Creating new sessions on Browser() only works with some versions of Chrome, it is experimental."
         )
         response = await self.browser.send_command("Target.attachToBrowserTarget")
         if "error" in response:
@@ -213,7 +212,7 @@ class Browser(Target):
         if not self.headless:
             raise ValueError("You must use this function with headless=False")
         elif not self.browser.loop:
-            warnings.warn("This method it is working without loop")
+            warnings.warn("This method requires use of an event loop (asyncio).")
         response = await self.browser.send_command("Target.getTargets")
         if "error" in response:
             raise RuntimeError("Could not get targets") from Exception(
@@ -234,4 +233,3 @@ class Browser(Target):
     def get_tab(self):
         if self.tabs.values():
             return list(self.tabs.values())[0]
-
