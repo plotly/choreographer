@@ -77,8 +77,18 @@ class Browser(Target):
         super().__init__("0", self)  # NOTE: 0 can't really be used externally
         self.add_session(Session(self, ""))
 
-        self._open()
+        if not self.loop:
+            self._open()
 
+
+
+    def __await__(self):
+        if self.loop is True: # TODO this might not work
+            self.loop = asyncio.get_running_loop()
+        # not we're going to open the process and wait
+        self.future_self = self.loop.create_future()
+        self.loop.create_task(self._open_async())
+        return self.future_self.__await__()
 
 
     def _open(self):
@@ -104,6 +114,13 @@ class Browser(Target):
                                                    from_chromium=self.pipe.write_from_chromium,
                                                    stderr=stderr,
                                                    env=env)
+
+
+    # TODO: we're not actually going to a future,
+    # since asyncio.Popen returns one we can use
+    async def _open_async(self):
+        self._open() # not really async yet
+        self.future_self.set_result(self)
 
 
     def __enter__(self):

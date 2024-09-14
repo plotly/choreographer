@@ -32,11 +32,24 @@ async def main_async():
         await browser.close_tab(tab2)
     print("All is done") # do we need to close loop?
 
+async def main_async2():
+    print("Starting browser")
+    browser = await devtools.Browser(loop=asyncio.get_running_loop(), headless=False, debug=True, debug_browser=True)
+    print(browser)
+    print("Sleeping")
+    await asyncio.sleep(2)
+    print("Slept")
+    print(browser)
+    browser.close()
+
 if __name__ == "__main__":
-    main_sync()
-    time.sleep(2)
-    asyncio.run(main_async())
-    time.sleep(1)
+    print(asyncio.get_running_loop())
+    exit()
+    asyncio.run(main_async2())
+    #main_sync()
+    #time.sleep(2)
+    #asyncio.run(main_async())
+    #time.sleep(1)
 
 
 # blocking, regular blocking, you read and write, good luck (we need to be able to piece-meal the thing together)

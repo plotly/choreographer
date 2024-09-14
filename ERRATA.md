@@ -1,10 +1,18 @@
+* Commits!
+* Return key()
+* Do I want to pull some stuff out of protocol?
+* TODO: fix pipe and protocol and reorganize and stuff so we can do all awaits at end
+
+* TODO: Try moving over to async. process
+* TODO: async contexts
+
+* Probably some done:
 * TODO: Mark lack of gracefulness.
 * TODO: Try browser.close() w/ devtools command.
 * TODO: Make a "kill"
 * TODO: Make sure no-debug is silent silent.
-* TODO: Try moving over to async. process
-* TODO: async contexts
 * TODO: POPULATE
+* TODO: Make sure delete is last thing
 
 
 Windows:
