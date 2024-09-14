@@ -113,18 +113,24 @@ class Browser(Target):
         self.close()
 
     def close(self):
+        self.send_command("Browser.close")
+        self.subprocess.wait(1)
         if platform.system() == "Windows":
             # maybe we don't need chrome_wrapper for windows because of how handles are needed
             # if we're not chaining process, this might not be necessary
             # otherwise, win behaves strangely in the face of signals, so call a command to kill the process instead
             # NB: chrome accepts being killed like this because it knows windows is a nightmare
-            subprocess.call(
-                ["taskkill", "/F", "/T", "/PID", str(self.subprocess.pid)]
-            )  # this output should be handled better by where there is debug
+            if self.subprocess.poll():
+                subprocess.call(
+                    ["taskkill", "/F", "/T", "/PID", str(self.subprocess.pid)]
+                )  # this output should be handled better by where there is debug
             self.subprocess.wait(2)
         self.subprocess.terminate()
         self.subprocess.wait(2)
         self.subprocess.kill()
+
+        self.pipe.close()
+
         try:
             self.temp_dir.cleanup()
         except Exception as e:  # TODO- handle specific errors
@@ -153,7 +159,7 @@ class Browser(Target):
                         f"The temporary directory could not be deleted, execution will continue. {type(e)}: {e}"
                 )
 
-        self.pipe.close()
+
 
     def add_tab(self, tab):
         if not isinstance(tab, Tab):
