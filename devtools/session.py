@@ -27,29 +27,17 @@ class Session:
 
         possible_future = self.parent_target.protocol.write_json(json_command)
         if possible_future:
-            if self.parent_target.protocol.debug:
-                print("Waiting Future in send_command")
             return possible_future
 
         return {"session_id": self.session_id, "message_id": current_id}
 
     def subscribe(self, string, callback, repeating):
         if string in self.subscriptions:
-            raise ValueError("This String was allready in subscriptions")
+            raise ValueError("You are already subscribed to this string, duplicate subscriptions are not allowed.")
         else:
             self.subscriptions[string] = (callback, repeating)
-            if self.parent_target.protocol.debug:
-                print(
-                    f"Subscribe to {self.session_id} the key-value: {string} and ({callback} - {repeating})"
-                )
-                print(f"Your subscriptions are: {self.subscriptions}")
 
     def unsubscribe(self, string):
         if string not in self.subscriptions:
-            raise ValueError("The String is not in subscriptions")
-        removed_subscription = self.subscriptions.pop(string)
-        if self.parent_target.protocol.debug:
-            print(
-                f"Unsubscribe to {self.session_id} the key-value: {string} and {removed_subscription[0]}"
-            )
-            print(f"Your subscriptions are: {self.subscriptions}")
+            raise ValueError("Cannot unsubscribe as string is not present in subscriptions")
+        removed_subscription = self.subscriptions.remove(string)
