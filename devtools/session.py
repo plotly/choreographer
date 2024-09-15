@@ -23,11 +23,7 @@ class Session:
         if params:
             json_command["params"] = params
 
-        possible_future = self.browser.protocol.write_json(json_command)
-        if possible_future:
-            return possible_future
-
-        return {"session_id": self.session_id, "message_id": current_id}
+        return self.browser.write_json(json_command)
 
     def subscribe(self, string, callback, repeating):
         if string in self.subscriptions:

@@ -4,6 +4,8 @@ import sys
 import subprocess
 import tempfile
 import warnings
+import json
+import asyncio
 from threading import Thread
 from collections import OrderedDict
 
@@ -16,6 +18,9 @@ from .system import which_browser
 
 from .pipe import PipeClosedError
 
+class UnhandledMessageWarning(UserWarning):
+    pass
+
 default_path = which_browser() # probably handle this better
 
 class Browser(Target):
@@ -24,6 +29,7 @@ class Browser(Target):
         path=None,
         headless=True,
         loop=None,
+        executor=None,
         debug=False,
         debug_browser=None,
     ):
@@ -74,13 +80,16 @@ class Browser(Target):
                 loop = False
         self.loop = loop
 
-        # Resources
-        self.pipe = Pipe(debug=debug) # this is a little weird TODO
-        self.protocol = Protocol(self.pipe, loop=loop, debug=debug) # this is a little weird TODO
-        # must take executor
+        # State
+        if self.loop:
+            self.futures = {}
+        self.executor = executor
 
         self.tabs = OrderedDict()
 
+        # Compose Resources
+        self.pipe = Pipe(debug=debug)
+        self.protocol = Protocol(debug=debug)
 
         # Initializing
         super().__init__("0", self)  # NOTE: 0 can't really be used externally
@@ -98,6 +107,7 @@ class Browser(Target):
         # not we're going to open the process and wait
         self.future_self = self.loop.create_future()
         self.loop.create_task(self._open_async())
+        self.run_read_loop()
         return self.future_self.__await__()
 
 
@@ -184,6 +194,19 @@ class Browser(Target):
         return self
 
     def __exit__(self, type, value, traceback):
+        self.close()
+
+    # this is basically __await__, but return slightly different
+    def __aenter__(self):
+        if self.loop is True:
+            self.loop = asyncio.get_running_loop()
+        # not we're going to open the process and wait
+        self.future_self = self.loop.create_future()
+        self.loop.create_task(self._open_async())
+        self.run_read_loop()
+        return self.future_self
+
+    async def __aexit__(self, type, value, traceback):
         self.close()
 
     # Basic syncronous functions
@@ -305,4 +328,72 @@ class Browser(Target):
                     break
 
         Thread(target=run_print, args=(debug,)).start()
+
+    def run_read_loop(self):
+        async def read_loop():
+            try:
+                responses = await self.loop.run_in_executor(
+                    self.executor, self.pipe.read_jsons, True, self.debug
+                )
+                for response in responses:
+                    error = self.protocol.get_error(response)
+                    key = self.protocol.calculate_key(response)
+                    if not self.protocol.has_id(response) and error:
+                        raise RuntimeError(error)
+                    elif self.protocol.is_event(response):
+                        session_id = (
+                            response["sessionId"] if "sessionId" in response else ""
+                        )
+                        session = self.protocol.sessions[session_id]
+                        subscriptions = session.subscriptions
+                        for sub_key in list(subscriptions):
+                            similar_strings = sub_key.endswith("*") and response[
+                                "method"
+                            ].startswith(sub_key[:-1])
+                            equals_method = response["method"] == sub_key
+                            if self.debug:
+                                print(f"Checking subscription key: {sub_key} against event method {response['method']}", file=sys.stderr)
+                            if similar_strings or equals_method:
+                                self.loop.create_task(
+                                    subscriptions[sub_key][0](response)
+                                )
+                                if not subscriptions[sub_key][1]: # if not repeating
+                                    self.sessions[session_id].unsubscribe(sub_key)
+                    elif key:
+                        future = None
+                        if key in self.futures:
+                            if self.debug:
+                                print(
+                                    f"run_read_loop() found future foor key {key}"
+                                )
+                            future = self.futures.pop(key)
+                        else:
+                            raise RuntimeError(f"Couldn't find a future for key: {key}")
+                        if error:
+                            future.set_result(response)
+                        else:
+                            future.set_result(response)
+                    else:
+                        warnings.warn(f"Unhandled message type:{str(response)}", UnhandledMessageWarning)
+            except PipeClosedError:
+                if self.debug:
+                    print("PipeClosedError caught", file=sys.stderr)
+                return
+            self.loop.create_task(read_loop())
+
+        self.loop.create_task(read_loop())
+
+    def write_json(self, obj):
+        self.protocol.verify_json(obj)
+        key = self.protocol.calculate_key(obj)
+        if self.loop:
+            future = self.loop.create_future()
+            self.futures[key] = future
+            self.loop.run_in_executor(
+                self.executor, self.pipe.write_json, obj
+            )  # ignore result
+            return future
+        else:
+            self.pipe.write_json(obj)
+            return key
 
