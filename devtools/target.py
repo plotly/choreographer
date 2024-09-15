@@ -9,7 +9,6 @@ class Target:
             raise TypeError("target_id must be string")
         # Resources
         self.browser = browser
-        self.protocol = browser.protocol
 
         # States
         self.sessions = OrderedDict()
@@ -42,7 +41,7 @@ class Target:
                 response["error"]
             )
         session_id = response["result"]["sessionId"]
-        new_session = Session(self, session_id)
+        new_session = Session(self.browser, session_id)
         self.add_session(new_session)
         return new_session
 
