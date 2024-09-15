@@ -1,10 +1,8 @@
 import json
 import sys
 import warnings
-# from functools import partial
 
 from .pipe import PipeClosedError
-from threading import Thread
 
 class UnhandledMessageWarning(UserWarning):
     pass
@@ -158,20 +156,4 @@ class Protocol:
 
         self.loop.create_task(read_loop())
 
-    def run_output_thread(self, debug=None):
-        if not debug:
-            debug = self.debug
 
-        def run_print(debug):
-            if debug: print("Starting run_print loop", file=sys.stderr)
-            while True:
-                try:
-                    responses = self.pipe.read_jsons(debug=debug)
-                    for response in responses:
-                        print(json.dumps(response, indent=4))
-                except PipeClosedError:
-                    if self.debug:
-                        print("PipeClosedError caught", file=sys.stderr)
-                    break
-
-        Thread(target=run_print, args=(debug,)).start()

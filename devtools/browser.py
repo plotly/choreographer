@@ -4,7 +4,7 @@ import sys
 import subprocess
 import tempfile
 import warnings
-
+from threading import Thread
 from collections import OrderedDict
 
 from .pipe import Pipe
@@ -14,8 +14,9 @@ from .session import Session
 from .tab import Tab
 from .system import which_browser
 
-default_path = which_browser()
+from .pipe import PipeClosedError
 
+default_path = which_browser() # probably handle this better
 
 class Browser(Target):
     def __init__(
@@ -88,10 +89,11 @@ class Browser(Target):
         if not self.loop:
             self._open()
 
-
-
+    # await is basically the second part of __init__() if the user uses
+    # await Browser(), which if they are using a loop, they need to.
+    # NOTE: does __aenter__ need to call this to be used with async with Browser() as browser
     def __await__(self):
-        if self.loop is True: # TODO this might not work
+        if self.loop is True:
             self.loop = asyncio.get_running_loop()
         # not we're going to open the process and wait
         self.future_self = self.loop.create_future()
@@ -176,6 +178,7 @@ class Browser(Target):
                         f"The temporary directory could not be deleted, execution will continue. {type(e)}: {e}"
                 )
 
+    # These are effectively stubs to allow use with with
 
     def __enter__(self):
         return self
@@ -282,4 +285,24 @@ class Browser(Target):
                 self.add_tab(new_tab)
                 if self.debug:
                     print(f"The target {target_id} was added", file=sys.stderr)
+
+    # Output Helper for Debugging
+
+    def run_output_thread(self, debug=None):
+        if not debug:
+            debug = self.debug
+
+        def run_print(debug):
+            if debug: print("Starting run_print loop", file=sys.stderr)
+            while True:
+                try:
+                    responses = self.pipe.read_jsons(debug=debug)
+                    for response in responses:
+                        print(json.dumps(response, indent=4))
+                except PipeClosedError:
+                    if self.debug:
+                        print("PipeClosedError caught", file=sys.stderr)
+                    break
+
+        Thread(target=run_print, args=(debug,)).start()
 
