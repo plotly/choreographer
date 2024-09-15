@@ -69,3 +69,21 @@ class Target:
         if not self.sessions.values():
             raise RuntimeError("Cannot send_command without at least one valid session")
         return list(self.sessions.values())[0].send_command(command, params)
+
+    def subscribe(self, string, callback, repeating):
+        if not self.sessions.values():
+            raise RuntimeError("Cannot send_command without at least one valid session")
+        session = list(self.sessions.values())[0]
+        if string in session.subscriptions:
+            raise ValueError("You are already subscribed to this string, duplicate subscriptions are not allowed.")
+        else:
+            session.subscriptions[string] = (callback, repeating)
+
+    def unsubscribe(self, string):
+        if not self.sessions.values():
+            raise RuntimeError("Cannot send_command without at least one valid session")
+        return list(self.sessions.values())[0].send_command(command, params)
+        session = list(self.sessions.values())[0]
+        if string not in session.subscriptions:
+            raise ValueError("Cannot unsubscribe as string is not present in subscriptions")
+        self.subscriptions.remove(string)
