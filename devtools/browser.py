@@ -26,12 +26,20 @@ class Browser(Target):
         debug=False,
         debug_browser=None,
     ):
-        # State
-        self.tabs = OrderedDict()
-
         # Configuration
         self.headless = headless
+        self.debug = debug
 
+        # Set up stderr
+        if not debug_browser:  # false o None
+            stderr = subprocess.DEVNULL
+        elif debug_browser is True:
+            stderr = None
+        else:
+            stderr = debug
+        self._stderr = stderr
+
+        # Set up temp dir
         if platform.system() != "Windows":
             self.temp_dir = tempfile.TemporaryDirectory()
         else:
@@ -39,14 +47,9 @@ class Browser(Target):
                 delete=False, ignore_cleanup_errors=True
             )
 
-        if not debug_browser:  # false o None
-            stderr = subprocess.DEVNULL
-        elif debug_browser is True:
-            stderr = None
-        else:
-            stderr = debug
-
+        # Set up process env
         new_env = os.environ.copy()
+
         if not path:
             path = os.environ.get("BROWSER_PATH", None)
         if not path:
@@ -55,12 +58,14 @@ class Browser(Target):
             new_env["BROWSER_PATH"] = path
 
         new_env["USER_DATA_DIR"] = str(self.temp_dir.name)
+
         if headless:
             new_env["HEADLESS"] = "--headless"  # unset if false
 
-        self._stderr = stderr
         self._env = new_env
 
+
+        # Defaults for loop
         if loop is None:
             try:
                 loop = asyncio.get_running_loop()
@@ -72,6 +77,9 @@ class Browser(Target):
         self.pipe = Pipe(debug=debug) # this is a little weird TODO
         self.protocol = Protocol(self.pipe, loop=loop, debug=debug) # this is a little weird TODO
         # must take executor
+
+        self.tabs = OrderedDict()
+
 
         # Initializing
         super().__init__("0", self)  # NOTE: 0 can't really be used externally
@@ -116,22 +124,14 @@ class Browser(Target):
                                                    env=env)
 
 
-    # TODO: we're not actually going to a future,
-    # since asyncio.Popen returns one we can use
     async def _open_async(self):
-        self._open() # not really async yet
+        self._open() # not really async yet, will get rid of self.future_self too
         self.future_self.set_result(self)
 
 
-    def __enter__(self):
-        return self
-
-    def __exit__(self, type, value, traceback):
-        self.close()
-
     def close(self):
         self.send_command("Browser.close")
-        self.subprocess.wait(1)
+        self.subprocess.wait(3)
         if platform.system() == "Windows":
             # maybe we don't need chrome_wrapper for windows because of how handles are needed
             # if we're not chaining process, this might not be necessary
@@ -140,7 +140,7 @@ class Browser(Target):
             if self.subprocess.poll():
                 subprocess.call(
                     ["taskkill", "/F", "/T", "/PID", str(self.subprocess.pid)]
-                )  # this output should be handled better by where there is debug
+                )  # TODO probably needs to be silenced
             self.subprocess.wait(2)
         self.subprocess.terminate()
         self.subprocess.wait(2)
@@ -150,7 +150,7 @@ class Browser(Target):
 
         try:
             self.temp_dir.cleanup()
-        except Exception as e:  # TODO- handle specific errors
+        except Exception as e:
             print(str(e))
 
         # windows doesn't like python's default cleanup
@@ -166,7 +166,7 @@ class Browser(Target):
                 shutil.rmtree(self.temp_dir.name, onexc=remove_readonly)
                 del self.temp_dir
             except FileNotFoundError:
-                pass
+                pass # it worked!
             except PermissionError:
                 warnings.warn(
                     "The temporary directory could not be deleted, due to permission error, execution will continue."
@@ -177,6 +177,13 @@ class Browser(Target):
                 )
 
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.close()
+
+    # Basic syncronous functions
 
     def add_tab(self, tab):
         if not isinstance(tab, Tab):
@@ -187,6 +194,12 @@ class Browser(Target):
         if isinstance(target_id, Tab):
             target_id = target_id.target_id
         del self.tabs[target_id]
+
+    def get_tab(self):
+        if self.tabs.values():
+            return list(self.tabs.values())[0]
+
+    # Better functions that require asyncronous
 
     async def create_tab(self, url="", width=None, height=None):
         if not self.loop:
@@ -270,6 +283,3 @@ class Browser(Target):
                 if self.debug:
                     print(f"The target {target_id} was added", file=sys.stderr)
 
-    def get_tab(self):
-        if self.tabs.values():
-            return list(self.tabs.values())[0]
