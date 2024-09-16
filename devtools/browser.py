@@ -450,7 +450,7 @@ class Browser(Target):
                                     subscriptions[sub_key][0](response)
                                 )
                                 if not subscriptions[sub_key][1]: # if not repeating
-                                    self.sessions[session_id].unsubscribe(sub_key)
+                                    self.protocol.sessions[session_id].unsubscribe(sub_key)
                     elif key:
                         future = None
                         if key in self.futures:
