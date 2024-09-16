@@ -24,6 +24,13 @@ class UnhandledMessageWarning(UserWarning):
 default_path = which_browser() # probably handle this better
 
 class Browser(Target):
+
+    def _check_loop(self):
+        if self.loop and isinstance(self.loop, asyncio.SelectorEventLoop):
+            # I think using set_event_loop_policy is too invasive (is system wide)
+            # and may not work in situations where a framework manually set SEL
+            self.loop_hack = True
+
     def __init__(
         self,
         path=None,
@@ -36,6 +43,7 @@ class Browser(Target):
         # Configuration
         self.headless = headless
         self.debug = debug
+        self.loop_hack = False # subprocess needs weird stuff w/ SelectorEventLoop
 
         # Set up stderr
         if not debug_browser:  # false o None
@@ -79,6 +87,7 @@ class Browser(Target):
             except Exception:
                 loop = False
         self.loop = loop
+        self._check_loop()
 
         # State
         if self.loop:
@@ -110,6 +119,7 @@ class Browser(Target):
     def __aenter__(self):
         if self.loop is True:
             self.loop = asyncio.get_running_loop()
+            self._check_loop()
         self.future_self = self.loop.create_future()
         self.loop.create_task(self._open_async())
         self.browser.subscribe("Target.detachedFromTarget", self._checkSession, repeating=True)
@@ -144,7 +154,8 @@ class Browser(Target):
             self.subprocess = open_browser(to_chromium=self.pipe.read_to_chromium,
                                                    from_chromium=self.pipe.write_from_chromium,
                                                    stderr=stderr,
-                                                   env=env)
+                                                   env=env,
+                                                   loop_hack=self.loop_hack)
 
 
     async def _open_async(self):
@@ -168,7 +179,8 @@ class Browser(Target):
                                                    from_chromium=self.pipe.write_from_chromium,
                                                    stderr=stderr,
                                                    env=env,
-                                                   loop=True)
+                                                   loop=True,
+                                                   loop_hack=self.loop_hack)
         await self.populate_targets()
         self.future_self.set_result(self)
 
