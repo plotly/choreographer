@@ -175,7 +175,6 @@ class Browser(Target):
     # Closers: close() calls sync or async, both call finish_close
 
     def finish_close(self):
-        self.pipe.close()
 
         try:
             self.temp_dir.cleanup()
@@ -209,11 +208,13 @@ class Browser(Target):
         self.send_command("Browser.close")
         try:
             self.subprocess.wait(3)
+            self.pipe.close()
             return
         except:
             pass
+        self.pipe.close()
         if platform.system() == "Windows":
-            if self.subprocess.poll():
+            if self.subprocess.poll() is None:
                 subprocess.call(
                     ["taskkill", "/F", "/T", "/PID", str(self.subprocess.pid)]
                 )  # TODO probably needs to be silenced
@@ -222,6 +223,8 @@ class Browser(Target):
                     return
                 except:
                     pass
+            else:
+                return
         self.subprocess.terminate()
         try:
             self.subprocess.wait(2)
@@ -237,9 +240,11 @@ class Browser(Target):
         try:
             await asyncio.wait_for(waiter, 3)
             self.finish_close()
+            self.pipe.close()
             return
         except:
             pass
+        self.pipe.close()
         if platform.system() == "Windows":
             waiter = self.subprocess.wait()
             try:
@@ -272,12 +277,17 @@ class Browser(Target):
     def close(self):
         if self.loop:
             if not len(self.tabs):
+                self.pipe.close()
                 self.finish_close()
-                return
+                future = self.loop.create_future()
+                future.set_result(None)
+                return future
             else:
                 return asyncio.create_task(self.async_process_close())
         else:
-            self.sync_process_close()
+            if self.subprocess.poll() is None:
+                self.sync_process_close()
+                # I'd say race condition but the user needs to take care of it
             self.finish_close()
     # These are effectively stubs to allow use with with
 
@@ -288,7 +298,7 @@ class Browser(Target):
         self.close()
 
     async def __aexit__(self, type, value, traceback):
-        self.close()
+        await self.close()
 
     # Basic syncronous functions
 

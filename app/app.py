@@ -76,11 +76,11 @@ async def async_no_context():
     await new_tab.close()
     await asyncio.sleep(2)
     print_state(browser)
-    browser.close()
+    await browser.close()
 
 indent2 = "####"
 if __name__ == "__main__":
-   
+
     print(f"{indent2} __main__: running sync() test")
     sync()
     print(f"{indent2} __main__: ran sync() test")
@@ -89,7 +89,7 @@ if __name__ == "__main__":
     print(f"{indent2} __main__: running async_no_context() test")
     asyncio.run(async_no_context()) # closes by browser.close()
     print(f"{indent2} __main__: ran async_no_context() test")
-    
+
     print(f"{indent2} __main__: running async_with_context() test")
     asyncio.run(async_with_context()) # closes by closing all tabs
     print(f"{indent2} __main__: ran async_with_context() test")
