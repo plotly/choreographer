@@ -34,4 +34,4 @@ class Session:
     def unsubscribe(self, string):
         if string not in self.subscriptions:
             raise ValueError("Cannot unsubscribe as string is not present in subscriptions")
-        self.subscriptions.remove(string)
+        del self.subscriptions[string]
