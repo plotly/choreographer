@@ -51,13 +51,13 @@ class Protocol:
     def has_id(self, response):
         return "id" in response
 
-    def get_targetId(self, response):
+    def get_target_id(self, response):
         if "result" in response and "targetId" in response["result"]:
             return response["result"]["targetId"]
         else:
             return None
 
-    def get_sessionId(self, response):
+    def get_session_id(self, response):
         if "result" in response and "sessionId" in response["result"]:
             return response["result"]["sessionId"]
         else:
