@@ -3,20 +3,37 @@ import sys
 import json
 import platform
 
+
+import numpy as np
+
+# TODO: don't know about this
+class NumpyEncoder(json.JSONEncoder):
+    """ Special json encoder for numpy types """
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        elif isinstance(obj, np.floating):
+            return float(obj)
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return json.JSONEncoder.default(self, obj)
+
+
 class PipeClosedError(IOError):
     pass
 
 class Pipe:
-    def __init__(self, debug=False):
+    def __init__(self, debug=False, cls=NumpyEncoder):
         self.read_from_chromium, self.write_from_chromium = list(os.pipe())
         self.read_to_chromium, self.write_to_chromium = list(os.pipe())
         self.debug = debug
+        self.cls=cls
 
     def write_json(self, obj, debug=None):
         if not debug: debug = self.debug
         if debug:
             print("write_json:", file=sys.stderr)
-        message = json.dumps(obj, ensure_ascii=False)
+        message = json.dumps(obj, ensure_ascii=False, cls=self.cls)
         encoded_message = message.encode("utf-8") + b"\0"
         if debug:
             print(f"write_json: {message}", file=sys.stderr)
