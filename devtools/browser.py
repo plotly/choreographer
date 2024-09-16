@@ -149,6 +149,8 @@ class Browser(Target):
 
     async def _open_async(self):
         self._open() # not really async yet, will get rid of self.future_self too
+        if not self.headless:
+            await self.populate_targets()
         self.future_self.set_result(self)
 
 
@@ -291,7 +293,7 @@ class Browser(Target):
         return new_session
 
     async def populate_targets(self):
-        if not self.headless:
+        if self.headless:
             raise ValueError("You must use this function with headless=False")
         elif not self.browser.loop:
             warnings.warn("This method requires use of an event loop (asyncio).")
@@ -308,6 +310,7 @@ class Browser(Target):
             ):
                 target_id = json_response["targetId"]
                 new_tab = Tab(target_id, self)
+                await new_tab.create_session()
                 self.add_tab(new_tab)
                 if self.debug:
                     print(f"The target {target_id} was added", file=sys.stderr)
