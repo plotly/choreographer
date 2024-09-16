@@ -81,7 +81,6 @@ class Target:
     def unsubscribe(self, string):
         if not self.sessions.values():
             raise RuntimeError("Cannot send_command without at least one valid session")
-        return list(self.sessions.values())[0].send_command(command, params)
         session = list(self.sessions.values())[0]
         if string not in session.subscriptions:
             raise ValueError("Cannot unsubscribe as string is not present in subscriptions")
