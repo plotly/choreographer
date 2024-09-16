@@ -148,6 +148,7 @@ for name in allNames:
         try:
             fig = json.load(_in)
         except Exception as e:
+            print("No load")
             print(e)
             print(_in)
             print("***")
@@ -162,8 +163,13 @@ for name in allNames:
                     width = layout['width']
                 if 'height' in layout :
                     height = layout['height']
-
-        asyncio.run(to_image(fig, "./results/" + name+".png"))
+        try:
+            asyncio.run(to_image(fig, "./results/" + name+".png"))
+        except Exception as e:
+            print("No to image")
+            print(e)
+            print(_in)
+            print("***")
 
 
 # option to block on this thread TODO
