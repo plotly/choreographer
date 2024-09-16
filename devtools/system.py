@@ -34,7 +34,6 @@ def which_browser(executable_name=chrome):
         if platform.system() == "Windows":
             try:
                 path = which_windows()
-                print(path)
                 break
             except:  # noqa # no bare except according to ruff but who knows what errors we'll get from this
                 os.environ["NoDefaultCurrentDirectoryInExePath"] = "0"
