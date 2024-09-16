@@ -149,8 +149,7 @@ class Browser(Target):
 
     async def _open_async(self):
         self._open() # not really async yet, will get rid of self.future_self too
-        if not self.headless:
-            await self.populate_targets()
+        await self.populate_targets()
         self.future_self.set_result(self)
 
 
@@ -293,9 +292,7 @@ class Browser(Target):
         return new_session
 
     async def populate_targets(self):
-        if self.headless: # should we do this/allow this for all TODO
-            raise ValueError("You must use this function with headless=False")
-        elif not self.browser.loop:
+        if not self.browser.loop:
             warnings.warn("This method requires use of an event loop (asyncio).")
         response = await self.browser.send_command("Target.getTargets")
         if "error" in response:
