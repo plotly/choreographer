@@ -98,17 +98,28 @@ class Browser(Target):
         if not self.loop:
             self._open()
 
-    # await is basically the second part of __init__() if the user uses
-    # await Browser(), which if they are using a loop, they need to.
-    # NOTE: does __aenter__ need to call this to be used with async with Browser() as browser
-    def __await__(self):
+    async def _checkSession(self, response):
+        target_id = response['params']['targetId'] # this is already gone by now, probably
+        session_id = response['params']['sessionId']
+        del self.protocol.sessions[session_id]
+        # we need to remove this from protocol
+
+    # somewhat out of order, __aenter__ is for use with `async with Browser()`
+    # it is basically 99% of __await__, which is for use with `browser = await Browser()`
+    # so we just use one inside the other
+    def __aenter__(self):
         if self.loop is True:
             self.loop = asyncio.get_running_loop()
-        # not we're going to open the process and wait
         self.future_self = self.loop.create_future()
         self.loop.create_task(self._open_async())
+        self.browser.subscribe("Target.detachedFromTarget", self._checkSession, repeating=True)
         self.run_read_loop()
-        return self.future_self.__await__()
+        return self.future_self
+
+    # await is basically the second part of __init__() if the user uses
+    # await Browser(), which if they are using a loop, they need to.
+    def __await__(self):
+        return self.__aenter__().__await__()
 
 
     def _open(self):
@@ -196,16 +207,6 @@ class Browser(Target):
     def __exit__(self, type, value, traceback):
         self.close()
 
-    # this is basically __await__, but return slightly different
-    def __aenter__(self):
-        if self.loop is True:
-            self.loop = asyncio.get_running_loop()
-        # not we're going to open the process and wait
-        self.future_self = self.loop.create_future()
-        self.loop.create_task(self._open_async())
-        self.run_read_loop()
-        return self.future_self
-
     async def __aexit__(self, type, value, traceback):
         self.close()
 
@@ -260,6 +261,8 @@ class Browser(Target):
             )
         if isinstance(target_id, Target):
             target_id = target_id.target_id
+        # NOTE: we don't need to manually remove sessions because
+        # sessions are intrinisically handled by events
         response = await self.send_command(
             command="Target.closeTarget",
             params={"targetId": target_id},

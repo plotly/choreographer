@@ -53,7 +53,7 @@ async def async_with_context():
         # Enable Page TODO
         # Catch Reload TODO 
         # Catch Page Events TODO 
-        await browser.send_command("Target.closeTarget", params=dict(targetId=new_tab.target_id))
+        await new_tab.close()
         await asyncio.sleep(2)
         print_state(browser)
         # Close First Tab TODO
@@ -76,7 +76,7 @@ async def async_no_context():
     # Enable Page TODO
     # Catch Reload TODO 
     # Catch Page Events TODO 
-    await browser.send_command("Target.closeTarget", params=dict(targetId=new_tab.target_id))
+    await new_tab.close()
     await asyncio.sleep(2)
     print_state(browser)
     # Close First Tab TODO
