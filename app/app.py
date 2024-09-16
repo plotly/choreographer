@@ -2,57 +2,99 @@ import devtools
 import time
 import asyncio
 
-def main_sync():
-    # Interface Test
-    # Process/Pipes Test
+indent = ">>>>>"
+
+async def print_event(event):
+    print(f"{indent} event: {event}")
+
+def create_printer(prefix):
+    async def print_event(event):
+        print(f"{indent} {prefix} event: {event}")
+    return print_event
+
+def print_state(browser):
+    print(f"\n{indent} List of browser tabs: {browser.tabs.items()}")
+    print(f"\n{indent} List of browser sessions: {browser.sessions.items()}")
+    for tab in browser.tabs.values():
+        print(f"\n{indent} List of tab sessions: {tab.sessions.items()}")
+    print(f"\n{indent} List of all sessions: {browser.protocol.sessions.items()}")
+
+def sync():
+    # Doing the full test w/o async framework is tedious and unreliable, so we don't...
+    print(f"{indent} Starting sync test")
     with devtools.Browser(headless=False, debug=True, debug_browser=True) as browser:
-        browser.protocol.run_output_thread()
-        time.sleep(2)
+        print(f"{indent} Starting output thread")
+        browser.run_output_thread()
+        print(f"{indent} Starting commands")
         browser.send_command(command="Target.getTargets")
-        time.sleep(3)
         browser.send_command(
             command="Target.createTarget", params={"url": "https://www.youtube.com"}
         )
-        time.sleep(3)
-        browser.send_command(command="Target.getTargets")
         time.sleep(1)
-    print("Done")
+        print(f"{indent} Finished commands")
+        time.sleep(3)
+    print(f"{indent} Finished Sync Tests")
 
-async def main_async():
-    with devtools.Browser(headless=False, debug=True, loop=asyncio.get_running_loop(), debug_browser=True) as browser:
-        tab1 = await browser.create_tab("https://www.youtube.com")
-        await tab1.send_command("Page.navigate", params=dict(url="https://github.com"))
-        tab2 = await browser.create_tab("https://plotly.com/")
-        await asyncio.sleep(1)
-        tab2_session2 = await tab2.create_session()
-        await tab2.send_command("Page.navigate", params=dict(url="https://duckduckgo.com"))
-        browser_session2 = await browser.create_session()
-        await browser_session2.send_command("Target.getTargets")
-        await tab2.close_session(tab2_session2)
-        await browser.close_tab(tab2)
-    print("All is done") # do we need to close loop?
+async def async_with_context():
+    async with devtools.Browser(headless=False, debug=True, debug_browser=True) as browser:
+        browser.subscribe("*", create_printer("browser"), repeating=True)
+        print_state(browser)
+        # Navigate on current tab TODO (after populate)
+        new_tab = await browser.create_tab("https://google.com")
+        new_tab.subscribe("*", create_printer("session1"), repeating=True)
+        new_session = await new_tab.create_session()
+        new_session.subscribe("*", create_printer("session2"), repeating=True)
+        print_state(browser)
+        await asyncio.sleep(2)
+        await new_tab.send_command("Page.navigate", params=dict(url="https://youtube.com"))
+        await asyncio.sleep(2)
+        await new_session.send_command("Page.navigate", params=dict(url="https://github.com"))
+        await asyncio.sleep(2)
+        # Enable Page TODO
+        # Catch Reload TODO 
+        # Catch Page Events TODO 
+        await browser.send_command("Target.closeTarget", params=dict(targetId=new_tab.target_id))
+        await asyncio.sleep(2)
+        print_state(browser)
+        # Close First Tab TODO
 
-async def main_async2():
-    print("Starting browser")
-    browser = await devtools.Browser(loop=asyncio.get_running_loop(), headless=False, debug=True, debug_browser=True)
-    print(browser)
-    print("Sleeping")
+async def async_no_context():
+    browser = await devtools.Browser(headless=False, debug=True, debug_browser=True)
+    browser.subscribe("*", create_printer("browser"), repeating=True)
+    print_state(browser)
+    # Navigate on current tab TODO (after populate)
+    new_tab = await browser.create_tab("https://google.com")
+    new_tab.subscribe("*", create_printer("session1"), repeating=True)
+    new_session = await new_tab.create_session()
+    new_session.subscribe("*", create_printer("session2"), repeating=True)
+    print_state(browser)
     await asyncio.sleep(2)
-    print("Slept")
-    print(browser)
+    await new_tab.send_command("Page.navigate", params=dict(url="https://youtube.com"))
+    await asyncio.sleep(2)
+    await new_session.send_command("Page.navigate", params=dict(url="https://github.com"))
+    await asyncio.sleep(2)
+    # Enable Page TODO
+    # Catch Reload TODO 
+    # Catch Page Events TODO 
+    await browser.send_command("Target.closeTarget", params=dict(targetId=new_tab.target_id))
+    await asyncio.sleep(2)
+    print_state(browser)
+    # Close First Tab TODO
     browser.close()
 
+indent2 = "####"
 if __name__ == "__main__":
-    print(asyncio.get_running_loop())
-    exit()
-    asyncio.run(main_async2())
-    #main_sync()
-    #time.sleep(2)
-    #asyncio.run(main_async())
-    #time.sleep(1)
+    """
+    print(f"{indent2} __main__: running sync() test")
+    sync()
+    print(f"{indent2} __main__: ran sync() test")
+    time.sleep(3)
 
+    print(f"{indent2} __main__: running async_no_context() test")
+    asyncio.run(async_no_context())
+    print(f"{indent2} __main__: ran async_no_context() test")
+    """    
+    print(f"{indent2} __main__: running async_with_context() test")
+    asyncio.run(async_with_context())
+    print(f"{indent2} __main__: ran async_with_context() test")
 
-# blocking, regular blocking, you read and write, good luck (we need to be able to piece-meal the thing together)
-
-# blocking with dumping out output off separate thread that you can see
-# that one should probably be working with a queue

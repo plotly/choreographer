@@ -1,24 +1,19 @@
-* Commits!
-* Return key()
-* Do I want to pull some stuff out of protocol?
-* TODO: fix pipe and protocol and reorganize and stuff so we can do all awaits at end
+* TODO: What do we do about wanting to close tabs
+* TODO: Do we subscribe to the browser to find out Target.detachedFromTarget
 
 * TODO: Try moving over to async. process
-* TODO: async contexts
-
-* Probably some done:
-* TODO: Mark lack of gracefulness.
-* TODO: Try browser.close() w/ devtools command.
-* TODO: Make a "kill"
+* TODO: do an async close?
 * TODO: Make sure no-debug is silent silent.
-* TODO: POPULATE
-* TODO: Make sure delete is last thing
+* TODO: Populate
+* TODO: Try on linux
+
+Done by 1:30
+
+Then we do a kaleido
+
+* Do we have to document? Am I done at this point? I think I'm done
+
+* Then we just need to start building an app which takes a plotly figure and turns it into an image.
+* It can have some kind of iterator or queue.
 
 
-Windows:
-
-1) We have to kill the browser process on close w/ a separate windows task. It's... not great.
-2) The pipe stays open and our reader will block. 
-3) We have to send an exit command ('{bye}\n') through the chromium side of the pipe and we also manually close file descriptors for pipes. However, the behavior seems to change if we're using async. In that case, os.close() is sufficient (it is not during sync type operations). The bad thing here is that with async i can't seem to catch the pipe closing, even tho it functions correctly. Would like to see what the thread is doing.
-
-In async, we can't catch the PipeClosedError and we tend to shut down too fast off Browser (which is not async) for the read_jsons command to print its last catch (which will then cause it to raise exception).
