@@ -22,7 +22,7 @@ def print_state(browser):
 def sync():
     # Doing the full test w/o async framework is tedious and unreliable, so we don't...
     print(f"{indent} Starting sync test")
-    with devtools.Browser(headless=False, debug=True, debug_browser=True) as browser:
+    with devtools.Browser(headless=True, debug=True, debug_browser=True) as browser:
         print(f"{indent} Starting output thread")
         browser.run_output_thread()
         print(f"{indent} Starting commands")
@@ -50,13 +50,13 @@ async def async_with_context():
         await asyncio.sleep(2)
         await new_session.send_command("Page.navigate", params=dict(url="https://github.com"))
         await asyncio.sleep(2)
-        # Enable Page TODO
-        # Catch Reload TODO 
-        # Catch Page Events TODO 
         await new_tab.close()
         await asyncio.sleep(2)
         print_state(browser)
-        # Close First Tab TODO
+        await list(browser.tabs.values())[0].close()
+        await asyncio.sleep(2)
+        print_state(browser)
+    print(f"{indent} async context done")
 
 async def async_no_context():
     browser = await devtools.Browser(headless=False, debug=True, debug_browser=True)
@@ -73,28 +73,25 @@ async def async_no_context():
     await asyncio.sleep(2)
     await new_session.send_command("Page.navigate", params=dict(url="https://github.com"))
     await asyncio.sleep(2)
-    # Enable Page TODO
-    # Catch Reload TODO 
-    # Catch Page Events TODO 
     await new_tab.close()
     await asyncio.sleep(2)
     print_state(browser)
-    # Close First Tab TODO
     browser.close()
 
 indent2 = "####"
 if __name__ == "__main__":
-    """
+   
     print(f"{indent2} __main__: running sync() test")
     sync()
     print(f"{indent2} __main__: ran sync() test")
     time.sleep(3)
 
     print(f"{indent2} __main__: running async_no_context() test")
-    asyncio.run(async_no_context())
+    asyncio.run(async_no_context()) # closes by browser.close()
     print(f"{indent2} __main__: ran async_no_context() test")
-    """    
+    
     print(f"{indent2} __main__: running async_with_context() test")
-    asyncio.run(async_with_context())
+    asyncio.run(async_with_context()) # closes by closing all tabs
     print(f"{indent2} __main__: ran async_with_context() test")
+
 

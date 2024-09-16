@@ -148,28 +148,33 @@ class Browser(Target):
 
 
     async def _open_async(self):
-        self._open() # not really async yet, will get rid of self.future_self too
+        stderr = self._stderr
+        env = self._env
+        if platform.system() != "Windows":
+            self.subprocess = await asyncio.create_subprocess_exec(
+                sys.executable,
+                os.path.join(
+                    os.path.dirname(os.path.realpath(__file__)), "chrome_wrapper.py"
+                ),
+                stdin=self.pipe.read_to_chromium,
+                stdout=self.pipe.write_from_chromium,
+                stderr=stderr,
+                close_fds=True,
+                env=env,
+            )
+        else:
+            from .chrome_wrapper import open_browser
+            self.subprocess = await open_browser(to_chromium=self.pipe.read_to_chromium,
+                                                   from_chromium=self.pipe.write_from_chromium,
+                                                   stderr=stderr,
+                                                   env=env,
+                                                   loop=True)
         await self.populate_targets()
         self.future_self.set_result(self)
 
+    # Closers: close() calls sync or async, both call finish_close
 
-    def close(self):
-        self.send_command("Browser.close")
-        self.subprocess.wait(3)
-        if platform.system() == "Windows":
-            # maybe we don't need chrome_wrapper for windows because of how handles are needed
-            # if we're not chaining process, this might not be necessary
-            # otherwise, win behaves strangely in the face of signals, so call a command to kill the process instead
-            # NB: chrome accepts being killed like this because it knows windows is a nightmare
-            if self.subprocess.poll():
-                subprocess.call(
-                    ["taskkill", "/F", "/T", "/PID", str(self.subprocess.pid)]
-                )  # TODO probably needs to be silenced
-            self.subprocess.wait(2)
-        self.subprocess.terminate()
-        self.subprocess.wait(2)
-        self.subprocess.kill()
-
+    def finish_close(self):
         self.pipe.close()
 
         try:
@@ -200,6 +205,80 @@ class Browser(Target):
                         f"The temporary directory could not be deleted, execution will continue. {type(e)}: {e}"
                 )
 
+    def sync_process_close(self):
+        self.send_command("Browser.close")
+        try:
+            self.subprocess.wait(3)
+            return
+        except:
+            pass
+        if platform.system() == "Windows":
+            if self.subprocess.poll():
+                subprocess.call(
+                    ["taskkill", "/F", "/T", "/PID", str(self.subprocess.pid)]
+                )  # TODO probably needs to be silenced
+                try:
+                    self.subprocess.wait(2)
+                    return
+                except:
+                    pass
+        self.subprocess.terminate()
+        try:
+            self.subprocess.wait(2)
+            return
+        except:
+            pass
+        self.subprocess.kill()
+
+
+    async def async_process_close(self):
+        await self.send_command("Browser.close")
+        waiter = self.subprocess.wait()
+        try:
+            await asyncio.wait_for(waiter, 3)
+            self.finish_close()
+            return
+        except:
+            pass
+        if platform.system() == "Windows":
+            waiter = self.subprocess.wait()
+            try:
+                await asyncio.wait_for(waiter, 1)
+                self.finish_close()
+                return
+            except:
+                pass
+            # need try
+            subprocess.call(
+                ["taskkill", "/F", "/T", "/PID", str(self.subprocess.pid)]
+            )  # TODO probably needs to be silenced
+            waiter = self.subprocess.wait()
+            try:
+                await asyncio.wait_for(waiter, 2)
+                self.finish_close()
+                return
+            except:
+                pass
+        self.subprocess.terminate()
+        waiter = self.subprocess.wait()
+        try:
+            await asyncio.wait_for(waiter, 2)
+            self.finish_close()
+            return
+        except:
+            pass
+        self.subprocess.kill()
+
+    def close(self):
+        if self.loop:
+            if not len(self.tabs):
+                self.finish_close()
+                return
+            else:
+                return asyncio.create_task(self.async_process_close())
+        else:
+            self.sync_process_close()
+            self.finish_close()
     # These are effectively stubs to allow use with with
 
     def __enter__(self):
