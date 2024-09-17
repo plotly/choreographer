@@ -49,7 +49,7 @@ class Session:
 
         self.subscribe(string, execution_started_cd, False)
         if string not in self.subscriptions_futures:
-            self.subscriptions_futures[string] = [string]
+            self.subscriptions_futures[string] = [future]
         else:
             self.subscriptions_futures[string].append(future)
         return future
