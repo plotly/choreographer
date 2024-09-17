@@ -27,17 +27,24 @@ class Session:
 
     def subscribe(self, string, callback, repeating):
         if string in self.subscriptions:
-            raise ValueError("You are already subscribed to this string, duplicate subscriptions are not allowed.")
+            raise ValueError(
+                "You are already subscribed to this string, duplicate subscriptions are not allowed."
+            )
         else:
             self.subscriptions[string] = (callback, repeating)
 
     def unsubscribe(self, string):
         if string not in self.subscriptions:
-            raise ValueError("Cannot unsubscribe as string is not present in subscriptions")
+            raise ValueError(
+                "Cannot unsubscribe as string is not present in subscriptions"
+            )
         del self.subscriptions[string]
 
     def subscribe_once(self, string):
         async def execution_started_cd(response):
             future = self.browser.loop.create_future()
             future.set_result(response)
-        return self.browser.loop.create_task(self.subscribe(string, execution_started_cd, False))
+
+        return self.browser.loop.create_task(
+            self.subscribe(string, execution_started_cd, False)
+        )
