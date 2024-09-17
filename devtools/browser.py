@@ -450,6 +450,7 @@ class Browser(Target):
                         )
                         session = self.protocol.sessions[session_id]
                         subscriptions = session.subscriptions
+                        subscriptions_futures = session.subscriptions_futures
                         for sub_key in list(subscriptions):
                             similar_strings = sub_key.endswith("*") and response[
                                 "method"
@@ -463,6 +464,18 @@ class Browser(Target):
                                 )
                                 if not subscriptions[sub_key][1]: # if not repeating
                                     self.protocol.sessions[session_id].unsubscribe(sub_key)
+                        for sub_key, futures_with_callbacks in list(subscriptions_futures.items()):
+                            similar_strings = sub_key.endswith("*") and response[
+                                "method"
+                            ].startswith(sub_key[:-1])
+                            equals_method = response["method"] == sub_key
+                            if self.debug:
+                                print(f"Checking subscription key: {sub_key} against event method {response['method']}", file=sys.stderr)
+                            if similar_strings or equals_method:
+                                for callback, future in futures_with_callbacks:
+                                    if not future.done():  
+                                        self.loop.create_task(callback(response))
+                                del session.subscriptions_futures[sub_key]
                     elif key:
                         future = None
                         if key in self.futures:
