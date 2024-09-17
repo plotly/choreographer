@@ -9,6 +9,7 @@ class Session:
         self.session_id = session_id
         self.message_id = 0
         self.subscriptions = {}
+        self.subscriptions_futures = {}
 
     def send_command(self, command, params=None):
         current_id = self.message_id
