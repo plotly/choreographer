@@ -48,4 +48,8 @@ class Session:
             future.set_result(response)
 
         self.subscribe(string, execution_started_cd, False)
+        if string not in self.subscriptions_futures:
+            self.subscriptions_futures[string] = [string]
+        else:
+            self.subscriptions_futures[string].append(future)
         return future
