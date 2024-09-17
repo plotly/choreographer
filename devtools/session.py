@@ -25,7 +25,7 @@ class Session:
 
         return self.browser.write_json(json_command)
 
-    def subscribe(self, string, callback, repeating):
+    def subscribe(self, string, callback, repeating=True):
         if string in self.subscriptions:
             raise ValueError(
                 "You are already subscribed to this string, duplicate subscriptions are not allowed."
