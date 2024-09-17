@@ -41,10 +41,10 @@ class Session:
         del self.subscriptions[string]
 
     def subscribe_once(self, string):
+        future = self.browser.loop.create_future()
+
         async def execution_started_cd(response):
-            future = self.browser.loop.create_future()
             future.set_result(response)
 
-        return self.browser.loop.create_task(
-            self.subscribe(string, execution_started_cd, False)
-        )
+        self.subscribe(string, execution_started_cd, False)
+        return future
