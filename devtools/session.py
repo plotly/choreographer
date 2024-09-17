@@ -40,7 +40,4 @@ class Session:
         async def execution_started_cd(response):
             future = self.browser.loop.create_future()
             future.set_result(response)
-        if string in self.subscriptions:
-            raise ValueError("You are already subscribed to this string, duplicate subscriptions are not allowed.")
-        else:
-            self.subscriptions[string] = (execution_started_cd, False)
+        return self.browser.loop.create_task(self.subscribe(string, execution_started_cd, False))
