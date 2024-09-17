@@ -47,9 +47,8 @@ class Session:
         async def execution_started_cd(response):
             future.set_result(response)
 
-        self.subscribe(string, execution_started_cd, False)
         if string not in self.subscriptions_futures:
-            self.subscriptions_futures[string] = [future]
+            self.subscriptions_futures[string] = [(execution_started_cd, future)]
         else:
-            self.subscriptions_futures[string].append(future)
+            self.subscriptions_futures[string].append((execution_started_cd, future))
         return future
