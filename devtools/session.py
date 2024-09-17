@@ -35,3 +35,11 @@ class Session:
         if string not in self.subscriptions:
             raise ValueError("Cannot unsubscribe as string is not present in subscriptions")
         del self.subscriptions[string]
+
+    def subscribe_once(self, string):
+        def print_obj(obj):
+            print(obj)
+        if string in self.subscriptions:
+            raise ValueError("You are already subscribed to this string, duplicate subscriptions are not allowed.")
+        else:
+            self.subscriptions[string] = (print_obj, False)
