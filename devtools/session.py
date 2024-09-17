@@ -37,11 +37,10 @@ class Session:
         del self.subscriptions[string]
 
     def subscribe_once(self, string):
+        async def execution_started_cd(response):
+            future = self.browser.loop.create_future()
+            future.set_result(response)
         if string in self.subscriptions:
             raise ValueError("You are already subscribed to this string, duplicate subscriptions are not allowed.")
         else:
-            self.subscriptions[string] = (self._execution_started_cd, False)
-
-    async def _execution_started_cd(self, response):
-        future = self.browser.loop.create_future()
-        future.set_result(response)
+            self.subscriptions[string] = (execution_started_cd, False)
