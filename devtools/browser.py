@@ -478,10 +478,9 @@ class Browser(Target):
                                     future.set_result(response)
                                     if self.debug:
                                         print(f"Future {future} resolved with response")
-                                if all(future.done() for future in futures):
-                                    del session.subscriptions_futures[sub_key]
-                                    if self.debug:
-                                        print(f"Deleted {sub_key} from session.subscriptions_futures")
+                                del session.subscriptions_futures[sub_key]
+                                if self.debug:
+                                    print(f"Deleted {sub_key} from session.subscriptions_futures")
 
                                 
                     elif key:
