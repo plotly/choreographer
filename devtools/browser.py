@@ -465,31 +465,24 @@ class Browser(Target):
                                 )
                                 if not subscriptions[sub_key][1]: # if not repeating
                                     self.protocol.sessions[session_id].unsubscribe(sub_key)
+
                         for sub_key, futures in list(subscriptions_futures.items()):
-                            similar_strings = sub_key.endswith("*") and response[
-                                "method"
-                            ].startswith(sub_key[:-1])
+                            similar_strings = sub_key.endswith("*") and response["method"].startswith(sub_key[:-1])
                             equals_method = response["method"] == sub_key
                             if self.debug:
                                 print(f"Checking subscription key: {sub_key} against event method {response['method']}", file=sys.stderr)
-                            processed = False
-                            sub_futures = copy.copy(futures)
-                            done_futures = []
                             if similar_strings or equals_method:
-                                processed = True
-                                for future in sub_futures:
+                                for future in futures:
                                     if self.debug:
-                                        print("Inside the loop of futures into the loop of subscriptions_futures")
-                                        print(f"The future {hex(id(future))} will set response")
+                                        print(f"Processing future {hex(id(future))}")
                                     future.set_result(response)
                                     if self.debug:
-                                        print(f"The future after the set_result is {future}")
-                                    done_futures.append(future.done())
-                                session.subscriptions_futures[sub_key] = sub_futures
-                            if processed and (done_futures):
-                                del session.subscriptions_futures[sub_key]
-                                if self.debug:
-                                        print(f"Delete {sub_key} of session.subscriptions_futures")
+                                        print(f"Future {future} resolved with response")
+                                if all(future.done() for future in futures):
+                                    del session.subscriptions_futures[sub_key]
+                                    if self.debug:
+                                        print(f"Deleted {sub_key} from session.subscriptions_futures")
+
                                 
                     elif key:
                         future = None
