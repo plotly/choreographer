@@ -464,7 +464,7 @@ class Browser(Target):
                                 )
                                 if not subscriptions[sub_key][1]: # if not repeating
                                     self.protocol.sessions[session_id].unsubscribe(sub_key)
-                        for sub_key, futures_with_callbacks in list(subscriptions_futures.items()):
+                        for sub_key, futures in list(subscriptions_futures.items()):
                             similar_strings = sub_key.endswith("*") and response[
                                 "method"
                             ].startswith(sub_key[:-1])
@@ -472,16 +472,17 @@ class Browser(Target):
                             if self.debug:
                                 print(f"Checking subscription key: {sub_key} against event method {response['method']}", file=sys.stderr)
                             if similar_strings or equals_method:
-                                for callback, future in futures_with_callbacks:
+                                for future in futures:
                                     if self.debug:
-                                        print("Inside the loop of callbacks and futures into the loop of subscriptions_futures")
+                                        print("Inside the loop of futures into the loop of subscriptions_futures")
                                     if not future.done():
                                         if self.debug:
-                                            print(f"The future {hex(id(future))} will use with callback and response")
-                                        self.loop.create_task(callback(response, future))
+                                            print(f"The future {hex(id(future))} will set response")
+                                        future.set_result(response)
+                                        print(f"The future after the set_result is {future}")
                                 del session.subscriptions_futures[sub_key]
                                 if self.debug:
-                                    print("Futures with callback works")
+                                    print("Futures of subscribe_once works")
                     elif key:
                         future = None
                         if key in self.futures:
