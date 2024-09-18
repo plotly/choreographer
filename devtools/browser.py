@@ -473,9 +473,15 @@ class Browser(Target):
                                 print(f"Checking subscription key: {sub_key} against event method {response['method']}", file=sys.stderr)
                             if similar_strings or equals_method:
                                 for callback, future in futures_with_callbacks:
-                                    if not future.done():  
-                                        self.loop.create_task(callback(response))
+                                    if self.debug:
+                                        print("Inside the loop of callbacks and futures into the loop of subscriptions_futures")
+                                    if not future.done():
+                                        if self.debug:
+                                            print(f"The future {hex(id(future))} will use with callback and response")
+                                        self.loop.create_task(callback(response, future))
                                 del session.subscriptions_futures[sub_key]
+                                if self.debug:
+                                    print("Futures with callback works")
                     elif key:
                         future = None
                         if key in self.futures:
