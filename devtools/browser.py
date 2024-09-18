@@ -475,11 +475,9 @@ class Browser(Target):
                                 for future in futures:
                                     if self.debug:
                                         print("Inside the loop of futures into the loop of subscriptions_futures")
-                                    if not future.done():
-                                        if self.debug:
-                                            print(f"The future {hex(id(future))} will set response")
-                                        future.set_result(response)
-                                        print(f"The future after the set_result is {future}")
+                                        print(f"The future {hex(id(future))} will set response")
+                                    future.set_result(response)
+                                    print(f"The future after the set_result is {future}")
                                 del session.subscriptions_futures[sub_key]
                                 if self.debug:
                                     print("Futures of subscribe_once works")
