@@ -44,8 +44,9 @@ class Session:
     def subscribe_once(self, string):
         future = self.browser.loop.create_future()
 
-        async def execution_started_cd(response):
-            future.set_result(response)
+        async def execution_started_cd(response, future):
+            if not future.done():
+                future.set_result(response)
 
         if string not in self.subscriptions_futures:
             self.subscriptions_futures[string] = [(execution_started_cd, future)]
