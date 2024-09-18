@@ -6,6 +6,7 @@ import tempfile
 import warnings
 import json
 import asyncio
+import copy
 from threading import Thread
 from collections import OrderedDict
 
@@ -471,16 +472,25 @@ class Browser(Target):
                             equals_method = response["method"] == sub_key
                             if self.debug:
                                 print(f"Checking subscription key: {sub_key} against event method {response['method']}", file=sys.stderr)
+                            processed = False
+                            sub_futures = copy.copy(futures)
+                            done_futures = []
                             if similar_strings or equals_method:
-                                for future in futures:
+                                processed = True
+                                for future in sub_futures:
                                     if self.debug:
                                         print("Inside the loop of futures into the loop of subscriptions_futures")
                                         print(f"The future {hex(id(future))} will set response")
                                     future.set_result(response)
-                                    print(f"The future after the set_result is {future}")
+                                    if self.debug:
+                                        print(f"The future after the set_result is {future}")
+                                    done_futures.append(future.done())
+                                session.subscriptions_futures[sub_key] = sub_futures
+                            if processed and (done_futures):
                                 del session.subscriptions_futures[sub_key]
                                 if self.debug:
-                                    print("Futures of subscribe_once works")
+                                        print(f"Delete {sub_key} of session.subscriptions_futures")
+                                
                     elif key:
                         future = None
                         if key in self.futures:
