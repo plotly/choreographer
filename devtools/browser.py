@@ -292,18 +292,32 @@ class Browser(Target):
     def close(self):
         if self.loop:
             if not len(self.tabs):
+                deleted_temp = os.path.isfile(self.temp_name)
+                print(f"Tempfile exist: {deleted_temp}")
                 self.pipe.close()
                 self.finish_close()
                 future = self.loop.create_future()
                 future.set_result(None)
+                deleted_temp = os.path.isfile(self.temp_name)
+                print(f"Tempfile exist: {deleted_temp}")
                 return future
             else:
-                return asyncio.create_task(self.async_process_close())
+                deleted_temp = os.path.isfile(self.temp_name)
+                print(f"Tempfile exist: {deleted_temp}")
+                task_close = asyncio.create_task(self.async_process_close())
+                deleted_temp = os.path.isfile(self.temp_name)
+                print(f"Tempfile exist: {deleted_temp}")
+                return task_close
+            
         else:
+            deleted_temp = os.path.isfile(self.temp_name)
+            print(f"Tempfile exist: {deleted_temp}")
             if self.subprocess.poll() is None:
                 self.sync_process_close()
                 # I'd say race condition but the user needs to take care of it
             self.finish_close()
+            deleted_temp = os.path.isfile(self.temp_name)
+            print(f"Tempfile exist: {deleted_temp}")
     # These are effectively stubs to allow use with with
 
     def __enter__(self):
