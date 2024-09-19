@@ -58,10 +58,12 @@ class Browser(Target):
         # Set up temp dir
         if platform.system() != "Windows":
             self.temp_dir = tempfile.TemporaryDirectory()
+            self.temp_name = str(self.temp_dir.name)
         else:
             self.temp_dir = tempfile.TemporaryDirectory(
                 delete=False, ignore_cleanup_errors=True
             )
+            self.temp_name = str(self.temp_dir.name)
 
         # Set up process env
         new_env = os.environ.copy()
@@ -73,7 +75,7 @@ class Browser(Target):
         if path:
             new_env["BROWSER_PATH"] = path
 
-        new_env["USER_DATA_DIR"] = str(self.temp_dir.name)
+        new_env["USER_DATA_DIR"] = self.temp_name
 
         if headless:
             new_env["HEADLESS"] = "--headless"  # unset if false
