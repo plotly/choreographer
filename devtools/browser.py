@@ -417,6 +417,8 @@ class Browser(Target):
     # Output Helper for Debugging
 
     def run_output_thread(self, debug=None):
+        if self.loop:
+            raise ValueError("You must use this method without loop in the Browser")
         if not debug:
             debug = self.debug
 
