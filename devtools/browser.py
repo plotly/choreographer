@@ -109,7 +109,7 @@ class Browser(Target):
         if not self.loop:
             self._open()
 
-    async def _checkSession(self, response):
+    async def _check_session(self, response):
         target_id = response['params']['targetId'] # this is already gone by now, probably
         session_id = response['params']['sessionId']
         del self.protocol.sessions[session_id]
@@ -124,7 +124,7 @@ class Browser(Target):
             self._check_loop()
         self.future_self = self.loop.create_future()
         self.loop.create_task(self._open_async())
-        self.browser.subscribe("Target.detachedFromTarget", self._checkSession, repeating=True)
+        self.browser.subscribe("Target.detachedFromTarget", self._check_session, repeating=True)
         self.run_read_loop()
         return self.future_self
 
