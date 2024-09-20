@@ -76,7 +76,7 @@ def open_browser(to_chromium, from_chromium, stderr=None, env=None, loop=None, l
         )
     elif loop_hack:
         def run():
-            subprocess.Popen(
+            return subprocess.Popen(
                 cli,
                 stderr=stderr,
                 close_fds=False, # TODO sh/could be true?
