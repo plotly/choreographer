@@ -474,7 +474,7 @@ class Browser(Target):
                             if similar_strings or equals_method:
                                 for future in futures:
                                     if self.debug:
-                                        print(f"Processing future {hex(id(future))}")
+                                        print(f"Processing future {id(future)}")
                                     future.set_result(response)
                                     if self.debug:
                                         print(f"Future {future} resolved with response")
