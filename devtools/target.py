@@ -71,13 +71,13 @@ class Target:
 
     def subscribe(self, string, callback, repeating):
         if not self.sessions.values():
-            raise RuntimeError("Cannot send_command without at least one valid session")
+            raise RuntimeError("Cannot subscribe without at least one valid session")
         session = list(self.sessions.values())[0]
         session.subscribe(string, callback, repeating)
 
     def unsubscribe(self, string):
         if not self.sessions.values():
-            raise RuntimeError("Cannot send_command without at least one valid session")
+            raise RuntimeError("Cannot unsubscribe without at least one valid session")
         session = list(self.sessions.values())[0]
         session.unsubscribe(string)
 
