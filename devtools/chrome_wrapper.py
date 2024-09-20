@@ -19,7 +19,6 @@ if __name__ == "__main__":
 import subprocess  # noqa
 import signal  # noqa
 import platform  # noqa
-import sys # noqa
 import asyncio #noqa
 
 system = platform.system()
