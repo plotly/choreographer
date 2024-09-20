@@ -6,7 +6,6 @@ import tempfile
 import warnings
 import json
 import asyncio
-import copy
 from threading import Thread
 from collections import OrderedDict
 
