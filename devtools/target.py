@@ -80,3 +80,9 @@ class Target:
             raise RuntimeError("Cannot send_command without at least one valid session")
         session = list(self.sessions.values())[0]
         session.unsubscribe(string)
+
+    def subscribe_once(self, string):
+        if not self.sessions.values():
+            raise RuntimeError("Cannot subscribe_one without at least one valid session")
+        session = list(self.sessions.values())[0]
+        session.subscribe_once(string)
