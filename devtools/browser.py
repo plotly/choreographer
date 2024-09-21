@@ -474,13 +474,11 @@ class Browser(Target):
                             if similar_strings or equals_method:
                                 for future in futures:
                                     if self.debug:
-                                        print(f"Processing future {id(future)}")
+                                        print(f"Processing future {id(future)}", file=sys.stderr)
                                     future.set_result(response)
                                     if self.debug:
-                                        print(f"Future {future} resolved with response")
+                                        print(f"Future resolved with response {future}", file=sys.stderr)
                                 del session.subscriptions_futures[sub_key]
-                                if self.debug:
-                                    print(f"Deleted {sub_key} from session.subscriptions_futures")
 
                                 
                     elif key:
