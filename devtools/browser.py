@@ -85,7 +85,8 @@ class Browser(Target):
         self._env = new_env
         if self.debug:
             print("DEBUG REPORT:")
-            print(new_env)
+            print(f"BROWSER_PATH: {new_env['BROWSER_PATH']}")
+            print(f"USER_DATA_DIR: {new_env['USER_DATA_DIR']}")
 
         # Defaults for loop
         if loop is None:
@@ -308,6 +309,8 @@ class Browser(Target):
                 self.sync_process_close()
                 # I'd say race condition but the user needs to take care of it
             self.finish_close()
+        if self.debug:
+            print(f"Tempfile still exists?: {bool(os.path.isfile(str(self.temp_dir.name)))}")
     # These are effectively stubs to allow use with with
 
     def __enter__(self):
