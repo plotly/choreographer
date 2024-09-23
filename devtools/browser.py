@@ -108,7 +108,6 @@ class Browser(Target):
             self._open()
 
     async def _checkSession(self, response):
-        target_id = response['params']['targetId'] # this is already gone by now, probably
         session_id = response['params']['sessionId']
         del self.protocol.sessions[session_id]
         # we need to remove this from protocol
@@ -222,7 +221,7 @@ class Browser(Target):
             self.subprocess.wait(3)
             self.pipe.close()
             return
-        except:
+        except Exception:
             pass
         self.pipe.close()
         if platform.system() == "Windows":
@@ -233,7 +232,7 @@ class Browser(Target):
                 try:
                     self.subprocess.wait(2)
                     return
-                except:
+                except Exception:
                     pass
             else:
                 return
@@ -241,7 +240,7 @@ class Browser(Target):
         try:
             self.subprocess.wait(2)
             return
-        except:
+        except Exception:
             pass
         self.subprocess.kill()
 
@@ -254,7 +253,7 @@ class Browser(Target):
             self.finish_close()
             self.pipe.close()
             return
-        except:
+        except Exception:
             pass
         self.pipe.close()
         if platform.system() == "Windows":
@@ -263,7 +262,7 @@ class Browser(Target):
                 await asyncio.wait_for(waiter, 1)
                 self.finish_close()
                 return
-            except:
+            except Exception:
                 pass
             # need try
             subprocess.call(
@@ -274,7 +273,7 @@ class Browser(Target):
                 await asyncio.wait_for(waiter, 2)
                 self.finish_close()
                 return
-            except:
+            except Exception:
                 pass
         self.subprocess.terminate()
         waiter = self.subprocess.wait()
@@ -282,7 +281,7 @@ class Browser(Target):
             await asyncio.wait_for(waiter, 2)
             self.finish_close()
             return
-        except:
+        except Exception:
             pass
         self.subprocess.kill()
 
