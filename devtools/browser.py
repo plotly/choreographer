@@ -301,8 +301,7 @@ class Browser(Target):
                 future.set_result(None)
                 return future
             else:
-                task_close = asyncio.create_task(self.async_process_close())
-                return task_close
+                return asyncio.create_task(self.async_process_close())
 
         else:
             if self.subprocess.poll() is None:
