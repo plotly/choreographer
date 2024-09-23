@@ -115,7 +115,7 @@ class Browser(Target):
         if not self.loop:
             self._open()
 
-    async def _checkSession(self, response):
+    async def _check_session(self, response):
         session_id = response['params']['sessionId']
         del self.protocol.sessions[session_id]
         # we need to remove this from protocol
