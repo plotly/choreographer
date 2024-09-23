@@ -85,7 +85,8 @@ class Browser(Target):
         self._env = new_env
         if self.debug:
             print("DEBUG REPORT:")
-            print(new_env)
+            print(f"BROWSER_PATH: {new_env['BROWSER_PATH']}")
+            print(f"USER_DATA_DIR: {new_env['USER_DATA_DIR']}")
 
         # Defaults for loop
         if loop is None:
