@@ -71,6 +71,11 @@ class Browser(Target):
             path = default_path
         if path:
             new_env["BROWSER_PATH"] = path
+        else:
+            raise RuntimeError(
+                "Could not find an acceptable browser. Please set environmental variable BROWSER_PATH or pass `path=/path/to/browser` into the Browser() constructor."
+            )
+
 
         new_env["USER_DATA_DIR"] = str(self.temp_dir.name)
 
@@ -78,7 +83,9 @@ class Browser(Target):
             new_env["HEADLESS"] = "--headless"  # unset if false
 
         self._env = new_env
-
+        if self.debug:
+            print("DEBUG REPORT:")
+            print(new_env)
 
         # Defaults for loop
         if loop is None:

@@ -40,8 +40,4 @@ def which_browser(executable_name=chrome):
         path = shutil.which(exe)
         if path:
             break
-    if not path:
-        raise RuntimeError(
-            "Could not find chrome. Please path execution path as environmental variable BROWSER_PATH"
-        )
     return path
