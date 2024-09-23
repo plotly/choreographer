@@ -6,6 +6,7 @@ import tempfile
 import warnings
 import json
 import asyncio
+import copy
 from threading import Thread
 from collections import OrderedDict
 
@@ -108,7 +109,6 @@ class Browser(Target):
             self._open()
 
     async def _checkSession(self, response):
-        target_id = response['params']['targetId'] # this is already gone by now, probably
         session_id = response['params']['sessionId']
         del self.protocol.sessions[session_id]
         # we need to remove this from protocol
@@ -222,7 +222,7 @@ class Browser(Target):
             self.subprocess.wait(3)
             self.pipe.close()
             return
-        except:
+        except Exception:
             pass
         self.pipe.close()
         if platform.system() == "Windows":
@@ -233,7 +233,7 @@ class Browser(Target):
                 try:
                     self.subprocess.wait(2)
                     return
-                except:
+                except Exception:
                     pass
             else:
                 return
@@ -241,7 +241,7 @@ class Browser(Target):
         try:
             self.subprocess.wait(2)
             return
-        except:
+        except Exception:
             pass
         self.subprocess.kill()
 
@@ -254,7 +254,7 @@ class Browser(Target):
             self.finish_close()
             self.pipe.close()
             return
-        except:
+        except Exception:
             pass
         self.pipe.close()
         if platform.system() == "Windows":
@@ -263,7 +263,7 @@ class Browser(Target):
                 await asyncio.wait_for(waiter, 1)
                 self.finish_close()
                 return
-            except:
+            except Exception:
                 pass
             # need try
             subprocess.call(
@@ -274,7 +274,7 @@ class Browser(Target):
                 await asyncio.wait_for(waiter, 2)
                 self.finish_close()
                 return
-            except:
+            except Exception:
                 pass
         self.subprocess.terminate()
         waiter = self.subprocess.wait()
@@ -282,7 +282,7 @@ class Browser(Target):
             await asyncio.wait_for(waiter, 2)
             self.finish_close()
             return
-        except:
+        except Exception:
             pass
         self.subprocess.kill()
 
@@ -450,6 +450,7 @@ class Browser(Target):
                         )
                         session = self.protocol.sessions[session_id]
                         subscriptions = session.subscriptions
+                        subscriptions_futures = session.subscriptions_futures
                         for sub_key in list(subscriptions):
                             similar_strings = sub_key.endswith("*") and response[
                                 "method"
@@ -463,6 +464,22 @@ class Browser(Target):
                                 )
                                 if not subscriptions[sub_key][1]: # if not repeating
                                     self.protocol.sessions[session_id].unsubscribe(sub_key)
+
+                        for sub_key, futures in list(subscriptions_futures.items()):
+                            similar_strings = sub_key.endswith("*") and response["method"].startswith(sub_key[:-1])
+                            equals_method = response["method"] == sub_key
+                            if self.debug:
+                                print(f"Checking subscription key: {sub_key} against event method {response['method']}", file=sys.stderr)
+                            if similar_strings or equals_method:
+                                for future in futures:
+                                    if self.debug:
+                                        print(f"Processing future {id(future)}", file=sys.stderr)
+                                    future.set_result(response)
+                                    if self.debug:
+                                        print(f"Future resolved with response {future}", file=sys.stderr)
+                                del session.subscriptions_futures[sub_key]
+
+                                
                     elif key:
                         future = None
                         if key in self.futures:
