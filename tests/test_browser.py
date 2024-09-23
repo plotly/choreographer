@@ -43,15 +43,21 @@ async def test_async_browser(
         debug=test_input_debug,
         debug_browser=test_input_debug_browser,
     ) as browser:
-        tab_1 = await browser.create_tab(url[1])
+        tab_1 = await browser.create_tab(url[0])
+        tab_2 = await browser.create_tab(url[1])
         session = await browser.create_session()
         assert isinstance(tab_1, devtools.tab.Tab)
         assert await browser.close_tab(tab_1) is not None
+        assert browser.get_tab() == list(browser.tabs.values())[0]
+        browser.remove_tab(tab_2)
+        assert tab_2 not in browser.tabs
         assert isinstance(session, devtools.session.Session)
         assert (
             await browser.write_json({"id": 0, "method": "Target.getTargets"})
             is not None
         )
+        assert await browser.populate_targets() is None
+        assert tab_2.target_id in browser.tabs
 
 
 @pytest.mark.parametrize(
