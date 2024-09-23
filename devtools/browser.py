@@ -61,7 +61,6 @@ class Browser(Target):
             self.temp_dir = tempfile.TemporaryDirectory(
                 delete=False, ignore_cleanup_errors=True
             )
-        self.temp_name = str(self.temp_dir.name)
 
         # Set up process env
         new_env = os.environ.copy()
@@ -73,7 +72,7 @@ class Browser(Target):
         if path:
             new_env["BROWSER_PATH"] = path
 
-        new_env["USER_DATA_DIR"] = self.temp_name
+        new_env["USER_DATA_DIR"] = str(self.temp_dir.name)
 
         if headless:
             new_env["HEADLESS"] = "--headless"  # unset if false
@@ -287,31 +286,22 @@ class Browser(Target):
         self.subprocess.kill()
 
     def close(self):
-        def verify_tempfile(tempfile):
-            deleted_temp = os.path.isfile(tempfile)
-            print(f"Tempfile exist: {deleted_temp}")
         if self.loop:
             if not len(self.tabs):
-                verify_tempfile(self.temp_name)
                 self.pipe.close()
                 self.finish_close()
                 future = self.loop.create_future()
                 future.set_result(None)
-                verify_tempfile(self.temp_name)
                 return future
             else:
-                verify_tempfile(self.temp_name)
                 task_close = asyncio.create_task(self.async_process_close())
-                verify_tempfile(self.temp_name)
                 return task_close
 
         else:
-            verify_tempfile(self.temp_name)
             if self.subprocess.poll() is None:
                 self.sync_process_close()
                 # I'd say race condition but the user needs to take care of it
             self.finish_close()
-            verify_tempfile(self.temp_name)
     # These are effectively stubs to allow use with with
 
     def __enter__(self):
