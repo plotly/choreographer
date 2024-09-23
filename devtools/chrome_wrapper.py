@@ -20,6 +20,7 @@ import subprocess  # noqa
 import signal  # noqa
 import platform  # noqa
 import sys # noqa
+import asyncio #noqa
 
 system = platform.system()
 if system == "Windows":
@@ -33,7 +34,7 @@ elif system == "Linux":
 else:
     pass
 
-def open_browser(to_chromium, from_chromium, stderr=None, env = None):
+def open_browser(to_chromium, from_chromium, stderr=None, env=None, loop=None, loop_hack=False):
     path = env.get("BROWSER_PATH", default_path)
 
     if path is None:
@@ -65,14 +66,32 @@ def open_browser(to_chromium, from_chromium, stderr=None, env = None):
         win_only = {}
         if platform.system() == "Windows":
             win_only = {"creationflags": subprocess.CREATE_NEW_PROCESS_GROUP}
-
-    return subprocess.Popen(
-        cli,
-        close_fds=False,
-        pass_fds=(to_chromium, from_chromium) if system != "Windows" else None,
-        stderr=stderr,
-        **win_only,
-    )
+    if not loop:
+        return subprocess.Popen(
+            cli,
+            stderr=stderr,
+            close_fds=False, # TODO sh/could be true?
+            pass_fds=(to_chromium, from_chromium) if system != "Windows" else None,
+            **win_only,
+        )
+    elif loop_hack:
+        def run():
+            subprocess.Popen(
+                cli,
+                stderr=stderr,
+                close_fds=False, # TODO sh/could be true?
+                pass_fds=(to_chromium, from_chromium) if system != "Windows" else None,
+                **win_only,
+            )
+        return asyncio.to_thread(run)
+    else:
+        return asyncio.create_subprocess_exec(
+                cli[0],
+                *cli[1:],
+                stderr=stderr,
+                close_fds=False, # TODO: sh/could be true?
+                pass_fds=(to_chromium, from_chromium) if system != "Windows" else None,
+                **win_only)
 
 
 # THIS MAY BE PART OF KILL
@@ -83,7 +102,7 @@ def kill_proc(*nope):
     process.kill()
 
 if __name__ == "__main__":
-    process = open_browser(to_chromium=3, from_chromium=4, env = os.environ)
+    process = open_browser(to_chromium=3, from_chromium=4, env=os.environ)
     signal.signal(signal.SIGTERM, kill_proc)
     signal.signal(signal.SIGINT, kill_proc)
 
