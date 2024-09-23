@@ -84,9 +84,10 @@ def test_sync_browser(test_input_headless, test_input_debug, test_input_debug_br
         debug_browser=test_input_debug_browser,
     ) as browser:
         print(browser)
-        assert browser.send_command(
-            command="Target.createTarget", params={"url": url[1]}
-        )  is not None
-        assert browser.write_json({"id": 0, "method": "Target.getTargets"})  is not None
+        assert (
+            browser.send_command(command="Target.createTarget", params={"url": url[1]})
+            is not None
+        )
+        assert browser.write_json({"id": 0, "method": "Target.getTargets"}) is not None
         browser.loop = None
         assert browser.run_output_thread() is None
