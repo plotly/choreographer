@@ -3,10 +3,10 @@ import sys
 import json
 import platform
 
-
 import numpy as np
 
 # TODO: don't know about this
+# TODO: use has_attr instead of np.integer, you'll be fine
 class NumpyEncoder(json.JSONEncoder):
     """ Special json encoder for numpy types """
     def default(self, obj):
