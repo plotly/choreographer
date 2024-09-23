@@ -1,6 +1,5 @@
 import pytest
 import devtools
-import asyncio
 
 
 url = (
