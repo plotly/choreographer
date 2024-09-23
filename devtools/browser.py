@@ -61,7 +61,6 @@ class Browser(Target):
             self.temp_dir = tempfile.TemporaryDirectory(
                 delete=False, ignore_cleanup_errors=True
             )
-        self.temp_name = str(self.temp_dir.name)
 
         # Set up process env
         new_env = os.environ.copy()
@@ -72,14 +71,21 @@ class Browser(Target):
             path = default_path
         if path:
             new_env["BROWSER_PATH"] = path
+        else:
+            raise RuntimeError(
+                "Could not find an acceptable browser. Please set environmental variable BROWSER_PATH or pass `path=/path/to/browser` into the Browser() constructor."
+            )
 
-        new_env["USER_DATA_DIR"] = self.temp_name
+
+        new_env["USER_DATA_DIR"] = str(self.temp_dir.name)
 
         if headless:
             new_env["HEADLESS"] = "--headless"  # unset if false
 
         self._env = new_env
-
+        if self.debug:
+            print("DEBUG REPORT:")
+            print(new_env)
 
         # Defaults for loop
         if loop is None:
@@ -108,8 +114,7 @@ class Browser(Target):
         if not self.loop:
             self._open()
 
-    async def _check_session(self, response):
-        target_id = response['params']['targetId'] # this is already gone by now, probably
+    async def _checkSession(self, response):
         session_id = response['params']['sessionId']
         del self.protocol.sessions[session_id]
         # we need to remove this from protocol
@@ -223,7 +228,7 @@ class Browser(Target):
             self.subprocess.wait(3)
             self.pipe.close()
             return
-        except:
+        except Exception:
             pass
         self.pipe.close()
         if platform.system() == "Windows":
@@ -234,7 +239,7 @@ class Browser(Target):
                 try:
                     self.subprocess.wait(2)
                     return
-                except:
+                except Exception:
                     pass
             else:
                 return
@@ -242,7 +247,7 @@ class Browser(Target):
         try:
             self.subprocess.wait(2)
             return
-        except:
+        except Exception:
             pass
         self.subprocess.kill()
 
@@ -255,7 +260,7 @@ class Browser(Target):
             self.finish_close()
             self.pipe.close()
             return
-        except:
+        except Exception:
             pass
         self.pipe.close()
         if platform.system() == "Windows":
@@ -264,7 +269,7 @@ class Browser(Target):
                 await asyncio.wait_for(waiter, 1)
                 self.finish_close()
                 return
-            except:
+            except Exception:
                 pass
             # need try
             subprocess.call(
@@ -275,7 +280,7 @@ class Browser(Target):
                 await asyncio.wait_for(waiter, 2)
                 self.finish_close()
                 return
-            except:
+            except Exception:
                 pass
         self.subprocess.terminate()
         waiter = self.subprocess.wait()
@@ -283,36 +288,26 @@ class Browser(Target):
             await asyncio.wait_for(waiter, 2)
             self.finish_close()
             return
-        except:
+        except Exception:
             pass
         self.subprocess.kill()
 
     def close(self):
-        def verify_tempfile(tempfile):
-            deleted_temp = os.path.isfile(tempfile)
-            print(f"Tempfile exist: {deleted_temp}")
         if self.loop:
             if not len(self.tabs):
-                verify_tempfile(self.temp_name)
                 self.pipe.close()
                 self.finish_close()
                 future = self.loop.create_future()
                 future.set_result(None)
-                verify_tempfile(self.temp_name)
                 return future
             else:
-                verify_tempfile(self.temp_name)
-                task_close = asyncio.create_task(self.async_process_close())
-                verify_tempfile(self.temp_name)
-                return task_close
-            
+                return asyncio.create_task(self.async_process_close())
+
         else:
-            verify_tempfile(self.temp_name)
             if self.subprocess.poll() is None:
                 self.sync_process_close()
                 # I'd say race condition but the user needs to take care of it
             self.finish_close()
-            verify_tempfile(self.temp_name)
     # These are effectively stubs to allow use with with
 
     def __enter__(self):
@@ -487,15 +482,13 @@ class Browser(Target):
                             if similar_strings or equals_method:
                                 for future in futures:
                                     if self.debug:
-                                        print(f"Processing future {hex(id(future))}")
+                                        print(f"Processing future {id(future)}", file=sys.stderr)
                                     future.set_result(response)
                                     if self.debug:
-                                        print(f"Future {future} resolved with response")
+                                        print(f"Future resolved with response {future}", file=sys.stderr)
                                 del session.subscriptions_futures[sub_key]
-                                if self.debug:
-                                    print(f"Deleted {sub_key} from session.subscriptions_futures")
 
-                                
+
                     elif key:
                         future = None
                         if key in self.futures:
