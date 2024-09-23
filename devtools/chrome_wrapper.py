@@ -55,6 +55,7 @@ def open_browser(to_chromium, from_chromium, stderr=None, env=None, loop=None, l
     if "HEADLESS" in env:
         cli.append("--headless")
 
+    win_only = {}
     if system == "Windows":
         to_chromium_handle = msvcrt.get_osfhandle(to_chromium)
         os.set_handle_inheritable(to_chromium_handle, True)
@@ -63,7 +64,6 @@ def open_browser(to_chromium, from_chromium, stderr=None, env=None, loop=None, l
         cli += [
             f"--remote-debugging-io-pipes={str(to_chromium_handle)},{str(from_chromium_handle)}"
         ]
-        win_only = {}
         if platform.system() == "Windows":
             win_only = {"creationflags": subprocess.CREATE_NEW_PROCESS_GROUP}
     if not loop:
