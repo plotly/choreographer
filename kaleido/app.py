@@ -74,7 +74,6 @@ async def to_image(figure, path):
         await tab.send_command("Page.enable")
         await tab.send_command("Runtime.enable")
         
-        # Create a future for the event automatically TODO
         event_done = asyncio.get_running_loop().create_future()
         async def execution_started_cb(response):
             event_done.set_result(response)
@@ -115,19 +114,14 @@ async def to_image(figure, path):
                 )
             )
 
-        # hate TODO
         img = json.loads(response.get("result").get("result").get("value")).get("result")
 
         # Base64 decode binary types
         if format not in _text_formats:
             img = base64.b64decode(img)
 
-        # TODO: not async
         with open(path, "wb") as f:
             f.write(img)
-
-        # Cleanup Close TODO
-        # https://stackoverflow.com/questions/1262708/suppress-command-line-output  TODO
 
 ####
 ####
@@ -171,7 +165,3 @@ for name in allNames:
             print(_in)
             print("***")
 
-
-# option to block on this thread TODO
-# option to go into background thread TODO
-# option to use it in my task manager TODO
