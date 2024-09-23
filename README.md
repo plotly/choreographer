@@ -1,18 +1,14 @@
-# INTERNAL TESTING PHASE:
+# Devtools Protocol
 
-We need to start testing on various systems.
+### Install
 
-## Install
+Install this repository (`pip install .`) and `numpy`.
 
-Please install this repository (`pip install .`) and `numpy`.
+### Important Test!
 
-## Important test
+Please run: `python app/test1.py` and send me the output.
 
-Please run: `app/test1.py` and send me the output.
-
-## Optional Tests
-
-If you want,
+#### Optional Tests
 
 Run: `app/app.py` and send me the output.
 
