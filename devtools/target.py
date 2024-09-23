@@ -69,14 +69,21 @@ class Target:
             raise RuntimeError("Cannot send_command without at least one valid session")
         return list(self.sessions.values())[0].send_command(command, params)
 
-    def subscribe(self, string, callback, repeating):
+    def _get_first_session(self):
         if not self.sessions.values():
-            raise RuntimeError("Cannot send_command without at least one valid session")
-        session = list(self.sessions.values())[0]
+            raise RuntimeError(
+                "Cannot use this method without at least one valid session"
+            )
+        return list(self.sessions.values())[0]
+
+    def subscribe(self, string, callback, repeating):
+        session = self._get_first_session()
         session.subscribe(string, callback, repeating)
 
     def unsubscribe(self, string):
-        if not self.sessions.values():
-            raise RuntimeError("Cannot send_command without at least one valid session")
-        session = list(self.sessions.values())[0]
+        session = self._get_first_session()
         session.unsubscribe(string)
+
+    def subscribe_once(self, string):
+        session = self._get_first_session()
+        session.subscribe_once(string)
