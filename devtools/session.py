@@ -9,6 +9,7 @@ class Session:
         self.session_id = session_id
         self.message_id = 0
         self.subscriptions = {}
+        self.subscriptions_futures = {}
 
     def send_command(self, command, params=None):
         current_id = self.message_id
@@ -25,13 +26,31 @@ class Session:
 
         return self.browser.write_json(json_command)
 
-    def subscribe(self, string, callback, repeating):
+    def subscribe(self, string, callback, repeating=True):
+        if not self.browser.loop:
+            raise ValueError("You may use this method with a loop in Browser")
         if string in self.subscriptions:
-            raise ValueError("You are already subscribed to this string, duplicate subscriptions are not allowed.")
+            raise ValueError(
+                "You are already subscribed to this string, duplicate subscriptions are not allowed."
+            )
         else:
             self.subscriptions[string] = (callback, repeating)
 
     def unsubscribe(self, string):
+        if not self.browser.loop:
+            raise ValueError("You may use this method with a loop in Browser")
         if string not in self.subscriptions:
-            raise ValueError("Cannot unsubscribe as string is not present in subscriptions")
+            raise ValueError(
+                "Cannot unsubscribe as string is not present in subscriptions"
+            )
         del self.subscriptions[string]
+
+    def subscribe_once(self, string):
+        if not self.browser.loop:
+            raise ValueError("You may use this method with a loop in Browser")
+        future = self.browser.loop.create_future()
+        if string not in self.subscriptions_futures:
+            self.subscriptions_futures[string] = [future]
+        else:
+            self.subscriptions_futures[string].append(future)
+        return future
