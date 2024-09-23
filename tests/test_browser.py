@@ -52,3 +52,41 @@ async def test_async_browser(
             await browser.write_json({"id": 0, "method": "Target.getTargets"})
             is not None
         )
+
+
+@pytest.mark.parametrize(
+    "test_input_headless,test_input_debug,test_input_debug_browser",
+    [
+        (True, True, True),
+        (True, True, False),
+        (True, False, True),
+        (True, False, False),
+        (False, True, True),
+        (False, True, False),
+        (False, False, True),
+        (False, False, False),
+    ],
+    ids=[
+        "sync_browser_1",
+        "sync_browser_2",
+        "sync_browser_3",
+        "sync_browser_4",
+        "sync_browser_5",
+        "sync_browser_6",
+        "sync_browser_7",
+        "sync_browser_8",
+    ],
+)
+def test_sync_browser(test_input_headless, test_input_debug, test_input_debug_browser):
+    with devtools.Browser(
+        headless=test_input_headless,
+        debug=test_input_debug,
+        debug_browser=test_input_debug_browser,
+    ) as browser:
+        print(browser)
+        assert browser.send_command(
+            command="Target.createTarget", params={"url": url[1]}
+        )  is not None
+        assert browser.write_json({"id": 0, "method": "Target.getTargets"})  is not None
+        browser.loop = None
+        assert browser.run_output_thread() is None
