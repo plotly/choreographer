@@ -6,7 +6,6 @@ import tempfile
 import warnings
 import json
 import asyncio
-import copy
 from threading import Thread
 from collections import OrderedDict
 
@@ -129,7 +128,7 @@ class Browser(Target):
             self._check_loop()
         self.future_self = self.loop.create_future()
         self.loop.create_task(self._open_async())
-        self.browser.subscribe("Target.detachedFromTarget", self._checkSession, repeating=True)
+        self.browser.subscribe("Target.detachedFromTarget", self._check_session, repeating=True)
         self.run_read_loop()
         return self.future_self
 
@@ -303,6 +302,7 @@ class Browser(Target):
                 return future
             else:
                 return asyncio.create_task(self.async_process_close())
+
         else:
             if self.subprocess.poll() is None:
                 self.sync_process_close()
@@ -488,7 +488,7 @@ class Browser(Target):
                                         print(f"Future resolved with response {future}", file=sys.stderr)
                                 del session.subscriptions_futures[sub_key]
 
-                                
+
                     elif key:
                         future = None
                         if key in self.futures:
