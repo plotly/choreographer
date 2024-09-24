@@ -6,12 +6,12 @@
 
 ### ⚠️⚠️⚠️**Testers Needed!**⚠️⚠️⚠️
 
-**This package is cross-platform and testing on _many various platforms_ will help us! See [here](#-help-needed-).**
+**This package is cross-platform and testing on _many various platforms_ will help us! See [here](#%EF%B8%8F-help-needed-%EF%B8%8F).**
 
 
 ## Quickstart (asyncio)
 
-Easy: 
+Easy:
 ```python
 import asyncio
 import devtools
@@ -30,11 +30,11 @@ See [the devtools reference](https://chromedevtools.github.io/devtools-protocol/
 
 ```python
 	... # continued from above
-	
+
 	# Callback for printing result
 	async def dump_event(response):
 		print(str(response))
-	
+
 	# Callback for raising result as error
 	async def error_event(response):
 		raise Exception(str(response))
