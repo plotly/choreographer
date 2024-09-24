@@ -381,6 +381,7 @@ class Browser(Target):
             params={"targetId": target_id},
         )
         self.remove_tab(target_id)
+        self._closed_tabs.append(target_id)
         if "error" in response:
             raise RuntimeError("Could not close tab") from Exception(response["error"])
         return response
