@@ -9,6 +9,9 @@ commands: # all jobs/workflows use same commands
       - run:
           name: python_version
           command: python --version
+      - install:
+          name: install_devtools
+          command: pip install . numpy
 jobs:
   linux-docker: # similiar to the one below us
     docker: # machine specifies a linux vm, can we just use docker for the pull?
