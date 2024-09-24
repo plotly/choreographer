@@ -103,6 +103,7 @@ class Browser(Target):
         self.executor = executor
 
         self.tabs = OrderedDict()
+        self._closed_tabs = []
 
         # Compose Resources
         self.pipe = Pipe(debug=debug)
