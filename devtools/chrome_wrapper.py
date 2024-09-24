@@ -36,8 +36,6 @@ else: # assume mac, or system == "Darwin"
 def open_browser(to_chromium, from_chromium, stderr=None, env=None, loop=None, loop_hack=False):
     path = env.get("BROWSER_PATH", default_path)
     # TODO: check that browser exists (windows, mac) w/ --version (TODO: how to do on wndows?)
-    if path is None:
-        raise ValueError("You must specify a path with environmental variable BROWSER_PATH")
 
     user_data_dir = env["USER_DATA_DIR"]
 
