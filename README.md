@@ -22,6 +22,15 @@ async with Browser(headless=False) as browser:
 	await asyncio.sleep(3)
 	await new_tab.send_command("Page.navigate", params=dict(url="https://github.com"))
 	await asyncio.sleep(3)
+
+
+## NOTE:
+# if you wish to use interactively, ie in a console,
+# it is better to use, instead of `async with`:
+
+browser = await Browser(headless=False)
+
+# as exiting the context will close the browser
 ```
 
 See [the devtools reference](https://chromedevtools.github.io/devtools-protocol/) for a list of all possible commands.
