@@ -18,5 +18,3 @@ dev = [
 
 [tool.ruff.lint]
 ignore = ["E701"]
-[tool.ruff.lint.per-file-ignores]
-"kaleido/**" = ["F", "E", "D"]
