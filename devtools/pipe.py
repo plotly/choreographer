@@ -74,34 +74,32 @@ class Pipe:
                     print(f"read_jsons: {jsons[-1]}", file=sys.stderr)
         return jsons
 
+    def _unblock_fd(self, fd):
+        try:
+            os.set_blocking(fd, False)
+        except BaseException as e:
+            if self.debug:
+                print(f"Error unblocking {str(fd)}: {str(e)}", file=sys.stderr)
+
+    def _close_fd(self, fd):
+        try:
+            os.close(fd)
+        except BaseException as e:
+            if self.debug:
+                print(f"Error closing {str(fd)}: {str(e)}", file=sys.stderr)
+
     def close(self):
-        os.set_blocking(self.write_from_chromium, False)
-        os.set_blocking(self.read_from_chromium, False)
-        os.set_blocking(self.write_to_chromium, False)
-        os.set_blocking(self.read_to_chromium, False)
+        self._unblock_fd(self.write_from_chromium)
+        self._unblock_fd(self.read_from_chromium)
+        self._unblock_fd(self.write_to_chromium)
+        self._unblock_fd(self.read_to_chromium)
         if platform.system() == "Windows":
             try:
                 os.write(self.write_from_chromium, b'{bye}\n')
             except BaseException as e:
                 if self.debug:
                     print(f"Caught error in self-wrte bye: {str(e)}", file=sys.stderr)
-        try:
-            os.close(self.write_to_chromium)
-        except BaseException as e:
-            if self.debug:
-                print(f"Caught error in self-wrte bye: {str(e)}", file=sys.stderr)
-        try:
-            os.close(self.read_from_chromium)
-        except BaseException as e:
-            if self.debug:
-                print(f"Caught error in self-wrte bye: {str(e)}", file=sys.stderr)
-        try:
-            os.close(self.write_from_chromium)
-        except BaseException as e:
-            if self.debug:
-                print(f"Caught error in self-wrte bye: {str(e)}", file=sys.stderr)
-        try:
-            os.close(self.read_to_chromium)
-        except BaseException as e:
-            if self.debug:
-                print(f"Caught error in self-wrte bye: {str(e)}", file=sys.stderr)
+        self._close_fd(self.write_to_chromium)
+        self._close_fd(self.read_from_chromium)
+        self._close_fd(self.write_from_chromium)
+        self._close_fd(self.read_to_chromium)
