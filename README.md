@@ -13,7 +13,7 @@
 
 Easy:
 ```python
-import asyncio
+import asyncio # required for this example only
 import devtools
 
 
@@ -45,10 +45,11 @@ See [the devtools reference](https://chromedevtools.github.io/devtools-protocol/
 	reponse = await new_tab.subscribe_once("Page.lifecycleEvent")
 	# do something with response
 	browser.unsubscribe("Target.*")
-	# events are always sent to a browser or tab, but the documentation isn't always clear which
-	# so dumping all: `browser.subscribe("*", dump_event)` can be useful (but verbose) for debugging
+	# events are always sent to a browser or tab,
+  # but the documentation isn't always clear which.
+	# Dumping all: `browser.subscribe("*", dump_event)` (on tab too)
+  # can be useful (but verbose) for debugging.
 ```
-Install this repository (`pip install .`) and `numpy`.
 
 ## Other Options
 
@@ -56,7 +57,7 @@ Install this repository (`pip install .`) and `numpy`.
 
 You can use this library without `asyncio`,
 ```
-my_browser = devtools.Browser()
+my_browser = devtools.Browser() # blocking until open
 ```
 But you are responsible for calling all `browser.pipe.read_jsons(blocking=True|False)` and organizing the results. `browser.run_output_thread()` will start a second thread that constantly prints all responses from the browser, it can't be used with `asyncio`- it won't play nice with any other read.
 
