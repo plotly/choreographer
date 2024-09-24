@@ -7,11 +7,12 @@ commands: # all jobs/workflows use same commands
   diagnostic:
     steps:
       - run:
-          name: python_version
-          command: python --version
-      - install:
           name: install_devtools
           command: pip install . numpy
+      - run:
+          name: first_test
+          command: python ./app/test1.py
+
 jobs:
   linux-docker: # similiar to the one below us
     docker: # machine specifies a linux vm, can we just use docker for the pull?
@@ -19,6 +20,9 @@ jobs:
     resource_class: small
     steps:
       - checkout
+      - run:
+          name: install_chrome
+          command: sudo apt-get update && sudo apt-get install chromium-browser
       - diagnostic
 
   windows-x64:
@@ -26,6 +30,9 @@ jobs:
       name: win/default
     steps:
       - checkout
+      - run:
+          name: install_chrome
+          command: choco install googlechrome -y --ignore-checksums
       - diagnostic
 
   osx:
@@ -34,6 +41,9 @@ jobs:
     resource_class: macos.m1.medium.gen1
     steps:
       - checkout
+      - run:
+          name: install_chrome
+          command: brew install google-chrome
       - diagnostic
 
 workflows:
@@ -57,3 +67,4 @@ workflows:
       - linux-docker:
           requires:
             - hold
+
