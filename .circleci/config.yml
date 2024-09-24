@@ -1,0 +1,56 @@
+version: 2.1
+
+orbs:
+  win: circleci/windows@5.0
+
+commands: # all jobs/workflows use same commands
+  diagnostic:
+    steps:
+      - run:
+          name: python_version
+          command: python --version
+jobs:
+  linux-docker: # similiar to the one below us
+    docker: # machine specifies a linux vm, can we just use docker for the pull?
+      - image: cimg/python:3.12.3
+    resource_class: small
+    steps:
+      - checkout
+      - diagnostic
+
+  windows-x64:
+    executor:
+      name: win/default
+    steps:
+      - checkout
+      - diagnostic
+
+  osx:
+    macos:  # indicate that we are using the macOS executor
+      xcode: 15.4.0
+    resource_class: macos.m1.medium.gen1
+    steps:
+      - checkout
+      - diagnostic
+
+workflows:
+  1-arch-3-os: # this workflow will do mac, linux, and windows without arch xcompile
+    jobs:
+      - hold:
+          type: approval
+      - linux-docker:
+          requires:
+            - hold
+      - windows-x64:
+          requires:
+            - hold
+      - osx:
+          requires:
+            - hold
+  cheap_test:
+    jobs:
+      - hold:
+          type: approval
+      - linux-docker:
+          requires:
+            - hold
