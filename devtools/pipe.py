@@ -75,13 +75,33 @@ class Pipe:
         return jsons
 
     def close(self):
+        os.set_blocking(self.write_from_chromium, False)
+        os.set_blocking(self.read_from_chromium, False)
+        os.set_blocking(self.write_to_chromium, False)
+        os.set_blocking(self.read_to_chromium, False)
         if platform.system() == "Windows":
             try:
-                os.set_blocking(self.write_from_chromium, False)
                 os.write(self.write_from_chromium, b'{bye}\n')
-            except Exception:
-                pass
-        os.close(self.write_to_chromium)
-        os.close(self.read_from_chromium)
-        os.close(self.write_from_chromium)
-        os.close(self.read_to_chromium)
+            except BaseException as e:
+                if self.debug:
+                    print(f"Caught error in self-wrte bye: {str(e)}", file=sys.stderr)
+        try:
+            os.close(self.write_to_chromium)
+        except BaseException as e:
+            if self.debug:
+                print(f"Caught error in self-wrte bye: {str(e)}", file=sys.stderr)
+        try:
+            os.close(self.read_from_chromium)
+        except BaseException as e:
+            if self.debug:
+                print(f"Caught error in self-wrte bye: {str(e)}", file=sys.stderr)
+        try:
+            os.close(self.write_from_chromium)
+        except BaseException as e:
+            if self.debug:
+                print(f"Caught error in self-wrte bye: {str(e)}", file=sys.stderr)
+        try:
+            os.close(self.read_to_chromium)
+        except BaseException as e:
+            if self.debug:
+                print(f"Caught error in self-wrte bye: {str(e)}", file=sys.stderr)
