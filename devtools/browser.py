@@ -404,6 +404,13 @@ class Browser(Target):
         self.add_session(new_session)
         return new_session
 
+    async def _close_returned_targets(self, targets):
+        for target_id in targets:
+            await self.send_command(
+                command="Target.closeTarget",
+                params={"targetId": target_id},
+            )
+
     async def populate_targets(self):
         if not self.browser.loop:
             warnings.warn("This method requires use of an event loop (asyncio).")
