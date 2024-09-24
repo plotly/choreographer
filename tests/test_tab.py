@@ -39,7 +39,7 @@ async def print_obj(obj):
     ],
 )
 @pytest.mark.asyncio
-async def test_async_browser(
+async def test_async_tab(
     test_input_headless, test_input_debug, test_input_debug_browser
 ):
     async with devtools.Browser(
