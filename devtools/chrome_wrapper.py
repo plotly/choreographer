@@ -30,12 +30,12 @@ if system == "Windows":
     default_path = r"c:\Program Files\Google\Chrome\Application\chrome.exe"
 elif system == "Linux":
     default_path = "/usr/bin/google-chrome-stable"
-else:
-    pass
+else: # assume mac, or system == "Darwin"
+    default_path = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" 
 
 def open_browser(to_chromium, from_chromium, stderr=None, env=None, loop=None, loop_hack=False):
     path = env.get("BROWSER_PATH", default_path)
-
+    # TODO: check that browser exists (windows, mac) w/ --version (TODO: how to do on wndows?)
     if path is None:
         raise ValueError("You must specify a path with environmental variable BROWSER_PATH")
 
