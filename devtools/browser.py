@@ -419,19 +419,23 @@ class Browser(Target):
             raise RuntimeError("Could not get targets") from Exception(
                 response["error"]
             )
-
+        returned_targets = []
         for json_response in response["result"]["targetInfos"]:
             if (
                 json_response["type"] == "page"
                 and json_response["targetId"] not in self.tabs
             ):
                 target_id = json_response["targetId"]
-                new_tab = Tab(target_id, self)
-                await new_tab.create_session()
-                self.add_tab(new_tab)
-                if self.debug:
-                    print(f"The target {target_id} was added", file=sys.stderr)
-
+                if target_id not in self._closed_tabs:
+                    new_tab = Tab(target_id, self)
+                    await new_tab.create_session()
+                    self.add_tab(new_tab)
+                    if self.debug:
+                        print(f"The target {target_id} was added", file=sys.stderr)
+                else:
+                    returned_targets.append(target_id)
+        if returned_targets:
+            await self._close_returned_targets(returned_targets)
     # Output Helper for Debugging
 
     def run_output_thread(self, debug=None):
