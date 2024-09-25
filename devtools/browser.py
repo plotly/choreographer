@@ -250,12 +250,12 @@ class Browser(Target):
             return
         # check if no sessions or targets
         self.send_command("Browser.close")
-        if self._is_closed(wait = .5):
+        if self._is_closed():
             if self.debug: print("Browser.close method closed browser", file=sys.stderr)
             return
         self.pipe.close()
-        if self._is_closed():
-            if self.debug: print("pipe.close() method closed browser", file=sys.stderr)
+        if self._is_closed(wait = 1):
+            if self.debug: print("pipe.close() (or slow Browser.close) method closed browser", file=sys.stderr)
             return
 
         # Start a kill
@@ -265,7 +265,7 @@ class Browser(Target):
                     ["taskkill", "/F", "/T", "/PID", str(self.subprocess.pid)]
                     stderr=subprocess.DEVNULL,
                     stdout=subprocess.DEVNULL,
-                ) 
+                )
                 if self._is_closed(wait = 2):
                     return
                 else:
@@ -289,12 +289,12 @@ class Browser(Target):
         # TODO: Above doesn't work with closed tabs for some reason
         # TODO: check if tabs?
         # TODO: track tabs?
-        await asyncio.wait([self.send_command("Browser.close")], timeout=2)
-        if await self._is_closed_async(wait = .5):
+        await asyncio.wait([self.send_command("Browser.close")], timeout=1)
+        if await self._is_closed_async():
             if self.debug: print("Browser.close method closed browser", file=sys.stderr)
             return
         self.pipe.close()
-        if await self._is_closed_async():
+        if await self._is_closed_async(wait=1):
             if self.debug: print("pipe.close() method closed browser", file=sys.stderr)
             return
 
