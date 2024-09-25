@@ -10,7 +10,7 @@ from threading import Thread
 from collections import OrderedDict
 
 from .pipe import Pipe
-from .protocol import Protocol
+from .protocol import Protocol, DevtoolsProtocolError, TARGET_NOT_FOUND
 from .target import Target
 from .session import Session
 from .tab import Tab
@@ -416,12 +416,22 @@ class Browser(Target):
                 json_response["type"] == "page"
                 and json_response["targetId"] not in self.tabs
             ):
-                target_id = json_response["targetId"]
-                new_tab = Tab(target_id, self)
-                await new_tab.create_session()
-                self.add_tab(new_tab)
-                if self.debug:
-                    print(f"The target {target_id} was added", file=sys.stderr)
+                try:
+                    target_id = json_response["targetId"]
+                    new_tab = Tab(target_id, self)
+                    await new_tab.create_session()
+                    self.add_tab(new_tab)
+                    if self.debug:
+                        print(f"The target {target_id} was added", file=sys.stderr)
+                except DevtoolsProtocolError as e:
+                    if e.code == TARGET_NOT_FOUND:
+                        if self.debug:
+                            print(
+                                f"Target {target_id} not found (could be closed before)",
+                                file=sys.stderr
+                                )
+                    else:
+                        raise e
 
     # Output Helper for Debugging
 
