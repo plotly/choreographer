@@ -263,7 +263,9 @@ class Browser(Target):
             if not self._is_closed():
                 subprocess.call(
                     ["taskkill", "/F", "/T", "/PID", str(self.subprocess.pid)]
-                )  # TODO probably needs to be silenced
+                    stderr=subprocess.DEVNULL,
+                    stdout=subprocess.DEVNULL,
+                ) 
                 if self._is_closed(wait = 2):
                     return
                 else:
@@ -300,8 +302,10 @@ class Browser(Target):
         if platform.system() == "Windows":
             if not await self._is_closed_async():
                 subprocess.call(
-                    ["taskkill", "/F", "/T", "/PID", str(self.subprocess.pid)]
-                )  # TODO probably needs to be silenced
+                    ["taskkill", "/F", "/T", "/PID", str(self.subprocess.pid)],
+                    stderr=subprocess.DEVNULL,
+                    stdout=subprocess.DEVNULL,
+                )
                 if await self._is_closed_async(wait = 2):
                     return
                 else:
