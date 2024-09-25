@@ -9,35 +9,38 @@ chromium = ["chromium", "chromium-browser"]
 # edge = // this needs to be tested
 
 
-def which_windows():
-    import winreg
-    import re
+def which_windows_chrome():
+    try:
+        import winreg
+        import re
 
-    command = winreg.QueryValueEx(
-        winreg.OpenKey(
-            winreg.HKEY_CLASSES_ROOT,
-            "ChromeHTML\\shell\\open\\command",
-            0,
-            winreg.KEY_READ,
-        ),
-        "",
-    )[0]
-    exe = re.search('"(.*?)"', command).group(1)
-    return exe
+        command = winreg.QueryValueEx(
+            winreg.OpenKey(
+                winreg.HKEY_CLASSES_ROOT,
+                "ChromeHTML\\shell\\open\\command",
+                0,
+                winreg.KEY_READ,
+            ),
+            "",
+        )[0]
+        exe = re.search('"(.*?)"', command).group(1)
+        return exe
+    except BaseException:
+        return None
 
 
 def which_browser(executable_name=chrome):
     path = None
     if isinstance(executable_name, str):
         executable_name = [executable_name]
+    if platform.system() == "Windows":
+        os.environ["NoDefaultCurrentDirectoryInExePath"] = "0"
     for exe in executable_name:
-        if platform.system() == "Windows":
-            try:
-                path = which_windows()
-                break
-            except:  # noqa # no bare except according to ruff but who knows what errors we'll get from this
-                os.environ["NoDefaultCurrentDirectoryInExePath"] = "0"
+        if platform.system() == "Windows" and exe == "chrome":
+            path = which_windows_chrome()
+            if path:
+                return path
         path = shutil.which(exe)
         if path:
-            break
-    return path
+            return path
+    return None
