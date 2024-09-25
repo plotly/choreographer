@@ -262,7 +262,7 @@ class Browser(Target):
         if platform.system() == "Windows":
             if not self._is_closed():
                 subprocess.call(
-                    ["taskkill", "/F", "/T", "/PID", str(self.subprocess.pid)]
+                    ["taskkill", "/F", "/T", "/PID", str(self.subprocess.pid)],
                     stderr=subprocess.DEVNULL,
                     stdout=subprocess.DEVNULL,
                 )
