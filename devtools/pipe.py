@@ -47,7 +47,10 @@ class Pipe:
         if debug:
             print(f"read_jsons ({'blocking' if blocking else 'not blocking'}):", file=sys.stderr)
         jsons = []
-        os.set_blocking(self.read_from_chromium, blocking)
+        try:
+            os.set_blocking(self.read_from_chromium, blocking)
+        except OSError as e:
+            raise PipeClosedError() from e
         try:
             raw_buffer = os.read(
                 self.read_from_chromium, 10000
