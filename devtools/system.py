@@ -64,11 +64,10 @@ def which_browser(executable_name=chrome):
         path = shutil.which(exe)
         if path and _is_exe(path):
             return path
-    if not path:
-        default_path = []
-        if executable_name == chrome:
-            default_path = default_path_chrome
-        for candidate in default_path:
-            if _is_exe(candidate):
-                return default_path
+    default_path = []
+    if executable_name == chrome:
+        default_path = default_path_chrome
+    for candidate in default_path:
+        if _is_exe(candidate):
+            return default_path
     return None
