@@ -543,7 +543,7 @@ def diagnose():
     print("Running a very simple test...")
     async def test():
         browser = await Browser(debug=True, debug_browser=True)
-        asyncio.sleep(2)
+        await asyncio.sleep(2)
         await browser.close()
     asyncio.run(test())
     print("Thank you! Please share these results with us!")
