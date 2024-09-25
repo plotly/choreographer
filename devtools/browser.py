@@ -117,8 +117,7 @@ class Browser(Target):
 
     async def _check_session(self, response):
         session_id = response['params']['sessionId']
-        del self.protocol.sessions[session_id]
-        # we need to remove this from protocol
+        self.remove_session(session_id)
 
     # somewhat out of order, __aenter__ is for use with `async with Browser()`
     # it is basically 99% of __await__, which is for use with `browser = await Browser()`
