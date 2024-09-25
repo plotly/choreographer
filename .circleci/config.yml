@@ -1,0 +1,70 @@
+version: 2.1
+
+orbs:
+  win: circleci/windows@5.0
+
+commands: # all jobs/workflows use same commands
+  diagnostic:
+    steps:
+      - run:
+          name: install_devtools
+          command: pip install . numpy
+      - run:
+          name: first_test
+          command: python ./app/test1.py
+
+jobs:
+  linux-docker: # similiar to the one below us
+    docker: # machine specifies a linux vm, can we just use docker for the pull?
+      - image: cimg/python:3.12.3
+    resource_class: small
+    steps:
+      - checkout
+      - run:
+          name: install_chrome
+          command: sudo apt-get update && sudo apt-get install chromium-browser
+      - diagnostic
+
+  windows-x64:
+    executor:
+      name: win/default
+    steps:
+      - checkout
+      - run:
+          name: install_chrome
+          command: choco install googlechrome -y --ignore-checksums
+      - diagnostic
+
+  osx:
+    macos:  # indicate that we are using the macOS executor
+      xcode: 15.4.0
+    resource_class: macos.m1.medium.gen1
+    steps:
+      - checkout
+      - run:
+          name: install_chrome
+          command: brew install google-chrome
+      - diagnostic
+
+workflows:
+  1-arch-3-os: # this workflow will do mac, linux, and windows without arch xcompile
+    jobs:
+      - hold:
+          type: approval
+      - linux-docker:
+          requires:
+            - hold
+      - windows-x64:
+          requires:
+            - hold
+      - osx:
+          requires:
+            - hold
+  cheap_test:
+    jobs:
+      - hold:
+          type: approval
+      - linux-docker:
+          requires:
+            - hold
+
