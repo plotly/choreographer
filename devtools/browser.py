@@ -18,28 +18,18 @@ from .system import which_browser
 
 from .pipe import PipeClosedError
 
-class UnhandledMessageWarning(UserWarning):
-    pass
-
 default_path = which_browser() # probably handle this better
 
-class Browser(Target):
-
+# BrowserProcess will be inherited by Browser. It contains all loop, context, and process logic.
+# It is just meant to help organize the code, it is not inherited anywhere else.
+class BrowserProcess():
     def _check_loop(self):
         if self.loop and isinstance(self.loop, asyncio.SelectorEventLoop):
             # I think using set_event_loop_policy is too invasive (is system wide)
             # and may not work in situations where a framework manually set SEL
             self.loop_hack = True
 
-    def __init__(
-        self,
-        path=None,
-        headless=True,
-        loop=None,
-        executor=None,
-        debug=False,
-        debug_browser=None,
-    ):
+    def __init__(self, path=None, headless=True, loop=None, executor=None, debug=False, debug_browser=False):
         # Configuration
         self.headless = headless
         self.debug = debug
@@ -98,19 +88,10 @@ class Browser(Target):
         self._check_loop()
 
         # State
-        if self.loop:
-            self.futures = {}
         self.executor = executor
-
-        self.tabs = OrderedDict()
 
         # Compose Resources
         self.pipe = Pipe(debug=debug)
-        self.protocol = Protocol(debug=debug)
-
-        # Initializing
-        super().__init__("0", self)  # NOTE: 0 can't really be used externally
-        self.add_session(Session(self, ""))
 
         if not self.loop:
             self._open()
@@ -120,8 +101,6 @@ class Browser(Target):
         del self.protocol.sessions[session_id]
         # we need to remove this from protocol
 
-    # somewhat out of order, __aenter__ is for use with `async with Browser()`
-    # it is basically 99% of __await__, which is for use with `browser = await Browser()`
     # so we just use one inside the other
     def __aenter__(self):
         if self.loop is True:
@@ -130,7 +109,7 @@ class Browser(Target):
         self.future_self = self.loop.create_future()
         self.loop.create_task(self._open_async())
         self.browser.subscribe("Target.detachedFromTarget", self._check_session, repeating=True)
-        self.run_read_loop()
+        self.protocol.run_read_loop()
         return self.future_self
 
     # await is basically the second part of __init__() if the user uses
@@ -262,7 +241,7 @@ class Browser(Target):
         if platform.system() == "Windows":
             if not self._is_closed():
                 subprocess.call(
-                    ["taskkill", "/F", "/T", "/PID", str(self.subprocess.pid)]
+                    ["taskkill", "/F", "/T", "/PID", str(self.subprocess.pid)],
                     stderr=subprocess.DEVNULL,
                     stdout=subprocess.DEVNULL,
                 )
@@ -346,6 +325,25 @@ class Browser(Target):
     async def __aexit__(self, type, value, traceback):
         await self.close()
 
+class Browser(BrowserProcess, Target):
+    def __init__(
+        self,
+        path=None,
+        headless=True,
+        debug=False,
+        **kwargs
+    ):
+        self.tabs = OrderedDict()
+
+        self.protocol = Protocol(self, debug=debug)
+
+        # Initializing
+        super(Target, self).__init__("0", self)
+        self.add_session(Session(self, ""))
+
+        super(BrowserProcess, self).__init__(path=None, headless=True, debug=False, **kwargs)
+
+
     # Basic syncronous functions
 
     def add_tab(self, tab):
@@ -363,7 +361,6 @@ class Browser(Target):
             return list(self.tabs.values())[0]
 
     # Better functions that require asyncronous
-
     async def create_tab(self, url="", width=None, height=None):
         if not self.loop:
             raise RuntimeError(
@@ -382,12 +379,16 @@ class Browser(Target):
             params["height"] = height
 
         response = await self.browser.send_command("Target.createTarget", params=params)
+
         if "error" in response:
             raise RuntimeError("Could not create tab") from Exception(response["error"])
         target_id = response["result"]["targetId"]
+
         new_tab = Tab(target_id, self)
         self.add_tab(new_tab)
+
         await new_tab.create_session()
+
         return new_tab
 
     async def close_tab(self, target_id):
@@ -468,89 +469,3 @@ class Browser(Target):
                     break
 
         Thread(target=run_print, args=(debug,)).start()
-
-    def run_read_loop(self):
-        async def read_loop():
-            try:
-                responses = await self.loop.run_in_executor(
-                    self.executor, self.pipe.read_jsons, True, self.debug
-                )
-                for response in responses:
-                    error = self.protocol.get_error(response)
-                    key = self.protocol.calculate_key(response)
-                    if not self.protocol.has_id(response) and error:
-                        raise RuntimeError(error)
-                    elif self.protocol.is_event(response):
-                        session_id = (
-                            response["sessionId"] if "sessionId" in response else ""
-                        )
-                        session = self.protocol.sessions[session_id]
-                        subscriptions = session.subscriptions
-                        subscriptions_futures = session.subscriptions_futures
-                        for sub_key in list(subscriptions):
-                            similar_strings = sub_key.endswith("*") and response[
-                                "method"
-                            ].startswith(sub_key[:-1])
-                            equals_method = response["method"] == sub_key
-                            if self.debug:
-                                print(f"Checking subscription key: {sub_key} against event method {response['method']}", file=sys.stderr)
-                            if similar_strings or equals_method:
-                                self.loop.create_task(
-                                    subscriptions[sub_key][0](response)
-                                )
-                                if not subscriptions[sub_key][1]: # if not repeating
-                                    self.protocol.sessions[session_id].unsubscribe(sub_key)
-
-                        for sub_key, futures in list(subscriptions_futures.items()):
-                            similar_strings = sub_key.endswith("*") and response["method"].startswith(sub_key[:-1])
-                            equals_method = response["method"] == sub_key
-                            if self.debug:
-                                print(f"Checking subscription key: {sub_key} against event method {response['method']}", file=sys.stderr)
-                            if similar_strings or equals_method:
-                                for future in futures:
-                                    if self.debug:
-                                        print(f"Processing future {id(future)}", file=sys.stderr)
-                                    future.set_result(response)
-                                    if self.debug:
-                                        print(f"Future resolved with response {future}", file=sys.stderr)
-                                del session.subscriptions_futures[sub_key]
-
-
-                    elif key:
-                        future = None
-                        if key in self.futures:
-                            if self.debug:
-                                print(
-                                    f"run_read_loop() found future foor key {key}"
-                                )
-                            future = self.futures.pop(key)
-                        else:
-                            raise RuntimeError(f"Couldn't find a future for key: {key}")
-                        if error:
-                            future.set_result(response)
-                        else:
-                            future.set_result(response)
-                    else:
-                        warnings.warn(f"Unhandled message type:{str(response)}", UnhandledMessageWarning)
-            except PipeClosedError:
-                if self.debug:
-                    print("PipeClosedError caught", file=sys.stderr)
-                return
-            self.loop.create_task(read_loop())
-
-        self.loop.create_task(read_loop())
-
-    def write_json(self, obj):
-        self.protocol.verify_json(obj)
-        key = self.protocol.calculate_key(obj)
-        if self.loop:
-            future = self.loop.create_future()
-            self.futures[key] = future
-            self.loop.run_in_executor(
-                self.executor, self.pipe.write_json, obj
-            )  # ignore result
-            return future
-        else:
-            self.pipe.write_json(obj)
-            return key
-

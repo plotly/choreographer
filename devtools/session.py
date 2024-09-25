@@ -4,6 +4,7 @@ class Session:
             raise TypeError("session_id must be a string")
         # Resources
         self.browser = browser
+        self.protocol = browser.protocol
 
         # State
         self.session_id = session_id
@@ -24,7 +25,7 @@ class Session:
         if params:
             json_command["params"] = params
 
-        return self.browser.write_json(json_command)
+        return self.protocol.write_json(json_command)
 
     def subscribe(self, string, callback, repeating=True):
         if not self.browser.loop:
