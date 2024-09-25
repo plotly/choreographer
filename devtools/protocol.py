@@ -1,3 +1,6 @@
+TARGET_NOT_FOUND = "-32602"
+
+
 class DevtoolsProtocolError(Exception):
     def __init__(self, response):
         super().__init__(response)
