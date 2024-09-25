@@ -1,4 +1,4 @@
-TARGET_NOT_FOUND = "-32602"
+TARGET_NOT_FOUND = -32602
 
 
 class DevtoolsProtocolError(Exception):
@@ -6,6 +6,9 @@ class DevtoolsProtocolError(Exception):
         super().__init__(response)
         self.code = response["error"]["code"]
         self.message = response["error"]["message"]
+        
+        if self.code != TARGET_NOT_FOUND:
+            raise RuntimeError(f"Could not create session: {self.message}")
 
 
 class Protocol:
