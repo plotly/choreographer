@@ -28,6 +28,8 @@ def which_windows_chrome():
     except BaseException:
         return None
 
+def _is_exe(path):
+    return os.access(path, os.X_OK)
 
 def which_browser(executable_name=chrome):
     path = None
@@ -38,9 +40,9 @@ def which_browser(executable_name=chrome):
     for exe in executable_name:
         if platform.system() == "Windows" and exe == "chrome":
             path = which_windows_chrome()
-            if path:
+            if path and _is_exe(path):
                 return path
         path = shutil.which(exe)
-        if path:
+        if path and _is_exe(path):
             return path
     return None
