@@ -250,7 +250,7 @@ class Browser(Target):
             return
         # check if no sessions or targets
         self.send_command("Browser.close")
-        if self._is_closed(wait = .2):
+        if self._is_closed(wait = .5):
             if self.debug: print("Browser.close method closed browser", file=sys.stderr)
             return
         self.pipe.close()
@@ -264,7 +264,7 @@ class Browser(Target):
                 subprocess.call(
                     ["taskkill", "/F", "/T", "/PID", str(self.subprocess.pid)]
                 )  # TODO probably needs to be silenced
-                if self._is_closed():
+                if self._is_closed(wait = 2):
                     return
                 else:
                     raise RuntimeError("Couldn't kill browser subprocess")
@@ -272,6 +272,7 @@ class Browser(Target):
             self.subprocess.terminate()
             if self._is_closed():
                 if self.debug: print("terminate() closed the browser", file=sys.stderr)
+                return
 
             self.subprocess.kill()
             if self._is_closed():
@@ -287,7 +288,7 @@ class Browser(Target):
         # TODO: check if tabs?
         # TODO: track tabs?
         await asyncio.wait([self.send_command("Browser.close")], timeout=2)
-        if await self._is_closed_async(wait = .2):
+        if await self._is_closed_async(wait = .5):
             if self.debug: print("Browser.close method closed browser", file=sys.stderr)
             return
         self.pipe.close()
@@ -301,7 +302,7 @@ class Browser(Target):
                 subprocess.call(
                     ["taskkill", "/F", "/T", "/PID", str(self.subprocess.pid)]
                 )  # TODO probably needs to be silenced
-                if await self._is_closed_async():
+                if await self._is_closed_async(wait = 2):
                     return
                 else:
                     raise RuntimeError("Couldn't kill browser subprocess")
@@ -314,8 +315,8 @@ class Browser(Target):
             self.subprocess.kill()
             if await self._is_closed_async():
                 if self.debug: print("kill() closed the browser", file=sys.stderr)
-                return
         return
+
 
     def close(self):
         if self.loop:

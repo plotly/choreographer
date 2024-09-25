@@ -87,18 +87,21 @@ class Pipe:
         except BaseException as e:
             if self.debug:
                 print(f"Error closing {str(fd)}: {str(e)}", file=sys.stderr)
+    def _fake_bye(self):
+        self._unblock_fd(self.write_from_chromium)
+        try:
+            os.write(self.write_from_chromium, b'{bye}\n')
+        except BaseException as e:
+            if self.debug:
+                print(f"Caught error in self-wrte bye: {str(e)}", file=sys.stderr)
 
     def close(self):
+        if platform.system() == "Windows":
+            self._fake_bye()
         self._unblock_fd(self.write_from_chromium)
         self._unblock_fd(self.read_from_chromium)
         self._unblock_fd(self.write_to_chromium)
         self._unblock_fd(self.read_to_chromium)
-        if platform.system() == "Windows":
-            try:
-                os.write(self.write_from_chromium, b'{bye}\n')
-            except BaseException as e:
-                if self.debug:
-                    print(f"Caught error in self-wrte bye: {str(e)}", file=sys.stderr)
         self._close_fd(self.write_to_chromium)
         self._close_fd(self.read_from_chromium)
         self._close_fd(self.write_from_chromium)
