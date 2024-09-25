@@ -11,11 +11,11 @@ chromium = ["chromium", "chromium-browser"]
 default_path = None
 system = platform.system()
 if system == "Windows":
-    default_path = r"c:\Program Files\Google\Chrome\Application\chrome.exe"
+    default_path = [r"c:\Program Files\Google\Chrome\Application\chrome.exe"]
 elif system == "Linux":
-    default_path = "/usr/bin/google-chrome-stable"
+    default_path = ["/usr/bin/google-chrome-stable"]
 else: # assume mac, or system == "Darwin"
-    default_path = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+    default_path = ["/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"]
 
 def which_windows_chrome():
     try:
@@ -37,7 +37,11 @@ def which_windows_chrome():
         return None
 
 def _is_exe(path):
-    return os.access(path, os.X_OK)
+    res = False
+    try:
+        res = os.access(path, os.X_OK)
+    finally:
+        return res
 
 def which_browser(executable_name=chrome):
     path = None
@@ -53,6 +57,8 @@ def which_browser(executable_name=chrome):
         path = shutil.which(exe)
         if path and _is_exe(path):
             return path
-    if not path and _is_exe(default_path):
-        return default_path
+    if not path:
+        for candidate in default_path:
+            if _is_exe(candidate):
+                return default_path
     return None
