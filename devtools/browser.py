@@ -65,7 +65,7 @@ class Browser(Target):
         # Set up process env
         new_env = os.environ.copy()
 
-        if not path:
+        if not path: # use argument first
             path = os.environ.get("BROWSER_PATH", None)
         if not path:
             path = default_path

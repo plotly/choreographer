@@ -8,6 +8,14 @@ chromium = ["chromium", "chromium-browser"]
 # brave = // this needs to be tested
 # edge = // this needs to be tested
 
+default_path = None
+system = platform.system()
+if system == "Windows":
+    default_path = r"c:\Program Files\Google\Chrome\Application\chrome.exe"
+elif system == "Linux":
+    default_path = "/usr/bin/google-chrome-stable"
+else: # assume mac, or system == "Darwin"
+    default_path = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 
 def which_windows_chrome():
     try:
@@ -45,4 +53,6 @@ def which_browser(executable_name=chrome):
         path = shutil.which(exe)
         if path and _is_exe(path):
             return path
+    if not path and _is_exe(default_path):
+        return default_path
     return None
