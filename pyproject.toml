@@ -16,5 +16,8 @@ dev = [
   "pytest",
   ]
 
+[project.scripts]
+devtools-doctor = "devtools.system:diagnose"
+
 [tool.ruff.lint]
 ignore = ["E701"]
