@@ -13,11 +13,14 @@ system = platform.system()
 default_path_chrome = None
 if system == "Windows":
     default_path_chrome = [
-            r"c:\Program Files\Google\Chrome\Application\chrome.exe"
+            r"c:\Program Files\Google\Chrome\Application\chrome.exe",
+            f"c:\\Users\\{os.environ.get('USER', 'default')}\\AppData\\Local\\Google\\Chrome\\Application\\chrome.exe",
             ]
 elif system == "Linux":
     default_path_chrome = [
-            "/usr/bin/google-chrome-stable"
+            "/usr/bin/google-chrome-stable",
+            "/usr/bin/google-chrome",
+            "/usr/bin/chrome",
             ]
 else: # assume mac, or system == "Darwin"
     default_path_chrome = [
