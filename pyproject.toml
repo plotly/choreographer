@@ -17,7 +17,7 @@ dev = [
   ]
 
 [project.scripts]
-devtools-doctor = "devtools.system:diagnose"
+devtools-doctor = "devtools.browser:diagnose"
 
 [tool.ruff.lint]
 ignore = ["E701"]
