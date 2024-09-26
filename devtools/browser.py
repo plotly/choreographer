@@ -484,7 +484,7 @@ class Browser(Target):
                             self.loop.create_task(
                                 self._delete_session(response)
                             )
-                            target_id = response["params"].get("targetId", None) or response[
+                            target_id = response["params"].get("targetId") or response[
                                 "params"
                             ].get("targetInfo", {}).get("targetId", None)
                             if target_id and self.tabs and target_id in self.tabs:
