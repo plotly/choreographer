@@ -541,6 +541,13 @@ def diagnose():
     print("Looking for browser:")
     print(which_browser())
     print("Running a very simple test...")
+    try:
+        import pip
+        print(pip.get_installed_distributions())
+    except ImportError:
+        print("No pip installed for getting version")
+    finally:
+        pass
     async def test():
         browser = await Browser(debug=True, debug_browser=True)
         await asyncio.sleep(2)
