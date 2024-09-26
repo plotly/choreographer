@@ -5,13 +5,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v1
       - name: Install Dependencies
         run:  sudo apt-get update && sudo apt-get install chromium-browser
       - name: Install devtools
-        run:  pip install . numpy
+        run:  pip install --user .[dev] numpy
+      - name: diagnostic
+        run:  devtools-doctor
       - name: test1
         run:  pytest
       - name: test2
-        run: python app/test1.py
-      - name: diagnost
-        run: devtools_doctor
+        run:  python app/test1.py
