@@ -32,12 +32,12 @@ jobs:
       - name: test2
         run:  python app/test1.py
   test-mac:
-    runs-on: windows-latest
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v1
       - name: Install Dependencies
-        run:  macos-latest
+        run:  brew install google-chrome
       - name: Install devtools
         run:  pip install --user .[dev] numpy
       - name: diagnostic
