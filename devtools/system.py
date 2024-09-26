@@ -2,11 +2,12 @@ import shutil
 import platform
 import os
 
-chrome = ["chrome", "Chrome", "google-chrome", "google-chrome-stable", "chromium"]
-chromium = ["chromium"]
+chrome = ["chrome", "Chrome", "google-chrome", "google-chrome-stable", "chromium", "chromium-browser"]
+chromium = ["chromium", "chromium-browser"]
 # firefox = // this needs to be tested
 # brave = // this needs to be tested
 # edge = // this needs to be tested
+
 
 
 def which_windows():

@@ -530,3 +530,27 @@ class Browser(Target):
             self.pipe.write_json(obj)
             return key
 
+def diagnose():
+    print("*****************************************")
+    print("Please copy and paste all these results to an issue or to slack!")
+    print("Collecting information about the system:")
+    print(platform.system())
+    print(platform.release())
+    print(platform.version())
+    print(platform.uname())
+    print("Looking for browser:")
+    print(which_browser())
+    print("Running a very simple test...")
+    try:
+        import pip
+        print(pip.get_installed_distributions())
+    except ImportError:
+        print("No pip installed for getting version")
+    finally:
+        pass
+    async def test():
+        browser = await Browser(debug=True, debug_browser=True)
+        await asyncio.sleep(2)
+        await browser.close()
+    asyncio.run(test())
+    print("Thank you! Please share these results with us!")
