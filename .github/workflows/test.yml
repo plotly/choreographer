@@ -16,3 +16,33 @@ jobs:
         run:  pytest
       - name: test2
         run:  python app/test1.py
+  test-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v1
+      - name: Install Dependencies
+        run:  choco install googlechrome -y --ignore-checksums
+      - name: Install devtools
+        run:  pip install --user .[dev] numpy
+      - name: diagnostic
+        run:  devtools-doctor
+      - name: test1
+        run:  pytest
+      - name: test2
+        run:  python app/test1.py
+  test-mac:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v1
+      - name: Install Dependencies
+        run:  macos-latest
+      - name: Install devtools
+        run:  pip install --user .[dev] numpy
+      - name: diagnostic
+        run:  devtools-doctor
+      - name: test1
+        run:  pytest
+      - name: test2
+        run:  python app/test1.py
