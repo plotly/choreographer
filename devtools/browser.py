@@ -128,7 +128,6 @@ class Browser(Target):
             self._check_loop()
         self.future_self = self.loop.create_future()
         self.loop.create_task(self._open_async())
-        self.browser.subscribe("Target.detachedFromTarget", self._delete_session, repeating=True)
         self.run_read_loop()
         return self.future_self
 
