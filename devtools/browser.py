@@ -544,6 +544,7 @@ def diagnose():
     try:
         import subprocess, sys # noqa
         print(subprocess.check_output([sys.executable, '-m', 'pip', 'freeze']))
+        print(subprocess.check_output(["git", "describe", "--all", "--tags", "--long", "--always",]))
     finally:
         pass
     async def test():
