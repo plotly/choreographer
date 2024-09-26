@@ -76,7 +76,7 @@ class Target:
             )
         return list(self.sessions.values())[0]
 
-    def subscribe(self, string, callback, repeating):
+    def subscribe(self, string, callback, repeating=True):
         session = self._get_first_session()
         session.subscribe(string, callback, repeating)
 
