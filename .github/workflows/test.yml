@@ -5,12 +5,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v1
       - name: Install Dependencies
         run:  sudo apt-get update && sudo apt-get install chromium-browser
       - name: check dir
         run:  ls -la && pwd
+      - name: cat pyproject
+        run: cat pyproject.toml
       - name: Install devtools
-        run:  pip install . numpy
+        run:  pip install --user .
+      - name: pip freeze
+        run: pip freeze
       - name: test1
         run:  pytest
       - name: test2
