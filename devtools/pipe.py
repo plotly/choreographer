@@ -67,6 +67,14 @@ class Pipe:
             if debug:
                 print("read_jsons: BlockingIOError caught.", file=sys.stderr)
             return jsons
+        except OSError as e:
+            if debug:
+                print(f"caught OSError in read() {str(e)}", file=sys.stderr)
+            if not raw_buffer:
+                raise PipeClosedError()
+            # TODO this could be hard to test as it is a real OS corner case
+            # but possibly raw_buffer is partial
+            # and we don't check for partials
         decoded_buffer = raw_buffer.decode("utf-8")
         for raw_message in decoded_buffer.split("\0"):
             if raw_message:
@@ -90,6 +98,7 @@ class Pipe:
         except BaseException as e:
             if self.debug:
                 print(f"Expected error closing {str(fd)}: {str(e)}", file=sys.stderr)
+
     def _fake_bye(self):
         self._unblock_fd(self.write_from_chromium)
         try:
