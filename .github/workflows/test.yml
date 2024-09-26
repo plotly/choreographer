@@ -11,7 +11,7 @@ jobs:
       - name: Install devtools
         run:  pip install --user .[dev] numpy
       - name: diagnostic
-        run: devtools_doctor
+        run: devtools-doctor
       - name: test1
         run:  pytest
       - name: test2
