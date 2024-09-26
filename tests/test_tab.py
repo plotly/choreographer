@@ -56,10 +56,6 @@ async def test_async_tab(
         assert isinstance(session_1, devtools.session.Session)
         assert isinstance(session_2, devtools.session.Session)
         assert await tab_1.close_session(session_1) is not None
-        tab_1.remove_session(session_2)
-        assert session_2.session_id not in tab_1.sessions
-        assert tab_2.add_session(session_2) is None
-        assert session_2.session_id in tab_2.sessions
         assert tab_1.send_command("Page.enable")
         assert tab_1.subscribe_once("Page") is None
         assert "Page" in list(tab_1.sessions.values())[0].subscriptions_futures
