@@ -462,29 +462,32 @@ class Browser(Target):
                         subscriptions = session.subscriptions
                         subscriptions_futures = session.subscriptions_futures
                         intern_key = "Target.detachedFromTarget"
-                        if  response["method"] == intern_key and intern_key not in subscriptions:
+                        equals_internal_method = response["method"] == intern_key
+                        done_method = False
+                        for sub_key in list(subscriptions):
+                            similar_strings = sub_key.endswith("*") and response[
+                                "method"
+                            ].startswith(sub_key[:-1])
+                            equals_method = response["method"] == sub_key
+                            if self.debug:
+                                print(f"Checking subscription key: {sub_key} against event method {response['method']}", file=sys.stderr)
+                            if similar_strings or equals_method:
+                                self.loop.create_task(
+                                    subscriptions[sub_key][0](response)
+                                )
+                                if equals_internal_method:
+                                    done_method = True
+                                if not subscriptions[sub_key][1]: # if not repeating
+                                    self.protocol.sessions[session_id].unsubscribe(sub_key)
+                        if equals_internal_method and intern_key not in subscriptions and not done_method:
                             self.loop.create_task(
                                 self._delete_session(response)
                             )
                             if self.debug:
                                 print(
-                                    f"Use intern subscription key: {intern_key}",
+                                    f"Use intern subscription key: {intern_key}. Session {session_id} was closed.",
                                     file=sys.stderr
                                     )
-                        else:
-                            for sub_key in list(subscriptions):
-                                similar_strings = sub_key.endswith("*") and response[
-                                    "method"
-                                ].startswith(sub_key[:-1])
-                                equals_method = response["method"] == sub_key
-                                if self.debug:
-                                    print(f"Checking subscription key: {sub_key} against event method {response['method']}", file=sys.stderr)
-                                if similar_strings or equals_method:
-                                    self.loop.create_task(
-                                        subscriptions[sub_key][0](response)
-                                    )
-                                    if not subscriptions[sub_key][1]: # if not repeating
-                                        self.protocol.sessions[session_id].unsubscribe(sub_key)
 
                         for sub_key, futures in list(subscriptions_futures.items()):
                             similar_strings = sub_key.endswith("*") and response["method"].startswith(sub_key[:-1])
