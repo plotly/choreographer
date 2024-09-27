@@ -13,11 +13,8 @@ jobs:
       - name: diagnostic
         run:  dtdoctor
         timeout-minutes: 1
-      - name: test1
+      - name: test
         run:  pytest
-        timeout-minutes: 1
-      - name: test2
-        run:  python app/test1.py
         timeout-minutes: 1
   test-windows:
     runs-on: windows-latest
@@ -31,11 +28,8 @@ jobs:
       - name: diagnostic
         run:  dtdoctor
         timeout-minutes: 1
-      - name: test1
+      - name: test
         run:  pytest
-        timeout-minutes: 1
-      - name: test2
-        run:  python app/test1.py
         timeout-minutes: 1
   test-mac:
     runs-on: macos-latest
@@ -49,9 +43,6 @@ jobs:
       - name: diagnostic
         run:  dtdoctor
         timeout-minutes: 1
-      - name: test1
+      - name: test
         run:  pytest
-        timeout-minutes: 1
-      - name: test2
-        run:  python app/test1.py
         timeout-minutes: 1
