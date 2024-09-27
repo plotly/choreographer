@@ -610,13 +610,23 @@ def diagnose():
     finally:
         print("Done with version info.".center(50, "*"))
         pass
+    try:
+        print("Sync test".center(50, "*"))
+        import time
+        browser = Browser(debug=True, debug_browser=True)
+        time.sleep(2)
+        browser.close()
+    finally:
+        print("Done with sync test".center(50, "*"))
+
     async def test():
         browser = await Browser(debug=True, debug_browser=True)
         await asyncio.sleep(2)
         await browser.close()
     try:
         print("Running Asyncio Test".center(50, "*"))
-        asyncio.run(test())
+        #asyncio.run(test())
+        print("Skipped...")
     finally:
         print("Asyncio.run done".center(50, "*"))
         pass
