@@ -623,8 +623,10 @@ def diagnose():
         fail.append(e)
     finally:
         print("Done with sync test".center(50, "*"))
-
+    def error_handler(loop, context):
+        print(context)
     async def test():
+        asyncio.get_running_loop().set_exception_handler(error_handler)
         try:
             print("Internal running Asyncio Test".center(50, "*"))
             browser = await Browser(debug=True, debug_browser=True)
