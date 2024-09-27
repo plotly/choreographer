@@ -3,18 +3,16 @@ import sys
 import json
 import platform
 
-import numpy as np
-
 # TODO: don't know about this
 # TODO: use has_attr instead of np.integer, you'll be fine
 class NumpyEncoder(json.JSONEncoder):
     """ Special json encoder for numpy types """
     def default(self, obj):
-        if isinstance(obj, np.integer):
+        if obj.dtype.kind == "i" and len(obj) == 1:
             return int(obj)
-        elif isinstance(obj, np.floating):
+        elif obj.dtype.kind == "f" and len(obj) == 1:
             return float(obj)
-        elif isinstance(obj, np.ndarray):
+        elif hasattr(obj, "dtype") and len(obj) > 1:
             return obj.tolist()
         return json.JSONEncoder.default(self, obj)
 
