@@ -78,15 +78,21 @@ class Pipe:
         except OSError as e:
             if debug:
                 print(f"caught OSError in read() {str(e)}", file=sys.stderr)
-            if not raw_buffer:
+            if not raw_buffer or raw_buffer == b'{bye}\n':
                 raise PipeClosedError()
             # TODO this could be hard to test as it is a real OS corner case
             # but possibly raw_buffer is partial
             # and we don't check for partials
         decoded_buffer = raw_buffer.decode("utf-8")
+        if debug:
+            print(decoded_buffer, file=sys.stderr)
         for raw_message in decoded_buffer.split("\0"):
             if raw_message:
-                jsons.append(json.loads(raw_message))
+                try:
+                    jsons.append(json.loads(raw_message))
+                except BaseException as e:
+                    if debug:
+                        print(f"Problem with {raw_message} in json: {e}", file=sys.stderr)
                 if debug:
                     # This debug is kinda late but the jsons package helps with decoding, since JSON optionally
                     # allows escaping unicode characters, which chrome does (oof)
