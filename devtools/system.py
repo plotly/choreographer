@@ -9,6 +9,7 @@ chromium = ["chromium", "chromium-browser"]
 # edge = // this needs to be tested
 
 
+
 def which_windows():
     import winreg
     import re
