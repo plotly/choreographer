@@ -182,34 +182,17 @@ class Browser(Target):
         stderr = self._stderr
         env = self._env
         if platform.system() != "Windows":
-            if platform.system() == "Linux":
-                self.subprocess = await asyncio.create_subprocess_exec(
-                    sys.executable,
-                    os.path.join(
-                        os.path.dirname(os.path.realpath(__file__)), "chrome_wrapper.py"
-                    ),
-                    stdin=self.pipe.read_to_chromium,
-                    stdout=self.pipe.write_from_chromium,
-                    stderr=stderr,
-                    close_fds=True,
-                    env=env,
-                )
-            else: # mac doesn't seem to like asyncio.create_subprocess_exec
-                def run():
-                    return subprocess.Popen(
-                        [
-                            sys.executable,
-                            os.path.join(
-                                os.path.dirname(os.path.realpath(__file__)), "chrome_wrapper.py"
-                            ),
-                        ],
-                        close_fds=True,
-                        stdin=self.pipe.read_to_chromium,
-                        stdout=self.pipe.write_from_chromium,
-                        stderr=stderr,
-                        env=env,
-                    )
-                self.subprocess = await asyncio.to_thread(run)
+            self.subprocess = await asyncio.create_subprocess_exec(
+                sys.executable,
+                os.path.join(
+                    os.path.dirname(os.path.realpath(__file__)), "chrome_wrapper.py"
+                ),
+                stdin=self.pipe.read_to_chromium,
+                stdout=self.pipe.write_from_chromium,
+                stderr=stderr,
+                close_fds=True,
+                env=env,
+            )
         else:
             from .chrome_wrapper import open_browser
             self.subprocess = await open_browser(to_chromium=self.pipe.read_to_chromium,
