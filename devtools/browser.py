@@ -204,9 +204,7 @@ class Browser(Target):
         await self.populate_targets()
         self.future_self.set_result(self)
 
-    # Closers: close() calls sync or async, both call finish_close
-
-    def finish_close(self):
+    def _clean_temp(self):
         clean = False
         try:
             self.temp_dir.cleanup()
@@ -246,93 +244,118 @@ class Browser(Target):
         if self.debug:
             print(f"Tempfile still exists?: {bool(os.path.isfile(str(self.temp_dir.name)))}")
 
-    def sync_process_close(self):
-        self.send_command("Browser.close")
+    async def _is_closed_async(self, wait=0):
+        waiter = self.subprocess.wait()
         try:
-            self.subprocess.wait(3)
-            self.pipe.close()
-            return
-        except Exception:
-            pass
-        self.pipe.close()
-        if platform.system() == "Windows":
-            if self.subprocess.poll() is None:
-                subprocess.call(
-                    ["taskkill", "/F", "/T", "/PID", str(self.subprocess.pid)]
-                )  # TODO probably needs to be silenced
-                try:
-                    self.subprocess.wait(2)
-                    return
-                except Exception:
-                    pass
+            await asyncio.wait_for(waiter, wait)
+            return True
+        except: # noqa
+            return False
+
+    def _is_closed(self, wait=0):
+        if not wait:
+            if not self.subprocess.poll():
+                return False
             else:
-                return
-        self.subprocess.terminate()
-        try:
-            self.subprocess.wait(2)
-            return
-        except Exception:
-            pass
-        self.subprocess.kill()
+                return True
+        else:
+            try:
+                self.subprocess.wait(wait)
+                return True
+            except: # noqa
+                return False
 
+    # _sync_close and _async_close are basically the same thing
 
-    async def async_process_close(self):
-        await self.send_command("Browser.close")
-        waiter = self.subprocess.wait()
-        try:
-            await asyncio.wait_for(waiter, 3)
-            self.finish_close()
-            self.pipe.close()
+    def _sync_close(self):
+        if self._is_closed():
+            if self.debug: print("Browser was already closed.", file=sys.stderr)
             return
-        except Exception:
-            pass
+        # check if no sessions or targets
+        self.send_command("Browser.close")
+        if self._is_closed():
+            if self.debug: print("Browser.close method closed browser", file=sys.stderr)
+            return
         self.pipe.close()
-        if platform.system() == "Windows":
-            waiter = self.subprocess.wait()
-            try:
-                await asyncio.wait_for(waiter, 1)
-                self.finish_close()
-                return
-            except Exception:
-                pass
-            # need try
-            subprocess.call(
-                ["taskkill", "/F", "/T", "/PID", str(self.subprocess.pid)]
-            )  # TODO probably needs to be silenced
-            waiter = self.subprocess.wait()
-            try:
-                await asyncio.wait_for(waiter, 2)
-                self.finish_close()
-                return
-            except Exception:
-                pass
-        self.subprocess.terminate()
-        waiter = self.subprocess.wait()
-        try:
-            await asyncio.wait_for(waiter, 2)
-            self.finish_close()
+        if self._is_closed(wait = 1):
+            if self.debug: print("pipe.close() (or slow Browser.close) method closed browser", file=sys.stderr)
             return
-        except Exception:
-            pass
-        self.subprocess.kill()
+
+        # Start a kill
+        if platform.system() == "Windows":
+            if not self._is_closed():
+                subprocess.call(
+                    ["taskkill", "/F", "/T", "/PID", str(self.subprocess.pid)],
+                    stderr=subprocess.DEVNULL,
+                    stdout=subprocess.DEVNULL,
+                )
+                if self._is_closed(wait = 2):
+                    return
+                else:
+                    raise RuntimeError("Couldn't kill browser subprocess")
+        else:
+            self.subprocess.terminate()
+            if self._is_closed():
+                if self.debug: print("terminate() closed the browser", file=sys.stderr)
+                return
+
+            self.subprocess.kill()
+            if self._is_closed():
+                if self.debug: print("kill() closed the browser", file=sys.stderr)
+        return
+
+
+    async def _async_close(self):
+        if await self._is_closed_async():
+            if self.debug: print("Browser was already closed.", file=sys.stderr)
+            return
+        # TODO: Above doesn't work with closed tabs for some reason
+        # TODO: check if tabs?
+        # TODO: track tabs?
+        await asyncio.wait([self.send_command("Browser.close")], timeout=1)
+        if await self._is_closed_async():
+            if self.debug: print("Browser.close method closed browser", file=sys.stderr)
+            return
+        self.pipe.close()
+        if await self._is_closed_async(wait=1):
+            if self.debug: print("pipe.close() method closed browser", file=sys.stderr)
+            return
+
+        # Start a kill
+        if platform.system() == "Windows":
+            if not await self._is_closed_async():
+                subprocess.call(
+                    ["taskkill", "/F", "/T", "/PID", str(self.subprocess.pid)],
+                    stderr=subprocess.DEVNULL,
+                    stdout=subprocess.DEVNULL,
+                )
+                if await self._is_closed_async(wait = 2):
+                    return
+                else:
+                    raise RuntimeError("Couldn't kill browser subprocess")
+        else:
+            self.subprocess.terminate()
+            if await self._is_closed_async():
+                if self.debug: print("terminate() closed the browser", file=sys.stderr)
+                return
+
+            self.subprocess.kill()
+            if await self._is_closed_async():
+                if self.debug: print("kill() closed the browser", file=sys.stderr)
+        return
+
 
     def close(self):
         if self.loop:
-            if not len(self.tabs):
+            async def close_task():
+                await self._async_close()
                 self.pipe.close()
-                self.finish_close()
-                future = self.loop.create_future()
-                future.set_result(None)
-                return future
-            else:
-                return asyncio.create_task(self.async_process_close())
-
+                self._clean_temp() # can we make async
+            return asyncio.create_task(close_task())
         else:
-            if self.subprocess.poll() is None:
-                self.sync_process_close()
-                # I'd say race condition but the user needs to take care of it
-            self.finish_close()
-    # These are effectively stubs to allow use with with
+            self._sync_close()
+            self.pipe.close()
+            self._clean_temp()
 
     def __enter__(self):
         return self
