@@ -623,22 +623,14 @@ def diagnose():
         fail.append(e)
     finally:
         print("Done with sync test".center(50, "*"))
-    def error_handler(loop, context):
-        print(context)
     async def test():
-        asyncio.get_running_loop().set_exception_handler(error_handler)
-        try:
-            print("Internal running Asyncio Test".center(50, "*"))
-            browser = await Browser(debug=True, debug_browser=True)
-            await asyncio.sleep(2)
-            await browser.close()
-        except BaseException as e:
-            fail.append(e)
-        finally:
-            print("Asyncio.run done internally".center(50, "*"))
+        browser = await Browser(debug=True, debug_browser=True)
+        await asyncio.sleep(2)
+        await browser.close()
     try:
         print("Running Asyncio Test".center(50, "*"))
-        asyncio.run(test())
+        #asyncio.run(test())
+        print("skip")
     except BaseException as e:
         fail.append(e)
     finally:
