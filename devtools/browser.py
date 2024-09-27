@@ -638,7 +638,9 @@ def diagnose():
     print("")
     sys.stdout.flush()
     sys.stderr.flush()
-    for exception in fail:
-        print(str(exception))
-    if fail: raise BaseException("There was an exception, see above.")
+    if fail:
+        import traceback
+        for exception in fail:
+            traceback.print_exception(exception)
+        raise BaseException("There was an exception, see above.")
     print("Thank you! Please share these results with us!")
