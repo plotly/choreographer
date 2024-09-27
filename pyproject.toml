@@ -9,12 +9,19 @@ find = {namespaces = false}
 name = "devtools"
 description = "Devtools protocol"
 requires-python = ">=3.9"
-version = "0.0.1"
+dynamic = ["version"]
 
 [project.optional-dependencies]
 dev = [
   "pytest",
   ]
 
+[project.scripts]
+dtdoctor = "devtools.browser:diagnose"
+
 [tool.ruff.lint]
 ignore = ["E701"]
+
+[tool.setuptools-git-versioning]
+enabled = true
+
