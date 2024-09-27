@@ -215,7 +215,7 @@ class Browser(Target):
             if platform.system() == "Windows" and not self.debug:\
                 pass
             else:
-                warnings.warn(str(e)), TempDirWarning)
+                warnings.warn(str(e), TempDirWarning)
 
         # windows+old vers doesn't like python's default cleanup
 
