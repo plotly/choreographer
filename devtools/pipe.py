@@ -6,11 +6,20 @@ import platform
 # TODO: don't know about this
 # TODO: use has_attr instead of np.integer, you'll be fine
 class NumpyEncoder(json.JSONEncoder):
-    """ Special json encoder for numpy types """
+    """Special json encoder for numpy types"""
+
     def default(self, obj):
-        if hasattr(obj, "dtype") and obj.dtype.kind == "i" and not hasattr(obj, "__len__"):
+        if (
+            hasattr(obj, "dtype")
+            and obj.dtype.kind == "i"
+            and not hasattr(obj, "__len__")
+        ):
             return int(obj)
-        elif hasattr(obj, "dtype") and obj.dtype.kind == "f" and not hasattr(obj, "__len__"):
+        elif (
+            hasattr(obj, "dtype")
+            and obj.dtype.kind == "f"
+            and not hasattr(obj, "__len__")
+        ):
             return float(obj)
         elif hasattr(obj, "dtype") and hasattr(obj, "__len__"):
             return obj.tolist()
