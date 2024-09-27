@@ -592,6 +592,7 @@ class Browser(Target):
             return key
 
 def diagnose():
+    fail = []
     print("*".center(50, "*"))
     print("Collecting information about the system:".center(50, "*"))
     print(platform.system())
@@ -607,8 +608,8 @@ def diagnose():
         print(subprocess.check_output(["git", "describe", "--all", "--tags", "--long", "--always",]))
         print(sys.version)
         print(sys.version_info)
-    except BaseException:
-        pass
+    except BaseException as e:
+        fail.append(e)
     finally:
         print("Done with version info.".center(50, "*"))
         pass
@@ -619,7 +620,7 @@ def diagnose():
         time.sleep(2)
         browser.close()
     except BaseException:
-        pass
+        fail.append(e)
     finally:
         print("Done with sync test".center(50, "*"))
 
@@ -629,12 +630,16 @@ def diagnose():
         await browser.close()
     try:
         print("Running Asyncio Test".center(50, "*"))
-        #asyncio.run(test())
-        print("Skipped...")
+        asyncio.run(test())
     except BaseException:
-        pass
+        fail.append(e)
     finally:
         print("Asyncio.run done".center(50, "*"))
         pass
     print("")
+    sys.stdout.flush()
+    sys.stderr.flush()
+    for exception in fail:
+        print(str(exception))
+    if fail: raise BaseException("There was an exception, see above.")
     print("Thank you! Please share these results with us!")
