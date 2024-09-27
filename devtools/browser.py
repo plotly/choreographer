@@ -212,7 +212,7 @@ class Browser(Target):
             self.temp_dir.cleanup()
             clean=True
         except Exception as e:
-            if platform.system() == "Windows" and not self.debug:\
+            if platform.system() == "Windows" and not self.debug:
                 pass
             else:
                 warnings.warn(str(e), TempDirWarning)
