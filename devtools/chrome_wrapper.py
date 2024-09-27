@@ -25,7 +25,6 @@ system = platform.system()
 if system == "Windows":
     import msvcrt  # noqa
 
-
 def open_browser(to_chromium, from_chromium, stderr=None, env=None, loop=None, loop_hack=False):
     path = env.get("BROWSER_PATH")
     if not path:
@@ -57,12 +56,11 @@ def open_browser(to_chromium, from_chromium, stderr=None, env=None, loop=None, l
             f"--remote-debugging-io-pipes={str(to_chromium_handle)},{str(from_chromium_handle)}"
         ]
         if platform.system() == "Windows":
-            win_only = {"creationflags": subprocess.CREATE_NEW_PROCESS_GROUP}
+            win_only = {"creationflags": subprocess.CREATE_NEW_PROCESS_GROUP, "close_fds":False}
     if not loop:
         return subprocess.Popen(
             cli,
             stderr=stderr,
-            close_fds=False, # TODO sh/could be true?
             pass_fds=(to_chromium, from_chromium) if system != "Windows" else None,
             **win_only,
         )
@@ -71,7 +69,6 @@ def open_browser(to_chromium, from_chromium, stderr=None, env=None, loop=None, l
             return subprocess.Popen(
                 cli,
                 stderr=stderr,
-                close_fds=False, # TODO sh/could be true?
                 pass_fds=(to_chromium, from_chromium) if system != "Windows" else None,
                 **win_only,
             )
@@ -81,7 +78,6 @@ def open_browser(to_chromium, from_chromium, stderr=None, env=None, loop=None, l
                 cli[0],
                 *cli[1:],
                 stderr=stderr,
-                close_fds=False, # TODO: sh/could be true?
                 pass_fds=(to_chromium, from_chromium) if system != "Windows" else None,
                 **win_only)
 
