@@ -2,8 +2,13 @@ import os
 import sys
 import json
 import platform
+import warnings
 
 import numpy as np
+
+with_block = bool(sys.version_info[:3] >= (3, 12) or platform.system() != "Windows")
+class BlockWarning(UserWarning):
+    pass
 
 # TODO: don't know about this
 # TODO: use has_attr instead of np.integer, you'll be fine
@@ -42,12 +47,17 @@ class Pipe:
         os.write(self.write_to_chromium, encoded_message)
 
     def read_jsons(self, blocking=True, debug=None):
+        if not with_block and not blocking:
+            warnings.warn("Windows python version < 3.12 does not support non-blocking", BlockWarning)
         if not debug:
             debug = self.debug
         if debug:
             print(f"read_jsons ({'blocking' if blocking else 'not blocking'}):", file=sys.stderr)
         jsons = []
-        os.set_blocking(self.read_from_chromium, blocking)
+        try:
+            if with_block: os.set_blocking(self.read_from_chromium, blocking)
+        except OSError as e:
+            raise PipeClosedError() from e
         try:
             raw_buffer = os.read(
                 self.read_from_chromium, 10000
@@ -58,12 +68,20 @@ class Pipe:
                 raise PipeClosedError()
             while raw_buffer[-1] != 0:
                 # still not great, return what you have
-                os.set_blocking(self.read_from_chromium, True)
+                if with_block: os.set_blocking(self.read_from_chromium, True)
                 raw_buffer += os.read(self.read_from_chromium, 10000)
         except BlockingIOError:
             if debug:
                 print("read_jsons: BlockingIOError caught.", file=sys.stderr)
             return jsons
+        except OSError as e:
+            if debug:
+                print(f"caught OSError in read() {str(e)}", file=sys.stderr)
+            if not raw_buffer:
+                raise PipeClosedError()
+            # TODO this could be hard to test as it is a real OS corner case
+            # but possibly raw_buffer is partial
+            # and we don't check for partials
         decoded_buffer = raw_buffer.decode("utf-8")
         for raw_message in decoded_buffer.split("\0"):
             if raw_message:
@@ -74,14 +92,36 @@ class Pipe:
                     print(f"read_jsons: {jsons[-1]}", file=sys.stderr)
         return jsons
 
+    def _unblock_fd(self, fd):
+        try:
+            if with_block: os.set_blocking(fd, False)
+        except BaseException as e:
+            if self.debug:
+                print(f"Expected error unblocking {str(fd)}: {str(e)}", file=sys.stderr)
+
+    def _close_fd(self, fd):
+        try:
+            os.close(fd)
+        except BaseException as e:
+            if self.debug:
+                print(f"Expected error closing {str(fd)}: {str(e)}", file=sys.stderr)
+
+    def _fake_bye(self):
+        self._unblock_fd(self.write_from_chromium)
+        try:
+            os.write(self.write_from_chromium, b'{bye}\n')
+        except BaseException as e:
+            if self.debug:
+                print(f"Caught expected error in self-wrte bye: {str(e)}", file=sys.stderr)
+
     def close(self):
         if platform.system() == "Windows":
-            try:
-                os.set_blocking(self.write_from_chromium, False)
-                os.write(self.write_from_chromium, b'{bye}\n')
-            except Exception:
-                pass
-        os.close(self.write_to_chromium)
-        os.close(self.read_from_chromium)
-        os.close(self.write_from_chromium)
-        os.close(self.read_to_chromium)
+            self._fake_bye()
+        self._unblock_fd(self.write_from_chromium)
+        self._unblock_fd(self.read_from_chromium)
+        self._unblock_fd(self.write_to_chromium)
+        self._unblock_fd(self.read_to_chromium)
+        self._close_fd(self.write_to_chromium)
+        self._close_fd(self.read_from_chromium)
+        self._close_fd(self.write_from_chromium)
+        self._close_fd(self.read_to_chromium)
