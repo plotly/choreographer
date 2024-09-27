@@ -11,7 +11,7 @@ jobs:
       - name: Install devtools
         run:  ls && pip install .[dev] numpy
       - name: diagnostic
-        run:  devtools-doctor
+        run:  dtdoctor
       - name: test1
         run:  pytest
       - name: test2
@@ -26,7 +26,7 @@ jobs:
       - name: Install devtools
         run:  pip install .[dev] numpy
       - name: diagnostic
-        run:  devtools-doctor
+        run:  dtdoctor
       - name: test1
         run:  pytest
       - name: test2
@@ -41,7 +41,7 @@ jobs:
       - name: Install devtools
         run:  pip install .[dev] numpy
       - name: diagnostic
-        run:  devtools-doctor
+        run:  dtdoctor
       - name: test1
         run:  pytest
       - name: test2
