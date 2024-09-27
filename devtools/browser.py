@@ -6,6 +6,8 @@ import tempfile
 import warnings
 import json
 import asyncio
+import stat
+import shutil
 from threading import Thread
 from collections import OrderedDict
 
@@ -18,10 +20,13 @@ from .system import which_browser
 
 from .pipe import PipeClosedError
 
+class TempDirWarning(UserWarning):
+    pass
 class UnhandledMessageWarning(UserWarning):
     pass
 
 default_path = which_browser() # probably handle this better
+with_onexc = bool(sys.version_info[:3] >= (3, 12))
 
 class Browser(Target):
 
@@ -58,9 +63,17 @@ class Browser(Target):
         if platform.system() != "Windows":
             self.temp_dir = tempfile.TemporaryDirectory()
         else:
-            self.temp_dir = tempfile.TemporaryDirectory(
-                delete=False, ignore_cleanup_errors=True
-            )
+            vinfo = sys.version_info[:3]
+            if vinfo >= (3, 12):
+                self.temp_dir = tempfile.TemporaryDirectory(
+                    delete=False, ignore_cleanup_errors=True
+                )
+            elif vinfo >= (3, 10):
+                self.temp_dir = tempfile.TemporaryDirectory(
+                    ignore_cleanup_errors=True
+                )
+            else:
+                self.temp_dir = tempfile.TemporaryDirectory()
 
         # Set up process env
         new_env = os.environ.copy()
@@ -194,33 +207,41 @@ class Browser(Target):
     # Closers: close() calls sync or async, both call finish_close
 
     def finish_close(self):
-
+        clean = False
         try:
             self.temp_dir.cleanup()
+            clean=True
         except Exception as e:
-            print(str(e))
+            if platform.system() == "Windows" and not self.debug:
+                pass
+            else:
+                warnings.warn(str(e), TempDirWarning)
 
-        # windows doesn't like python's default cleanup
-        if platform.system() == "Windows":
-            import stat
-            import shutil
+        # windows+old vers doesn't like python's default cleanup
 
-            def remove_readonly(func, path, excinfo):
-                os.chmod(path, stat.S_IWUSR)
-                func(path)
+        def remove_readonly(func, path, excinfo):
+            os.chmod(path, stat.S_IWUSR)
+            func(path)
 
-            try:
+        try:
+            if with_onexc:
                 shutil.rmtree(self.temp_dir.name, onexc=remove_readonly)
-                del self.temp_dir
-            except FileNotFoundError:
-                pass # it worked!
-            except PermissionError:
+                clean=True
+            else:
+                shutil.rmtree(self.temp_dir.name, onerror=remove_readonly)
+                clean=True
+            del self.temp_dir
+        except FileNotFoundError:
+            pass # it worked!
+        except PermissionError:
+            if not clean:
                 warnings.warn(
-                    "The temporary directory could not be deleted, due to permission error, execution will continue."
+                    "The temporary directory could not be deleted, due to permission error, execution will continue.", TempDirWarning
                 )
-            except Exception as e:
+        except Exception as e:
+            if not clean:
                 warnings.warn(
-                        f"The temporary directory could not be deleted, execution will continue. {type(e)}: {e}"
+                        f"The temporary directory could not be deleted, execution will continue. {type(e)}: {e}", TempDirWarning
                 )
         if self.debug:
             print(f"Tempfile still exists?: {bool(os.path.isfile(str(self.temp_dir.name)))}")
