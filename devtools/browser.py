@@ -24,6 +24,7 @@ class UnhandledMessageWarning(UserWarning):
     pass
 
 default_path = which_browser() # probably handle this better
+with_onexc = bool(sys.version_info[:3] >= (3, 12))
 
 class Browser(Target):
 
@@ -204,9 +205,10 @@ class Browser(Target):
     # Closers: close() calls sync or async, both call finish_close
 
     def finish_close(self):
-
+        clean = False
         try:
             self.temp_dir.cleanup()
+            clean=True
         except Exception as e:
             print(str(e))
 
@@ -217,18 +219,25 @@ class Browser(Target):
             func(path)
 
         try:
-            shutil.rmtree(self.temp_dir.name, onexc=remove_readonly)
+            if with_onexc:
+                shutil.rmtree(self.temp_dir.name, onexc=remove_readonly)
+                clean=True
+            else:
+                shutil.rmtree(self.temp_dir.name, onerror=remove_readonly)
+                clean=True
             del self.temp_dir
         except FileNotFoundError:
             pass # it worked!
         except PermissionError:
-            warnings.warn(
-                "The temporary directory could not be deleted, due to permission error, execution will continue."
-            )
+            if not clean:
+                warnings.warn(
+                    "The temporary directory could not be deleted, due to permission error, execution will continue."
+                )
         except Exception as e:
-            warnings.warn(
-                    f"The temporary directory could not be deleted, execution will continue. {type(e)}: {e}"
-            )
+            if not clean:
+                warnings.warn(
+                        f"The temporary directory could not be deleted, execution will continue. {type(e)}: {e}"
+                )
 
     def sync_process_close(self):
         self.send_command("Browser.close")
