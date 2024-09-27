@@ -12,6 +12,7 @@ jobs:
         run:  ls && pip install .[dev] numpy
       - name: diagnostic
         run:  dtdoctor
+        timeout-minutes: 1
       - name: test1
         run:  pytest
       - name: test2
@@ -27,6 +28,7 @@ jobs:
         run:  pip install .[dev] numpy
       - name: diagnostic
         run:  dtdoctor
+        timeout-minutes: 1
       - name: test1
         run:  pytest
       - name: test2
@@ -42,6 +44,7 @@ jobs:
         run:  pip install .[dev] numpy
       - name: diagnostic
         run:  dtdoctor
+        timeout-minutes: 1
       - name: test1
         run:  pytest
       - name: test2
