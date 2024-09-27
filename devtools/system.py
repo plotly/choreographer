@@ -25,8 +25,8 @@ elif system == "Linux":
             ]
 else: # assume mac, or system == "Darwin"
     default_path_chrome = [
-            "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-            "/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome"
+            "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+            "/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome",
             ]
 
 def which_windows_chrome():
