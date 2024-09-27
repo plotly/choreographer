@@ -625,9 +625,15 @@ def diagnose():
         print("Done with sync test".center(50, "*"))
 
     async def test():
-        browser = await Browser(debug=True, debug_browser=True)
-        await asyncio.sleep(2)
-        await browser.close()
+        try:
+            print("Internal running Asyncio Test".center(50, "*"))
+            browser = await Browser(debug=True, debug_browser=True)
+            await asyncio.sleep(2)
+            await browser.close()
+        except BaseException as e:
+            fail.append(e)
+        finally:
+            print("Asyncio.run done internally".center(50, "*"))
     try:
         print("Running Asyncio Test".center(50, "*"))
         asyncio.run(test())
@@ -635,7 +641,6 @@ def diagnose():
         fail.append(e)
     finally:
         print("Asyncio.run done".center(50, "*"))
-        pass
     print("")
     sys.stdout.flush()
     sys.stderr.flush()
