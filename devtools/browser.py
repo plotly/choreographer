@@ -6,6 +6,8 @@ import tempfile
 import warnings
 import json
 import asyncio
+import stat
+import shutil
 from threading import Thread
 from collections import OrderedDict
 
@@ -58,9 +60,17 @@ class Browser(Target):
         if platform.system() != "Windows":
             self.temp_dir = tempfile.TemporaryDirectory()
         else:
-            self.temp_dir = tempfile.TemporaryDirectory(
-                delete=False, ignore_cleanup_errors=True
-            )
+            vinfo = sys.version_info[:3]
+            if vinfo >= (3, 12):
+                self.temp_dir = tempfile.TemporaryDirectory(
+                    delete=False, ignore_cleanup_errors=True
+                )
+            elif vinfo >= (3, 10):
+                self.temp_dir = tempfile.TemporaryDirectory(
+                    ignore_cleanup_errors=True
+                )
+            else:
+                self.temp_dir = tempfile.TemporaryDirectory()
 
         # Set up process env
         new_env = os.environ.copy()
@@ -200,28 +210,25 @@ class Browser(Target):
         except Exception as e:
             print(str(e))
 
-        # windows doesn't like python's default cleanup
-        if platform.system() == "Windows":
-            import stat
-            import shutil
+        # windows+old vers doesn't like python's default cleanup
 
-            def remove_readonly(func, path, excinfo):
-                os.chmod(path, stat.S_IWUSR)
-                func(path)
+        def remove_readonly(func, path, excinfo):
+            os.chmod(path, stat.S_IWUSR)
+            func(path)
 
-            try:
-                shutil.rmtree(self.temp_dir.name, onexc=remove_readonly)
-                del self.temp_dir
-            except FileNotFoundError:
-                pass # it worked!
-            except PermissionError:
-                warnings.warn(
-                    "The temporary directory could not be deleted, due to permission error, execution will continue."
-                )
-            except Exception as e:
-                warnings.warn(
-                        f"The temporary directory could not be deleted, execution will continue. {type(e)}: {e}"
-                )
+        try:
+            shutil.rmtree(self.temp_dir.name, onexc=remove_readonly)
+            del self.temp_dir
+        except FileNotFoundError:
+            pass # it worked!
+        except PermissionError:
+            warnings.warn(
+                "The temporary directory could not be deleted, due to permission error, execution will continue."
+            )
+        except Exception as e:
+            warnings.warn(
+                    f"The temporary directory could not be deleted, execution will continue. {type(e)}: {e}"
+            )
 
     def sync_process_close(self):
         self.send_command("Browser.close")
