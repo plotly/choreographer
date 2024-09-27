@@ -2,8 +2,13 @@ import os
 import sys
 import json
 import platform
+import warnings
 
 import numpy as np
+
+with_block = bool(sys.version_info[:3] >= (3, 12) or platform.system() != "Windows")
+class BlockWarning(UserWarning):
+    pass
 
 # TODO: don't know about this
 # TODO: use has_attr instead of np.integer, you'll be fine
@@ -42,13 +47,15 @@ class Pipe:
         os.write(self.write_to_chromium, encoded_message)
 
     def read_jsons(self, blocking=True, debug=None):
+        if not with_block and not blocking:
+            warnings.warn("Windows python version < 3.12 does not support non-blocking", BlockWarning)
         if not debug:
             debug = self.debug
         if debug:
             print(f"read_jsons ({'blocking' if blocking else 'not blocking'}):", file=sys.stderr)
         jsons = []
         try:
-            os.set_blocking(self.read_from_chromium, blocking)
+            if with_block: os.set_blocking(self.read_from_chromium, blocking)
         except OSError as e:
             raise PipeClosedError() from e
         try:
@@ -61,7 +68,7 @@ class Pipe:
                 raise PipeClosedError()
             while raw_buffer[-1] != 0:
                 # still not great, return what you have
-                os.set_blocking(self.read_from_chromium, True)
+                if with_block: os.set_blocking(self.read_from_chromium, True)
                 raw_buffer += os.read(self.read_from_chromium, 10000)
         except BlockingIOError:
             if debug:
@@ -87,7 +94,7 @@ class Pipe:
 
     def _unblock_fd(self, fd):
         try:
-            os.set_blocking(fd, False)
+            if with_block: os.set_blocking(fd, False)
         except BaseException as e:
             if self.debug:
                 print(f"Expected error unblocking {str(fd)}: {str(e)}", file=sys.stderr)
