@@ -583,7 +583,7 @@ def diagnose():
     print(platform.version())
     print(platform.uname())
     print("Looking for browser:".center(50, "*"))
-    print(which_browser())
+    print(which_browser(debug=True))
     try:
         print("Looking for version info:".center(50, "*"))
         import subprocess, sys # noqa

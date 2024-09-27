@@ -2,7 +2,7 @@ import shutil
 import platform
 import os
 
-chrome = ["chrome", "Chrome", "google-chrome", "google-chrome-stable", "chromium", "chromium-browser"]
+chrome = ["chrome", "Chrome", "google-chrome", "google-chrome-stable", "Chrome.app", "Google Chrome", "chromium", "chromium-browser"]
 chromium = ["chromium", "chromium-browser"]
 # firefox = // this needs to be tested
 # brave = // this needs to be tested
@@ -25,6 +25,7 @@ elif system == "Linux":
 else: # assume mac, or system == "Darwin"
     default_path_chrome = [
             "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+            "/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome"
             ]
 
 def which_windows_chrome():
@@ -53,24 +54,28 @@ def _is_exe(path):
     finally:
         return res
 
-def which_browser(executable_name=chrome):
+def which_browser(executable_name=chrome, debug=False):
     path = None
     if isinstance(executable_name, str):
         executable_name = [executable_name]
     if platform.system() == "Windows":
         os.environ["NoDefaultCurrentDirectoryInExePath"] = "0"
     for exe in executable_name:
+        if debug: print(f"looking for {exe}", file=sys.stderr)
         if platform.system() == "Windows" and exe == "chrome":
             path = which_windows_chrome()
             if path and _is_exe(path):
                 return path
         path = shutil.which(exe)
+        if debug: print(f"looking for {path}", file=sys.stderr)
         if path and _is_exe(path):
             return path
     default_path = []
     if executable_name == chrome:
         default_path = default_path_chrome
     for candidate in default_path:
+        if debug: print(f"Looking at {candidate}", file=sys.stderr)
         if _is_exe(candidate):
             return default_path
+    if debug: print("Found nothing...")
     return None
