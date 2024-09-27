@@ -20,6 +20,8 @@ from .system import which_browser
 
 from .pipe import PipeClosedError
 
+class TempDirWarning(UserWarning):
+    pass
 class UnhandledMessageWarning(UserWarning):
     pass
 
@@ -210,7 +212,10 @@ class Browser(Target):
             self.temp_dir.cleanup()
             clean=True
         except Exception as e:
-            print(str(e))
+            if platform.system() == "Windows" and not self.debug:\
+                pass
+            else:
+                warnings.warn(str(e)), TempDirWarning)
 
         # windows+old vers doesn't like python's default cleanup
 
@@ -231,12 +236,12 @@ class Browser(Target):
         except PermissionError:
             if not clean:
                 warnings.warn(
-                    "The temporary directory could not be deleted, due to permission error, execution will continue."
+                    "The temporary directory could not be deleted, due to permission error, execution will continue.", TempDirWarning
                 )
         except Exception as e:
             if not clean:
                 warnings.warn(
-                        f"The temporary directory could not be deleted, execution will continue. {type(e)}: {e}"
+                        f"The temporary directory could not be deleted, execution will continue. {type(e)}: {e}", TempDirWarning
                 )
 
     def sync_process_close(self):
