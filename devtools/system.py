@@ -3,7 +3,7 @@ import platform
 import os
 import sys
 
-chrome = ["chrome", "Chrome", "google-chrome", "google-chrome-stable", "Chrome.app", "Google Chrome", "chromium", "chromium-browser"]
+chrome = ["chrome", "Chrome", "google-chrome", "google-chrome-stable", "Chrome.app", "Google Chrome", "Google Chrome.app", "chromium", "chromium-browser"]
 chromium = ["chromium", "chromium-browser"]
 # firefox = // this needs to be tested
 # brave = // this needs to be tested
