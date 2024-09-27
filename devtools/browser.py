@@ -607,6 +607,8 @@ def diagnose():
         print(subprocess.check_output(["git", "describe", "--all", "--tags", "--long", "--always",]))
         print(sys.version)
         print(sys.version_info)
+    except BaseException:
+        pass
     finally:
         print("Done with version info.".center(50, "*"))
         pass
@@ -616,6 +618,8 @@ def diagnose():
         browser = Browser(debug=True, debug_browser=True)
         time.sleep(2)
         browser.close()
+    except BaseException:
+        pass
     finally:
         print("Done with sync test".center(50, "*"))
 
@@ -627,6 +631,8 @@ def diagnose():
         print("Running Asyncio Test".center(50, "*"))
         #asyncio.run(test())
         print("Skipped...")
+    except BaseException:
+        pass
     finally:
         print("Asyncio.run done".center(50, "*"))
         pass
