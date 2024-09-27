@@ -83,7 +83,7 @@ class Browser(Target):
         if not path:
             path = default_path
         if path:
-            new_env["BROWSER_PATH"] = path
+            new_env["BROWSER_PATH"] = str(path)
         else:
             raise RuntimeError(
                 "Could not find an acceptable browser. Please set environmental variable BROWSER_PATH or pass `path=/path/to/browser` into the Browser() constructor."
