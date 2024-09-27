@@ -222,6 +222,8 @@ class Browser(Target):
                 warnings.warn(
                         f"The temporary directory could not be deleted, execution will continue. {type(e)}: {e}"
                 )
+        if self.debug:
+            print(f"Tempfile still exists?: {bool(os.path.isfile(str(self.temp_dir.name)))}")
 
     def sync_process_close(self):
         self.send_command("Browser.close")
@@ -309,8 +311,6 @@ class Browser(Target):
                 self.sync_process_close()
                 # I'd say race condition but the user needs to take care of it
             self.finish_close()
-        if self.debug:
-            print(f"Tempfile still exists?: {bool(os.path.isfile(str(self.temp_dir.name)))}")
     # These are effectively stubs to allow use with with
 
     def __enter__(self):

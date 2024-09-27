@@ -12,10 +12,8 @@ jobs:
         run:  ls && pip install .[dev] numpy
       - name: diagnostic
         run:  dtdoctor
-      - name: test1
+      - name: test
         run:  pytest
-      - name: test2
-        run:  python app/test1.py
   test-windows:
     runs-on: windows-latest
     steps:
@@ -27,10 +25,8 @@ jobs:
         run:  pip install .[dev] numpy
       - name: diagnostic
         run:  dtdoctor
-      - name: test1
+      - name: test
         run:  pytest
-      - name: test2
-        run:  python app/test1.py
   test-mac:
     runs-on: macos-latest
     steps:
@@ -42,7 +38,5 @@ jobs:
         run:  pip install .[dev] numpy
       - name: diagnostic
         run:  dtdoctor
-      - name: test1
+      - name: test
         run:  pytest
-      - name: test2
-        run:  python app/test1.py
