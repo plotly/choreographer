@@ -8,9 +8,9 @@ import platform
 class NumpyEncoder(json.JSONEncoder):
     """ Special json encoder for numpy types """
     def default(self, obj):
-        if obj.dtype.kind == "i" and not hasattr(obj, "__len__"):
+        if hasattr(obj, "dtype") and obj.dtype.kind == "i" and not hasattr(obj, "__len__"):
             return int(obj)
-        elif obj.dtype.kind == "f" and not hasattr(obj, "__len__"):
+        elif hasattr(obj, "dtype") and obj.dtype.kind == "f" and not hasattr(obj, "__len__"):
             return float(obj)
         elif hasattr(obj, "dtype") and hasattr(obj, "__len__"):
             return obj.tolist()
