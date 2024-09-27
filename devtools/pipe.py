@@ -59,6 +59,7 @@ class Pipe:
         except OSError as e:
             raise PipeClosedError() from e
         try:
+            raw_buffer = None # if we fail in read, we already defined
             raw_buffer = os.read(
                 self.read_from_chromium, 10000
             )  # 10MB buffer, nbd, doesn't matter w/ this

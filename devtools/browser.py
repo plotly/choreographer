@@ -613,7 +613,6 @@ def diagnose():
     try:
         print("Running Asyncio Test".center(50, "*"))
         asyncio.run(test())
-        print("skip")
     except BaseException as e:
         fail.append(e)
     finally:
@@ -624,6 +623,7 @@ def diagnose():
     if fail:
         import traceback
         for exception in fail:
-            traceback.print_exception(exception)
+            if exception:
+                traceback.print_exception(exception)
         raise BaseException("There was an exception, see above.")
     print("Thank you! Please share these results with us!")
