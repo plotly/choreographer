@@ -6,8 +6,7 @@
 
 ### ⚠️⚠️⚠️**Testers Needed!**⚠️⚠️⚠️
 
-**This package is cross-platform and testing on _many various platforms_ will help us! See [here](#%EF%B8%8F-help-needed-%EF%B8%8F).**
-
+Please install this repo with `pip` (`pip install .`) and run `dtdoctor`, pasting the output in an issue or to slack!
 
 ## Quickstart (asyncio)
 
@@ -73,20 +72,3 @@ But you are responsible for calling all `browser.pipe.read_jsons(blocking=True|F
 ### Low-level use
 
 We provide a `Browser` and `Tab` interface, but there is also a lower-level `Target` and `Session` interface that one can use if needed.
-
---------------------------
---------------------------
---------------------------
---------------------------
-# ⚠️ Help Needed! ⚠️
-
-### First Test
-
-Please run: `python app/test1.py` and send me the output along with information about your browser, operating system, and python. Internal plotly slack is fine #kaleido, or a github issue is also fine.
-
-#### Optional Tests
-
-Run: `app/app.py` and send me the output.
-
-If everything works, feel free to give `kaleido/app.py` a shot.
-
