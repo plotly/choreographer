@@ -612,7 +612,7 @@ def diagnose():
         await browser.close()
     try:
         print("Running Asyncio Test".center(50, "*"))
-        #asyncio.run(test())
+        asyncio.run(test())
         print("skip")
     except BaseException as e:
         fail.append(e)
