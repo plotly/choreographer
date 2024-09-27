@@ -619,7 +619,7 @@ def diagnose():
         browser = Browser(debug=True, debug_browser=True)
         time.sleep(2)
         browser.close()
-    except BaseException:
+    except BaseException as e:
         fail.append(e)
     finally:
         print("Done with sync test".center(50, "*"))
@@ -631,7 +631,7 @@ def diagnose():
     try:
         print("Running Asyncio Test".center(50, "*"))
         asyncio.run(test())
-    except BaseException:
+    except BaseException as e:
         fail.append(e)
     finally:
         print("Asyncio.run done".center(50, "*"))
