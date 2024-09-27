@@ -77,6 +77,6 @@ def which_browser(executable_name=chrome, debug=False):
     for candidate in default_path:
         if debug: print(f"Looking at {candidate}", file=sys.stderr)
         if _is_exe(candidate):
-            return default_path
+            return candidate
     if debug: print("Found nothing...")
     return None
