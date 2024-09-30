@@ -17,16 +17,16 @@ class NumpyEncoder(json.JSONEncoder):
         if (
             hasattr(obj, "dtype")
             and obj.dtype.kind == "i"
-            and not hasattr(obj, "__len__")
+            and obj.shape == ()
         ):
             return int(obj)
         elif (
             hasattr(obj, "dtype")
             and obj.dtype.kind == "f"
-            and not hasattr(obj, "__len__")
+            and obj.shape == ()
         ):
             return float(obj)
-        elif hasattr(obj, "dtype") and hasattr(obj, "__len__"):
+        elif hasattr(obj, "dtype") and obj.shape != ():
             return obj.tolist()
         return json.JSONEncoder.default(self, obj)
 
