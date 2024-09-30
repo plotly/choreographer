@@ -499,7 +499,9 @@ class Browser(Target):
                     if not self.protocol.has_id(response) and error:
                         raise RuntimeError(error)
                     elif self.protocol.is_event(response):
-                        target_id = None
+                        target_id = response["params"].get("targetId") or response[
+                            "params"
+                        ].get("targetInfo", {}).get("targetId", None)
                         session_id = (
                             response["sessionId"] if "sessionId" in response else ""
                         )
@@ -524,9 +526,6 @@ class Browser(Target):
                             self.loop.create_task(
                                 self._delete_session(response)
                             )
-                            target_id = response["params"].get("targetId") or response[
-                                "params"
-                            ].get("targetInfo", {}).get("targetId", None)
                             if target_id and self.tabs and target_id in self.tabs:
                                 self.tabs[target_id].remove_session(session_id)
                             if self.debug:
