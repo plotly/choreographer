@@ -4,8 +4,6 @@ import json
 import platform
 import warnings
 
-import numpy as np
-
 with_block = bool(sys.version_info[:3] >= (3, 12) or platform.system() != "Windows")
 class BlockWarning(UserWarning):
     pass
@@ -13,13 +11,22 @@ class BlockWarning(UserWarning):
 # TODO: don't know about this
 # TODO: use has_attr instead of np.integer, you'll be fine
 class NumpyEncoder(json.JSONEncoder):
-    """ Special json encoder for numpy types """
+    """Special json encoder for numpy types"""
+
     def default(self, obj):
-        if isinstance(obj, np.integer):
+        if (
+            hasattr(obj, "dtype")
+            and obj.dtype.kind == "i"
+            and obj.shape == ()
+        ):
             return int(obj)
-        elif isinstance(obj, np.floating):
+        elif (
+            hasattr(obj, "dtype")
+            and obj.dtype.kind == "f"
+            and obj.shape == ()
+        ):
             return float(obj)
-        elif isinstance(obj, np.ndarray):
+        elif hasattr(obj, "dtype") and obj.shape != ():
             return obj.tolist()
         return json.JSONEncoder.default(self, obj)
 
