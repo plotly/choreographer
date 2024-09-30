@@ -474,6 +474,7 @@ class Browser(Target):
                                 f"Target {target_id} not found (could be closed before)",
                                 file=sys.stderr
                                 )
+                        continue
                     else:
                         raise e
 
