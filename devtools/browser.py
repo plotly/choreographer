@@ -460,9 +460,9 @@ class Browser(Target):
                 json_response["type"] == "page"
                 and json_response["targetId"] not in self.tabs
             ):
+                target_id = json_response["targetId"]
+                new_tab = Tab(target_id, self)
                 try:
-                    target_id = json_response["targetId"]
-                    new_tab = Tab(target_id, self)
                     await new_tab.create_session()
                     self.add_tab(new_tab)
                     if self.debug:
