@@ -512,7 +512,6 @@ class Browser(Target):
                         
                         subscriptions = session.subscriptions
                         subscriptions_futures = session.subscriptions_futures
-                        intern_key = "Target.detachedFromTarget"
                         for sub_key in list(subscriptions):
                             similar_strings = sub_key.endswith("*") and response[
                                 "method"
@@ -526,13 +525,13 @@ class Browser(Target):
                                 )
                                 if not subscriptions[sub_key][1]: # if not repeating
                                     self.protocol.sessions[session_id].unsubscribe(sub_key)
-                        if response["method"] == intern_key:
+                        if response["method"] == "Target.detachedFromTarget":
                             if session_id == "" and target is self:
                                 continue
                             self.loop.create_task(target.remove_session(session_id))
                             if self.debug:
                                 print(
-                                    f"Use intern subscription key: {intern_key}. Session {session_id} was closed.",
+                                    f"Use intern subscription key: 'Target.detachedFromTarget'. Session {session_id} was closed.",
                                     file=sys.stderr
                                     )
 
