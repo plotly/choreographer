@@ -1,6 +1,7 @@
 from collections import OrderedDict
 
 from .session import Session
+from .protocol import DevtoolsProtocolError
 
 
 class Target:
@@ -37,8 +38,8 @@ class Target:
             "Target.attachToTarget", params=dict(targetId=self.target_id, flatten=True)
         )
         if "error" in response:
-            raise RuntimeError("Could not create session") from Exception(
-                response["error"]
+            raise RuntimeError("Could not create session") from DevtoolsProtocolError(
+                response
             )
         session_id = response["result"]["sessionId"]
         new_session = Session(self.browser, session_id)
