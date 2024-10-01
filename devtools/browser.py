@@ -487,6 +487,12 @@ class Browser(Target):
 
         Thread(target=run_print, args=(debug,)).start()
 
+    def _get_target_for_session(self, session_id):
+        for tab in list(self.tabs.values()):
+            if session_id in tab.sessions:
+                return tab
+        return self
+
     def run_read_loop(self):
         async def read_loop():
             try:
@@ -499,13 +505,12 @@ class Browser(Target):
                     if not self.protocol.has_id(response) and error:
                         raise RuntimeError(error)
                     elif self.protocol.is_event(response):
-                        target_id = response["params"].get("targetId") or response[
-                            "params"
-                        ].get("targetInfo", {}).get("targetId", None)
                         session_id = (
                             response["sessionId"] if "sessionId" in response else ""
                         )
                         session = self.protocol.sessions[session_id]
+                        target = self._get_target_for_session(session_id)
+                        
                         subscriptions = session.subscriptions
                         subscriptions_futures = session.subscriptions_futures
                         intern_key = "Target.detachedFromTarget"
@@ -523,11 +528,7 @@ class Browser(Target):
                                 if not subscriptions[sub_key][1]: # if not repeating
                                     self.protocol.sessions[session_id].unsubscribe(sub_key)
                         if response["method"] == intern_key:
-                            self.loop.create_task(
-                                self._delete_session(response)
-                            )
-                            if target_id and self.tabs and target_id in self.tabs:
-                                self.tabs[target_id].remove_session(session_id)
+                            self.loop.create_task(target.remove_session(session_id))
                             if self.debug:
                                 print(
                                     f"Use intern subscription key: {intern_key}. Session {session_id} was closed.",
