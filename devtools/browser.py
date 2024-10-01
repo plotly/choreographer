@@ -575,7 +575,10 @@ class Browser(Target):
             self.pipe.write_json(obj)
             return key
 
+# this is the dtdoctor.exe function to help get debug reports
+# it is not really part of this program
 def diagnose():
+    import subprocess, sys, time # noqa
     fail = []
     print("*".center(50, "*"))
     print("Collecting information about the system:".center(50, "*"))
