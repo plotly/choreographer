@@ -526,6 +526,8 @@ class Browser(Target):
                                 if not subscriptions[sub_key][1]: # if not repeating
                                     self.protocol.sessions[session_id].unsubscribe(sub_key)
                         if response["method"] == intern_key:
+                            if session_id == "" and target is self:
+                                continue
                             self.loop.create_task(target.remove_session(session_id))
                             if self.debug:
                                 print(
