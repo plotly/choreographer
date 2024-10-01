@@ -366,7 +366,7 @@ class Browser(Target):
 
     # Basic syncronous functions
 
-    def add_tab(self, tab):
+    def _add_tab(self, tab):
         if not isinstance(tab, Tab):
             raise TypeError("tab must be an object of class Tab")
         self.tabs[tab.target_id] = tab
@@ -404,7 +404,7 @@ class Browser(Target):
             raise RuntimeError("Could not create tab") from Exception(response["error"])
         target_id = response["result"]["targetId"]
         new_tab = Tab(target_id, self)
-        self.add_tab(new_tab)
+        self._add_tab(new_tab)
         await new_tab.create_session()
         return new_tab
 
@@ -461,7 +461,7 @@ class Browser(Target):
                 target_id = json_response["targetId"]
                 new_tab = Tab(target_id, self)
                 await new_tab.create_session()
-                self.add_tab(new_tab)
+                self._add_tab(new_tab)
                 if self.debug:
                     print(f"The target {target_id} was added", file=sys.stderr)
 
