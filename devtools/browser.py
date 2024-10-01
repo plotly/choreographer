@@ -598,26 +598,25 @@ def diagnose():
         print("Done with version info.".center(50, "*"))
         pass
     try:
-        print("Sync test".center(50, "*"))
-        import time
-        browser = Browser(debug=True, debug_browser=True)
-        time.sleep(2)
+        print("Sync test normal".center(50, "*"))
+        browser = Browser(debug=True, debug_browser=True, headless=False)
+        time.sleep(3)
         browser.close()
     except BaseException as e:
         fail.append(e)
     finally:
         print("Done with sync test".center(50, "*"))
     async def test():
-        browser = await Browser(debug=True, debug_browser=True)
-        await asyncio.sleep(2)
+        browser = await Browser(debug=True, debug_browser=True, headless=False)
+        await asyncio.sleep(3)
         await browser.close()
     try:
-        print("Running Asyncio Test".center(50, "*"))
+        print("Async Test normal".center(50, "*"))
         asyncio.run(test())
     except BaseException as e:
         fail.append(e)
     finally:
-        print("Asyncio.run done".center(50, "*"))
+        print("Done with async test".center(50, "*"))
     print("")
     sys.stdout.flush()
     sys.stderr.flush()
