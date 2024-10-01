@@ -56,7 +56,7 @@ def open_browser(to_chromium, from_chromium, stderr=None, env=None, loop=None, l
             f"--remote-debugging-io-pipes={str(to_chromium_handle)},{str(from_chromium_handle)}"
         ]
         if platform.system() == "Windows":
-            win_only = {"creationflags": subprocess.CREATE_NEW_PROCESS_GROUP}
+            win_only = {"creationflags": subprocess.CREATE_NEW_PROCESS_GROUP, "close_fds":False}
     if not loop:
         return subprocess.Popen(
             cli,
