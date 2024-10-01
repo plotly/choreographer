@@ -505,9 +505,7 @@ class Browser(Target):
                     if not self.protocol.has_id(response) and error:
                         raise RuntimeError(error)
                     elif self.protocol.is_event(response):
-                        session_id = (
-                            response["sessionId"] if "sessionId" in response else ""
-                        )
+                        session_id = response.get("sessionId", "")
                         session = self.protocol.sessions[session_id]
                         target = self._get_target_for_session(session_id)
                         
