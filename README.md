@@ -6,14 +6,13 @@
 
 ### ⚠️⚠️⚠️**Testers Needed!**⚠️⚠️⚠️
 
-**This package is cross-platform and testing on _many various platforms_ will help us! See [here](#%EF%B8%8F-help-needed-%EF%B8%8F).**
-
+Please install this repo with `pip` (`pip install .`) and run `dtdoctor`, pasting the output in an issue or to slack!
 
 ## Quickstart (asyncio)
 
 Easy:
 ```python
-import asyncio
+import asyncio # required for this example only
 import devtools
 
 
@@ -22,6 +21,15 @@ async with Browser(headless=False) as browser:
 	await asyncio.sleep(3)
 	await new_tab.send_command("Page.navigate", params=dict(url="https://github.com"))
 	await asyncio.sleep(3)
+
+
+## NOTE:
+# if you wish to use interactively, ie in a console,
+# it is better to use, instead of `async with`:
+
+browser = await Browser(headless=False)
+
+# as exiting the context will close the browser
 ```
 
 See [the devtools reference](https://chromedevtools.github.io/devtools-protocol/) for a list of all possible commands.
@@ -45,10 +53,11 @@ See [the devtools reference](https://chromedevtools.github.io/devtools-protocol/
 	reponse = await new_tab.subscribe_once("Page.lifecycleEvent")
 	# do something with response
 	browser.unsubscribe("Target.*")
-	# events are always sent to a browser or tab, but the documentation isn't always clear which
-	# so dumping all: `browser.subscribe("*", dump_event)` can be useful (but verbose) for debugging
+	# events are always sent to a browser or tab,
+  # but the documentation isn't always clear which.
+	# Dumping all: `browser.subscribe("*", dump_event)` (on tab too)
+  # can be useful (but verbose) for debugging.
 ```
-Install this repository (`pip install .`) and `numpy`.
 
 ## Other Options
 
@@ -56,27 +65,10 @@ Install this repository (`pip install .`) and `numpy`.
 
 You can use this library without `asyncio`,
 ```
-my_browser = devtools.Browser()
+my_browser = devtools.Browser() # blocking until open
 ```
 But you are responsible for calling all `browser.pipe.read_jsons(blocking=True|False)` and organizing the results. `browser.run_output_thread()` will start a second thread that constantly prints all responses from the browser, it can't be used with `asyncio`- it won't play nice with any other read.
 
 ### Low-level use
 
 We provide a `Browser` and `Tab` interface, but there is also a lower-level `Target` and `Session` interface that one can use if needed.
-
---------------------------
---------------------------
---------------------------
---------------------------
-# ⚠️ Help Needed! ⚠️
-
-### First Test
-
-Please run: `python app/test1.py` and send me the output along with information about your browser, operating system, and python. Internal plotly slack is fine #kaleido, or a github issue is also fine.
-
-#### Optional Tests
-
-Run: `app/app.py` and send me the output.
-
-If everything works, feel free to give `kaleido/app.py` a shot.
-
