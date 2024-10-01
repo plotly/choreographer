@@ -243,7 +243,7 @@ class Browser(Target):
                         f"The temporary directory could not be deleted, execution will continue. {type(e)}: {e}", TempDirWarning
                 )
         if self.debug:
-            print(f"Tempfile still exists?: {bool(os.path.exists(str(self.name)))}")
+            print(f"Tempfile still exists?: {bool(os.path.exists(str(name)))}")
 
     async def _is_closed_async(self, wait=0):
         waiter = self.subprocess.wait()
