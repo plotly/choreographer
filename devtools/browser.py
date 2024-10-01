@@ -489,7 +489,7 @@ class Browser(Target):
         Thread(target=run_print, args=(debug,)).start()
 
     def _get_target_for_session(self, session_id):
-        for tab in list(self.tabs.values()):
+        for tab in self.tabs.values():
             if session_id in tab.sessions:
                 return tab
         return self
