@@ -465,9 +465,6 @@ class Browser(Target):
                 new_tab = Tab(target_id, self)
                 try:
                     await new_tab.create_session()
-                    self.add_tab(new_tab)
-                    if self.debug:
-                        print(f"The target {target_id} was added", file=sys.stderr)
                 except DevtoolsProtocolError as e:
                     if e.code == TARGET_NOT_FOUND:
                         if self.debug:
@@ -478,6 +475,9 @@ class Browser(Target):
                         continue
                     else:
                         raise e
+                self.add_tab(new_tab)
+                if self.debug:
+                    print(f"The target {target_id} was added", file=sys.stderr)
 
     # Output Helper for Debugging
 
