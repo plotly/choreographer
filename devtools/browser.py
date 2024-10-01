@@ -83,7 +83,7 @@ class Browser(Target):
         if not path:
             path = default_path
         if path:
-            new_env["BROWSER_PATH"] = path
+            new_env["BROWSER_PATH"] = str(path)
         else:
             raise RuntimeError(
                 "Could not find an acceptable browser. Please set environmental variable BROWSER_PATH or pass `path=/path/to/browser` into the Browser() constructor."
@@ -205,6 +205,7 @@ class Browser(Target):
         self.future_self.set_result(self)
 
     def _clean_temp(self):
+        name = self.temp_dir.name
         clean = False
         try:
             self.temp_dir.cleanup()
@@ -242,7 +243,7 @@ class Browser(Target):
                         f"The temporary directory could not be deleted, execution will continue. {type(e)}: {e}", TempDirWarning
                 )
         if self.debug:
-            print(f"Tempfile still exists?: {bool(os.path.isfile(str(self.temp_dir.name)))}")
+            print(f"Tempfile still exists?: {bool(os.path.exists(str(name)))}")
 
     async def _is_closed_async(self, wait=0):
         waiter = self.subprocess.wait()
@@ -575,27 +576,55 @@ class Browser(Target):
             return key
 
 def diagnose():
-    print("*****************************************")
-    print("Please copy and paste all these results to an issue or to slack!")
-    print("Collecting information about the system:")
+    fail = []
+    print("*".center(50, "*"))
+    print("Collecting information about the system:".center(50, "*"))
     print(platform.system())
     print(platform.release())
     print(platform.version())
     print(platform.uname())
-    print("Looking for browser:")
-    print(which_browser())
-    print("Running a very simple test...")
+    print("Looking for browser:".center(50, "*"))
+    print(which_browser(debug=True))
     try:
+        print("Looking for version info:".center(50, "*"))
         import subprocess, sys # noqa
         print(subprocess.check_output([sys.executable, '-m', 'pip', 'freeze']))
         print(subprocess.check_output(["git", "describe", "--all", "--tags", "--long", "--always",]))
         print(sys.version)
         print(sys.version_info)
+    except BaseException as e:
+        fail.append(e)
     finally:
+        print("Done with version info.".center(50, "*"))
         pass
+    try:
+        print("Sync test".center(50, "*"))
+        import time
+        browser = Browser(debug=True, debug_browser=True)
+        time.sleep(2)
+        browser.close()
+    except BaseException as e:
+        fail.append(e)
+    finally:
+        print("Done with sync test".center(50, "*"))
     async def test():
         browser = await Browser(debug=True, debug_browser=True)
         await asyncio.sleep(2)
         await browser.close()
-    asyncio.run(test())
+    try:
+        print("Running Asyncio Test".center(50, "*"))
+        asyncio.run(test())
+    except BaseException as e:
+        fail.append(e)
+    finally:
+        print("Asyncio.run done".center(50, "*"))
+    print("")
+    sys.stdout.flush()
+    sys.stderr.flush()
+    if fail:
+        import traceback
+        for exception in fail:
+            if exception:
+                traceback.print_exception(exception)
+        raise BaseException("There was an exception, see above.")
     print("Thank you! Please share these results with us!")
