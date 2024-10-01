@@ -1,3 +1,13 @@
+TARGET_NOT_FOUND = -32602
+
+
+class DevtoolsProtocolError(Exception):
+    def __init__(self, response):
+        super().__init__(response)
+        self.code = response["error"]["code"]
+        self.message = response["error"]["message"]
+
+
 class Protocol:
     def __init__(self, debug=False):
         # Stored Resources
