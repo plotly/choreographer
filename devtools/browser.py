@@ -210,7 +210,7 @@ class Browser(Target):
         try:
             self.temp_dir.cleanup()
             clean=True
-        except Exception as e:
+        except BaseException as e:
             if platform.system() == "Windows" and not self.debug:
                 pass
             else:
@@ -237,7 +237,7 @@ class Browser(Target):
                 warnings.warn(
                     "The temporary directory could not be deleted, due to permission error, execution will continue.", TempDirWarning
                 )
-        except Exception as e:
+        except BaseException as e:
             if not clean:
                 warnings.warn(
                         f"The temporary directory could not be deleted, execution will continue. {type(e)}: {e}", TempDirWarning
@@ -590,13 +590,12 @@ def diagnose():
     print(which_browser(debug=True))
     try:
         print("Looking for version info:".center(50, "*"))
-        import subprocess, sys # noqa
         print(subprocess.check_output([sys.executable, '-m', 'pip', 'freeze']))
         print(subprocess.check_output(["git", "describe", "--all", "--tags", "--long", "--always",]))
         print(sys.version)
         print(sys.version_info)
     except BaseException as e:
-        fail.append(e)
+        fail.append(("System Info", e))
     finally:
         print("Done with version info.".center(50, "*"))
         pass
@@ -606,7 +605,7 @@ def diagnose():
         time.sleep(3)
         browser.close()
     except BaseException as e:
-        fail.append(e)
+        fail.append(("Sync test", e))
     finally:
         print("Done with sync test".center(50, "*"))
     async def test():
@@ -617,7 +616,7 @@ def diagnose():
         print("Async Test normal".center(50, "*"))
         asyncio.run(test())
     except BaseException as e:
-        fail.append(e)
+        fail.append(("Async test", e))
     finally:
         print("Done with async test".center(50, "*"))
     print("")
@@ -626,7 +625,11 @@ def diagnose():
     if fail:
         import traceback
         for exception in fail:
-            if exception:
-                traceback.print_exception(exception)
+            try:
+                print(f"Error in: {exception[0]}")
+                traceback.print_exception(exception[1])
+            except BaseException as e:
+                print("Couldn't print traceback for:")
+                print(str(exception))
         raise BaseException("There was an exception, see above.")
     print("Thank you! Please share these results with us!")
