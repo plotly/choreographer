@@ -77,5 +77,5 @@ def which_browser(executable_name=chrome, debug=False):
         if debug: print(f"Looking at {candidate}", file=sys.stderr)
         if _is_exe(candidate):
             return candidate
-    if debug: print("Found nothing...")
+    if debug: print("Found nothing...", file=sys.stderr)
     return None
