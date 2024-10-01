@@ -371,7 +371,7 @@ class Browser(Target):
             raise TypeError("tab must be an object of class Tab")
         self.tabs[tab.target_id] = tab
 
-    def remove_tab(self, target_id):
+    def _remove_tab(self, target_id):
         if isinstance(target_id, Tab):
             target_id = target_id.target_id
         del self.tabs[target_id]
@@ -421,7 +421,7 @@ class Browser(Target):
             command="Target.closeTarget",
             params={"targetId": target_id},
         )
-        self.remove_tab(target_id)
+        self._remove_tab(target_id)
         if "error" in response:
             raise RuntimeError("Could not close tab") from Exception(response["error"])
         return response
