@@ -205,6 +205,7 @@ class Browser(Target):
         self.future_self.set_result(self)
 
     def _clean_temp(self):
+        name = self.temp_dir.name
         clean = False
         try:
             self.temp_dir.cleanup()
@@ -242,7 +243,7 @@ class Browser(Target):
                         f"The temporary directory could not be deleted, execution will continue. {type(e)}: {e}", TempDirWarning
                 )
         if self.debug:
-            print(f"Tempfile still exists?: {bool(os.path.exists(str(self.temp_dir.name)))}")
+            print(f"Tempfile still exists?: {bool(os.path.exists(str(self.name)))}")
 
     async def _is_closed_async(self, wait=0):
         waiter = self.subprocess.wait()
