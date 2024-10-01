@@ -25,16 +25,10 @@ system = platform.system()
 if system == "Windows":
     import msvcrt  # noqa
 
-default_path = None
-if system == "Windows":
-    default_path = r"c:\Program Files\Google\Chrome\Application\chrome.exe"
-elif system == "Linux":
-    default_path = "/usr/bin/google-chrome-stable"
-else: # assume mac, or system == "Darwin"
-    default_path = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-
 def open_browser(to_chromium, from_chromium, stderr=None, env=None, loop=None, loop_hack=False):
-    path = env.get("BROWSER_PATH", default_path)
+    path = env.get("BROWSER_PATH")
+    if not path:
+        raise RuntimeError("No browser path was passed to run")
     # TODO: check that browser exists (windows, mac) w/ --version (TODO: how to do on wndows?)
 
     user_data_dir = env["USER_DATA_DIR"]
