@@ -600,6 +600,15 @@ def diagnose():
         print("Done with version info.".center(50, "*"))
         pass
     try:
+        print("Sync test headless".center(50, "*"))
+        browser = Browser(debug=True, debug_browser=True, headless=True)
+        time.sleep(3)
+        browser.close()
+    except BaseException as e:
+        fail.append(("Sync test headless", e))
+    finally:
+        print("Done with sync test headless".center(50, "*"))
+    try:
         print("Sync test normal".center(50, "*"))
         browser = Browser(debug=True, debug_browser=True, headless=False)
         time.sleep(3)
@@ -619,6 +628,17 @@ def diagnose():
         fail.append(("Async test", e))
     finally:
         print("Done with async test".center(50, "*"))
+    async def test_headless():
+        browser = await Browser(debug=True, debug_browser=True, headless=True)
+        await asyncio.sleep(3)
+        await browser.close()
+    try:
+        print("Async Test headless".center(50, "*"))
+        asyncio.run(test_headless())
+    except BaseException as e:
+        fail.append(("Async test headless", e))
+    finally:
+        print("Done with async test headless".center(50, "*"))
     print("")
     sys.stdout.flush()
     sys.stderr.flush()
