@@ -503,7 +503,9 @@ class Browser(Target):
         for tab in self.tabs.values():
             if session_id in tab.sessions:
                 return tab
-        return self
+        if session_id in self.sessions:
+            return self
+        return None
 
     def run_read_loop(self):
         async def read_loop():
@@ -519,10 +521,11 @@ class Browser(Target):
                     elif self.protocol.is_event(response):
                         session_id = response.get("sessionId", "")
                         session = self.protocol.sessions[session_id]
-                        target = self._get_target_for_session(session_id)
+                        target = self._get_target_for_session(session_id) # and if there is no target TODO
                         
                         subscriptions = session.subscriptions
                         subscriptions_futures = session.subscriptions_futures
+
                         for sub_key in list(subscriptions):
                             similar_strings = sub_key.endswith("*") and response[
                                 "method"
@@ -536,10 +539,11 @@ class Browser(Target):
                                 )
                                 if not subscriptions[sub_key][1]: # if not repeating
                                     self.protocol.sessions[session_id].unsubscribe(sub_key)
+
                         if response["method"] == "Target.detachedFromTarget":
-                            if session_id == "" and target is self:
-                                continue
-                            self.loop.create_task(target.remove_session(session_id))
+                            if target:
+                                target.remove_session(session_id)
+                            _ = self.protocol.sessions.pop(session_id, None)
                             if self.debug:
                                 print(
                                     f"Use intern subscription key: 'Target.detachedFromTarget'. Session {session_id} was closed.",
