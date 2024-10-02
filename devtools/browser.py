@@ -128,10 +128,6 @@ class Browser(Target):
         if not self.loop:
             self._open()
 
-    async def _delete_session(self, response):
-        session_id = response['params']['sessionId']
-        self.remove_session(session_id)
-
     # somewhat out of order, __aenter__ is for use with `async with Browser()`
     # it is basically 99% of __await__, which is for use with `browser = await Browser()`
     # so we just use one inside the other
