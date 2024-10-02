@@ -520,7 +520,10 @@ class Browser(Target):
                         raise RuntimeError(error)
                     elif self.protocol.is_event(response):
                         event_session_id = response.get("sessionId", "")
-                        if event_session_id == "":
+                        if (
+                            event_session_id == ""
+                            and response["method"] != "Target.detachedFromTarget"
+                        ):
                             session_id = ""
                         else:
                             session_id = response["params"]["sessionId"]
