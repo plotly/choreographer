@@ -128,10 +128,6 @@ class Browser(Target):
         if not self.loop:
             self._open()
 
-    async def _delete_session(self, response):
-        session_id = response['params']['sessionId']
-        self.remove_session(session_id)
-
     # somewhat out of order, __aenter__ is for use with `async with Browser()`
     # it is basically 99% of __await__, which is for use with `browser = await Browser()`
     # so we just use one inside the other
@@ -519,13 +515,16 @@ class Browser(Target):
                     if not self.protocol.has_id(response) and error:
                         raise RuntimeError(error)
                     elif self.protocol.is_event(response):
-                        session_id = response.get("sessionId", "")
-                        session = self.protocol.sessions[session_id]
-                        target = self._get_target_for_session(session_id) # and if there is no target TODO
-                        
-                        subscriptions = session.subscriptions
-                        subscriptions_futures = session.subscriptions_futures
+                        ### INFORMATION WE NEED FOR EVERY EVENT
+                        event_session_id = response.get("sessionId", "") # GET THE SESSION THAT THE EVENT CAME IN ON
+                        event_session = self.protocol.sessions[event_session_id]
 
+
+                        ### INFORMATION FOR JUST USER SUBSCRIPTIONS
+                        subscriptions = event_session.subscriptions
+                        subscriptions_futures = event_session.subscriptions_futures
+
+                        ### THIS IS FOR SUBSCRIBE(repeating=True|False)
                         for sub_key in list(subscriptions):
                             similar_strings = sub_key.endswith("*") and response[
                                 "method"
@@ -538,18 +537,9 @@ class Browser(Target):
                                     subscriptions[sub_key][0](response)
                                 )
                                 if not subscriptions[sub_key][1]: # if not repeating
-                                    self.protocol.sessions[session_id].unsubscribe(sub_key)
+                                    self.protocol.sessions[event_session_id].unsubscribe(sub_key)
 
-                        if response["method"] == "Target.detachedFromTarget":
-                            if target:
-                                target.remove_session(session_id)
-                            _ = self.protocol.sessions.pop(session_id, None)
-                            if self.debug:
-                                print(
-                                    f"Use intern subscription key: 'Target.detachedFromTarget'. Session {session_id} was closed.",
-                                    file=sys.stderr
-                                    )
-
+                        ### THIS IS FOR SUBSCRIBE_ONCE (that's not clear from variable names)
                         for sub_key, futures in list(subscriptions_futures.items()):
                             similar_strings = sub_key.endswith("*") and response["method"].startswith(sub_key[:-1])
                             equals_method = response["method"] == sub_key
@@ -562,7 +552,21 @@ class Browser(Target):
                                     future.set_result(response)
                                     if self.debug:
                                         print(f"Future resolved with response {future}", file=sys.stderr)
-                                del session.subscriptions_futures[sub_key]
+                                del event_session.subscriptions_futures[sub_key]
+
+                        ### JUST INTERNAL STUFF
+                        if response["method"] == "Target.detachedFromTarget":
+                            session_closed = response["params"].get("sessionId", "") # GET THE SESSION THAT WAS CLOSED
+                            if session_closed == "": continue # not actually possible to close browser session this way...
+                            target_closed = self._get_target_for_session(session_closed)
+                            if target_closed:
+                                target_closed.remove_session(session_closed)
+                            _ = self.protocol.sessions.pop(session_closed, None)
+                            if self.debug:
+                                print(
+                                    f"Use intern subscription key: 'Target.detachedFromTarget'. Session {session_closed} was closed.",
+                                    file=sys.stderr
+                                    )
 
 
                     elif key:
