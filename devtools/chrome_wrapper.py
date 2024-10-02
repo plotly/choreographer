@@ -11,8 +11,6 @@ env = None
 if __name__ == "__main__":
     os.dup2(0, 3)  # make our stdin their input
     os.dup2(1, 4)  # make our stdout their output
-    os.set_inheritable(4, True)
-    os.set_inheritable(3, True)
 
 
 
@@ -24,6 +22,9 @@ import asyncio #noqa
 system = platform.system()
 if system == "Windows":
     import msvcrt  # noqa
+else: 
+    os.set_inheritable(4, True)
+    os.set_inheritable(3, True)
 
 def open_browser(to_chromium, from_chromium, stderr=None, env=None, loop=None, loop_hack=False):
     path = env.get("BROWSER_PATH")
@@ -44,9 +45,9 @@ def open_browser(to_chromium, from_chromium, stderr=None, env=None, loop=None, l
     ]
 
     if "HEADLESS" in env:
-        cli.append("--headless")
+        cli.append("--headless=old") # temporary fix
 
-    win_only = {}
+    system_dependent = {}
     if system == "Windows":
         to_chromium_handle = msvcrt.get_osfhandle(to_chromium)
         os.set_handle_inheritable(to_chromium_handle, True)
@@ -55,22 +56,23 @@ def open_browser(to_chromium, from_chromium, stderr=None, env=None, loop=None, l
         cli += [
             f"--remote-debugging-io-pipes={str(to_chromium_handle)},{str(from_chromium_handle)}"
         ]
-        if platform.system() == "Windows":
-            win_only = {"creationflags": subprocess.CREATE_NEW_PROCESS_GROUP, "close_fds":False}
+        system_dependent["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
+        system_dependent["close_fds"] = False
+    else:
+        system_dependent["pass_fds"]=(to_chromium, from_chromium)
+
     if not loop:
         return subprocess.Popen(
             cli,
             stderr=stderr,
-            pass_fds=(to_chromium, from_chromium) if system != "Windows" else None,
-            **win_only,
+            **system_dependent,
         )
     elif loop_hack:
         def run():
             return subprocess.Popen(
                 cli,
                 stderr=stderr,
-                pass_fds=(to_chromium, from_chromium) if system != "Windows" else None,
-                **win_only,
+                **system_dependent,
             )
         return asyncio.to_thread(run)
     else:
@@ -78,8 +80,7 @@ def open_browser(to_chromium, from_chromium, stderr=None, env=None, loop=None, l
                 cli[0],
                 *cli[1:],
                 stderr=stderr,
-                pass_fds=(to_chromium, from_chromium) if system != "Windows" else None,
-                **win_only)
+                **system_dependent)
 
 
 # THIS MAY BE PART OF KILL

@@ -128,11 +128,6 @@ class Browser(Target):
         if not self.loop:
             self._open()
 
-    async def _check_session(self, response):
-        session_id = response['params']['sessionId']
-        del self.protocol.sessions[session_id]
-        # we need to remove this from protocol
-
     # somewhat out of order, __aenter__ is for use with `async with Browser()`
     # it is basically 99% of __await__, which is for use with `browser = await Browser()`
     # so we just use one inside the other
@@ -142,7 +137,6 @@ class Browser(Target):
             self._check_loop()
         self.future_self = self.loop.create_future()
         self.loop.create_task(self._open_async())
-        self.browser.subscribe("Target.detachedFromTarget", self._check_session, repeating=True)
         self.run_read_loop()
         return self.future_self
 
@@ -210,7 +204,7 @@ class Browser(Target):
         try:
             self.temp_dir.cleanup()
             clean=True
-        except Exception as e:
+        except BaseException as e:
             if platform.system() == "Windows" and not self.debug:
                 pass
             else:
@@ -237,7 +231,7 @@ class Browser(Target):
                 warnings.warn(
                     "The temporary directory could not be deleted, due to permission error, execution will continue.", TempDirWarning
                 )
-        except Exception as e:
+        except BaseException as e:
             if not clean:
                 warnings.warn(
                         f"The temporary directory could not be deleted, execution will continue. {type(e)}: {e}", TempDirWarning
@@ -290,7 +284,7 @@ class Browser(Target):
                     stderr=subprocess.DEVNULL,
                     stdout=subprocess.DEVNULL,
                 )
-                if self._is_closed(wait = 2):
+                if self._is_closed(wait = 4):
                     return
                 else:
                     raise RuntimeError("Couldn't kill browser subprocess")
@@ -330,7 +324,7 @@ class Browser(Target):
                     stderr=subprocess.DEVNULL,
                     stdout=subprocess.DEVNULL,
                 )
-                if await self._is_closed_async(wait = 2):
+                if await self._is_closed_async(wait = 4):
                     return
                 else:
                     raise RuntimeError("Couldn't kill browser subprocess")
@@ -369,12 +363,12 @@ class Browser(Target):
 
     # Basic syncronous functions
 
-    def add_tab(self, tab):
+    def _add_tab(self, tab):
         if not isinstance(tab, Tab):
             raise TypeError("tab must be an object of class Tab")
         self.tabs[tab.target_id] = tab
 
-    def remove_tab(self, target_id):
+    def _remove_tab(self, target_id):
         if isinstance(target_id, Tab):
             target_id = target_id.target_id
         del self.tabs[target_id]
@@ -407,7 +401,7 @@ class Browser(Target):
             raise RuntimeError("Could not create tab") from Exception(response["error"])
         target_id = response["result"]["targetId"]
         new_tab = Tab(target_id, self)
-        self.add_tab(new_tab)
+        self._add_tab(new_tab)
         await new_tab.create_session()
         return new_tab
 
@@ -424,7 +418,7 @@ class Browser(Target):
             command="Target.closeTarget",
             params={"targetId": target_id},
         )
-        self.remove_tab(target_id)
+        self._remove_tab(target_id)
         if "error" in response:
             raise RuntimeError("Could not close tab") from Exception(response["error"])
         return response
@@ -475,7 +469,7 @@ class Browser(Target):
                         continue
                     else:
                         raise e
-                self.add_tab(new_tab)
+                self._add_tab(new_tab)
                 if self.debug:
                     print(f"The target {target_id} was added", file=sys.stderr)
 
@@ -501,6 +495,14 @@ class Browser(Target):
 
         Thread(target=run_print, args=(debug,)).start()
 
+    def _get_target_for_session(self, session_id):
+        for tab in self.tabs.values():
+            if session_id in tab.sessions:
+                return tab
+        if session_id in self.sessions:
+            return self
+        return None
+
     def run_read_loop(self):
         async def read_loop():
             try:
@@ -513,12 +515,16 @@ class Browser(Target):
                     if not self.protocol.has_id(response) and error:
                         raise RuntimeError(error)
                     elif self.protocol.is_event(response):
-                        session_id = (
-                            response["sessionId"] if "sessionId" in response else ""
-                        )
-                        session = self.protocol.sessions[session_id]
-                        subscriptions = session.subscriptions
-                        subscriptions_futures = session.subscriptions_futures
+                        ### INFORMATION WE NEED FOR EVERY EVENT
+                        event_session_id = response.get("sessionId", "") # GET THE SESSION THAT THE EVENT CAME IN ON
+                        event_session = self.protocol.sessions[event_session_id]
+
+
+                        ### INFORMATION FOR JUST USER SUBSCRIPTIONS
+                        subscriptions = event_session.subscriptions
+                        subscriptions_futures = event_session.subscriptions_futures
+
+                        ### THIS IS FOR SUBSCRIBE(repeating=True|False)
                         for sub_key in list(subscriptions):
                             similar_strings = sub_key.endswith("*") and response[
                                 "method"
@@ -531,8 +537,9 @@ class Browser(Target):
                                     subscriptions[sub_key][0](response)
                                 )
                                 if not subscriptions[sub_key][1]: # if not repeating
-                                    self.protocol.sessions[session_id].unsubscribe(sub_key)
+                                    self.protocol.sessions[event_session_id].unsubscribe(sub_key)
 
+                        ### THIS IS FOR SUBSCRIBE_ONCE (that's not clear from variable names)
                         for sub_key, futures in list(subscriptions_futures.items()):
                             similar_strings = sub_key.endswith("*") and response["method"].startswith(sub_key[:-1])
                             equals_method = response["method"] == sub_key
@@ -545,7 +552,21 @@ class Browser(Target):
                                     future.set_result(response)
                                     if self.debug:
                                         print(f"Future resolved with response {future}", file=sys.stderr)
-                                del session.subscriptions_futures[sub_key]
+                                del event_session.subscriptions_futures[sub_key]
+
+                        ### JUST INTERNAL STUFF
+                        if response["method"] == "Target.detachedFromTarget":
+                            session_closed = response["params"].get("sessionId", "") # GET THE SESSION THAT WAS CLOSED
+                            if session_closed == "": continue # not actually possible to close browser session this way...
+                            target_closed = self._get_target_for_session(session_closed)
+                            if target_closed:
+                                target_closed.remove_session(session_closed)
+                            _ = self.protocol.sessions.pop(session_closed, None)
+                            if self.debug:
+                                print(
+                                    f"Use intern subscription key: 'Target.detachedFromTarget'. Session {session_closed} was closed.",
+                                    file=sys.stderr
+                                    )
 
 
                     elif key:
@@ -586,7 +607,10 @@ class Browser(Target):
             self.pipe.write_json(obj)
             return key
 
+# this is the dtdoctor.exe function to help get debug reports
+# it is not really part of this program
 def diagnose():
+    import subprocess, sys, time # noqa
     fail = []
     print("*".center(50, "*"))
     print("Collecting information about the system:".center(50, "*"))
@@ -598,44 +622,46 @@ def diagnose():
     print(which_browser(debug=True))
     try:
         print("Looking for version info:".center(50, "*"))
-        import subprocess, sys # noqa
         print(subprocess.check_output([sys.executable, '-m', 'pip', 'freeze']))
         print(subprocess.check_output(["git", "describe", "--all", "--tags", "--long", "--always",]))
         print(sys.version)
         print(sys.version_info)
     except BaseException as e:
-        fail.append(e)
+        fail.append(("System Info", e))
     finally:
         print("Done with version info.".center(50, "*"))
         pass
     try:
-        print("Sync test".center(50, "*"))
-        import time
-        browser = Browser(debug=True, debug_browser=True)
-        time.sleep(2)
+        print("Sync test headless".center(50, "*"))
+        browser = Browser(debug=True, debug_browser=True, headless=True)
+        time.sleep(3)
         browser.close()
     except BaseException as e:
-        fail.append(e)
+        fail.append(("Sync test headless", e))
     finally:
-        print("Done with sync test".center(50, "*"))
-    async def test():
-        browser = await Browser(debug=True, debug_browser=True)
-        await asyncio.sleep(2)
+        print("Done with sync test headless".center(50, "*"))
+    async def test_headless():
+        browser = await Browser(debug=True, debug_browser=True, headless=True)
+        await asyncio.sleep(3)
         await browser.close()
     try:
-        print("Running Asyncio Test".center(50, "*"))
-        asyncio.run(test())
+        print("Async Test headless".center(50, "*"))
+        asyncio.run(test_headless())
     except BaseException as e:
-        fail.append(e)
+        fail.append(("Async test headless", e))
     finally:
-        print("Asyncio.run done".center(50, "*"))
+        print("Done with async test headless".center(50, "*"))
     print("")
     sys.stdout.flush()
     sys.stderr.flush()
     if fail:
         import traceback
         for exception in fail:
-            if exception:
-                traceback.print_exception(exception)
+            try:
+                print(f"Error in: {exception[0]}")
+                traceback.print_exception(exception[1])
+            except BaseException:
+                print("Couldn't print traceback for:")
+                print(str(exception))
         raise BaseException("There was an exception, see above.")
     print("Thank you! Please share these results with us!")
