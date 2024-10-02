@@ -248,11 +248,9 @@ class Browser(Target):
             return await asyncio.to_thread(self._is_closed, wait)
         waiter = self.subprocess.wait()
         try:
-            print(f"Waiting with wait_for for {wait}")
             await asyncio.wait_for(waiter, wait)
             return True
         except: # noqa
-            print("Waiter excepted")
             return False
 
     def _is_closed(self, wait=0):
@@ -309,11 +307,9 @@ class Browser(Target):
 
 
     async def _async_close(self):
-        print("Called async_close, waiting to see if it already is")
         if await self._is_closed_async():
             if self.debug: print("Browser was already closed.", file=sys.stderr)
             return
-        print("Trying clean close with command")
         await asyncio.wait([self.send_command("Browser.close")], timeout=1)
         if await self._is_closed_async():
             if self.debug: print("Browser.close method closed browser", file=sys.stderr)
@@ -351,11 +347,8 @@ class Browser(Target):
         if self.loop:
             async def close_task():
                 await self._async_close()
-                print("Closing pipes")
                 self.pipe.close()
-                print("Cleaning temporary files")
                 self._clean_temp() # can we make async
-            print("Posing _async_close")
             return asyncio.create_task(close_task())
         else:
             self._sync_close()
