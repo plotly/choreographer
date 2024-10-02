@@ -208,7 +208,7 @@ class Browser(Target):
         try:
             self.temp_dir.cleanup()
             clean=True
-        except Exception as e:
+        except BaseException as e:
             if platform.system() == "Windows" and not self.debug:
                 pass
             else:
@@ -235,7 +235,7 @@ class Browser(Target):
                 warnings.warn(
                     "The temporary directory could not be deleted, due to permission error, execution will continue.", TempDirWarning
                 )
-        except Exception as e:
+        except BaseException as e:
             if not clean:
                 warnings.warn(
                         f"The temporary directory could not be deleted, execution will continue. {type(e)}: {e}", TempDirWarning
@@ -603,7 +603,10 @@ class Browser(Target):
             self.pipe.write_json(obj)
             return key
 
+# this is the dtdoctor.exe function to help get debug reports
+# it is not really part of this program
 def diagnose():
+    import subprocess, sys, time # noqa
     fail = []
     print("*".center(50, "*"))
     print("Collecting information about the system:".center(50, "*"))
@@ -615,44 +618,46 @@ def diagnose():
     print(which_browser(debug=True))
     try:
         print("Looking for version info:".center(50, "*"))
-        import subprocess, sys # noqa
         print(subprocess.check_output([sys.executable, '-m', 'pip', 'freeze']))
         print(subprocess.check_output(["git", "describe", "--all", "--tags", "--long", "--always",]))
         print(sys.version)
         print(sys.version_info)
     except BaseException as e:
-        fail.append(e)
+        fail.append(("System Info", e))
     finally:
         print("Done with version info.".center(50, "*"))
         pass
     try:
-        print("Sync test".center(50, "*"))
-        import time
-        browser = Browser(debug=True, debug_browser=True)
-        time.sleep(2)
+        print("Sync test headless".center(50, "*"))
+        browser = Browser(debug=True, debug_browser=True, headless=True)
+        time.sleep(3)
         browser.close()
     except BaseException as e:
-        fail.append(e)
+        fail.append(("Sync test headless", e))
     finally:
-        print("Done with sync test".center(50, "*"))
-    async def test():
-        browser = await Browser(debug=True, debug_browser=True)
-        await asyncio.sleep(2)
+        print("Done with sync test headless".center(50, "*"))
+    async def test_headless():
+        browser = await Browser(debug=True, debug_browser=True, headless=True)
+        await asyncio.sleep(3)
         await browser.close()
     try:
-        print("Running Asyncio Test".center(50, "*"))
-        asyncio.run(test())
+        print("Async Test headless".center(50, "*"))
+        asyncio.run(test_headless())
     except BaseException as e:
-        fail.append(e)
+        fail.append(("Async test headless", e))
     finally:
-        print("Asyncio.run done".center(50, "*"))
+        print("Done with async test headless".center(50, "*"))
     print("")
     sys.stdout.flush()
     sys.stderr.flush()
     if fail:
         import traceback
         for exception in fail:
-            if exception:
-                traceback.print_exception(exception)
+            try:
+                print(f"Error in: {exception[0]}")
+                traceback.print_exception(exception[1])
+            except BaseException:
+                print("Couldn't print traceback for:")
+                print(str(exception))
         raise BaseException("There was an exception, see above.")
     print("Thank you! Please share these results with us!")
