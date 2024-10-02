@@ -51,8 +51,8 @@ async def test_async_tab(
         assert await tab_1.close_session(session_1) is not None
         response = await tab_1.send_command("Page.enable")
         assert check_response_dictionary(response,{"result" : {}})
-        tab_1.subscribe_once("Page")
-        assert "Page" in list(tab_1.sessions.values())[0].subscriptions_futures
+        tab_1.subscribe_once("Page.*")
+        assert "Page.*" in list(tab_1.sessions.values())[0].subscriptions_futures
         tab_1.subscribe("*", print_obj, True)
         assert "*" in list(tab_1.sessions.values())[0].subscriptions
         tab_1.subscribe("INVALID", print_obj, False)

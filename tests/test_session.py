@@ -37,8 +37,8 @@ async def test_async_session(
         session_1 = await browser.create_session()
         assert isinstance(session_1, devtools.session.Session)
         await session_1.send_command("Page.enable")
-        session_1.subscribe_once("Page")
-        assert "Page" in session_1.subscriptions_futures
+        session_1.subscribe_once("Page.*")
+        assert "Page.*" in session_1.subscriptions_futures
         session_1.subscribe("*", print_obj, True)
         assert "*" in session_1.subscriptions
         session_1.subscribe("INVALID", print_obj, False)
