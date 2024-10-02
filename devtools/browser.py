@@ -648,7 +648,7 @@ def diagnose():
             try:
                 print(f"Error in: {exception[0]}")
                 traceback.print_exception(exception[1])
-            except BaseException as e:
+            except BaseException:
                 print("Couldn't print traceback for:")
                 print(str(exception))
         raise BaseException("There was an exception, see above.")
