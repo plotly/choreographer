@@ -15,27 +15,15 @@ async def print_obj(obj):
 
 
 @pytest.mark.parametrize(
-    "test_input_headless,test_input_debug,test_input_debug_browser",
-    [
-        (True, True, True),
-        (True, True, False),
-        (True, False, True),
-        (True, False, False),
-        (False, True, True),
-        (False, True, False),
-        (False, False, True),
-        (False, False, False),
-    ],
-    ids=[
-        "async_session_1",
-        "async_session_2",
-        "async_session_3",
-        "async_session_4",
-        "async_session_5",
-        "async_session_6",
-        "async_session_7",
-        "async_session_8",
-    ],
+    "test_input_debug", [True, False], ids=["async_debug", "async_no_debug"]
+)
+@pytest.mark.parametrize(
+    "test_input_headless", [True, False], ids=["async_headless", "async_no_headless"]
+)
+@pytest.mark.parametrize(
+    "test_input_debug_browser",
+    [True, False],
+    ids=["async_debug_browser", "async_no_debug_browser"],
 )
 @pytest.mark.asyncio
 async def test_async_session(

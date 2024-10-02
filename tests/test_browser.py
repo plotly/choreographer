@@ -11,27 +11,15 @@ url = (
 
 
 @pytest.mark.parametrize(
-    "test_input_headless,test_input_debug,test_input_debug_browser",
-    [
-        (True, True, True),
-        (True, True, False),
-        (True, False, True),
-        (True, False, False),
-        (False, True, True),
-        (False, True, False),
-        (False, False, True),
-        (False, False, False),
-    ],
-    ids=[
-        "async_browser_1",
-        "async_browser_2",
-        "async_browser_3",
-        "async_browser_4",
-        "async_browser_5",
-        "async_browser_6",
-        "async_browser_7",
-        "async_browser_8",
-    ],
+    "test_input_debug", [True, False], ids=["async_debug", "async_no_debug"]
+)
+@pytest.mark.parametrize(
+    "test_input_headless", [True, False], ids=["async_headless", "async_no_headless"]
+)
+@pytest.mark.parametrize(
+    "test_input_debug_browser",
+    [True, False],
+    ids=["async_debug_browser", "async_no_debug_browser"],
 )
 @pytest.mark.asyncio
 async def test_async_browser(
@@ -58,27 +46,15 @@ async def test_async_browser(
 
 
 @pytest.mark.parametrize(
-    "test_input_headless,test_input_debug,test_input_debug_browser",
-    [
-        (True, True, True),
-        (True, True, False),
-        (True, False, True),
-        (True, False, False),
-        (False, True, True),
-        (False, True, False),
-        (False, False, True),
-        (False, False, False),
-    ],
-    ids=[
-        "sync_browser_1",
-        "sync_browser_2",
-        "sync_browser_3",
-        "sync_browser_4",
-        "sync_browser_5",
-        "sync_browser_6",
-        "sync_browser_7",
-        "sync_browser_8",
-    ],
+    "test_input_debug", [True, False], ids=["sync_debug", "sync_no_debug"]
+)
+@pytest.mark.parametrize(
+    "test_input_headless", [True, False], ids=["sync_headless", "sync_no_headless"]
+)
+@pytest.mark.parametrize(
+    "test_input_debug_browser",
+    [True, False],
+    ids=["sync_debug_browser", "sync_no_debug_browser"],
 )
 def test_sync_browser(test_input_headless, test_input_debug, test_input_debug_browser):
     with devtools.Browser(
