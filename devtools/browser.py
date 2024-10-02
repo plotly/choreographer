@@ -288,7 +288,7 @@ class Browser(Target):
                     stderr=subprocess.DEVNULL,
                     stdout=subprocess.DEVNULL,
                 )
-                if self._is_closed(wait = 2):
+                if self._is_closed(wait = 4):
                     return
                 else:
                     raise RuntimeError("Couldn't kill browser subprocess")
@@ -328,7 +328,7 @@ class Browser(Target):
                     stderr=subprocess.DEVNULL,
                     stdout=subprocess.DEVNULL,
                 )
-                if await self._is_closed_async(wait = 2):
+                if await self._is_closed_async(wait = 4):
                     return
                 else:
                     raise RuntimeError("Couldn't kill browser subprocess")
