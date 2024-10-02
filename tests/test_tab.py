@@ -14,6 +14,11 @@ url = (
 async def print_obj(obj):
     print(obj)
 
+def check_response_dictionary(response_received, response_expected):
+    for k, v in response_expected.items():
+        if isinstance(v, dict):
+            check_response_dictionary(v, response_expected[k])
+        return k in response_received and response_received[k] == v
 
 @pytest.mark.parametrize(
     "test_input_debug", [True, False], ids=["async_debug", "async_no_debug"]
@@ -44,7 +49,8 @@ async def test_async_tab(
         assert isinstance(session_1, devtools.session.Session)
         assert isinstance(session_2, devtools.session.Session)
         assert await tab_1.close_session(session_1) is not None
-        await tab_1.send_command("Page.enable")
+        response = await tab_1.send_command("Page.enable")
+        assert check_response_dictionary(response,{"result" : {}})
         tab_1.subscribe_once("Page")
         assert "Page" in list(tab_1.sessions.values())[0].subscriptions_futures
         tab_1.subscribe("*", print_obj, True)
