@@ -11,8 +11,6 @@ env = None
 if __name__ == "__main__":
     os.dup2(0, 3)  # make our stdin their input
     os.dup2(1, 4)  # make our stdout their output
-    os.set_inheritable(4, True)
-    os.set_inheritable(3, True)
 
 
 
@@ -24,6 +22,9 @@ import asyncio #noqa
 system = platform.system()
 if system == "Windows":
     import msvcrt  # noqa
+else: 
+    os.set_inheritable(4, True)
+    os.set_inheritable(3, True)
 
 def open_browser(to_chromium, from_chromium, stderr=None, env=None, loop=None, loop_hack=False):
     path = env.get("BROWSER_PATH")
@@ -44,7 +45,7 @@ def open_browser(to_chromium, from_chromium, stderr=None, env=None, loop=None, l
     ]
 
     if "HEADLESS" in env:
-        cli.append("--headless")
+        cli.append("--headless=old") # temporary fix
 
     system_dependent = {}
     if system == "Windows":
