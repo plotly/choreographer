@@ -45,12 +45,13 @@ async def test_async_tab(
         assert isinstance(session_2, devtools.session.Session)
         assert await tab_1.close_session(session_1) is not None
         await tab_1.send_command("Page.enable")
-        assert tab_1.subscribe_once("Page") is None
+        tab_1.subscribe_once("Page")
         assert "Page" in list(tab_1.sessions.values())[0].subscriptions_futures
-        assert tab_1.subscribe("*", print_obj, True) is None
-        assert tab_1.subscribe("INVALID", print_obj, False) is None
+        tab_1.subscribe("*", print_obj, True)
         assert "*" in list(tab_1.sessions.values())[0].subscriptions
-        assert tab_1.unsubscribe("INVALID") is None
+        tab_1.subscribe("INVALID", print_obj, False)
+        assert "INVALID" in list(tab_1.sessions.values())[0].subscriptions
+        tab_1.unsubscribe("INVALID")
         assert "INVALID" not in list(tab_1.sessions.values())[0].subscriptions
         await tab_1.send_command("Page.navigate", params=dict(url=url[3]))
         await tab_2.send_command("Page.navigate", params=dict(url=url[1]))
