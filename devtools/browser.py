@@ -128,10 +128,9 @@ class Browser(Target):
         if not self.loop:
             self._open()
 
-    async def _check_session(self, response):
+    async def _delete_session(self, response):
         session_id = response['params']['sessionId']
-        del self.protocol.sessions[session_id]
-        # we need to remove this from protocol
+        self.remove_session(session_id)
 
     # somewhat out of order, __aenter__ is for use with `async with Browser()`
     # it is basically 99% of __await__, which is for use with `browser = await Browser()`
@@ -142,7 +141,6 @@ class Browser(Target):
             self._check_loop()
         self.future_self = self.loop.create_future()
         self.loop.create_task(self._open_async())
-        self.browser.subscribe("Target.detachedFromTarget", self._check_session, repeating=True)
         self.run_read_loop()
         return self.future_self
 
@@ -290,7 +288,7 @@ class Browser(Target):
                     stderr=subprocess.DEVNULL,
                     stdout=subprocess.DEVNULL,
                 )
-                if self._is_closed(wait = 2):
+                if self._is_closed(wait = 4):
                     return
                 else:
                     raise RuntimeError("Couldn't kill browser subprocess")
@@ -330,7 +328,7 @@ class Browser(Target):
                     stderr=subprocess.DEVNULL,
                     stdout=subprocess.DEVNULL,
                 )
-                if await self._is_closed_async(wait = 2):
+                if await self._is_closed_async(wait = 4):
                     return
                 else:
                     raise RuntimeError("Couldn't kill browser subprocess")
@@ -369,12 +367,12 @@ class Browser(Target):
 
     # Basic syncronous functions
 
-    def add_tab(self, tab):
+    def _add_tab(self, tab):
         if not isinstance(tab, Tab):
             raise TypeError("tab must be an object of class Tab")
         self.tabs[tab.target_id] = tab
 
-    def remove_tab(self, target_id):
+    def _remove_tab(self, target_id):
         if isinstance(target_id, Tab):
             target_id = target_id.target_id
         del self.tabs[target_id]
@@ -407,7 +405,7 @@ class Browser(Target):
             raise RuntimeError("Could not create tab") from Exception(response["error"])
         target_id = response["result"]["targetId"]
         new_tab = Tab(target_id, self)
-        self.add_tab(new_tab)
+        self._add_tab(new_tab)
         await new_tab.create_session()
         return new_tab
 
@@ -424,7 +422,7 @@ class Browser(Target):
             command="Target.closeTarget",
             params={"targetId": target_id},
         )
-        self.remove_tab(target_id)
+        self._remove_tab(target_id)
         if "error" in response:
             raise RuntimeError("Could not close tab") from Exception(response["error"])
         return response
@@ -475,7 +473,7 @@ class Browser(Target):
                         continue
                     else:
                         raise e
-                self.add_tab(new_tab)
+                self._add_tab(new_tab)
                 if self.debug:
                     print(f"The target {target_id} was added", file=sys.stderr)
 
@@ -501,6 +499,14 @@ class Browser(Target):
 
         Thread(target=run_print, args=(debug,)).start()
 
+    def _get_target_for_session(self, session_id):
+        for tab in self.tabs.values():
+            if session_id in tab.sessions:
+                return tab
+        if session_id in self.sessions:
+            return self
+        return None
+
     def run_read_loop(self):
         async def read_loop():
             try:
@@ -513,12 +519,13 @@ class Browser(Target):
                     if not self.protocol.has_id(response) and error:
                         raise RuntimeError(error)
                     elif self.protocol.is_event(response):
-                        session_id = (
-                            response["sessionId"] if "sessionId" in response else ""
-                        )
+                        session_id = response.get("sessionId", "")
                         session = self.protocol.sessions[session_id]
+                        target = self._get_target_for_session(session_id) # and if there is no target TODO
+                        
                         subscriptions = session.subscriptions
                         subscriptions_futures = session.subscriptions_futures
+
                         for sub_key in list(subscriptions):
                             similar_strings = sub_key.endswith("*") and response[
                                 "method"
@@ -532,6 +539,16 @@ class Browser(Target):
                                 )
                                 if not subscriptions[sub_key][1]: # if not repeating
                                     self.protocol.sessions[session_id].unsubscribe(sub_key)
+
+                        if response["method"] == "Target.detachedFromTarget":
+                            if target:
+                                target.remove_session(session_id)
+                            _ = self.protocol.sessions.pop(session_id, None)
+                            if self.debug:
+                                print(
+                                    f"Use intern subscription key: 'Target.detachedFromTarget'. Session {session_id} was closed.",
+                                    file=sys.stderr
+                                    )
 
                         for sub_key, futures in list(subscriptions_futures.items()):
                             similar_strings = sub_key.endswith("*") and response["method"].startswith(sub_key[:-1])
