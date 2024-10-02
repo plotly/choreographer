@@ -36,7 +36,7 @@ async def test_async_session(
     ) as browser:
         session_1 = await browser.create_session()
         assert isinstance(session_1, devtools.session.Session)
-        assert session_1.send_command("Page.enable")
+        await session_1.send_command("Page.enable")
         assert session_1.subscribe_once("Page")
         assert "Page" in session_1.subscriptions_futures
         assert session_1.subscribe("*", print_obj, True) is None
@@ -44,9 +44,5 @@ async def test_async_session(
         assert "*" in session_1.subscriptions
         assert session_1.unsubscribe("INVALID") is None
         assert "INVALID" not in session_1.subscriptions
-        await session_1.send_command(
-            "Page.navigate", params=dict(url=url[2])
-        ) is not None
-        await session_1.send_command(
-            "Page.navigate", params=dict(url=url[-1])
-        ) is not None
+        await session_1.send_command("Page.navigate", params=dict(url=url[2]))
+        await session_1.send_command("Page.navigate", params=dict(url=url[-1]))

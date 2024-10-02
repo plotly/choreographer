@@ -44,7 +44,7 @@ async def test_async_tab(
         assert isinstance(session_1, devtools.session.Session)
         assert isinstance(session_2, devtools.session.Session)
         assert await tab_1.close_session(session_1) is not None
-        assert tab_1.send_command("Page.enable")
+        await tab_1.send_command("Page.enable")
         assert tab_1.subscribe_once("Page") is None
         assert "Page" in list(tab_1.sessions.values())[0].subscriptions_futures
         assert tab_1.subscribe("*", print_obj, True) is None
@@ -52,9 +52,5 @@ async def test_async_tab(
         assert "*" in list(tab_1.sessions.values())[0].subscriptions
         assert tab_1.unsubscribe("INVALID") is None
         assert "INVALID" not in list(tab_1.sessions.values())[0].subscriptions
-        await tab_1.send_command(
-            "Page.navigate", params=dict(url="https://youtube.com")
-        ) is not None
-        await tab_2.send_command(
-            "Page.navigate", params=dict(url="https://plotly.com/")
-        ) is not None
+        await tab_1.send_command("Page.navigate", params=dict(url=url[3]))
+        await tab_2.send_command("Page.navigate", params=dict(url=url[1]))
