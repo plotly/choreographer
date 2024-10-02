@@ -608,26 +608,6 @@ def diagnose():
         fail.append(("Sync test headless", e))
     finally:
         print("Done with sync test headless".center(50, "*"))
-    try:
-        print("Sync test normal".center(50, "*"))
-        browser = Browser(debug=True, debug_browser=True, headless=False)
-        time.sleep(3)
-        browser.close()
-    except BaseException as e:
-        fail.append(("Sync test", e))
-    finally:
-        print("Done with sync test".center(50, "*"))
-    async def test():
-        browser = await Browser(debug=True, debug_browser=True, headless=False)
-        await asyncio.sleep(3)
-        await browser.close()
-    try:
-        print("Async Test normal".center(50, "*"))
-        asyncio.run(test())
-    except BaseException as e:
-        fail.append(("Async test", e))
-    finally:
-        print("Done with async test".center(50, "*"))
     async def test_headless():
         browser = await Browser(debug=True, debug_browser=True, headless=True)
         await asyncio.sleep(3)
