@@ -25,3 +25,5 @@ ignore = ["E701"]
 [tool.setuptools-git-versioning]
 enabled = true
 
+[tool.pytest.ini_options]
+asyncio_default_fixture_loop_scope = "function"
