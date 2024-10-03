@@ -15,7 +15,8 @@ dynamic = ["version"]
 dev = [
   "pytest",
   "pytest-asyncio",
-  "pytest-xdist"
+  "pytest-xdist",
+  "pytest-timeout"
   ]
 
 [project.scripts]
@@ -29,4 +30,4 @@ enabled = true
 
 [tool.pytest.ini_options]
 asyncio_default_fixture_loop_scope = "function"
-addopts = "-v -n auto"
+addopts = "-v -n auto --timeout=4"
