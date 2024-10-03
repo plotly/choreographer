@@ -100,9 +100,9 @@ class Browser(Target):
 
         self._env = new_env
         if self.debug:
-            print("DEBUG REPORT:")
-            print(f"BROWSER_PATH: {new_env['BROWSER_PATH']}")
-            print(f"USER_DATA_DIR: {new_env['USER_DATA_DIR']}")
+            print("DEBUG REPORT:", file=sys.stderr)
+            print(f"BROWSER_PATH: {new_env['BROWSER_PATH']}", file=sys.stderr)
+            print(f"USER_DATA_DIR: {new_env['USER_DATA_DIR']}", file=sys.stderr)
 
         # Defaults for loop
         if loop is None:
@@ -240,11 +240,11 @@ class Browser(Target):
                         f"The temporary directory could not be deleted, execution will continue. {type(e)}: {e}", TempDirWarning
                 )
         if self.debug:
-            print(f"Tempfile still exists?: {bool(os.path.exists(str(name)))}")
+            print(f"Tempfile still exists?: {bool(os.path.exists(str(name)))}", file=sys.stderr)
 
     async def _is_closed_async(self, wait=0):
         if self.loop_hack:
-            if self.debug: print(f"Moving sync close to thread as self.loop_hack: {self.loop_hack}")
+            if self.debug: print(f"Moving sync close to thread as self.loop_hack: {self.loop_hack}", file=sys.stderr)
             return await asyncio.to_thread(self._is_closed, wait)
         waiter = self.subprocess.wait()
         try:
@@ -577,7 +577,7 @@ class Browser(Target):
                         if key in self.futures:
                             if self.debug:
                                 print(
-                                    f"run_read_loop() found future foor key {key}"
+                                    f"run_read_loop() found future for key {key}", file=sys.stderr
                                 )
                             future = self.futures.pop(key)
                         else:

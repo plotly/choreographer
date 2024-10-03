@@ -1,3 +1,5 @@
+import sys
+
 from collections import OrderedDict
 
 from .session import Session
@@ -60,7 +62,7 @@ class Target:
             raise RuntimeError("Could not close session") from Exception(
                 response["error"]
             )
-        print(f"The session {session_id} has been closed")
+        print(f"The session {session_id} has been closed", file=sys.stderr)
         return response
 
     def send_command(self, command, params=None):
