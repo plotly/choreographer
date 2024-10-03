@@ -31,9 +31,12 @@ with_onexc = bool(sys.version_info[:3] >= (3, 12))
 class Browser(Target):
 
     def _check_loop(self):
-        if self.loop and isinstance(self.loop, asyncio.SelectorEventLoop):
+        if platform.system() == "Windows" and self.loop and isinstance(self.loop, asyncio.SelectorEventLoop):
             # I think using set_event_loop_policy is too invasive (is system wide)
             # and may not work in situations where a framework manually set SEL
+            # https://github.com/jupyterlab/jupyterlab/issues/12545
+            if self.debug:
+                print("We are in a selector event loop, use loop_hack", file=sys.stderr)
             self.loop_hack = True
 
     def __init__(
@@ -240,6 +243,9 @@ class Browser(Target):
             print(f"Tempfile still exists?: {bool(os.path.exists(str(name)))}")
 
     async def _is_closed_async(self, wait=0):
+        if self.loop_hack:
+            if self.debug: print(f"Moving sync close to thread as self.loop_hack: {self.loop_hack}")
+            return await asyncio.to_thread(self._is_closed, wait)
         waiter = self.subprocess.wait()
         try:
             await asyncio.wait_for(waiter, wait)
@@ -304,9 +310,6 @@ class Browser(Target):
         if await self._is_closed_async():
             if self.debug: print("Browser was already closed.", file=sys.stderr)
             return
-        # TODO: Above doesn't work with closed tabs for some reason
-        # TODO: check if tabs?
-        # TODO: track tabs?
         await asyncio.wait([self.send_command("Browser.close")], timeout=1)
         if await self._is_closed_async():
             if self.debug: print("Browser.close method closed browser", file=sys.stderr)
