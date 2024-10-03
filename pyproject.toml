@@ -14,7 +14,8 @@ dynamic = ["version"]
 [project.optional-dependencies]
 dev = [
   "pytest",
-  "pytest-asyncio"
+  "pytest-asyncio",
+  "pytest-xdist"
   ]
 
 [project.scripts]
@@ -28,3 +29,4 @@ enabled = true
 
 [tool.pytest.ini_options]
 asyncio_default_fixture_loop_scope = "function"
+addopts = "-v -n auto"
