@@ -31,9 +31,12 @@ with_onexc = bool(sys.version_info[:3] >= (3, 12))
 class Browser(Target):
 
     def _check_loop(self):
-        if self.loop and isinstance(self.loop, asyncio.SelectorEventLoop):
+        if platform.system() == "Windows" and self.loop and isinstance(self.loop, asyncio.SelectorEventLoop):
             # I think using set_event_loop_policy is too invasive (is system wide)
             # and may not work in situations where a framework manually set SEL
+            # https://github.com/jupyterlab/jupyterlab/issues/12545
+            if self.debug:
+                print("We are in a selector event loop, use loop_hack", file=sys.stderr)
             self.loop_hack = True
 
     def __init__(
@@ -97,9 +100,9 @@ class Browser(Target):
 
         self._env = new_env
         if self.debug:
-            print("DEBUG REPORT:")
-            print(f"BROWSER_PATH: {new_env['BROWSER_PATH']}")
-            print(f"USER_DATA_DIR: {new_env['USER_DATA_DIR']}")
+            print("DEBUG REPORT:", file=sys.stderr)
+            print(f"BROWSER_PATH: {new_env['BROWSER_PATH']}", file=sys.stderr)
+            print(f"USER_DATA_DIR: {new_env['USER_DATA_DIR']}", file=sys.stderr)
 
         # Defaults for loop
         if loop is None:
@@ -237,9 +240,12 @@ class Browser(Target):
                         f"The temporary directory could not be deleted, execution will continue. {type(e)}: {e}", TempDirWarning
                 )
         if self.debug:
-            print(f"Tempfile still exists?: {bool(os.path.exists(str(name)))}")
+            print(f"Tempfile still exists?: {bool(os.path.exists(str(name)))}", file=sys.stderr)
 
     async def _is_closed_async(self, wait=0):
+        if self.loop_hack:
+            if self.debug: print(f"Moving sync close to thread as self.loop_hack: {self.loop_hack}", file=sys.stderr)
+            return await asyncio.to_thread(self._is_closed, wait)
         waiter = self.subprocess.wait()
         try:
             await asyncio.wait_for(waiter, wait)
@@ -304,9 +310,6 @@ class Browser(Target):
         if await self._is_closed_async():
             if self.debug: print("Browser was already closed.", file=sys.stderr)
             return
-        # TODO: Above doesn't work with closed tabs for some reason
-        # TODO: check if tabs?
-        # TODO: track tabs?
         await asyncio.wait([self.send_command("Browser.close")], timeout=1)
         if await self._is_closed_async():
             if self.debug: print("Browser.close method closed browser", file=sys.stderr)
@@ -574,7 +577,7 @@ class Browser(Target):
                         if key in self.futures:
                             if self.debug:
                                 print(
-                                    f"run_read_loop() found future foor key {key}"
+                                    f"run_read_loop() found future for key {key}", file=sys.stderr
                                 )
                             future = self.futures.pop(key)
                         else:
