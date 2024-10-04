@@ -2,11 +2,6 @@ name: 'common-test-fragment'
 description: 'Run python common across OSes'
 on:
   workflow_call:
-    inputs:
-      platform:
-        required: true
-        description: true
-        type: string
 runs:
   using: "composite"
   steps:

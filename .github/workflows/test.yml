@@ -9,9 +9,7 @@ jobs:
       - uses: actions/setup-python@v1
       - name: Install Dependencies
         run:  sudo apt-get update && sudo apt-get install chromium-browser
-      - uses: ./.github/workflows/common-test-fragment.yml
-        with:
-          platform: ubuntu-latest
+      - uses: ./.github/actions/
   test-windows:
     runs-on: windows-latest
     steps:
