@@ -32,11 +32,12 @@ async def test_no_context(headless, debug, debug_browser):
     # so lets make sure it does
     loop = asyncio.get_running_loop()
     exception_handler = loop.get_exception_handler()
-    if not exception_handler:
-        exception_handler = loop.default_exception_handler()
     def close_browser(loop, context):
         browser.close() # posts task, doesn't need to be awaited
-        exception_handler(loop, context)
+        if exception_handler:
+            exception_handler(loop, context)
+        else:
+            loop.default_exception_handler(context)
     loop.set_exception_handler(close_browser)
 
     response = await browser.send_command(command="Target.getTargets")
