@@ -20,7 +20,7 @@ def debug_browser(request):
 
 def pytest_addoption(parser):
     parser.addoption("--headless", action="store_true", default=False)
-    parser.addoption("--debug", action="store_true", default=False)
+    parser.addoption("--debug-tests", action="store_true", default=False)
 
 
 @pytest.fixture(scope="function")
@@ -30,7 +30,7 @@ def intern_headless(request):
 
 @pytest.fixture(scope="function")
 def intern_debug(request):
-    return request.config.getoption("--debug")
+    return request.config.getoption("--debug-tests")
 
 
 @pytest_asyncio.fixture(scope="function", loop_scope="function")
