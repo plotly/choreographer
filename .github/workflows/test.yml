@@ -16,10 +16,10 @@ jobs:
         run:  dtdoctor
         timeout-minutes: 3
       - name: Test Process Control
-        run:  pytest -vv -r tests/test_process.py
+        run:  pytest -vv -rfE -n auto tests/test_process.py
         timeout-minutes: 1
       - name: Test the Rest
-        run:  pytest -vv -r --ignore=tests/test_process.py
+        run:  pytest -vv -rfE --ignore=tests/test_process.py
         timeout-minutes: 1
   test-windows:
     runs-on: windows-latest
@@ -35,10 +35,10 @@ jobs:
         run:  dtdoctor
         timeout-minutes: 3
       - name: Test Process Control
-        run:  pytest -vv -r -n auto tests/test_process.py
+        run:  pytest -vv -rfE -n auto tests/test_process.py
         timeout-minutes: 1
       - name: Test the Rest
-        run:  pytest -vv -r --ignore=tests/test_process.py
+        run:  pytest -vv -rfE --ignore=tests/test_process.py
         timeout-minutes: 1
   test-mac:
     runs-on: macos-latest
@@ -54,8 +54,8 @@ jobs:
         run:  dtdoctor
         timeout-minutes: 3
       - name: Test Process Control
-        run:  pytest -vv -r -n auto tests/test_process.py
+        run:  pytest -vv -rfE -n auto tests/test_process.py
         timeout-minutes: 1
       - name: Test the Rest
-        run:  pytest -vv -r --ignore=tests/test_process.py
+        run:  pytest -vv -rfE --ignore=tests/test_process.py
         timeout-minutes: 1
