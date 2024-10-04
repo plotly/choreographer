@@ -16,7 +16,7 @@ dev = [
   "pytest",
   "pytest-asyncio",
   "pytest-xdist",
-  "pytest-timeout"
+  "async-timeout"
   ]
 
 [project.scripts]
@@ -35,5 +35,3 @@ asyncio_default_fixture_loop_scope = "function"
 # -vv -rA
 ## Parallelism:
 # -n auto
-## Timeout:
-# --timeout=4
