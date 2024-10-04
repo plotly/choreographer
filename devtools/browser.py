@@ -425,7 +425,9 @@ class Browser(Target):
         )
         self._remove_tab(target_id)
         if "error" in response:
-            raise RuntimeError("Could not close tab") from Exception(response["error"])
+            raise RuntimeError("Could not close tab") from DevtoolsProtocolError(
+                response
+            )
         return response
 
     async def create_session(self):
