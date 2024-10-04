@@ -6,10 +6,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v1
+      - uses: actions/setup-python@v1 # Would be nice to bump this? Regressions.
       - name: Install Dependencies
         run:  sudo apt-get update && sudo apt-get install chromium-browser
-      - uses: ./.github/actions/
+        #- uses: ./.github/actions/ # it would be nice but it doesn't support timeout-minutes
+      - name: Install devtools
+        run:  pip install .[dev]
+      - name: DTDoctor
+        run:  dtdoctor
+        timeout-minutes: 3
+      - name: Test Process Control
+        run:  pytest -vv -rA tests/test_process.py
+        timeout-minutes: 1
+      - name: Test the Rest
+        run:  pytest -vv -rA --ignore=tests/test_process.py
+        timeout-minutes: 1
   test-windows:
     runs-on: windows-latest
     steps:
@@ -17,6 +28,7 @@ jobs:
       - uses: actions/setup-python@v5
       - name: Install Dependencies
         run:  choco install googlechrome -y --ignore-checksums
+      #- uses: ./.github/actions/
       - name: Install devtools
         run:  pip install .[dev]
       - name: DTDoctor
@@ -35,6 +47,7 @@ jobs:
       - uses: actions/setup-python@v5
       - name: Install Dependencies
         run:  brew install google-chrome
+      #- uses: ./.github/actions/
       - name: Install devtools
         run:  pip install .[dev]
       - name: DTDoctor
