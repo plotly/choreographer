@@ -34,7 +34,7 @@ def intern_debug(request):
 
 
 @pytest_asyncio.fixture(scope="function", loop_scope="function")
-async def browser():
+async def browser(intern_headless, intern_debug):
     # this needs also to be set by command line TODO
     browser = await devtools.Browser(
         headless=intern_headless, debug=intern_debug, debug_browser=intern_debug
