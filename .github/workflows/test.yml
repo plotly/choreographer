@@ -19,7 +19,7 @@ jobs:
         run:  pytest -vv -rA tests/test_process.py
         timeout-minutes: 1
       - name: Test the Rest
-        run:  pytest -vv -rA --ignore=tests/test_process.py
+        run:  pytest -vv -r --ignore=tests/test_process.py
         timeout-minutes: 1
   test-windows:
     runs-on: windows-latest

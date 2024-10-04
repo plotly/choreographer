@@ -1,5 +1,11 @@
+import asyncio
+
 import pytest
+
 import devtools
+@pytest.mark.asyncio
+async def test_asyncio():
+    await asyncio.sleep(0)
 
 @pytest.mark.asyncio
 async def test_context(
