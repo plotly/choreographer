@@ -5,9 +5,7 @@ import devtools
 from async_timeout import timeout
 
 @pytest.mark.asyncio
-async def test_context(
-    headless, debug, debug_browser
-):
+async def test_context(capsys, headless, debug, debug_browser):
     async with devtools.Browser(
         headless=headless,
         debug=debug,
@@ -16,6 +14,7 @@ async def test_context(
             response = await browser.send_command(command="Target.getTargets")
             assert "result" in response and "targetInfos" in response["result"]
             assert (len(response["result"]["targetInfos"]) != 0) != headless
+    assert capsys.readouterr().out == "", "stdout should be silent!"
 
 @pytest.mark.asyncio
 async def test_no_context(headless, debug, debug_browser):
@@ -31,3 +30,5 @@ async def test_no_context(headless, debug, debug_browser):
             assert (len(response["result"]["targetInfos"]) != 0) != headless
     finally:
         await browser.close()
+        print("Break")
+        assert capsys.readouterr().out == "", "stdout should be silent!"
