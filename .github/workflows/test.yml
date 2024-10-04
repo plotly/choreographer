@@ -10,7 +10,7 @@ jobs:
       - name: Install Dependencies
         run:  sudo apt-get update && sudo apt-get install chromium-browser xvfb
       - name: Run Fake Screen
-        run: nohup Xvfb > /dev/null 2>&1 &
+        run: nohup Xvfb > /dev/null 2>&1 &; export DISPLAY=:0
         #- uses: ./.github/actions/ # it would be nice but it doesn't support timeout-minutes
       - name: Install devtools
         run:  pip install .[dev]
