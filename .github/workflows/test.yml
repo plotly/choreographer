@@ -20,7 +20,7 @@ jobs:
         run:  pytest -W error -n auto -vvv -rA --capture=tee-sys tests/test_process.py
         timeout-minutes: 1
       - name: Test Process Control
-        if: ! runner.debug
+        if: ${{ ! runner.debug }}
         run:  pytest -W error -n auto -v --capture=sys tests/test_process.py
         timeout-minutes: 1
       - name: Test the Rest
@@ -44,7 +44,7 @@ jobs:
         run:  pytest -W error -n auto -vvv -rA --capture=tee-sys tests/test_process.py
         timeout-minutes: 1
       - name: Test Process Control
-        if: ! runner.debug
+        if: ${{ ! runner.debug }}
         run:  pytest -W error -n auto -v --capture=sys tests/test_process.py
         timeout-minutes: 1
       - name: Test the Rest
@@ -68,7 +68,7 @@ jobs:
         run:  pytest -W error -n auto -vvv -rA --capture=tee-sys tests/test_process.py
         timeout-minutes: 1
       - name: Test Process Control
-        if: ! runner.debug
+        if: ${{ ! runner.debug }}
         run:  pytest -W error -n auto -v --capture=sys tests/test_process.py
         timeout-minutes: 1
       - name: Test the Rest
