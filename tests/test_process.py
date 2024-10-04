@@ -1,8 +1,10 @@
-import pytest
+import asyncio
 
 import devtools
 
+import pytest
 from async_timeout import timeout
+
 
 @pytest.mark.asyncio
 async def test_context(capsys, headless, debug, debug_browser):
@@ -15,6 +17,8 @@ async def test_context(capsys, headless, debug, debug_browser):
             assert "result" in response and "targetInfos" in response["result"]
             assert (len(response["result"]["targetInfos"]) != 0) != headless
     assert capsys.readouterr().out == "", "stdout should be silent!"
+    # let asyncio do some cleaning up if it wants, may prevent warnings
+    await asyncio.sleep(0)
 
 @pytest.mark.asyncio
 async def test_no_context(capsys, headless, debug, debug_browser):
@@ -31,3 +35,4 @@ async def test_no_context(capsys, headless, debug, debug_browser):
     finally:
         await browser.close()
         assert capsys.readouterr().out == "", "stdout should be silent!"
+        await asyncio.sleep(0)
