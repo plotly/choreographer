@@ -23,7 +23,7 @@ class Target:
         self.sessions[session.session_id] = session
         self.browser.protocol.sessions[session.session_id] = session
 
-    def remove_session(self, session_id):
+    def _remove_session(self, session_id):
         if isinstance(session_id, Session):
             session_id = session_id.session_id
         _ = self.sessions.pop(session_id, None)
@@ -57,7 +57,7 @@ class Target:
             command="Target.detachFromTarget",
             params={"sessionId": session_id},
         )
-        self.remove_session(session_id)
+        self._remove_session(session_id)
         if "error" in response:
             raise RuntimeError("Could not close session") from DevtoolsProtocolError(
                 response

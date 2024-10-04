@@ -567,7 +567,7 @@ class Browser(Target):
                             if session_closed == "": continue # not actually possible to close browser session this way...
                             target_closed = self._get_target_for_session(session_closed)
                             if target_closed:
-                                target_closed.remove_session(session_closed)
+                                target_closed._remove_session(session_closed)
                             _ = self.protocol.sessions.pop(session_closed, None)
                             if self.debug:
                                 print(
