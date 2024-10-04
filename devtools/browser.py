@@ -401,7 +401,9 @@ class Browser(Target):
 
         response = await self.browser.send_command("Target.createTarget", params=params)
         if "error" in response:
-            raise RuntimeError("Could not create tab") from Exception(response["error"])
+            raise RuntimeError("Could not create tab") from DevtoolsProtocolError(
+                response
+            )
         target_id = response["result"]["targetId"]
         new_tab = Tab(target_id, self)
         self._add_tab(new_tab)
