@@ -520,7 +520,7 @@ class Browser(Target):
                     error = self.protocol.get_error(response)
                     key = self.protocol.calculate_key(response)
                     if not self.protocol.has_id(response) and error:
-                        raise RuntimeError(error)
+                        raise DevtoolsProtocolError(response)
                     elif self.protocol.is_event(response):
                         ### INFORMATION WE NEED FOR EVERY EVENT
                         event_session_id = response.get("sessionId", "") # GET THE SESSION THAT THE EVENT CAME IN ON
