@@ -1,0 +1,25 @@
+name: common-test-fragment.yml
+on:
+  workflow_call:
+    inputs:
+      platform:
+        required: true
+        description: true
+        type: string
+jobs:
+  run-python:
+    runs-on: ${{ inputs.platform }}
+    steps:
+      - name: Install devtools
+        run:  pip install .[dev]
+      - name: DTDoctor
+        run:  dtdoctor
+        timeout-minutes: 3
+      - name: Test Process Control
+        run:  pytest -vv -rA tests/test_process.py
+        timeout-minutes: 1
+      - name: Test the Rest
+        run:  pytest -vv -rA --ignore=tests/test_process.py
+        timeout-minutes: 1
+
+
