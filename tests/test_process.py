@@ -1,12 +1,8 @@
-import asyncio
-
 import pytest
 
 import devtools
-@pytest.mark.asyncio
-async def test_asyncio():
-    await asyncio.sleep(0)
 
+@pytest.mark.timeout(method="thread")
 @pytest.mark.asyncio
 async def test_context(
     headless, debug, debug_browser
@@ -20,6 +16,7 @@ async def test_context(
         assert "result" in response and "targetInfos" in response["result"]
         assert (len(response["result"]["targetInfos"]) != 0)
 
+@pytest.mark.timeout(method="thread")
 @pytest.mark.asyncio
 async def test_no_context(headless, debug, debug_browser):
     browser = await devtools.Browser(
