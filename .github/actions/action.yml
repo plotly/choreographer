@@ -1,0 +1,19 @@
+# not using this until actions supports timeout-minutes
+name: 'common-test-fragment'
+description: 'Run python common across OSes'
+on:
+  workflow_call:
+runs:
+  using: "composite"
+  steps:
+    - name: Install devtools
+      run:  pip install .[dev]
+    - name: DTDoctor
+      run:  dtdoctor
+      #timeout-minutes: 3
+    - name: Test Process Control
+      run:  pytest -vv -rA tests/test_process.py
+      #timeout-minutes: 1
+    - name: Test the Rest
+      run:  pytest -vv -rA --ignore=tests/test_process.py
+      #timeout-minutes: 1
