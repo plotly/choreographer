@@ -59,8 +59,8 @@ class Target:
         )
         self.remove_session(session_id)
         if "error" in response:
-            raise RuntimeError("Could not close session") from Exception(
-                response["error"]
+            raise RuntimeError("Could not close session") from DevtoolsProtocolError(
+                response
             )
         print(f"The session {session_id} has been closed", file=sys.stderr)
         return response
