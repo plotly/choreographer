@@ -37,7 +37,7 @@ async def browser_verbose():
 def pytest_runtest_setup(item: pytest.Item):
     yield
 
-    if "browser" in item.funcargs or "browser_verbose" not in item.funcargs:
+    if "browser" in item.funcargs or "browser_verbose" in item.funcargs:
         raw_test_fn = item.obj
         timeouts = [k for k in item.funcargs if k.startswith("timeout")]
         timeout = item.funcargs[timeouts[-1]] if len(timeouts) else pytest.default_timeout
