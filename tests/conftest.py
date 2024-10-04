@@ -17,10 +17,28 @@ def debug(request):
 def debug_browser(request):
     return request.param
 
+
+def pytest_addoption(parser):
+    parser.addoption("--headless", action="store_true", default=False)
+    parser.addoption("--debug", action="store_true", default=False)
+
+
+@pytest.fixture(scope="function")
+def intern_headless(request):
+    return request.config.getoption("--headless")
+
+
+@pytest.fixture(scope="function")
+def intern_debug(request):
+    return request.config.getoption("--debug")
+
+
 @pytest_asyncio.fixture(scope="function", loop_scope="function")
 async def browser():
     # this needs also to be set by command line TODO
-    browser = await devtools.Browser()
+    browser = await devtools.Browser(
+        headless=intern_headless, debug=intern_debug, debug_browser=intern_debug
+    )
     yield browser
     await browser.close()
 
