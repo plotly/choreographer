@@ -12,7 +12,7 @@ async def test_context(capsys, headless, debug, debug_browser):
         headless=headless,
         debug=debug,
         debug_browser=debug_browser,
-    ) as browser, timeout(2):
+    ) as browser, timeout(pytest.default_timeout):
             response = await browser.send_command(command="Target.getTargets")
             assert "result" in response and "targetInfos" in response["result"]
             assert (len(response["result"]["targetInfos"]) != 0) != headless
@@ -33,7 +33,7 @@ async def test_no_context(capsys, headless, debug, debug_browser):
         debug_browser=debug_browser,
     )
     try:
-        async with timeout(2):
+        async with timeout(pytest.default_timeout):
             response = await browser.send_command(command="Target.getTargets")
             assert "result" in response and "targetInfos" in response["result"]
             assert (len(response["result"]["targetInfos"]) != 0) != headless
