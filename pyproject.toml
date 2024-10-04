@@ -30,4 +30,10 @@ enabled = true
 
 [tool.pytest.ini_options]
 asyncio_default_fixture_loop_scope = "function"
-addopts = "-v -n auto --timeout=4"
+# addopts = "-v -n auto --timeout=4"
+## Verbosity:
+# -vv -rA
+## Parallelism:
+# -n auto
+## Timeout:
+# --timeout=4
