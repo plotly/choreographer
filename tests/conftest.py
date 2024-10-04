@@ -52,10 +52,12 @@ def pytest_runtest_setup(item: pytest.Item):
             item.obj = wrapped_test_fn
 
 def pytest_configure():
-    # change this by command line TODO, throw warning if timeout longer than global
-    pytest.default_timeout = 4
+    # change this by command line TODO
+    pytest.default_timeout = 3
 
 # add this fixture to extend timeout
+# there is 6 second max test length for all
+# which kills all tests
 @pytest.fixture(scope="session")
 def timeout_long():
-    return 10
+    return 6
