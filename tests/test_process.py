@@ -16,7 +16,9 @@ async def test_context(capsys, headless, debug, debug_browser):
             response = await browser.send_command(command="Target.getTargets")
             assert "result" in response and "targetInfos" in response["result"]
             assert (len(response["result"]["targetInfos"]) != 0) != headless
-    assert capsys.readouterr().out == "", "stdout should be silent!"
+    print("") # this makes sure that capturing is working
+    # stdout should be empty, but not because capsys is broken, because nothing was print
+    assert capsys.readouterr().out == "\n", "stdout should be silent!"
     # let asyncio do some cleaning up if it wants, may prevent warnings
     await asyncio.sleep(0)
 
@@ -34,5 +36,6 @@ async def test_no_context(capsys, headless, debug, debug_browser):
             assert (len(response["result"]["targetInfos"]) != 0) != headless
     finally:
         await browser.close()
-        assert capsys.readouterr().out == "", "stdout should be silent!"
+        print("") # this make sure that capturing is working
+        assert capsys.readouterr().out == "\n", "stdout should be silent!"
         await asyncio.sleep(0)
