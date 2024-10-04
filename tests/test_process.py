@@ -30,5 +30,4 @@ async def test_no_context(capsys, headless, debug, debug_browser):
             assert (len(response["result"]["targetInfos"]) != 0) != headless
     finally:
         await browser.close()
-        print("Break")
         assert capsys.readouterr().out == "", "stdout should be silent!"
