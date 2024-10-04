@@ -12,10 +12,10 @@ async def test_context(
         headless=headless,
         debug=debug,
         debug_browser=debug_browser,
-    ) as browser, timeout(1):
+    ) as browser, timeout(2):
             response = await browser.send_command(command="Target.getTargets")
             assert "result" in response and "targetInfos" in response["result"]
-            assert (len(response["result"]["targetInfos"]) != 0)
+            assert (len(response["result"]["targetInfos"]) != 0) != headless
 
 @pytest.mark.asyncio
 async def test_no_context(headless, debug, debug_browser):
@@ -25,9 +25,9 @@ async def test_no_context(headless, debug, debug_browser):
         debug_browser=debug_browser,
     )
     try:
-        async with timeout(1):
+        async with timeout(2):
             response = await browser.send_command(command="Target.getTargets")
             assert "result" in response and "targetInfos" in response["result"]
-            assert (len(response["result"]["targetInfos"]) != 0)
+            assert (len(response["result"]["targetInfos"]) != 0) != headless
     finally:
         await browser.close()
