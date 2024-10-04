@@ -440,8 +440,8 @@ class Browser(Target):
         )
         response = await self.browser.send_command("Target.attachToBrowserTarget")
         if "error" in response:
-            raise RuntimeError("Could not create session") from Exception(
-                response["error"]
+            raise RuntimeError("Could not create session") from DevtoolsProtocolError(
+                response
             )
         session_id = response["result"]["sessionId"]
         new_session = Session(self, session_id)
