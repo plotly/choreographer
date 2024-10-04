@@ -17,7 +17,7 @@ async def test_context(capsys, headless, debug, debug_browser):
     assert capsys.readouterr().out == "", "stdout should be silent!"
 
 @pytest.mark.asyncio
-async def test_no_context(headless, debug, debug_browser):
+async def test_no_context(capsys, headless, debug, debug_browser):
     browser = await devtools.Browser(
         headless=headless,
         debug=debug,
