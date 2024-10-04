@@ -21,7 +21,7 @@ jobs:
         timeout-minutes: 1
       - name: Test Process Control
         if: ${{ ! runner.debug }}
-        run:  pytest -W error -n auto -v --capture=sys tests/test_process.py
+        run:  pytest -W error -n auto -v -rfE --capture=fd tests/test_process.py
         timeout-minutes: 1
       - name: Test the Rest
         run:  pytest -vv -rfE --ignore=tests/test_process.py
@@ -45,7 +45,7 @@ jobs:
         timeout-minutes: 1
       - name: Test Process Control
         if: ${{ ! runner.debug }}
-        run:  pytest -W error -n auto -v --capture=sys tests/test_process.py
+        run:  pytest -W error -n auto -v -rFe --capture=fd tests/test_process.py
         timeout-minutes: 1
       - name: Test the Rest
         run:  pytest -vv -rfE --ignore=tests/test_process.py
@@ -69,7 +69,7 @@ jobs:
         timeout-minutes: 1
       - name: Test Process Control
         if: ${{ ! runner.debug }}
-        run:  pytest -W error -n auto -v --capture=sys tests/test_process.py
+        run:  pytest -W error -n auto -v -rFe --capture=fd tests/test_process.py
         timeout-minutes: 1
       - name: Test the Rest
         run:  pytest -vv -rfE --ignore=tests/test_process.py
