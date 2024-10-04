@@ -35,7 +35,7 @@ async def test_no_context(headless, debug, debug_browser):
     if not exception_handler:
         exception_handler = loop.default_exception_handler()
     def close_browser(loop, context):
-        await browser.close()
+        browser.close() # posts task, doesn't need to be awaited
         exception_handler(loop, context)
     loop.set_exception_handler(close_browser)
 
