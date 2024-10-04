@@ -14,31 +14,20 @@ url = (
 async def print_obj(obj):
     print(obj)
 
+
 def check_response_dictionary(response_received, response_expected):
     for k, v in response_expected.items():
         if isinstance(v, dict):
             check_response_dictionary(v, response_expected[k])
         return k in response_received and response_received[k] == v
 
-@pytest.mark.parametrize(
-    "test_input_debug", [True, False], ids=["async_debug", "async_no_debug"]
-)
-@pytest.mark.parametrize(
-    "test_input_headless", [True, False], ids=["async_headless", "async_no_headless"]
-)
-@pytest.mark.parametrize(
-    "test_input_debug_browser",
-    [True, False],
-    ids=["async_debug_browser", "async_no_debug_browser"],
-)
+
 @pytest.mark.asyncio
-async def test_async_tab(
-    test_input_headless, test_input_debug, test_input_debug_browser
-):
+async def test_async_tab(headless, debug, debug_browser):
     async with devtools.Browser(
-        headless=test_input_headless,
-        debug=test_input_debug,
-        debug_browser=test_input_debug_browser,
+        headless=headless,
+        debug=debug,
+        debug_browser=debug_browser,
     ) as browser:
         tab_1 = await browser.create_tab(url[0])
         tab_2 = await browser.create_tab(url[1])
@@ -50,7 +39,7 @@ async def test_async_tab(
         assert isinstance(session_2, devtools.session.Session)
         assert await tab_1.close_session(session_1) is not None
         response = await tab_1.send_command("Page.enable")
-        assert check_response_dictionary(response,{"result" : {}})
+        assert check_response_dictionary(response, {"result": {}})
         tab_1.subscribe_once("Page.*")
         assert "Page.*" in list(tab_1.sessions.values())[0].subscriptions_futures
         tab_1.subscribe("*", print_obj, True)

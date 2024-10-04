@@ -10,25 +10,12 @@ url = (
 )
 
 
-@pytest.mark.parametrize(
-    "test_input_debug", [True, False], ids=["async_debug", "async_no_debug"]
-)
-@pytest.mark.parametrize(
-    "test_input_headless", [True, False], ids=["async_headless", "async_no_headless"]
-)
-@pytest.mark.parametrize(
-    "test_input_debug_browser",
-    [True, False],
-    ids=["async_debug_browser", "async_no_debug_browser"],
-)
 @pytest.mark.asyncio
-async def test_async_browser(
-    test_input_headless, test_input_debug, test_input_debug_browser
-):
+async def test_async_browser(headless, debug, debug_browser):
     async with devtools.Browser(
-        headless=test_input_headless,
-        debug=test_input_debug,
-        debug_browser=test_input_debug_browser,
+        headless=headless,
+        debug=debug,
+        debug_browser=debug_browser,
     ) as browser:
         tab_1 = await browser.create_tab(url[0])
         tab_2 = await browser.create_tab(url[1])
@@ -45,22 +32,11 @@ async def test_async_browser(
         assert tab_2.target_id in browser.tabs
 
 
-@pytest.mark.parametrize(
-    "test_input_debug", [True, False], ids=["sync_debug", "sync_no_debug"]
-)
-@pytest.mark.parametrize(
-    "test_input_headless", [True, False], ids=["sync_headless", "sync_no_headless"]
-)
-@pytest.mark.parametrize(
-    "test_input_debug_browser",
-    [True, False],
-    ids=["sync_debug_browser", "sync_no_debug_browser"],
-)
-def test_sync_browser(test_input_headless, test_input_debug, test_input_debug_browser):
+def test_sync_browser(headless, debug, debug_browser):
     with devtools.Browser(
-        headless=test_input_headless,
-        debug=test_input_debug,
-        debug_browser=test_input_debug_browser,
+        headless=headless,
+        debug=debug,
+        debug_browser=debug_browser,
     ) as browser:
         print(browser)
         assert (
