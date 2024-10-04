@@ -346,12 +346,18 @@ class Browser(Target):
     def close(self):
         if self.loop:
             async def close_task():
-                await self._async_close()
+                try:
+                    await self._async_close()
+                except ProcessLookupError:
+                    pass
                 self.pipe.close()
                 self._clean_temp() # can we make async
             return asyncio.create_task(close_task())
         else:
-            self._sync_close()
+            try:
+                self._sync_close()
+            except ProcessLookupError:
+                pass
             self.pipe.close()
             self._clean_temp()
 
@@ -618,6 +624,11 @@ class Browser(Target):
 # it is not really part of this program
 def diagnose():
     import subprocess, sys, time # noqa
+    import argparse
+    parser = argparse.ArgumentParser(description='tool to help debug problems')
+    parser.add_argument('--no-run', dest='run', action='store_false')
+    parser.set_defaults(run=True)
+    run = parser.parse_args().run
     fail = []
     print("*".center(50, "*"))
     print("Collecting information about the system:".center(50, "*"))
@@ -638,26 +649,27 @@ def diagnose():
     finally:
         print("Done with version info.".center(50, "*"))
         pass
-    try:
-        print("Sync test headless".center(50, "*"))
-        browser = Browser(debug=True, debug_browser=True, headless=True)
-        time.sleep(3)
-        browser.close()
-    except BaseException as e:
-        fail.append(("Sync test headless", e))
-    finally:
-        print("Done with sync test headless".center(50, "*"))
-    async def test_headless():
-        browser = await Browser(debug=True, debug_browser=True, headless=True)
-        await asyncio.sleep(3)
-        await browser.close()
-    try:
-        print("Async Test headless".center(50, "*"))
-        asyncio.run(test_headless())
-    except BaseException as e:
-        fail.append(("Async test headless", e))
-    finally:
-        print("Done with async test headless".center(50, "*"))
+    if run:
+        try:
+            print("Sync test headless".center(50, "*"))
+            browser = Browser(debug=True, debug_browser=True, headless=True)
+            time.sleep(3)
+            browser.close()
+        except BaseException as e:
+            fail.append(("Sync test headless", e))
+        finally:
+            print("Done with sync test headless".center(50, "*"))
+        async def test_headless():
+            browser = await Browser(debug=True, debug_browser=True, headless=True)
+            await asyncio.sleep(3)
+            await browser.close()
+        try:
+            print("Async Test headless".center(50, "*"))
+            asyncio.run(test_headless())
+        except BaseException as e:
+            fail.append(("Async test headless", e))
+        finally:
+            print("Done with async test headless".center(50, "*"))
     print("")
     sys.stdout.flush()
     sys.stderr.flush()

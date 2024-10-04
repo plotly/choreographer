@@ -1,20 +1,30 @@
 name: test-wf
+
 on: pull_request
 jobs:
   test-linux:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v1
+      - uses: actions/setup-python@v1 # Would be nice to bump this? Regressions.
       - name: Install Dependencies
-        run:  sudo apt-get update && sudo apt-get install chromium-browser
+        run:  sudo apt-get update && sudo apt-get install chromium-browser xvfb
+        #- uses: ./.github/actions/ # it would be nice but it doesn't support timeout-minutes
       - name: Install devtools
-        run:  ls && pip install .[dev]
-      - name: diagnostic
-        run:  dtdoctor
-        timeout-minutes: 3
-      - name: test
-        run:  pytest
+        run:  pip install .[dev]
+      - name: DTDoctor
+        run:  dtdoctor --no-run
+        timeout-minutes: 1
+      - name: Test Process Control DEBUG
+        if: runner.debug
+        run:  xvfb-run pytest -W error -n auto -vvv -rA --capture=tee-sys tests/test_process.py
+        timeout-minutes: 1
+      - name: Test Process Control
+        if: ${{ ! runner.debug }}
+        run:  xvfb-run pytest -W error -n auto -v -rfE --capture=fd tests/test_process.py
+        timeout-minutes: 1
+      - name: Test the Rest
+        run:  pytest -vv -rfE --ignore=tests/test_process.py
         timeout-minutes: 1
   test-windows:
     runs-on: windows-latest
@@ -23,13 +33,22 @@ jobs:
       - uses: actions/setup-python@v5
       - name: Install Dependencies
         run:  choco install googlechrome -y --ignore-checksums
+      #- uses: ./.github/actions/
       - name: Install devtools
         run:  pip install .[dev]
-      - name: diagnostic
-        run:  dtdoctor
-        timeout-minutes: 3
-      - name: test
-        run:  pytest
+      - name: DTDoctor
+        run:  dtdoctor --no-run
+        timeout-minutes: 1
+      - name: Test Process Control DEBUG
+        if: runner.debug
+        run:  pytest -W error -n auto -vvv -rA --capture=tee-sys tests/test_process.py
+        timeout-minutes: 1
+      - name: Test Process Control
+        if: ${{ ! runner.debug }}
+        run:  pytest -W error -n auto -v -rFe --capture=fd tests/test_process.py
+        timeout-minutes: 1
+      - name: Test the Rest
+        run:  pytest -vv -rfE --ignore=tests/test_process.py
         timeout-minutes: 1
   test-mac:
     runs-on: macos-latest
@@ -38,11 +57,20 @@ jobs:
       - uses: actions/setup-python@v5
       - name: Install Dependencies
         run:  brew install google-chrome
+      #- uses: ./.github/actions/
       - name: Install devtools
         run:  pip install .[dev]
-      - name: diagnostic
-        run:  dtdoctor
-        timeout-minutes: 3
-      - name: test
-        run:  pytest
+      - name: DTDoctor
+        run:  dtdoctor --no-run
+        timeout-minutes: 1
+      - name: Test Process Control DEBUG
+        if: runner.debug
+        run:  pytest -W error -n auto -vvv -rA --capture=tee-sys tests/test_process.py
+        timeout-minutes: 1
+      - name: Test Process Control
+        if: ${{ ! runner.debug }}
+        run:  pytest -W error -n auto -v -rFe --capture=fd tests/test_process.py
+        timeout-minutes: 1
+      - name: Test the Rest
+        run:  pytest -vv -rfE --ignore=tests/test_process.py
         timeout-minutes: 1
