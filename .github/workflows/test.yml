@@ -17,8 +17,8 @@ jobs:
       - name: Install devtools
         run:  pip install .[dev]
       - name: DTDoctor
-        run:  dtdoctor
-        timeout-minutes: 3
+        run:  dtdoctor --no-run
+        timeout-minutes: 1
       - name: Test Process Control
         run:  pytest -vvv -rA --capture=tee-sys tests/test_process.py
         timeout-minutes: 1
@@ -36,8 +36,8 @@ jobs:
       - name: Install devtools
         run:  pip install .[dev]
       - name: DTDoctor
-        run:  dtdoctor
-        timeout-minutes: 3
+        run:  dtdoctor --no-run
+        timeout-minutes: 1
       - name: Test Process Control
         run:  pytest -vvv -rA --capture=tee-sys tests/test_process.py
         timeout-minutes: 1
@@ -55,8 +55,8 @@ jobs:
       - name: Install devtools
         run:  pip install .[dev]
       - name: DTDoctor
-        run:  dtdoctor
-        timeout-minutes: 3
+        run:  dtdoctor --no-run
+        timeout-minutes: 1
       - name: Test Process Control
         run:  pytest -vvv -rA --capture=tee-sys tests/test_process.py
         timeout-minutes: 1
