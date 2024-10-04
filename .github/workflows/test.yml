@@ -17,7 +17,7 @@ jobs:
         timeout-minutes: 1
       - name: Test Process Control DEBUG
         if: runner.debug
-        run:  xvfb-run pytest -W error -n auto -vvv -rA --capture=tee-sys tests/test_process.py
+        run:  xvfb-run pytest -W error -n auto -vvv -rA -s tests/test_process.py
         timeout-minutes: 2
       - name: Test Process Control
         if: ${{ ! runner.debug }}
@@ -41,7 +41,7 @@ jobs:
         timeout-minutes: 1
       - name: Test Process Control DEBUG
         if: runner.debug
-        run:  pytest -W error -n auto -vvv -rA --capture=tee-sys tests/test_process.py
+        run:  pytest -W error -n auto -vvv -rA -s tests/test_process.py
         timeout-minutes: 2
       - name: Test Process Control
         if: ${{ ! runner.debug }}
@@ -65,7 +65,7 @@ jobs:
         timeout-minutes: 1
       - name: Test Process Control DEBUG
         if: runner.debug
-        run:  pytest -W error -n auto -vvv -rA --capture=tee-sys tests/test_process.py
+        run:  pytest -W error -n auto -vvv -rA -s tests/test_process.py
         timeout-minutes: 2
       - name: Test Process Control
         if: ${{ ! runner.debug }}
