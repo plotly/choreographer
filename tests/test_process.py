@@ -1,25 +1,33 @@
 import pytest
+
 import devtools
 
-@pytest.mark.parametrize(
-    "test_input_debug", [True, False], ids=["async_debug", "async_no_debug"]
-)
-@pytest.mark.parametrize(
-    "test_input_headless", [True, False], ids=["async_headless", "async_no_headless"]
-)
-@pytest.mark.parametrize(
-    "test_input_debug_browser",
-    [True, False],
-    ids=["async_debug_browser", "async_no_debug_browser"],
-)
+from async_timeout import timeout
+
 @pytest.mark.asyncio
-async def test_async_tab(
-    test_input_headless, test_input_debug, test_input_debug_browser
+async def test_context(
+    headless, debug, debug_browser
 ):
     async with devtools.Browser(
-        headless=test_input_headless,
-        debug=test_input_debug,
-        debug_browser=test_input_debug_browser,
-    ) as browser:
-        response = await browser.send_command(command="Target.getTargets")
-        assert "result" in response and "targetInfos" in response["result"]
+        headless=headless,
+        debug=debug,
+        debug_browser=debug_browser,
+    ) as browser, timeout(2):
+            response = await browser.send_command(command="Target.getTargets")
+            assert "result" in response and "targetInfos" in response["result"]
+            assert (len(response["result"]["targetInfos"]) != 0) != headless
+
+@pytest.mark.asyncio
+async def test_no_context(headless, debug, debug_browser):
+    browser = await devtools.Browser(
+        headless=headless,
+        debug=debug,
+        debug_browser=debug_browser,
+    )
+    try:
+        async with timeout(2):
+            response = await browser.send_command(command="Target.getTargets")
+            assert "result" in response and "targetInfos" in response["result"]
+            assert (len(response["result"]["targetInfos"]) != 0) != headless
+    finally:
+        await browser.close()
