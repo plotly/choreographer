@@ -1,6 +1,7 @@
 import pytest
 
 
+
 @pytest.fixture(params=[True, False], ids=["headless", ""])
 def headless(request):
     return request.param

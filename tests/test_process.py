@@ -2,7 +2,8 @@ import pytest
 
 import devtools
 
-@pytest.mark.timeout(method="thread")
+from async_timeout import timeout
+
 @pytest.mark.asyncio
 async def test_context(
     headless, debug, debug_browser
@@ -11,12 +12,11 @@ async def test_context(
         headless=headless,
         debug=debug,
         debug_browser=debug_browser,
-    ) as browser:
-        response = await browser.send_command(command="Target.getTargets")
-        assert "result" in response and "targetInfos" in response["result"]
-        assert (len(response["result"]["targetInfos"]) != 0)
+    ) as browser, timeout(.1):
+            response = await browser.send_command(command="Target.getTargets")
+            assert "result" in response and "targetInfos" in response["result"]
+            assert (len(response["result"]["targetInfos"]) != 0)
 
-@pytest.mark.timeout(method="thread")
 @pytest.mark.asyncio
 async def test_no_context(headless, debug, debug_browser):
     browser = await devtools.Browser(
@@ -25,8 +25,9 @@ async def test_no_context(headless, debug, debug_browser):
         debug_browser=debug_browser,
     )
     try:
-        response = await browser.send_command(command="Target.getTargets")
-        assert "result" in response and "targetInfos" in response["result"]
-        assert len(response["result"]["targetInfos"]) != 0
+        async with timeout(.1):
+            response = await browser.send_command(command="Target.getTargets")
+            assert "result" in response and "targetInfos" in response["result"]
+            assert (len(response["result"]["targetInfos"]) != 0)
     finally:
         await browser.close()
