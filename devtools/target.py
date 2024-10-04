@@ -17,7 +17,7 @@ class Target:
         self.sessions = OrderedDict()
         self.target_id = target_id
 
-    def add_session(self, session):
+    def _add_session(self, session):
         if not isinstance(session, Session):
             raise TypeError("session must be an object of class Session")
         self.sessions[session.session_id] = session
@@ -43,7 +43,7 @@ class Target:
             )
         session_id = response["result"]["sessionId"]
         new_session = Session(self.browser, session_id)
-        self.add_session(new_session)
+        self._add_session(new_session)
         return new_session
 
     async def close_session(self, session_id):

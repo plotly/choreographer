@@ -126,7 +126,7 @@ class Browser(Target):
 
         # Initializing
         super().__init__("0", self)  # NOTE: 0 can't really be used externally
-        self.add_session(Session(self, ""))
+        self._add_session(Session(self, ""))
 
         if not self.loop:
             self._open()
@@ -445,7 +445,7 @@ class Browser(Target):
             )
         session_id = response["result"]["sessionId"]
         new_session = Session(self, session_id)
-        self.add_session(new_session)
+        self._add_session(new_session)
         return new_session
 
     async def populate_targets(self):
