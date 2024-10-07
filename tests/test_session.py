@@ -1,36 +1,37 @@
 import pytest
-import devtools
-
-
-url = (
-    "https://plotly.com/",
-    "https://plotly.com/python/",
-    "https://plotly.com/graphing-libraries/",
-    "https://plotly.com/python/getting-started/",
-)
+import pytest_asyncio
 
 
 async def print_obj(obj):
     print(obj)
 
 
+@pytest_asyncio.fixture(scope="function", loop_scope="function")
+async def session(browser):
+    session_browser = await browser.create_session()
+    yield session_browser
+    await browser.close_session(session_browser)
+
+
 @pytest.mark.asyncio
-async def test_async_session(headless, debug, debug_browser):
-    async with devtools.Browser(
-        headless=headless,
-        debug=debug,
-        debug_browser=debug_browser,
-    ) as browser:
-        session_1 = await browser.create_session()
-        assert isinstance(session_1, devtools.session.Session)
-        await session_1.send_command("Page.enable")
-        session_1.subscribe_once("Page.*")
-        assert "Page.*" in session_1.subscriptions_futures
-        session_1.subscribe("*", print_obj, True)
-        assert "*" in session_1.subscriptions
-        session_1.subscribe("INVALID", print_obj, False)
-        assert "INVALID" in session_1.subscriptions
-        session_1.unsubscribe("INVALID")
-        assert "INVALID" not in session_1.subscriptions
-        await session_1.send_command("Page.navigate", params=dict(url=url[2]))
-        await session_1.send_command("Page.navigate", params=dict(url=url[-1]))
+async def test_send_command(session):
+    response = await session.send_command("Target.getTargets")
+    assert "result" in response and "targetInfos" in response["result"]
+
+
+@pytest.mark.asyncio
+async def test_subscribe_once(session):
+    session.subscribe_once("Page.*")
+    assert "Page.*" in session.subscriptions_futures
+
+
+@pytest.mark.asyncio
+async def test_subscribe_and_unsubscribe(session):
+    session.subscribe("*", print_obj, True)
+    assert "*" in session.subscriptions
+    session.unsubscribe("*")
+    assert "*" not in session.subscriptions
+    session.subscribe("INVALID", print_obj, False)
+    assert "INVALID" in session.subscriptions
+    session.unsubscribe("INVALID")
+    assert "INVALID" not in session.subscriptions
