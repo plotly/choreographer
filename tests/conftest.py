@@ -20,24 +20,16 @@ def debug_browser(request):
 
 def pytest_addoption(parser):
     parser.addoption("--headless", action="store_true", default=False)
-    parser.addoption("--verbose", action="store_true", default=False)
-
-
-@pytest.fixture(scope="session")
-def _headless(request):
-    return request.config.getoption("--headless")
-
-
-@pytest.fixture(scope="session")
-def _debug(request):
-    return request.config.getoption("--verbose")
 
 
 @pytest_asyncio.fixture(scope="function", loop_scope="function")
-async def browser(_headless, _debug):
+async def browser(request):
     # this needs also to be set by command line TODO
+    headless = request.config.getoption("--headless")
+    debug = request.config.get_verbosity() > 2
+
     browser = await devtools.Browser(
-        headless=_headless, debug=_debug, debug_browser=_debug
+        headless=headless, debug=debug, debug_browser=debug
     )
     yield browser
     await browser.close()
