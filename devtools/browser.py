@@ -301,7 +301,7 @@ class Browser(Target):
                 return
 
             self.subprocess.kill()
-            if self._is_closed():
+            if self._is_closed(wait = 4):
                 if self.debug: print("kill() closed the browser", file=sys.stderr)
         return
 
@@ -338,7 +338,7 @@ class Browser(Target):
                 return
 
             self.subprocess.kill()
-            if await self._is_closed_async():
+            if await self._is_closed_async(wait = 4):
                 if self.debug: print("kill() closed the browser", file=sys.stderr)
         return
 
