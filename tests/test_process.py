@@ -7,7 +7,7 @@ from async_timeout import timeout
 
 
 @pytest.mark.asyncio(loop_scope="function")
-async def test_context(headless, debug, debug_browser):
+async def test_context(capteesys, headless, debug, debug_browser):
     async with devtools.Browser(
         headless=headless,
         debug=debug,
@@ -21,12 +21,12 @@ async def test_context(headless, debug, debug_browser):
                 assert len(browser.get_tab().sessions) == 1
     print("") # this makes sure that capturing is working
     # stdout should be empty, but not because capsys is broken, because nothing was print
-    #assert capsys.readouterr().out == "\n", "stdout should be silent!"
+    assert capteesys.readouterr().out == "\n", "stdout should be silent!"
     # let asyncio do some cleaning up if it wants, may prevent warnings
     await asyncio.sleep(0)
 
 @pytest.mark.asyncio(loop_scope="function")
-async def test_no_context(capsys, headless, debug, debug_browser):
+async def test_no_context(capteesys, headless, debug, debug_browser):
     browser = await devtools.Browser(
         headless=headless,
         debug=debug,
@@ -43,5 +43,5 @@ async def test_no_context(capsys, headless, debug, debug_browser):
     finally:
         await browser.close()
         print("") # this make sure that capturing is working
-        assert capsys.readouterr().out == "\n", "stdout should be silent!"
+        assert capteesys.readouterr().out == "\n", "stdout should be silent!"
         await asyncio.sleep(0)
