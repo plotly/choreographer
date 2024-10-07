@@ -1,5 +1,7 @@
+import warnings
 import pytest
 import devtools
+import devtools.protocol
 
 
 url = (
@@ -19,7 +21,12 @@ async def test_create_and_close_tab(browser):
 
 @pytest.mark.asyncio
 async def test_create_and_close_session(browser):
-    session = await browser.create_session()
+    with pytest.warns(devtools.protocol.ExperimentalFeatureWarning):
+        session = await browser.create_session()
+        warnings.warn(
+            "Creating new sessions on Browser() only works with some versions of Chrome, it is experimental.",
+            devtools.protocol.ExperimentalFeatureWarning,
+        )
     assert isinstance(session, devtools.session.Session)
     assert session.session_id in browser.sessions
     await browser.close_session(session)
