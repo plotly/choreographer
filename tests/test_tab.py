@@ -1,14 +1,6 @@
 import pytest
+import pytest_asyncio
 import devtools
-import asyncio
-
-
-url = (
-    "https://plotly.com/",
-    "https://plotly.com/python/",
-    "https://plotly.com/graphing-libraries/",
-    "https://plotly.com/python/getting-started/",
-)
 
 
 async def print_obj(obj):
@@ -22,31 +14,41 @@ def check_response_dictionary(response_received, response_expected):
         return k in response_received and response_received[k] == v
 
 
+@pytest_asyncio.fixture(scope="function", loop_scope="function")
+async def tab(browser):
+    tab_browser = await browser.create_tab("https://plotly.com/python/getting-started/")
+    await tab_browser.create_session()
+    yield tab_browser
+    await browser.close_tab(tab_browser)
+
+
 @pytest.mark.asyncio
-async def test_async_tab(headless, debug, debug_browser):
-    async with devtools.Browser(
-        headless=headless,
-        debug=debug,
-        debug_browser=debug_browser,
-    ) as browser:
-        tab_1 = await browser.create_tab(url[0])
-        tab_2 = await browser.create_tab(url[1])
-        session_1 = await tab_1.create_session()
-        session_2 = await tab_1.create_session()
-        assert isinstance(tab_1, devtools.tab.Tab)
-        assert isinstance(tab_2, devtools.tab.Tab)
-        assert isinstance(session_1, devtools.session.Session)
-        assert isinstance(session_2, devtools.session.Session)
-        assert await tab_1.close_session(session_1) is not None
-        response = await tab_1.send_command("Page.enable")
-        assert check_response_dictionary(response, {"result": {}})
-        tab_1.subscribe_once("Page.*")
-        assert "Page.*" in list(tab_1.sessions.values())[0].subscriptions_futures
-        tab_1.subscribe("*", print_obj, True)
-        assert "*" in list(tab_1.sessions.values())[0].subscriptions
-        tab_1.subscribe("INVALID", print_obj, False)
-        assert "INVALID" in list(tab_1.sessions.values())[0].subscriptions
-        tab_1.unsubscribe("INVALID")
-        assert "INVALID" not in list(tab_1.sessions.values())[0].subscriptions
-        await tab_1.send_command("Page.navigate", params=dict(url=url[3]))
-        await tab_2.send_command("Page.navigate", params=dict(url=url[1]))
+async def test_create_and_close_session(tab):
+    session = await tab.create_session()
+    assert isinstance(session, devtools.session.Session)
+    await tab.close_session(session)
+    assert session.session_id not in tab.sessions
+
+
+@pytest.mark.asyncio
+async def test_send_command(tab):
+    response = await tab.send_command("Page.enable")
+    assert check_response_dictionary(response, {"result": {}})
+
+
+@pytest.mark.asyncio
+async def test_subscribe_once(tab):
+    await tab.send_command("Page.enable")
+    tab.subscribe_once("Page.*")
+    assert "Page.*" in list(tab.sessions.values())[0].subscriptions_futures
+
+
+@pytest.mark.asyncio
+async def test_subscribe_and_unsubscribe(tab):
+    await tab.send_command("Page.enable")
+    tab.subscribe("*", print_obj, True)
+    assert "*" in list(tab.sessions.values())[0].subscriptions
+    tab.subscribe("INVALID", print_obj, False)
+    assert "INVALID" in list(tab.sessions.values())[0].subscriptions
+    tab.unsubscribe("INVALID")
+    assert "INVALID" not in list(tab.sessions.values())[0].subscriptions
