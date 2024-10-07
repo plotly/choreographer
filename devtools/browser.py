@@ -126,7 +126,7 @@ class Browser(Target):
 
         # Initializing
         super().__init__("0", self)  # NOTE: 0 can't really be used externally
-        self.add_session(Session(self, ""))
+        self._add_session(Session(self, ""))
 
         if not self.loop:
             self._open()
@@ -407,7 +407,9 @@ class Browser(Target):
 
         response = await self.browser.send_command("Target.createTarget", params=params)
         if "error" in response:
-            raise RuntimeError("Could not create tab") from Exception(response["error"])
+            raise RuntimeError("Could not create tab") from DevtoolsProtocolError(
+                response
+            )
         target_id = response["result"]["targetId"]
         new_tab = Tab(target_id, self)
         self._add_tab(new_tab)
@@ -429,7 +431,9 @@ class Browser(Target):
         )
         self._remove_tab(target_id)
         if "error" in response:
-            raise RuntimeError("Could not close tab") from Exception(response["error"])
+            raise RuntimeError("Could not close tab") from DevtoolsProtocolError(
+                response
+            )
         return response
 
     async def create_session(self):
@@ -442,12 +446,12 @@ class Browser(Target):
         )
         response = await self.browser.send_command("Target.attachToBrowserTarget")
         if "error" in response:
-            raise RuntimeError("Could not create session") from Exception(
-                response["error"]
+            raise RuntimeError("Could not create session") from DevtoolsProtocolError(
+                response
             )
         session_id = response["result"]["sessionId"]
         new_session = Session(self, session_id)
-        self.add_session(new_session)
+        self._add_session(new_session)
         return new_session
 
     async def populate_targets(self):
@@ -522,7 +526,7 @@ class Browser(Target):
                     error = self.protocol.get_error(response)
                     key = self.protocol.calculate_key(response)
                     if not self.protocol.has_id(response) and error:
-                        raise RuntimeError(error)
+                        raise DevtoolsProtocolError(response)
                     elif self.protocol.is_event(response):
                         ### INFORMATION WE NEED FOR EVERY EVENT
                         event_session_id = response.get("sessionId", "") # GET THE SESSION THAT THE EVENT CAME IN ON
@@ -569,7 +573,7 @@ class Browser(Target):
                             if session_closed == "": continue # not actually possible to close browser session this way...
                             target_closed = self._get_target_for_session(session_closed)
                             if target_closed:
-                                target_closed.remove_session(session_closed)
+                                target_closed._remove_session(session_closed)
                             _ = self.protocol.sessions.pop(session_closed, None)
                             if self.debug:
                                 print(
