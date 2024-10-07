@@ -17,13 +17,13 @@ class Target:
         self.sessions = OrderedDict()
         self.target_id = target_id
 
-    def add_session(self, session):
+    def _add_session(self, session):
         if not isinstance(session, Session):
             raise TypeError("session must be an object of class Session")
         self.sessions[session.session_id] = session
         self.browser.protocol.sessions[session.session_id] = session
 
-    def remove_session(self, session_id):
+    def _remove_session(self, session_id):
         if isinstance(session_id, Session):
             session_id = session_id.session_id
         _ = self.sessions.pop(session_id, None)
@@ -43,7 +43,7 @@ class Target:
             )
         session_id = response["result"]["sessionId"]
         new_session = Session(self.browser, session_id)
-        self.add_session(new_session)
+        self._add_session(new_session)
         return new_session
 
     async def close_session(self, session_id):
@@ -57,10 +57,10 @@ class Target:
             command="Target.detachFromTarget",
             params={"sessionId": session_id},
         )
-        self.remove_session(session_id)
+        self._remove_session(session_id)
         if "error" in response:
-            raise RuntimeError("Could not close session") from Exception(
-                response["error"]
+            raise RuntimeError("Could not close session") from DevtoolsProtocolError(
+                response
             )
         print(f"The session {session_id} has been closed", file=sys.stderr)
         return response
