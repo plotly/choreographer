@@ -5,31 +5,50 @@ import devtools
 url = (
     "https://plotly.com/",
     "https://plotly.com/python/",
-    "https://plotly.com/graphing-libraries/",
-    "https://plotly.com/python/getting-started/",
 )
 
 
 @pytest.mark.asyncio
-async def test_async_browser(headless, debug, debug_browser):
-    async with devtools.Browser(
-        headless=headless,
-        debug=debug,
-        debug_browser=debug_browser,
-    ) as browser:
-        tab_1 = await browser.create_tab(url[0])
-        tab_2 = await browser.create_tab(url[1])
-        session = await browser.create_session()
-        assert isinstance(tab_1, devtools.tab.Tab)
-        assert await browser.close_tab(tab_1) is not None
-        assert browser.get_tab() == list(browser.tabs.values())[0]
-        assert isinstance(session, devtools.session.Session)
-        assert (
-            await browser.write_json({"id": 0, "method": "Target.getTargets"})
-            is not None
-        )
-        assert await browser.populate_targets() is None
-        assert tab_2.target_id in browser.tabs
+async def test_create_and_close_tab(browser):
+    tab = await browser.create_tab(url[0])
+    assert isinstance(tab, devtools.tab.Tab)
+    assert tab.target_id in browser.tabs
+    await browser.close_tab(tab)
+    assert tab.target_id not in browser.tabs
+
+
+@pytest.mark.asyncio
+async def test_create_and_close_session(browser):
+    session = await browser.create_session()
+    assert isinstance(session, devtools.session.Session)
+    assert session.target_id in browser.sessions
+    await browser.close_session(session)
+    assert session.session_id not in browser.sessions
+
+
+@pytest.mark.asyncio
+async def test_populate_targets(browser):
+    await browser.populate_targets()
+    if browser.headless is False:
+        assert len(browser.tabs) > 1
+    else:
+        assert len(browser.tabs) == 1
+
+
+@pytest.mark.asyncio
+async def test_browser_write_json(browser):
+    response = await browser.write_json({"id": 0, "method": "Target.getTargets"})
+    assert "result" in response and "targetInfos" in response["result"]
+
+
+@pytest.mark.asyncio
+async def test_browser_send_command(browser):
+    response = await browser.send_command(command="Target.getTargets")
+    assert "result" in response and "targetInfos" in response["result"]
+
+
+def test_get_tab(browser):
+    assert browser.get_tab() == list(browser.tabs.values())[0]
 
 
 def test_sync_browser(headless, debug, debug_browser):
@@ -38,8 +57,5 @@ def test_sync_browser(headless, debug, debug_browser):
         debug=debug,
         debug_browser=debug_browser,
     ) as browser:
-        print(browser)
-        assert (
-            browser.send_command(command="Target.createTarget", params={"url": url[1]})
-            is not None
-        )
+        response = browser.send_command(command="Target.createTarget", params={"url": url[1]})
+        assert "result" in response
