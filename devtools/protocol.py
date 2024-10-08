@@ -32,6 +32,10 @@ class Protocol:
     def verify_json(self, obj):
         n_keys = 0
         if "id" in obj and "method" in obj:
+            if not isinstance(obj["id"], int):
+                raise RuntimeError("id message object must be int")
+            if not isinstance(obj["method"], str):
+                raise RuntimeError("The method of the message object must be string")
             n_keys += 2
         else:
             raise RuntimeError("Each message object must contain an id and method key")
