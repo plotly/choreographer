@@ -17,19 +17,19 @@ jobs:
         timeout-minutes: 1
       - name: Test Process Control DEBUG
         if: runner.debug
-        run:  xvfb-run pytest -W error -vv -rA --capture=tee-sys tests/test_process.py
+        run:  xvfb-run pytest -W error --headless -vv -rA --capture=tee-sys tests/test_process.py
         timeout-minutes: 5
       - name: Test Process Control
         if: ${{ ! runner.debug }}
-        run:  xvfb-run pytest -W error -n auto -v -rfE --capture=fd tests/test_process.py
+        run:  xvfb-run pytest -W error -n auto --headless -v -rfE --capture=fd tests/test_process.py
         timeout-minutes: 2
       - name: Test The Rest DEBUG
         if: runner.debug
-        run:  pytest -W error -vvv -rA --capture=tee-sys --ignore=tests/test_process.py
+        run:  pytest -W error --headless -vvv -rA --capture=tee-sys --ignore=tests/test_process.py
         timeout-minutes: 5
       - name: Test The Rest
         if: ${{ ! runner.debug }}
-        run:  pytest -W error -n auto -v -rfE --ignore=tests/test_process.py
+        run:  pytest -W error -n auto --headless -v -rfE --ignore=tests/test_process.py
         timeout-minutes: 2
   test-windows:
     runs-on: windows-latest
@@ -46,19 +46,19 @@ jobs:
         timeout-minutes: 1
       - name: Test Process Control DEBUG
         if: runner.debug
-        run:  pytest -W error -vv -rA --capture=tee-sys tests/test_process.py
+        run:  pytest -W error --headless -vv -rA --capture=tee-sys tests/test_process.py
         timeout-minutes: 5
       - name: Test Process Control
         if: ${{ ! runner.debug }}
-        run:  pytest -W error -n auto -v -rFe --capture=fd tests/test_process.py
+        run:  pytest -W error -n auto --headless -v -rFe --capture=fd tests/test_process.py
         timeout-minutes: 2
       - name: Test The Rest DEBUG
         if: runner.debug
-        run:  pytest -W error -vvv -rA --capture=tee-sys --ignore=tests/test_process.py
+        run:  pytest -W error --headless -vvv -rA --capture=tee-sys --ignore=tests/test_process.py
         timeout-minutes: 5
       - name: Test The Rest
         if: ${{ ! runner.debug }}
-        run:  pytest -W error -n auto -v -rfE --ignore=tests/test_process.py
+        run:  pytest -W error -n auto --headless -v -rfE --ignore=tests/test_process.py
         timeout-minutes: 2
   test-mac:
     runs-on: macos-latest
@@ -75,18 +75,18 @@ jobs:
         timeout-minutes: 1
       - name: Test Process Control DEBUG
         if: runner.debug
-        run:  pytest -W error -vv -rA --capture=tee-sys tests/test_process.py
+        run:  pytest -W error --headless -vv -rA --capture=tee-sys tests/test_process.py
         timeout-minutes: 5
       - name: Test Process Control
         if: ${{ ! runner.debug }}
-        run:  pytest -W error -n auto -v -rFe --capture=fd tests/test_process.py
+        run:  pytest -W error -n auto --headless -v -rFe --capture=fd tests/test_process.py
         timeout-minutes: 2
       - name: Test The Rest DEBUG
         if: runner.debug
-        run:  pytest -W error -vvv -rA --capture=tee-sys --ignore=tests/test_process.py
+        run:  pytest -W error --headless -vvv -rA --capture=tee-sys --ignore=tests/test_process.py
         timeout-minutes: 5
       - name: Test The Rest
         if: ${{ ! runner.debug }}
-        run:  pytest -W error -n auto -v -rfE --ignore=tests/test_process.py
+        run:  pytest -W error -n auto --headless -v -rfE --ignore=tests/test_process.py
         timeout-minutes: 2
 
