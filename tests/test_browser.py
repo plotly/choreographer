@@ -1,7 +1,5 @@
-import warnings
 import pytest
 import devtools
-import devtools.protocol
 
 
 url = (
