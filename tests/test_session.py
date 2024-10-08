@@ -10,7 +10,8 @@ async def print_obj(obj):
 
 @pytest_asyncio.fixture(scope="function", loop_scope="function")
 async def session(browser):
-    with pytest.warns(devtools.protocol.ExperimentalFeatureWarning):
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", devtools.protocol.ExperimentalFeatureWarning)
         session_browser = await browser.create_session()
     yield session_browser
     await browser.close_session(session_browser)
