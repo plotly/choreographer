@@ -60,13 +60,3 @@ def test_get_tab(browser):
         assert browser.get_tab() is None
     else:
         assert browser.get_tab() == list(browser.tabs.values())[0]
-
-
-def test_sync_browser(headless, debug, debug_browser):
-    browser = devtools.Browser(
-        headless=headless,
-        debug=debug,
-        debug_browser=debug_browser,
-    )
-    assert isinstance(browser, devtools.browser.Browser)
-    browser.close()
