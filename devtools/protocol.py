@@ -8,6 +8,10 @@ class DevtoolsProtocolError(Exception):
         self.message = response["error"]["message"]
 
 
+class ExperimentalFeatureWarning(UserWarning):
+    pass
+
+
 class Protocol:
     def __init__(self, debug=False):
         # Stored Resources
@@ -17,7 +21,6 @@ class Protocol:
 
         # State
         self.sessions = {}
-
 
     def calculate_key(self, response):
         session_id = response["sessionId"] if "sessionId" in response else ""
@@ -84,5 +87,3 @@ class Protocol:
         if required_keys <= response.keys() and "id" not in response:
             return True
         return False
-
-

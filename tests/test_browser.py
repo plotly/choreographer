@@ -19,7 +19,8 @@ async def test_create_and_close_tab(browser):
 
 @pytest.mark.asyncio
 async def test_create_and_close_session(browser):
-    session = await browser.create_session()
+    with pytest.warns(devtools.protocol.ExperimentalFeatureWarning):
+        session = await browser.create_session()
     assert isinstance(session, devtools.session.Session)
     assert session.session_id in browser.sessions
     await browser.close_session(session)

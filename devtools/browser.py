@@ -12,7 +12,7 @@ from threading import Thread
 from collections import OrderedDict
 
 from .pipe import Pipe
-from .protocol import Protocol, DevtoolsProtocolError, TARGET_NOT_FOUND
+from .protocol import Protocol, DevtoolsProtocolError, ExperimentalFeatureWarning, TARGET_NOT_FOUND
 from .target import Target
 from .session import Session
 from .tab import Tab
@@ -442,7 +442,8 @@ class Browser(Target):
                 "There is no eventloop, or was not passed to browser. Cannot use async methods"
             )
         warnings.warn(
-            "Creating new sessions on Browser() only works with some versions of Chrome, it is experimental."
+            "Creating new sessions on Browser() only works with some versions of Chrome, it is experimental.",
+            ExperimentalFeatureWarning
         )
         response = await self.browser.send_command("Target.attachToBrowserTarget")
         if "error" in response:
