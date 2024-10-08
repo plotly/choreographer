@@ -12,10 +12,6 @@ async def print_obj(obj):
 async def session(browser):
     with pytest.warns(devtools.protocol.ExperimentalFeatureWarning):
         session_browser = await browser.create_session()
-        warnings.warn(
-            "Creating new sessions on Browser() only works with some versions of Chrome, it is experimental.",
-            devtools.protocol.ExperimentalFeatureWarning,
-        )
     yield session_browser
     await browser.close_session(session_browser)
 

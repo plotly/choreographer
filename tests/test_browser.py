@@ -23,10 +23,6 @@ async def test_create_and_close_tab(browser):
 async def test_create_and_close_session(browser):
     with pytest.warns(devtools.protocol.ExperimentalFeatureWarning):
         session = await browser.create_session()
-        warnings.warn(
-            "Creating new sessions on Browser() only works with some versions of Chrome, it is experimental.",
-            devtools.protocol.ExperimentalFeatureWarning,
-        )
     assert isinstance(session, devtools.session.Session)
     assert session.session_id in browser.sessions
     await browser.close_session(session)
