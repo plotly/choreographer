@@ -107,9 +107,6 @@ class Browser(Target):
         #Lock
         self.lock = asyncio.Lock()
 
-        #Watchdog
-        self.watchdog = None
-
         # Defaults for loop
         if loop is None:
             try:
@@ -154,11 +151,6 @@ class Browser(Target):
     def __await__(self):
         return self.__aenter__().__await__()
 
-    async def _watch_closed(self):
-        if self._is_closed_async(None):
-            if self.debug:
-                print("Browser is being closed because chromium closed")
-            self.close()
 
     def _open(self):
         stderr = self._stderr
@@ -189,6 +181,7 @@ class Browser(Target):
     async def _watchdog(self):
       await self.loop.to_thread(self._is_closed_async, wait=None)
       await self.close()
+
 
     async def _open_async(self):
         stderr = self._stderr
