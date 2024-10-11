@@ -351,12 +351,14 @@ class Browser(Target):
     def close(self):
         if self.loop:
             async def close_task():
-                try:
-                    await self._async_close()
-                except ProcessLookupError:
-                    pass
-                self.pipe.close()
-                self._clean_temp() # can we make async
+                if not self.lock.locked():
+                    try:
+                        await self._async_close()
+                        await self.lock.acquire()
+                    except ProcessLookupError:
+                        pass
+                    self.pipe.close()
+                    self._clean_temp() # can we make async
             return asyncio.create_task(close_task())
         else:
             try:
