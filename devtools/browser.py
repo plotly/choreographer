@@ -201,7 +201,26 @@ class Browser(Target):
         await self.populate_targets()
         self.future_self.set_result(self)
 
+    def _retry_delete_manual(self, path, delete=False):
+        n_dirs = 0
+        n_files = 0
+        for root, dirs, files in os.walk(path):
+            n_dirs += len(dirs)
+            n_files += len(files)
+            errors = []
+            if delete:
+                for f in files:
+                    fp = os.path.join(root, f)
+                    try:
+                        os.chmod(fp, stat.S_IWUSR)
+                        os.remove(fp)
+                    except BaseException as e:
+                        errors.append((fp, e))
+            # clean up directory
+            return n_dirs, n_files, errors
+
     def _clean_temp(self):
+        return # temporary for testing
         name = self.temp_dir.name
         clean = False
         try:
