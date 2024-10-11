@@ -186,10 +186,13 @@ class Browser(Target):
                                                    loop_hack=self.loop_hack)
 
 
+    async def _watchdog(self):
+      await self.loop.to_thread(self._is_closed_async, wait=None)
+      await self.close()
+
     async def _open_async(self):
         stderr = self._stderr
         env = self._env
-        self.watchdog = await asyncio.to_thread(self._watch_closed)
         if platform.system() != "Windows":
             self.subprocess = await asyncio.create_subprocess_exec(
                 sys.executable,
@@ -210,6 +213,7 @@ class Browser(Target):
                                                    env=env,
                                                    loop=True,
                                                    loop_hack=self.loop_hack)
+        self.loop.create_task(self._watchdog)
         await self.populate_targets()
         self.future_self.set_result(self)
 
