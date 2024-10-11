@@ -235,7 +235,6 @@ class Browser(Target):
         return n_dirs, n_files, errors
 
     def _clean_temp(self):
-        return # temporary for testing
         name = self.temp_dir.name
         clean = False
         try:
