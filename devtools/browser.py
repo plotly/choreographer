@@ -189,7 +189,7 @@ class Browser(Target):
     async def _open_async(self):
         stderr = self._stderr
         env = self._env
-        self.watchdog = asyncio.to_thread(self._watch_closed)
+        self.watchdog = await asyncio.to_thread(self._watch_closed)
         if platform.system() != "Windows":
             self.subprocess = await asyncio.create_subprocess_exec(
                 sys.executable,
@@ -360,16 +360,16 @@ class Browser(Target):
     def close(self):
         if self.loop:
             async def close_task():
-                if not self.lock.locked():
-                    try:
-                        await self.lock.acquire()
-                        await self._async_close()
-                    except ProcessLookupError:
-                        pass
-                    self.pipe.close()
-                    self._clean_temp() # can we make async
-                else:
+                if self.lock.locked():
                     print("You can not close the browser more than 1 time")
+                    return
+                await self.lock.acquire()
+                try:
+                    await self._async_close()
+                except ProcessLookupError:
+                    pass
+                self.pipe.close()
+                self._clean_temp() # can we make async
             return asyncio.create_task(close_task())
         else:
             try:
