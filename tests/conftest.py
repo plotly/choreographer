@@ -32,7 +32,29 @@ async def browser(request):
         headless=headless, debug=debug, debug_browser=debug
     )
     yield browser
+    old_temp_file = str(browser.temp_dir.name)
     await browser.close()
+    import sys # TEMP
+    await asyncio.sleep(1)
+    print("Counting".center(20, "-"), file=sys.stderr)
+    count = browser._retry_delete_manual(old_temp_file)
+    print(f"Found {count[0]} files, {count[1]} directories", file=sys.stderr)
+    print(f"Errors: {count[2]}", file=sys.stderr)
+
+
+    await asyncio.sleep(1)
+
+    print("Deleting".center(20, "-"), file=sys.stderr)
+    count = browser._retry_delete_manual(old_temp_file, delete=True)
+    print(f"Errors: {count[2]}", file=sys.stderr)
+
+    await asyncio.sleep(1)
+
+    print("Counting".center(20, "-"), file=sys.stderr)
+    count = browser._retry_delete_manual(old_temp_file)
+    print(f"Found {count[0]} files, {count[1]} directories", file=sys.stderr)
+    print(f"Errors: {count[2]}", file=sys.stderr)
+
 
 @pytest_asyncio.fixture(scope="function", loop_scope="function")
 async def browser_verbose():
