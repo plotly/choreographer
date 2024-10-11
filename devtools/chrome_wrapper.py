@@ -22,7 +22,7 @@ import asyncio #noqa
 system = platform.system()
 if system == "Windows":
     import msvcrt  # noqa
-else: 
+else:
     os.set_inheritable(4, True)
     os.set_inheritable(3, True)
 
@@ -95,11 +95,7 @@ if __name__ == "__main__":
     signal.signal(signal.SIGTERM, kill_proc)
     signal.signal(signal.SIGINT, kill_proc)
 
-    if system == "Windows": # never will be main tbh
-        process.wait()
-    else:
-        signal.pause()
-
+    process.wait()
     # NOTE is bad but we don't detect closed pipe (stdout doesn't close from other end?)
     # doesn't seem to impact in sync, maybe because we're doing manual cleanup in sequence
     # should try to see if shutting down chrome browser can provoke pipeerror in threadmode and asyncmode
