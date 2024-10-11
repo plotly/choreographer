@@ -255,7 +255,7 @@ class Browser(Target):
 
     def _is_closed(self, wait=0):
         if wait == 0:
-            if not self.subprocess.poll():
+            if self.subprocess.poll() is None:
                 return False
             else:
                 return True
