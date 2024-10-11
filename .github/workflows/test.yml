@@ -1,6 +1,5 @@
-name: test-wf
-
-on: pull_request
+name: test
+on: push
 jobs:
   test-linux:
     runs-on: ubuntu-latest
