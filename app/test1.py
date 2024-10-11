@@ -11,10 +11,10 @@ browser.close()
 
 time.sleep(2)
 
-print(browser._retry_manual_delete(old_temp_file))
+print(browser._retry_delete_manual(old_temp_file))
 time.sleep(1)
-print(browser._retry_manual_delete(old_temp_file, delete=True))
+print(browser._retry_delete_manual(old_temp_file, delete=True))
 time.sleep(1)
-print(browser._retry_manual_delete(old_temp_file))
+print(browser._retry_delete_manual(old_temp_file))
 time.sleep(1)
 
