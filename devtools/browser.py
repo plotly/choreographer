@@ -107,6 +107,9 @@ class Browser(Target):
         #Lock
         self.lock = asyncio.Lock()
 
+        #Watchdog
+        self.watchdog = None
+
         # Defaults for loop
         if loop is None:
             try:
