@@ -156,6 +156,8 @@ class Browser(Target):
 
     def _watch_closed(self):
         if self._is_closed_async(None):
+            if self.debug:
+                print("Browser is being closed because chromium closed")
             self.close()
 
     def _open(self):
@@ -187,7 +189,7 @@ class Browser(Target):
     async def _open_async(self):
         stderr = self._stderr
         env = self._env
-        self.watchdog = asyncio.to_thread(self._watch_lock)
+        self.watchdog = asyncio.to_thread(self._watch_closed)
         if platform.system() != "Windows":
             self.subprocess = await asyncio.create_subprocess_exec(
                 sys.executable,
@@ -366,6 +368,8 @@ class Browser(Target):
                         pass
                     self.pipe.close()
                     self._clean_temp() # can we make async
+                else:
+                    print("You can not close the browser more than 1 time")
             return asyncio.create_task(close_task())
         else:
             try:
