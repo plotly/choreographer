@@ -154,7 +154,7 @@ class Browser(Target):
     def __await__(self):
         return self.__aenter__().__await__()
 
-    def _watch_closed(self):
+    async def _watch_closed(self):
         if self._is_closed_async(None):
             if self.debug:
                 print("Browser is being closed because chromium closed")
@@ -362,8 +362,8 @@ class Browser(Target):
             async def close_task():
                 if not self.lock.locked():
                     try:
-                        await self._async_close()
                         await self.lock.acquire()
+                        await self._async_close()
                     except ProcessLookupError:
                         pass
                     self.pipe.close()
