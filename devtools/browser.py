@@ -104,6 +104,9 @@ class Browser(Target):
             print(f"BROWSER_PATH: {new_env['BROWSER_PATH']}", file=sys.stderr)
             print(f"USER_DATA_DIR: {new_env['USER_DATA_DIR']}", file=sys.stderr)
 
+        #Lock
+        self._lock = asyncio.Lock()
+
         # Defaults for loop
         if loop is None:
             try:
