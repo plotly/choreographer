@@ -154,6 +154,9 @@ class Browser(Target):
     def __await__(self):
         return self.__aenter__().__await__()
 
+    def _watch_closed(self):
+        if self._is_closed_async(None):
+            self.close()
 
     def _open(self):
         stderr = self._stderr
@@ -184,7 +187,7 @@ class Browser(Target):
     async def _open_async(self):
         stderr = self._stderr
         env = self._env
-        
+        self.watchdog = asyncio.to_thread(self._watch_lock)
         if platform.system() != "Windows":
             self.subprocess = await asyncio.create_subprocess_exec(
                 sys.executable,
