@@ -12,20 +12,20 @@ browser.close()
 time.sleep(1)
 
 print("Counting:")
-count = print(browser._retry_delete_manual(old_temp_file))
+count = browser._retry_delete_manual(old_temp_file)
 print(f"Found {count[0]} files, {count[1]} directories")
 print(f"Errors: {count[2]}")
 
 time.sleep(1)
 
 print("Deleting:")
-count = print(browser._retry_delete_manual(old_temp_file, delete=True))
+count = browser._retry_delete_manual(old_temp_file, delete=True)
 print(f"Errors: {count[2]}")
 
 time.sleep(1)
 
 print("Counting:")
-count = print(browser._retry_delete_manual(old_temp_file))
+count = browser._retry_delete_manual(old_temp_file)
 print(f"Found {count[0]} files, {count[1]} directories")
 print(f"Errors: {count[2]}")
 
