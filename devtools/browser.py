@@ -206,10 +206,10 @@ class Browser(Target):
             return 0, 0, [(path, FileNotFoundError("Supplied path doesn't exist"))]
         n_dirs = 0
         n_files = 0
-        for root, dirs, files in os.walk(path):
+        errors = []
+        for root, dirs, files in os.walk(path, topdown=False):
             n_dirs += len(dirs)
             n_files += len(files)
-            errors = []
             if delete:
                 for f in files:
                     fp = os.path.join(root, f)
@@ -218,8 +218,21 @@ class Browser(Target):
                         os.remove(fp)
                     except BaseException as e:
                         errors.append((fp, e))
+                for d in dirs:
+                    fp = os.path.join(root, d)
+                    try:
+                        os.chmod(fp, stat.S_IWUSR)
+                        os.rmdir(fp)
+                    except BaseException as e:
+                        errors.append((fp, e))
             # clean up directory
-            return n_dirs, n_files, errors
+        if delete:
+            try:
+                os.chmod(path, stat.S_IWUSR)
+                os.rmdir(path)
+            except BaseException as e:
+                errors.append((path, e))
+        return n_dirs, n_files, errors
 
     def _clean_temp(self):
         return # temporary for testing
