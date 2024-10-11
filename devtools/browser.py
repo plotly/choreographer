@@ -208,7 +208,7 @@ class Browser(Target):
                                                    env=env,
                                                    loop=True,
                                                    loop_hack=self.loop_hack)
-        self.loop.create_task(self._watchdog)
+        self.loop.create_task(self._watchdog())
         await self.populate_targets()
         self.future_self.set_result(self)
 
