@@ -248,13 +248,11 @@ class Browser(Target):
             return await asyncio.to_thread(self._is_closed, wait)
         waiter = self.subprocess.wait()
         try:
-            if wait == 0: # this never works
-                wait = .01
+            if wait == 0: # this never works cause processing
+                wait = .15
             await asyncio.wait_for(waiter, wait)
             return True
         except Exception as e:
-            print("Excepted")
-            print(str(e))
             return False
 
     def _is_closed(self, wait=0):
