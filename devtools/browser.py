@@ -105,7 +105,7 @@ class Browser(Target):
             print(f"USER_DATA_DIR: {new_env['USER_DATA_DIR']}", file=sys.stderr)
 
         #Lock
-        self._lock = asyncio.Lock()
+        self.lock = asyncio.Lock()
 
         # Defaults for loop
         if loop is None:
@@ -181,6 +181,7 @@ class Browser(Target):
     async def _open_async(self):
         stderr = self._stderr
         env = self._env
+        
         if platform.system() != "Windows":
             self.subprocess = await asyncio.create_subprocess_exec(
                 sys.executable,
