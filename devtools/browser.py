@@ -202,6 +202,8 @@ class Browser(Target):
         self.future_self.set_result(self)
 
     def _retry_delete_manual(self, path, delete=False):
+        if not os.path.exists(path):
+            return 0, 0, [(path, FileNotFoundError("Supplied path doesn't exist"))]
         n_dirs = 0
         n_files = 0
         for root, dirs, files in os.walk(path):
