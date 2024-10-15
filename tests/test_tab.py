@@ -1,7 +1,7 @@
 import pytest
 import pytest_asyncio
 
-import choreograph as choreo
+import choreographer as choreo
 
 
 async def print_obj(obj):
