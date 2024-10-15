@@ -44,7 +44,7 @@ async def test_populate_targets(browser):
     await browser.send_command(command="Target.createTarget", params={"url": url[1]})
     await browser.populate_targets()
     if browser.headless is False:
-        assert len(browser.tabs) > 1
+        assert len(browser.tabs) == 2
     else:
         assert len(browser.tabs) == 1
 
