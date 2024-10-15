@@ -10,7 +10,7 @@ jobs:
       - name: Install Dependencies
         run:  sudo apt-get update && sudo apt-get install chromium-browser xvfb
         #- uses: ./.github/actions/ # it would be nice but it doesn't support timeout-minutes
-      - name: Install Choreographer
+      - name: Install choreographer
         run:  pip install .[dev]
       - name: DTDoctor
         run:  dtdoctor --no-run
@@ -34,7 +34,7 @@ jobs:
       - name: Install Dependencies
         run:  choco install googlechrome -y --ignore-checksums
       #- uses: ./.github/actions/
-      - name: Install Choreographer
+      - name: Install choreographer
         run:  pip install .[dev]
       - name: DTDoctor
         run:  dtdoctor --no-run
@@ -58,7 +58,7 @@ jobs:
       - name: Install Dependencies
         run:  brew install google-chrome
       #- uses: ./.github/actions/
-      - name: Install Choreographer
+      - name: Install choreographer
         run:  pip install .[dev]
       - name: DTDoctor
         run:  dtdoctor --no-run
