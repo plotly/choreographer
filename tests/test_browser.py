@@ -49,8 +49,10 @@ async def test_populate_targets(browser):
         assert len(browser.tabs) == 1
 
 
-def test_get_tab(browser):
-    if browser.headless:
-        assert browser.get_tab() is None
-    else:
-        assert browser.get_tab() == list(browser.tabs.values())[0]
+@pytest.mark.asyncio
+async def test_get_tab(browser):
+    await browser.create_tab(url[0])
+    assert browser.get_tab() == list(browser.tabs.values())[0]
+    await browser.create_tab()
+    await browser.create_tab(url[1])
+    assert browser.get_tab() == list(browser.tabs.values())[0]
