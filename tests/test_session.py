@@ -1,7 +1,9 @@
 import warnings
+
 import pytest
 import pytest_asyncio
-import devtools
+
+import choreographer as choreo
 
 
 async def print_obj(obj):
@@ -11,7 +13,7 @@ async def print_obj(obj):
 @pytest_asyncio.fixture(scope="function", loop_scope="function")
 async def session(browser):
     with warnings.catch_warnings():
-        warnings.simplefilter("ignore", devtools.protocol.ExperimentalFeatureWarning)
+        warnings.simplefilter("ignore", choreo.protocol.ExperimentalFeatureWarning)
         session_browser = await browser.create_session()
     yield session_browser
     await browser.close_session(session_browser)

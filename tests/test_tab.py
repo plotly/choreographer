@@ -1,6 +1,7 @@
 import pytest
 import pytest_asyncio
-import devtools
+
+import choreograph as choreo
 
 
 async def print_obj(obj):
@@ -24,7 +25,7 @@ async def tab(browser):
 @pytest.mark.asyncio
 async def test_create_and_close_session(tab):
     session = await tab.create_session()
-    assert isinstance(session, devtools.session.Session)
+    assert isinstance(session, choreo.session.Session)
     await tab.close_session(session)
     assert session.session_id not in tab.sessions
 

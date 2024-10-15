@@ -1,10 +1,9 @@
 import asyncio
 
-import choreographer as choreo
-
 import pytest
 from async_timeout import timeout
 
+import choreographer as choreo
 
 @pytest.mark.asyncio(loop_scope="function")
 async def test_context(capteesys, headless, debug, debug_browser):
