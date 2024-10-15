@@ -1,6 +1,6 @@
 # Devtools Protocol
 
-`devtools` allows remote control of browsers from Python.
+`choreographer` allows remote control of browsers from Python.
 It is a work in progress:
 only Chrome-ish browsers are supported at the moment,
 and the name will change before the first release to PyPI.
@@ -49,11 +49,11 @@ Save the following code to `example-01.py` and run with Python.
 
 ```
 import asyncio
-import devtools
+import choreographer as choreo
 
 
 async def example():
-    browser = await devtools.Browser(headless=False)
+    browser = await choreo.Browser(headless=False)
     tab = await browser.create_tab("https://google.com")
     await asyncio.sleep(3)
     await tab.send_command("Page.navigate", params={"url": "https://github.com"})
@@ -69,7 +69,7 @@ Step by step, this example:
 1.  Imports the required libraries.
 1.  Defines an `async` function
     (because `await` can only be used inside `async` functions).
-1.  Asks `devtools` to create a browser.
+1.  Asks `choreographer` to create a browser.
     `headless=False` tells it to display the browser on the screen;
     the default is no display.
 1.  Wait three seconds for the browser to be created.
@@ -113,7 +113,7 @@ Try adding the following to the example shown above:
 You can use this library without `asyncio`,
 
 ```
-my_browser = devtools.Browser() # blocking until open
+my_browser = choreo.Browser() # blocking until open
 ```
 
 However,
