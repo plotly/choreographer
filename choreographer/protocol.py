@@ -18,7 +18,7 @@ class MessageTypeError(TypeError):
 class MissingKeyError(ValueError):
     def __init__(self, key, obj):
         super().__init__(
-            f"Message missing required key {key}. Message received: {obj}"
+            f"Message missing required key/s {key}. Message received: {obj}"
         )
 
 
