@@ -182,7 +182,7 @@ class Browser(Target):
 
     async def _watchdog(self):
         if self.debug: print("Starting watchdog", file=sys.stderr)
-        await self.loop.run_in_executor(self.executor, self._is_closed_async, None) # not sure if this will work
+        await self.loop.run_in_executor(self.executor, self.subprocess.wait) # yikes
         if self.debug:
             print("Browser is being closed because chrom* closed", file=sys.stderr)
         await self.close()
