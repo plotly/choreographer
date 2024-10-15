@@ -9,12 +9,17 @@ class DevtoolsProtocolError(Exception):
 
 
 class MessageTypeError(TypeError):
-         def __init__(self, key, value, expected_type):
-                super().__init__(f"Message with key {key} must have type {expected_type}, not {type(value)}.")
+    def __init__(self, key, value, expected_type):
+        super().__init__(
+            f"Message with key {key} must have type {expected_type}, not {type(value)}."
+        )
+
 
 class MissingKeyError(ValueError):
-         def __init__(self, key, object):
-                super().__init__(f"Message missing required key {key}. Message received: {object}")
+    def __init__(self, key, object):
+        super().__init__(
+            f"Message missing required key {key}. Message received: {object}"
+        )
 
 
 class Protocol:
@@ -26,7 +31,6 @@ class Protocol:
 
         # State
         self.sessions = {}
-
 
     def calculate_key(self, response):
         session_id = response["sessionId"] if "sessionId" in response else ""
@@ -100,5 +104,3 @@ class Protocol:
         if required_keys <= response.keys() and "id" not in response:
             return True
         return False
-
-
