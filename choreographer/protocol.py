@@ -8,6 +8,15 @@ class DevtoolsProtocolError(Exception):
         self.message = response["error"]["message"]
 
 
+class MessageTypeError(TypeError):
+         def __init__(self, key, value, expected_type):
+                super().__init__(f"Message with key {key} must have type {expected_type}, not {type(value)}.")
+
+class MissingKeyError(ValueError):
+         def __init__(self, key, object):
+                super().__init__(f"Message missing required key {key}. Message received: {object}")
+
+
 class Protocol:
     def __init__(self, debug=False):
         # Stored Resources
