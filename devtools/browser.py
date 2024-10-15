@@ -362,7 +362,6 @@ class Browser(Target):
         if self.loop:
             async def close_task():
                 if self.lock.locked():
-                    print("You can not close the browser more than 1 time")
                     return
                 await self.lock.acquire()
                 try:
