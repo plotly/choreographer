@@ -181,7 +181,7 @@ class Browser(Target):
 
 
     async def _watchdog(self):
-        await self.loop.to_thread(self._is_closed_async, wait=None)
+        await asyncio.to_thread(self._is_closed_async, wait=None)
         if self.debug:
             print("Browser is being closed because chromium closed")
         await self.close()
