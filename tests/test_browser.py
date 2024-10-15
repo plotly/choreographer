@@ -3,8 +3,8 @@ import devtools
 
 
 url = (
-    "https://plotly.com/",
-    "https://plotly.com/python/",
+    "",
+    "",
 )
 
 
