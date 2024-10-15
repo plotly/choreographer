@@ -46,6 +46,9 @@ class Protocol:
         else:
             raise RuntimeError("Each message object must contain an id and method key")
 
+        if n_keys == 0:
+            raise MissingKeyError("method", obj)
+
         if "params" in obj:
             n_keys += 1
         if "sessionId" in obj:
