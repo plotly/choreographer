@@ -1,6 +1,6 @@
 import asyncio
 
-import devtools
+import choreographer as choreo
 
 import pytest
 from async_timeout import timeout
@@ -8,7 +8,7 @@ from async_timeout import timeout
 
 @pytest.mark.asyncio(loop_scope="function")
 async def test_context(capteesys, headless, debug, debug_browser):
-    async with devtools.Browser(
+    async with choreo.Browser(
         headless=headless,
         debug=debug,
         debug_browser=debug_browser,
@@ -18,7 +18,7 @@ async def test_context(capteesys, headless, debug, debug_browser):
         assert "result" in response and "targetInfos" in response["result"]
         assert (len(response["result"]["targetInfos"]) != 0) != headless
         if not headless:
-            assert isinstance(browser.get_tab(), devtools.tab.Tab)
+            assert isinstance(browser.get_tab(), choreo.tab.Tab)
             assert len(browser.get_tab().sessions) == 1
     print("") # this makes sure that capturing is working
     # stdout should be empty, but not because capsys is broken, because nothing was print
@@ -48,7 +48,7 @@ async def test_context(capteesys, headless, debug, debug_browser):
 
 @pytest.mark.asyncio(loop_scope="function")
 async def test_no_context(capteesys, headless, debug, debug_browser):
-    browser = await devtools.Browser(
+    browser = await choreo.Browser(
         headless=headless,
         debug=debug,
         debug_browser=debug_browser,
@@ -60,7 +60,7 @@ async def test_no_context(capteesys, headless, debug, debug_browser):
             assert "result" in response and "targetInfos" in response["result"]
             assert (len(response["result"]["targetInfos"]) != 0) != headless
             if not headless:
-                assert isinstance(browser.get_tab(), devtools.tab.Tab)
+                assert isinstance(browser.get_tab(), choreo.tab.Tab)
                 assert len(browser.get_tab().sessions) == 1
     finally:
         await browser.close()

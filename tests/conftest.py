@@ -1,7 +1,7 @@
 import asyncio
 import pytest
 import pytest_asyncio
-import devtools
+import choreographer as choreo
 
 @pytest.fixture(params=[True, False], ids=["headless", ""])
 def headless(request):
@@ -29,7 +29,7 @@ async def browser(request):
     headless = request.config.getoption("--headless")
     debug = request.config.get_verbosity() > 2
 
-    browser = await devtools.Browser(
+    browser = await choreo.Browser(
         headless=headless, debug=debug, debug_browser=debug
     )
     yield browser
@@ -59,7 +59,7 @@ async def browser(request):
 
 @pytest_asyncio.fixture(scope="function", loop_scope="function")
 async def browser_verbose():
-    browser = await devtools.Browser(debug=True, debug_browser=True)
+    browser = await choreo.Browser(debug=True, debug_browser=True)
     yield browser
     await browser.close()
 
