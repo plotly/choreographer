@@ -265,7 +265,7 @@ class Browser(Target):
                 wait = .15
             await asyncio.wait_for(waiter, wait)
             return True
-        except Exception as e:
+        except Exception:
             return False
 
     def _is_closed(self, wait=0):
