@@ -17,7 +17,6 @@ def check_response_dictionary(response_received, response_expected):
 @pytest_asyncio.fixture(scope="function", loop_scope="function")
 async def tab(browser):
     tab_browser = await browser.create_tab("https://plotly.com/python/getting-started/")
-    await tab_browser.create_session()
     yield tab_browser
     await browser.close_tab(tab_browser)
 
