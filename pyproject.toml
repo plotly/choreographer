@@ -1,15 +1,26 @@
 [build-system]
-requires = ["setuptools>=65.0.0", "wheel"]
+requires = ["setuptools>=65.0.0", "wheel", "setuptools-git-versioning"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages]
 find = {namespaces = false}
 
+[tool.setuptools-git-versioning]
+enabled = true
+
 [project]
-name = "devtools"
-description = "Devtools protocol"
+name = "choreographer"
+description = "Devtools Protocol implementation for chrome."
+readme = "README.md"
 requires-python = ">=3.9"
 dynamic = ["version"]
+authors = [
+  {name = "Andrew Pikul", email="ajpikul@gmail.com"},
+  {name = "Neyberson Atencio", email="neyberatencio@gmail.com"}
+  ]
+maintainers = [
+  {name = "Andrew Pikul", email = "ajpikul@gmail.com"},
+]
 
 [project.optional-dependencies]
 dev = [
@@ -20,13 +31,10 @@ dev = [
   ]
 
 [project.scripts]
-dtdoctor = "devtools.browser:diagnose"
+dtdoctor = "choreographer.browser:diagnose"
 
 [tool.ruff.lint]
 ignore = ["E701"]
-
-[tool.setuptools-git-versioning]
-enabled = true
 
 [tool.pytest.ini_options]
 asyncio_default_fixture_loop_scope = "function"
