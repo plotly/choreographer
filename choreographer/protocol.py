@@ -47,11 +47,12 @@ class Protocol:
             if not isinstance(obj["method"], str):
                 raise MessageTypeError("method", type(obj["method"]), str)
             n_keys += 2
-        else:
-            raise RuntimeError("Each message object must contain an id and method key")
-
-        if n_keys == 0:
+        elif "id" not in obj:
+            raise MissingKeyError("id", obj)
+        elif "method" not in obj:
             raise MissingKeyError("method", obj)
+        else:
+            raise MissingKeyError("id and method", obj)
 
         if "params" in obj:
             n_keys += 1
