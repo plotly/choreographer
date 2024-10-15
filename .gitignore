@@ -14,3 +14,4 @@ __pycache__
 # builds
 results/*
 !results/placeholder
+dist/
