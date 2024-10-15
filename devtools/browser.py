@@ -31,6 +31,8 @@ with_onexc = bool(sys.version_info[:3] >= (3, 12))
 class Browser(Target):
 
     def _check_loop(self):
+        # Lock
+        if not self.lock: self.lock = asyncio.Lock()
         if platform.system() == "Windows" and self.loop and isinstance(self.loop, asyncio.SelectorEventLoop):
             # I think using set_event_loop_policy is too invasive (is system wide)
             # and may not work in situations where a framework manually set SEL
@@ -104,8 +106,6 @@ class Browser(Target):
             print(f"BROWSER_PATH: {new_env['BROWSER_PATH']}", file=sys.stderr)
             print(f"USER_DATA_DIR: {new_env['USER_DATA_DIR']}", file=sys.stderr)
 
-        #Lock
-        self.lock = asyncio.Lock()
 
         # Defaults for loop
         if loop is None:
@@ -114,11 +114,13 @@ class Browser(Target):
             except Exception:
                 loop = False
         self.loop = loop
-        self._check_loop()
+
+        self.lock = None
 
         # State
         if self.loop:
             self.futures = {}
+            self._check_loop()
         self.executor = executor
 
         self.tabs = OrderedDict()
