@@ -31,6 +31,8 @@ with_onexc = bool(sys.version_info[:3] >= (3, 12))
 class Browser(Target):
 
     def _check_loop(self):
+        # Lock
+        if not self.lock: self.lock = asyncio.Lock()
         if platform.system() == "Windows" and self.loop and isinstance(self.loop, asyncio.SelectorEventLoop):
             # I think using set_event_loop_policy is too invasive (is system wide)
             # and may not work in situations where a framework manually set SEL
@@ -104,6 +106,7 @@ class Browser(Target):
             print(f"BROWSER_PATH: {new_env['BROWSER_PATH']}", file=sys.stderr)
             print(f"USER_DATA_DIR: {new_env['USER_DATA_DIR']}", file=sys.stderr)
 
+
         # Defaults for loop
         if loop is None:
             try:
@@ -111,11 +114,13 @@ class Browser(Target):
             except Exception:
                 loop = False
         self.loop = loop
-        self._check_loop()
+
+        self.lock = None
 
         # State
         if self.loop:
             self.futures = {}
+            self._check_loop()
         self.executor = executor
 
         self.tabs = OrderedDict()
@@ -175,6 +180,14 @@ class Browser(Target):
                                                    loop_hack=self.loop_hack)
 
 
+    async def _watchdog(self):
+        if self.debug: print("Starting watchdog", file=sys.stderr)
+        await self.subprocess.wait()
+        if self.debug:
+            print("Browser is being closed because chrom* closed", file=sys.stderr)
+        await self.close()
+
+
     async def _open_async(self):
         stderr = self._stderr
         env = self._env
@@ -198,6 +211,7 @@ class Browser(Target):
                                                    env=env,
                                                    loop=True,
                                                    loop_hack=self.loop_hack)
+        self.loop.create_task(self._watchdog())
         await self.populate_targets()
         self.future_self.set_result(self)
 
@@ -243,19 +257,23 @@ class Browser(Target):
             print(f"Tempfile still exists?: {bool(os.path.exists(str(name)))}", file=sys.stderr)
 
     async def _is_closed_async(self, wait=0):
+        if self.debug:
+            print(f"is_closed called with wait: {wait}", file=sys.stderr)
         if self.loop_hack:
             if self.debug: print(f"Moving sync close to thread as self.loop_hack: {self.loop_hack}", file=sys.stderr)
             return await asyncio.to_thread(self._is_closed, wait)
         waiter = self.subprocess.wait()
         try:
+            if wait == 0: # this never works cause processing
+                wait = .15
             await asyncio.wait_for(waiter, wait)
             return True
-        except: # noqa
+        except Exception:
             return False
 
     def _is_closed(self, wait=0):
-        if not wait:
-            if not self.subprocess.poll():
+        if wait == 0:
+            if self.subprocess.poll() is None:
                 return False
             else:
                 return True
@@ -346,6 +364,9 @@ class Browser(Target):
     def close(self):
         if self.loop:
             async def close_task():
+                if self.lock.locked():
+                    return
+                await self.lock.acquire()
                 try:
                     await self._async_close()
                 except ProcessLookupError:
