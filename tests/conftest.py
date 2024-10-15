@@ -19,7 +19,8 @@ def debug_browser(request):
 
 
 def pytest_addoption(parser):
-    parser.addoption("--headless", action="store_true", default=False)
+    parser.addoption("--headless", action="store_true", dest="headless", default=True)
+    parser.addoption("--no-headless", dest="headless", action="store_false")
 
 
 @pytest_asyncio.fixture(scope="function", loop_scope="function")
