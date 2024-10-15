@@ -6,8 +6,8 @@ build-backend = "setuptools.build_meta"
 find = {namespaces = false}
 
 [project]
-name = "devtools"
-description = "Devtools protocol"
+name = "choreographer"
+description = "Devtools Protocol implementation for chrome"
 requires-python = ">=3.9"
 dynamic = ["version"]
 
@@ -20,7 +20,7 @@ dev = [
   ]
 
 [project.scripts]
-dtdoctor = "devtools.browser:diagnose"
+dtdoctor = "choreographer.browser:diagnose"
 
 [tool.ruff.lint]
 ignore = ["E701"]
