@@ -39,9 +39,9 @@ class Protocol:
         n_keys = 0
         if "id" in obj and "method" in obj:
             if not isinstance(obj["id"], int):
-                raise RuntimeError("id message object must be int")
+                raise MessageTypeError("id", type(obj["id"]), int)
             if not isinstance(obj["method"], str):
-                raise RuntimeError("The method of the message object must be string")
+                raise MessageTypeError("method", type(obj["method"]), str)
             n_keys += 2
         else:
             raise RuntimeError("Each message object must contain an id and method key")
