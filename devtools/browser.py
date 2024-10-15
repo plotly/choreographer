@@ -182,7 +182,7 @@ class Browser(Target):
 
     async def _watchdog(self):
         if self.debug: print("Starting watchdog", file=sys.stderr)
-        await self.loop.run_in_executor(self.executor, self._is_closed_async, wait=None)
+        await self.loop.run_in_executor(self.executor, self._is_closed_async, None) # not sure if this will work
         if self.debug:
             print("Browser is being closed because chrom* closed", file=sys.stderr)
         await self.close()
@@ -257,6 +257,8 @@ class Browser(Target):
             print(f"Tempfile still exists?: {bool(os.path.exists(str(name)))}", file=sys.stderr)
 
     async def _is_closed_async(self, wait=0):
+        if self.debug:
+            print(f"is_closed called with wait: {wait}", file=sys.stderr)
         if self.loop_hack:
             if self.debug: print(f"Moving sync close to thread as self.loop_hack: {self.loop_hack}", file=sys.stderr)
             return await asyncio.to_thread(self._is_closed, wait)
