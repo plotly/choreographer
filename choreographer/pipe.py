@@ -3,6 +3,7 @@ import sys
 import json
 import platform
 import warnings
+from threading import Lock
 
 with_block = bool(sys.version_info[:3] >= (3, 12) or platform.system() != "Windows")
 class BlockWarning(UserWarning):
@@ -41,6 +42,9 @@ class Pipe:
         self.debug = debug
         self.cls=cls
 
+        # this is just a convenience to prevent multiple shutdowns
+        self.shutdown_lock = Lock()
+
     def write_json(self, obj, debug=None):
         if not debug: debug = self.debug
         if debug:
@@ -52,6 +56,8 @@ class Pipe:
             # windows may print weird characters if we set utf-8 instead of utf-16
             # check this TODO
         os.write(self.write_to_chromium, encoded_message)
+        if debug:
+            print("wrote_json.", file=sys.stderr)
 
     def read_jsons(self, blocking=True, debug=None):
         if not with_block and not blocking:
@@ -129,13 +135,14 @@ class Pipe:
                 print(f"Caught expected error in self-wrte bye: {str(e)}", file=sys.stderr)
 
     def close(self):
-        if platform.system() == "Windows":
-            self._fake_bye()
-        self._unblock_fd(self.write_from_chromium)
-        self._unblock_fd(self.read_from_chromium)
-        self._unblock_fd(self.write_to_chromium)
-        self._unblock_fd(self.read_to_chromium)
-        self._close_fd(self.write_to_chromium)
-        self._close_fd(self.read_from_chromium)
-        self._close_fd(self.write_from_chromium)
-        self._close_fd(self.read_to_chromium)
+        if self.shutdown_lock.acquire(blocking=False):
+            if platform.system() == "Windows":
+                self._fake_bye()
+            self._unblock_fd(self.write_from_chromium)
+            self._unblock_fd(self.read_from_chromium)
+            self._unblock_fd(self.write_to_chromium)
+            self._unblock_fd(self.read_to_chromium)
+            self._close_fd(self.write_to_chromium) # no more writes
+            self._close_fd(self.write_from_chromium) # we're done with writes
+            self._close_fd(self.read_from_chromium) # no more attemps at read
+            self._close_fd(self.read_to_chromium) #
