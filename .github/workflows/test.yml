@@ -9,6 +9,7 @@ jobs:
       - uses: actions/setup-python@v1 # Would be nice to bump this? Regressions.
       - name: Install Dependencies
         run:  sudo apt-get update && sudo apt-get install chromium-browser xvfb
+        timeout-minutes: 4 # because sometimes it dies
         #- uses: ./.github/actions/ # it would be nice but it doesn't support timeout-minutes
       - name: Install choreographer
         run:  pip install .[dev]
@@ -38,6 +39,7 @@ jobs:
       - uses: actions/setup-python@v5
       - name: Install Dependencies
         run:  choco install googlechrome -y --ignore-checksums
+        timeout-minutes: 4 # because sometimes it dies
       #- uses: ./.github/actions/
       - name: Install choreographer
         run:  pip install .[dev]
@@ -67,6 +69,7 @@ jobs:
       - uses: actions/setup-python@v5
       - name: Install Dependencies
         run:  brew install google-chrome
+        timeout-minutes: 4 # because sometimes it dies
       #- uses: ./.github/actions/
       - name: Install choreographer
         run:  pip install .[dev]
