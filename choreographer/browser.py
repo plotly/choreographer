@@ -24,6 +24,8 @@ class TempDirWarning(UserWarning):
     pass
 class UnhandledMessageWarning(UserWarning):
     pass
+class BrowserFailedError(RuntimeError):
+    pass
 class BrowserClosedError(RuntimeError):
     pass
 
@@ -90,7 +92,7 @@ class Browser(Target):
         if path:
             new_env["BROWSER_PATH"] = str(path)
         else:
-            raise RuntimeError(
+            raise BrowserFailedError(
                 "Could not find an acceptable browser. Please set environmental variable BROWSER_PATH or pass `path=/path/to/browser` into the Browser() constructor."
             )
 
@@ -347,16 +349,17 @@ class Browser(Target):
 
     def close(self):
         if self.loop:
+            if not self.future_self.done():
+                self.future_self.set_exception(BrowserFailedError("Close() was called before the browser finished opening- maybe it crashed?"))
             for future in self.futures:
-                future.set_exception(BrowserClosedError())
+                future.set_exception(BrowserClosedError("Command not completed because browser closed."))
             for session in self.sessions:
                 for future in session.subscription_futures.values():
-                    future.set_exception(BrowserClosedError())
-
+                    future.set_exception(BrowserClosedError("Event not complete because browser closed."))
             for tab in self.tabs:
                 for session in tab.sessions:
                     for future in session.subscription_futures.values():
-                        future.set_exception(BrowserClosedError())
+                        future.set_exception(BrowserClosedError("Event not completed because browser closed."))
             async def close_task():
                 try:
                     await self._async_close()
