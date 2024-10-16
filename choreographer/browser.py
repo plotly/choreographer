@@ -24,6 +24,8 @@ class TempDirWarning(UserWarning):
     pass
 class UnhandledMessageWarning(UserWarning):
     pass
+class BrowserFailedError(RuntimeError):
+    pass
 class BrowserClosedError(RuntimeError):
     pass
 
@@ -92,7 +94,7 @@ class Browser(Target):
         if path:
             new_env["BROWSER_PATH"] = str(path)
         else:
-            raise RuntimeError(
+            raise BrowserFailedError(
                 "Could not find an acceptable browser. Please set environmental variable BROWSER_PATH or pass `path=/path/to/browser` into the Browser() constructor."
             )
 
@@ -191,31 +193,34 @@ class Browser(Target):
 
 
     async def _open_async(self):
-        stderr = self._stderr
-        env = self._env
-        if platform.system() != "Windows":
-            self.subprocess = await asyncio.create_subprocess_exec(
-                sys.executable,
-                os.path.join(
-                    os.path.dirname(os.path.realpath(__file__)), "chrome_wrapper.py"
-                ),
-                stdin=self.pipe.read_to_chromium,
-                stdout=self.pipe.write_from_chromium,
-                stderr=stderr,
-                close_fds=True,
-                env=env,
-            )
-        else:
-            from .chrome_wrapper import open_browser
-            self.subprocess = await open_browser(to_chromium=self.pipe.read_to_chromium,
-                                                   from_chromium=self.pipe.write_from_chromium,
-                                                   stderr=stderr,
-                                                   env=env,
-                                                   loop=True,
-                                                   loop_hack=self.loop_hack)
-        self.loop.create_task(self._watchdog())
-        await self.populate_targets()
-        self.future_self.set_result(self)
+        try:
+            stderr = self._stderr
+            env = self._env
+            if platform.system() != "Windows":
+                self.subprocess = await asyncio.create_subprocess_exec(
+                    sys.executable,
+                    os.path.join(
+                        os.path.dirname(os.path.realpath(__file__)), "chrome_wrapper.py"
+                    ),
+                    stdin=self.pipe.read_to_chromium,
+                    stdout=self.pipe.write_from_chromium,
+                    stderr=stderr,
+                    close_fds=True,
+                    env=env,
+                )
+            else:
+                from .chrome_wrapper import open_browser
+                self.subprocess = await open_browser(to_chromium=self.pipe.read_to_chromium,
+                                                       from_chromium=self.pipe.write_from_chromium,
+                                                       stderr=stderr,
+                                                       env=env,
+                                                       loop=True,
+                                                       loop_hack=self.loop_hack)
+            self.loop.create_task(self._watchdog())
+            await self.populate_targets()
+            self.future_self.set_result(self)
+        except (BrowserClosedError, BrowserFailedError, asyncio.CancelledError) as e:
+            raise BrowserFailedError("The browser seemed to close immediately after starting. Perhaps adding debug_browser=True will help.") from e
 
     def _retry_delete_manual(self, path, delete=False):
         if not os.path.exists(path):
@@ -402,16 +407,17 @@ class Browser(Target):
                 if self.lock.locked():
                     return
                 await self.lock.acquire()
+                if not self.future_self.done():
+                    self.future_self.set_exception(BrowserFailedError("Close() was called before the browser finished opening- maybe it crashed?"))
                 for future in self.futures:
-                    future.set_exception(BrowserClosedError())
+                    future.set_exception(BrowserClosedError("Command not completed because browser closed."))
                 for session in self.sessions:
                     for future in session.subscription_futures.values():
-                        future.set_exception(BrowserClosedError())
-
+                        future.set_exception(BrowserClosedError("Event not complete because browser closed."))
                 for tab in self.tabs:
                     for session in tab.sessions:
                         for future in session.subscription_futures.values():
-                            future.set_exception(BrowserClosedError())
+                            future.set_exception(BrowserClosedError("Event not completed because browser closed."))
                 try:
                     await self._async_close()
                 except ProcessLookupError:
@@ -524,37 +530,34 @@ class Browser(Target):
     async def populate_targets(self):
         if not self.browser.loop:
             raise RuntimeError("This method requires use of an event loop (asyncio).")
-        try:
-            response = await self.browser.send_command("Target.getTargets")
-            if "error" in response:
-                raise RuntimeError("Could not get targets") from Exception(
-                    response["error"]
-                )
+        response = await self.browser.send_command("Target.getTargets")
+        if "error" in response:
+            raise RuntimeError("Could not get targets") from Exception(
+                response["error"]
+            )
 
-            for json_response in response["result"]["targetInfos"]:
-                if (
-                    json_response["type"] == "page"
-                    and json_response["targetId"] not in self.tabs
-                ):
-                    target_id = json_response["targetId"]
-                    new_tab = Tab(target_id, self)
-                    try:
-                        await new_tab.create_session()
-                    except DevtoolsProtocolError as e:
-                        if e.code == TARGET_NOT_FOUND:
-                            if self.debug:
-                                print(
-                                    f"Target {target_id} not found (could be closed before)",
-                                    file=sys.stderr
-                                    )
-                            continue
-                        else:
-                            raise e
-                    self._add_tab(new_tab)
-                    if self.debug:
-                        print(f"The target {target_id} was added", file=sys.stderr)
-        except BrowserClosedError as e:
-            raise RuntimeError("The browser seemed to close immediately after starting. Perhaps addng debug_browser=True will help.") from e
+        for json_response in response["result"]["targetInfos"]:
+            if (
+                json_response["type"] == "page"
+                and json_response["targetId"] not in self.tabs
+            ):
+                target_id = json_response["targetId"]
+                new_tab = Tab(target_id, self)
+                try:
+                    await new_tab.create_session()
+                except DevtoolsProtocolError as e:
+                    if e.code == TARGET_NOT_FOUND:
+                        if self.debug:
+                            print(
+                                f"Target {target_id} not found (could be closed before)",
+                                file=sys.stderr
+                                )
+                        continue
+                    else:
+                        raise e
+                self._add_tab(new_tab)
+                if self.debug:
+                    print(f"The target {target_id} was added", file=sys.stderr)
 
     # Output Helper for Debugging
 
