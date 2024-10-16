@@ -398,20 +398,20 @@ class Browser(Target):
 
     def close(self):
         if self.loop:
-            for future in self.futures:
-                future.set_exception(BrowserClosedError())
-            for session in self.sessions:
-                for future in session.subscription_futures.values():
-                    future.set_exception(BrowserClosedError())
-
-            for tab in self.tabs:
-                for session in tab.sessions:
-                    for future in session.subscription_futures.values():
-                        future.set_exception(BrowserClosedError())
             async def close_task():
                 if self.lock.locked():
                     return
                 await self.lock.acquire()
+                for future in self.futures:
+                    future.set_exception(BrowserClosedError())
+                for session in self.sessions:
+                    for future in session.subscription_futures.values():
+                        future.set_exception(BrowserClosedError())
+
+                for tab in self.tabs:
+                    for session in tab.sessions:
+                        for future in session.subscription_futures.values():
+                            future.set_exception(BrowserClosedError())
                 try:
                     await self._async_close()
                 except ProcessLookupError:
