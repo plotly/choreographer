@@ -357,11 +357,11 @@ class Browser(Target):
                 self.future_self.set_exception(BrowserFailedError("Close() was called before the browser finished opening- maybe it crashed?"))
             for future in self.futures:
                 future.set_exception(BrowserClosedError("Command not completed because browser closed."))
-            for session in self.sessions:
+            for session in self.sessions.values():
                 for future in session.subscription_futures.values():
                     future.set_exception(BrowserClosedError("Event not complete because browser closed."))
             for tab in self.tabs:
-                for session in tab.sessions:
+                for session in tab.sessions.values():
                     for future in session.subscription_futures.values():
                         future.set_exception(BrowserClosedError("Event not completed because browser closed."))
             async def close_task():
