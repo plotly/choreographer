@@ -47,9 +47,9 @@ class Protocol:
             if not isinstance(obj["method"], str):
                 raise MessageTypeError("method", type(obj["method"]), str)
             n_keys += 2
-        elif "id" not in obj:
+        elif "id" not in obj and "method" in obj:
             raise MissingKeyError("id", obj)
-        elif "method" not in obj:
+        elif "method" not in obj and "id" in obj:
             raise MissingKeyError("method", obj)
         else:
             raise MissingKeyError("id and method", obj)
