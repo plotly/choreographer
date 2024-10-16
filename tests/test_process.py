@@ -1,4 +1,6 @@
 import asyncio
+import os
+import signal
 
 import pytest
 from async_timeout import timeout
@@ -86,3 +88,20 @@ async def test_no_context(capteesys, headless, debug, debug_browser):
         count = browser._retry_delete_manual(old_temp_file)
         print(f"Found {count[0]} files, {count[1]} directories", file=sys.stderr)
         print(f"Errors: {count[2]}", file=sys.stderr)
+
+# we're basically just harrassing choreographer with a kill in this test to see if it behaves well
+@pytest.mark.asyncio(loop_scope="function")
+async def test_watchdog(capteesys, headless, debug, debug_browser):
+    browser = await choreo.Browser(
+        headless=headless,
+        debug=debug,
+        debug_browser=debug_browser,
+    )
+    #async with timeout(pytest.default_timeout):
+
+    os.kill(browser.subprocess.pid, signal.SIGKILL)
+    await asyncio.sleep(1)
+    future = browser.send_command(command="Target.getTargets") # could check for error, for close
+    await asyncio.wait([future])
+    assert isinstance(future.exception(), choreo.browser.PipeClosedError)
+    await browser.close()

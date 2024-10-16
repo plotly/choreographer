@@ -114,7 +114,6 @@ def capteesys(request):
         # Remove next two lines if you don't want to ever switch to native version
         yield request.getfixturevalue("capteesys")
         return
-    print("Shimming")
     capman = request.config.pluginmanager.getplugin("capturemanager")
     capture_fixture = capture.CaptureFixture(capture.SysCapture, request, _ispytest=True)
     def _inject_start():

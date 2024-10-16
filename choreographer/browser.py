@@ -685,9 +685,19 @@ class Browser(Target):
         if self.loop:
             future = self.loop.create_future()
             self.futures[key] = future
-            self.loop.run_in_executor(
+            res = self.loop.run_in_executor(
                 self.executor, self.pipe.write_json, obj
             )  # ignore result
+            def check_future(fut):
+                if fut.exception():
+                    if self.debug:
+                        print(f"Write json future error: {str(fut)}", file=sys.stderr)
+                    if not future.done():
+                        print("Setting future based on pipe error", file=sys.stderr)
+                        future.set_exception(fut.exception())
+                        print("Exception set", file=sys.stderr)
+                    self.close()
+            res.add_done_callback(check_future)
             return future
         else:
             self.pipe.write_json(obj)
