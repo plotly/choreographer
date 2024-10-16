@@ -24,6 +24,8 @@ class TempDirWarning(UserWarning):
     pass
 class UnhandledMessageWarning(UserWarning):
     pass
+class BrowserClosedError(RuntimeError):
+    pass
 
 default_path = which_browser() # probably handle this better
 with_onexc = bool(sys.version_info[:3] >= (3, 12))
@@ -396,6 +398,16 @@ class Browser(Target):
 
     def close(self):
         if self.loop:
+            for future in self.futures:
+                future.set_exception(BrowserClosedError())
+            for session in self.sessions:
+                for future in session.subscription_futures.values():
+                    future.set_exception(BrowserClosedError())
+
+            for tab in self.tabs:
+                for session in tab.sessions:
+                    for future in session.subscription_futures.values():
+                        future.set_exception(BrowserClosedError())
             async def close_task():
                 if self.lock.locked():
                     return
@@ -511,35 +523,38 @@ class Browser(Target):
 
     async def populate_targets(self):
         if not self.browser.loop:
-            warnings.warn("This method requires use of an event loop (asyncio).")
-        response = await self.browser.send_command("Target.getTargets")
-        if "error" in response:
-            raise RuntimeError("Could not get targets") from Exception(
-                response["error"]
-            )
+            raise RuntimeError("This method requires use of an event loop (asyncio).")
+        try:
+            response = await self.browser.send_command("Target.getTargets")
+            if "error" in response:
+                raise RuntimeError("Could not get targets") from Exception(
+                    response["error"]
+                )
 
-        for json_response in response["result"]["targetInfos"]:
-            if (
-                json_response["type"] == "page"
-                and json_response["targetId"] not in self.tabs
-            ):
-                target_id = json_response["targetId"]
-                new_tab = Tab(target_id, self)
-                try:
-                    await new_tab.create_session()
-                except DevtoolsProtocolError as e:
-                    if e.code == TARGET_NOT_FOUND:
-                        if self.debug:
-                            print(
-                                f"Target {target_id} not found (could be closed before)",
-                                file=sys.stderr
-                                )
-                        continue
-                    else:
-                        raise e
-                self._add_tab(new_tab)
-                if self.debug:
-                    print(f"The target {target_id} was added", file=sys.stderr)
+            for json_response in response["result"]["targetInfos"]:
+                if (
+                    json_response["type"] == "page"
+                    and json_response["targetId"] not in self.tabs
+                ):
+                    target_id = json_response["targetId"]
+                    new_tab = Tab(target_id, self)
+                    try:
+                        await new_tab.create_session()
+                    except DevtoolsProtocolError as e:
+                        if e.code == TARGET_NOT_FOUND:
+                            if self.debug:
+                                print(
+                                    f"Target {target_id} not found (could be closed before)",
+                                    file=sys.stderr
+                                    )
+                            continue
+                        else:
+                            raise e
+                    self._add_tab(new_tab)
+                    if self.debug:
+                        print(f"The target {target_id} was added", file=sys.stderr)
+        except BrowserClosedError as e:
+            raise RuntimeError("The browser seemed to close immediately after starting. Perhaps addng debug_browser=True will help.") from e
 
     # Output Helper for Debugging
 
