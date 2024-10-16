@@ -41,18 +41,13 @@ class Protocol:
 
     def verify_json(self, obj):
         n_keys = 0
-        if "id" in obj and "method" in obj:
-            if not isinstance(obj["id"], int):
-                raise MessageTypeError("id", type(obj["id"]), int)
-            if not isinstance(obj["method"], str):
-                raise MessageTypeError("method", type(obj["method"]), str)
-            n_keys += 2
-        elif "id" not in obj and "method" in obj:
-            raise MissingKeyError("id", obj)
-        elif "method" not in obj and "id" in obj:
-            raise MissingKeyError("method", obj)
-        else:
-            raise MissingKeyError("id and method", obj)
+        required_keys = {"id": int, "method": str}
+        for key, type_key in required_keys.items():
+            if key not in obj:
+                raise MissingKeyError(key, obj)
+            if not isinstance(obj[key], type_key):
+                raise MessageTypeError(key, type(obj[key]), type_key)
+        n_keys += 2
 
         if "params" in obj:
             n_keys += 1
