@@ -24,6 +24,10 @@ class TempDirWarning(UserWarning):
     pass
 class UnhandledMessageWarning(UserWarning):
     pass
+class BrowserFailedError(RuntimeError):
+    pass
+class BrowserClosedError(RuntimeError):
+    pass
 
 default_path = which_browser() # probably handle this better
 with_onexc = bool(sys.version_info[:3] >= (3, 12))
@@ -88,7 +92,7 @@ class Browser(Target):
         if path:
             new_env["BROWSER_PATH"] = str(path)
         else:
-            raise RuntimeError(
+            raise BrowserFailedError(
                 "Could not find an acceptable browser. Please set environmental variable BROWSER_PATH or pass `path=/path/to/browser` into the Browser() constructor."
             )
 
@@ -176,30 +180,34 @@ class Browser(Target):
 
 
     async def _open_async(self):
-        stderr = self._stderr
-        env = self._env
-        if platform.system() != "Windows":
-            self.subprocess = await asyncio.create_subprocess_exec(
-                sys.executable,
-                os.path.join(
-                    os.path.dirname(os.path.realpath(__file__)), "chrome_wrapper.py"
-                ),
-                stdin=self.pipe.read_to_chromium,
-                stdout=self.pipe.write_from_chromium,
-                stderr=stderr,
-                close_fds=True,
-                env=env,
-            )
-        else:
-            from .chrome_wrapper import open_browser
-            self.subprocess = await open_browser(to_chromium=self.pipe.read_to_chromium,
-                                                   from_chromium=self.pipe.write_from_chromium,
-                                                   stderr=stderr,
-                                                   env=env,
-                                                   loop=True,
-                                                   loop_hack=self.loop_hack)
-        await self.populate_targets()
-        self.future_self.set_result(self)
+        try:
+            stderr = self._stderr
+            env = self._env
+            if platform.system() != "Windows":
+                self.subprocess = await asyncio.create_subprocess_exec(
+                    sys.executable,
+                    os.path.join(
+                        os.path.dirname(os.path.realpath(__file__)), "chrome_wrapper.py"
+                    ),
+                    stdin=self.pipe.read_to_chromium,
+                    stdout=self.pipe.write_from_chromium,
+                    stderr=stderr,
+                    close_fds=True,
+                    env=env,
+                )
+            else:
+                from .chrome_wrapper import open_browser
+                self.subprocess = await open_browser(to_chromium=self.pipe.read_to_chromium,
+                                                       from_chromium=self.pipe.write_from_chromium,
+                                                       stderr=stderr,
+                                                       env=env,
+                                                       loop=True,
+                                                       loop_hack=self.loop_hack)
+            await self.populate_targets()
+            self.future_self.set_result(self)
+        except (BrowserClosedError, BrowserFailedError, asyncio.CancelledError) as e:
+            raise BrowserFailedError("The browser seemed to close immediately after starting. Perhaps adding debug_browser=True will help.") from e
+
 
     def _clean_temp(self):
         name = self.temp_dir.name
@@ -345,6 +353,17 @@ class Browser(Target):
 
     def close(self):
         if self.loop:
+            if not self.future_self.done():
+                self.future_self.set_exception(BrowserFailedError("Close() was called before the browser finished opening- maybe it crashed?"))
+            for future in self.futures.values():
+                future.set_exception(BrowserClosedError("Command not completed because browser closed."))
+            for session in self.sessions.values():
+                for future in session.subscriptions_futures.values():
+                    future.set_exception(BrowserClosedError("Event not complete because browser closed."))
+            for tab in self.tabs.values():
+                for session in tab.sessions.values():
+                    for future in session.subscriptions_futures.values():
+                        future.set_exception(BrowserClosedError("Event not completed because browser closed."))
             async def close_task():
                 try:
                     await self._async_close()
@@ -456,7 +475,7 @@ class Browser(Target):
 
     async def populate_targets(self):
         if not self.browser.loop:
-            warnings.warn("This method requires use of an event loop (asyncio).")
+            raise RuntimeError("This method requires use of an event loop (asyncio).")
         response = await self.browser.send_command("Target.getTargets")
         if "error" in response:
             raise RuntimeError("Could not get targets") from Exception(
