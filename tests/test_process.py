@@ -101,7 +101,8 @@ async def test_watchdog(capteesys, headless, debug, debug_browser):
 
     os.kill(browser.subprocess.pid, signal.SIGKILL)
     await asyncio.sleep(1)
-    future = browser.send_command(command="Target.getTargets") # could check for error, for close
-    await asyncio.wait([future])
-    assert isinstance(future.exception(), choreo.browser.PipeClosedError)
+    with pytest.raises(choreo.browser.PipeClosedError):
+        await browser.send_command(command="Target.getTargets") # could check for error, for close
+    # interestingly, try/except doesn't work here? maybe problem with pytest
+
     await browser.close()
