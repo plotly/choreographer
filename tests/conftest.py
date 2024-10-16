@@ -5,6 +5,12 @@ import pytest_asyncio
 
 import choreographer as choreo
 
+# PYTEST TIP:
+# set capture=no to let all debug leak through
+# if asyncio and pytest aren't playing nice, this will help,
+# especially in fixtures- since they may buffer your outputs
+# and can freeze w/o dumping the buffer
+
 @pytest.fixture(params=[True, False], ids=["headless", ""])
 def headless(request):
     return request.param
@@ -30,7 +36,6 @@ async def browser(request):
     # this needs also to be set by command line TODO
     headless = request.config.getoption("--headless")
     debug = request.config.get_verbosity() > 2
-
     browser = await choreo.Browser(
         headless=headless, debug=debug, debug_browser=debug
     )
