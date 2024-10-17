@@ -2,12 +2,14 @@ import platform
 import os
 import sys
 import subprocess
+import time
 import tempfile
 import warnings
 import json
 import asyncio
 import stat
 import shutil
+
 from threading import Thread
 from collections import OrderedDict
 
@@ -253,6 +255,10 @@ class Browser(Target):
                 os.rmdir(path)
             except BaseException as e:
                 errors.append((path, e))
+        if errors:
+            warnings.warn(
+                    f"The temporary directory could not be deleted, execution will continue. errors: {errors}", TempDirWarning
+            )
         return n_dirs, n_files, errors
 
     def _clean_temp(self):
@@ -283,16 +289,18 @@ class Browser(Target):
             del self.temp_dir
         except FileNotFoundError:
             pass # it worked!
-        except PermissionError:
-            if not clean:
-                warnings.warn(
-                    "The temporary directory could not be deleted, due to permission error, execution will continue.", TempDirWarning
-                )
         except BaseException as e:
             if not clean:
-                warnings.warn(
-                        f"The temporary directory could not be deleted, execution will continue. {type(e)}: {e}", TempDirWarning
-                )
+                if platform.system() == "Windows":
+                    def extra_clean():
+                        time.sleep(5)
+                        self._retry_delete_manual(name, delete=True)
+                    t = Thread(target=extra_clean)
+                    t.run()
+                else:
+                    warnings.warn(
+                            f"The temporary directory could not be deleted, execution will continue. {type(e)}: {e}", TempDirWarning
+                    )
         if self.debug:
             print(f"Tempfile still exists?: {bool(os.path.exists(str(name)))}", file=sys.stderr)
 
