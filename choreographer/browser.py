@@ -2,17 +2,19 @@ import platform
 import os
 import sys
 import subprocess
+import time
 import tempfile
 import warnings
 import json
 import asyncio
 import stat
 import shutil
+
 from threading import Thread
 from collections import OrderedDict
 
 from .pipe import Pipe
-from .protocol import Protocol, DevtoolsProtocolError, TARGET_NOT_FOUND
+from .protocol import Protocol, DevtoolsProtocolError, ExperimentalFeatureWarning, TARGET_NOT_FOUND
 from .target import Target
 from .session import Session
 from .tab import Tab
@@ -35,6 +37,8 @@ with_onexc = bool(sys.version_info[:3] >= (3, 12))
 class Browser(Target):
 
     def _check_loop(self):
+        # Lock
+        if not self.lock: self.lock = asyncio.Lock()
         if platform.system() == "Windows" and self.loop and isinstance(self.loop, asyncio.SelectorEventLoop):
             # I think using set_event_loop_policy is too invasive (is system wide)
             # and may not work in situations where a framework manually set SEL
@@ -108,6 +112,7 @@ class Browser(Target):
             print(f"BROWSER_PATH: {new_env['BROWSER_PATH']}", file=sys.stderr)
             print(f"USER_DATA_DIR: {new_env['USER_DATA_DIR']}", file=sys.stderr)
 
+
         # Defaults for loop
         if loop is None:
             try:
@@ -115,11 +120,13 @@ class Browser(Target):
             except Exception:
                 loop = False
         self.loop = loop
-        self._check_loop()
+
+        self.lock = None
 
         # State
         if self.loop:
             self.futures = {}
+            self._check_loop()
         self.executor = executor
 
         self.tabs = OrderedDict()
@@ -179,6 +186,14 @@ class Browser(Target):
                                                    loop_hack=self.loop_hack)
 
 
+    async def _watchdog(self):
+        if self.debug: print("Starting watchdog", file=sys.stderr)
+        await self.subprocess.wait()
+        if self.debug:
+            print("Browser is being closed because chrom* closed", file=sys.stderr)
+        await self.close()
+
+
     async def _open_async(self):
         try:
             stderr = self._stderr
@@ -203,11 +218,48 @@ class Browser(Target):
                                                        env=env,
                                                        loop=True,
                                                        loop_hack=self.loop_hack)
+            self.loop.create_task(self._watchdog())
             await self.populate_targets()
             self.future_self.set_result(self)
         except (BrowserClosedError, BrowserFailedError, asyncio.CancelledError) as e:
             raise BrowserFailedError("The browser seemed to close immediately after starting. Perhaps adding debug_browser=True will help.") from e
 
+    def _retry_delete_manual(self, path, delete=False):
+        if not os.path.exists(path):
+            return 0, 0, [(path, FileNotFoundError("Supplied path doesn't exist"))]
+        n_dirs = 0
+        n_files = 0
+        errors = []
+        for root, dirs, files in os.walk(path, topdown=False):
+            n_dirs += len(dirs)
+            n_files += len(files)
+            if delete:
+                for f in files:
+                    fp = os.path.join(root, f)
+                    try:
+                        os.chmod(fp, stat.S_IWUSR)
+                        os.remove(fp)
+                    except BaseException as e:
+                        errors.append((fp, e))
+                for d in dirs:
+                    fp = os.path.join(root, d)
+                    try:
+                        os.chmod(fp, stat.S_IWUSR)
+                        os.rmdir(fp)
+                    except BaseException as e:
+                        errors.append((fp, e))
+            # clean up directory
+        if delete:
+            try:
+                os.chmod(path, stat.S_IWUSR)
+                os.rmdir(path)
+            except BaseException as e:
+                errors.append((path, e))
+        if errors:
+            warnings.warn(
+                    f"The temporary directory could not be deleted, execution will continue. errors: {errors}", TempDirWarning
+            )
+        return n_dirs, n_files, errors
 
     def _clean_temp(self):
         name = self.temp_dir.name
@@ -216,8 +268,9 @@ class Browser(Target):
             self.temp_dir.cleanup()
             clean=True
         except BaseException as e:
-            if platform.system() == "Windows" and not self.debug:
-                pass
+            if platform.system() == "Windows":
+                if self.debug:
+                    print(f"TempDirWarning: {str(e)}", file=sys.stderr)
             else:
                 warnings.warn(str(e), TempDirWarning)
 
@@ -237,33 +290,39 @@ class Browser(Target):
             del self.temp_dir
         except FileNotFoundError:
             pass # it worked!
-        except PermissionError:
-            if not clean:
-                warnings.warn(
-                    "The temporary directory could not be deleted, due to permission error, execution will continue.", TempDirWarning
-                )
         except BaseException as e:
             if not clean:
-                warnings.warn(
-                        f"The temporary directory could not be deleted, execution will continue. {type(e)}: {e}", TempDirWarning
-                )
+                if platform.system() == "Windows":
+                    def extra_clean():
+                        time.sleep(5)
+                        self._retry_delete_manual(name, delete=True)
+                    t = Thread(target=extra_clean)
+                    t.run()
+                else:
+                    warnings.warn(
+                            f"The temporary directory could not be deleted, execution will continue. {type(e)}: {e}", TempDirWarning
+                    )
         if self.debug:
             print(f"Tempfile still exists?: {bool(os.path.exists(str(name)))}", file=sys.stderr)
 
     async def _is_closed_async(self, wait=0):
+        if self.debug:
+            print(f"is_closed called with wait: {wait}", file=sys.stderr)
         if self.loop_hack:
             if self.debug: print(f"Moving sync close to thread as self.loop_hack: {self.loop_hack}", file=sys.stderr)
             return await asyncio.to_thread(self._is_closed, wait)
         waiter = self.subprocess.wait()
         try:
+            if wait == 0: # this never works cause processing
+                wait = .15
             await asyncio.wait_for(waiter, wait)
             return True
-        except: # noqa
+        except Exception:
             return False
 
     def _is_closed(self, wait=0):
-        if not wait:
-            if not self.subprocess.poll():
+        if wait == 0:
+            if self.subprocess.poll() is None:
                 return False
             else:
                 return True
@@ -353,18 +412,21 @@ class Browser(Target):
 
     def close(self):
         if self.loop:
-            if not self.future_self.done():
-                self.future_self.set_exception(BrowserFailedError("Close() was called before the browser finished opening- maybe it crashed?"))
-            for future in self.futures.values():
-                future.set_exception(BrowserClosedError("Command not completed because browser closed."))
-            for session in self.sessions.values():
-                for future in session.subscriptions_futures.values():
-                    future.set_exception(BrowserClosedError("Event not complete because browser closed."))
-            for tab in self.tabs.values():
-                for session in tab.sessions.values():
-                    for future in session.subscriptions_futures.values():
-                        future.set_exception(BrowserClosedError("Event not completed because browser closed."))
             async def close_task():
+                if self.lock.locked():
+                    return
+                await self.lock.acquire()
+                if not self.future_self.done():
+                    self.future_self.set_exception(BrowserFailedError("Close() was called before the browser finished opening- maybe it crashed?"))
+                for future in self.futures.values():
+                    future.set_exception(BrowserClosedError("Command not completed because browser closed."))
+                for session in self.sessions.values():
+                    for future in session.subscriptions_futures.values():
+                        future.set_exception(BrowserClosedError("Event not complete because browser closed."))
+                for tab in self.tabs.values():
+                    for session in tab.sessions.values():
+                        for future in session.subscriptions_futures.values():
+                            future.set_exception(BrowserClosedError("Event not completed because browser closed."))
                 try:
                     await self._async_close()
                 except ProcessLookupError:
@@ -461,7 +523,8 @@ class Browser(Target):
                 "There is no eventloop, or was not passed to browser. Cannot use async methods"
             )
         warnings.warn(
-            "Creating new sessions on Browser() only works with some versions of Chrome, it is experimental."
+            "Creating new sessions on Browser() only works with some versions of Chrome, it is experimental.",
+            ExperimentalFeatureWarning
         )
         response = await self.browser.send_command("Target.attachToBrowserTarget")
         if "error" in response:
@@ -631,9 +694,19 @@ class Browser(Target):
         if self.loop:
             future = self.loop.create_future()
             self.futures[key] = future
-            self.loop.run_in_executor(
+            res = self.loop.run_in_executor(
                 self.executor, self.pipe.write_json, obj
             )  # ignore result
+            def check_future(fut):
+                if fut.exception():
+                    if self.debug:
+                        print(f"Write json future error: {str(fut)}", file=sys.stderr)
+                    if not future.done():
+                        print("Setting future based on pipe error", file=sys.stderr)
+                        future.set_exception(fut.exception())
+                        print("Exception set", file=sys.stderr)
+                    self.close()
+            res.add_done_callback(check_future)
             return future
         else:
             self.pipe.write_json(obj)

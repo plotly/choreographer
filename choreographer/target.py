@@ -87,4 +87,4 @@ class Target:
 
     def subscribe_once(self, string):
         session = self._get_first_session()
-        session.subscribe_once(string)
+        return session.subscribe_once(string)

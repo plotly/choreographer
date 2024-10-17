@@ -1,5 +1,6 @@
-import pytest
 import asyncio
+
+import pytest
 
 # allows to create a browser pool for tests
 pytestmark = pytest.mark.asyncio(loop_scope="function")

@@ -9,6 +9,7 @@ jobs:
       - uses: actions/setup-python@v1 # Would be nice to bump this? Regressions.
       - name: Install Dependencies
         run:  sudo apt-get update && sudo apt-get install chromium-browser xvfb
+        timeout-minutes: 4 # because sometimes it dies
         #- uses: ./.github/actions/ # it would be nice but it doesn't support timeout-minutes
       - name: Install choreographer
         run:  pip install .[dev]
@@ -23,8 +24,13 @@ jobs:
         if: ${{ ! runner.debug }}
         run:  xvfb-run pytest -W error -n auto -v -rfE --capture=fd tests/test_process.py
         timeout-minutes: 2
-      - name: Test the Rest
-        run:  pytest -vv -rfE --ignore=tests/test_process.py
+      - name: Test The Rest DEBUG
+        if: runner.debug
+        run:  pytest -W error -vvv -rA --capture=tee-sys --ignore=tests/test_process.py
+        timeout-minutes: 5
+      - name: Test The Rest
+        if: ${{ ! runner.debug }}
+        run:  pytest -W error -n auto -v -rfE --ignore=tests/test_process.py
         timeout-minutes: 2
   test-windows:
     runs-on: windows-latest
@@ -33,6 +39,7 @@ jobs:
       - uses: actions/setup-python@v5
       - name: Install Dependencies
         run:  choco install googlechrome -y --ignore-checksums
+        timeout-minutes: 4 # because sometimes it dies
       #- uses: ./.github/actions/
       - name: Install choreographer
         run:  pip install .[dev]
@@ -47,8 +54,13 @@ jobs:
         if: ${{ ! runner.debug }}
         run:  pytest -W error -n auto -v -rFe --capture=fd tests/test_process.py
         timeout-minutes: 2
-      - name: Test the Rest
-        run:  pytest -vv -rfE --ignore=tests/test_process.py
+      - name: Test The Rest DEBUG
+        if: runner.debug
+        run:  pytest -W error -vvv -rA --capture=tee-sys --ignore=tests/test_process.py
+        timeout-minutes: 5
+      - name: Test The Rest
+        if: ${{ ! runner.debug }}
+        run:  pytest -W error -n auto -v -rfE --ignore=tests/test_process.py
         timeout-minutes: 2
   test-mac:
     runs-on: macos-latest
@@ -57,6 +69,7 @@ jobs:
       - uses: actions/setup-python@v5
       - name: Install Dependencies
         run:  brew install google-chrome
+        timeout-minutes: 4 # because sometimes it dies
       #- uses: ./.github/actions/
       - name: Install choreographer
         run:  pip install .[dev]
@@ -71,6 +84,12 @@ jobs:
         if: ${{ ! runner.debug }}
         run:  pytest -W error -n auto -v -rFe --capture=fd tests/test_process.py
         timeout-minutes: 2
-      - name: Test the Rest
-        run:  pytest -vv -rfE --ignore=tests/test_process.py
+      - name: Test The Rest DEBUG
+        if: runner.debug
+        run:  pytest -W error -vvv -rA --capture=tee-sys --ignore=tests/test_process.py
+        timeout-minutes: 5
+      - name: Test The Rest
+        if: ${{ ! runner.debug }}
+        run:  pytest -W error -n auto -v -rfE --ignore=tests/test_process.py
         timeout-minutes: 2
+
