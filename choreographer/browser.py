@@ -268,8 +268,9 @@ class Browser(Target):
             self.temp_dir.cleanup()
             clean=True
         except BaseException as e:
-            if platform.system() == "Windows" and not self.debug:
-                pass
+            if platform.system() == "Windows":
+                if self.debug:
+                    print(f"TempDirWarning: {str(e)}", file=sys.stderr)
             else:
                 warnings.warn(str(e), TempDirWarning)
 
