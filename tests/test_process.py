@@ -1,6 +1,8 @@
 import asyncio
 import os
+import platform
 import signal
+import subprocess
 
 import pytest
 from async_timeout import timeout
@@ -99,7 +101,14 @@ async def test_watchdog(capteesys, headless, debug, debug_browser):
     )
     #async with timeout(pytest.default_timeout):
 
-    os.kill(browser.subprocess.pid, signal.SIGKILL)
+    if platform.system() == "Windows":
+        subprocess.call(
+            ["taskkill", "/F", "/T", "/PID", str(browser.subprocess.pid)],
+            stderr=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+        )
+    else:
+        os.kill(browser.subprocess.pid, signal.SIGKILL)
     await asyncio.sleep(1)
     with pytest.raises(choreo.browser.PipeClosedError):
         await browser.send_command(command="Target.getTargets") # could check for error, for close
