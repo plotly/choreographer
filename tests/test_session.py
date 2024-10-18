@@ -16,7 +16,7 @@ async def session(browser):
 
 
 @pytest.mark.asyncio
-async def test_send_command(session):
+async def test_session_send_command(session):
     # Test valid request with correct command
     response = await session.send_command(command="Target.getTargets")
     assert "result" in response and "targetInfos" in response["result"]

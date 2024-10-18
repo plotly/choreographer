@@ -27,7 +27,7 @@ async def test_create_and_close_session(tab):
 
 
 @pytest.mark.asyncio
-async def test_send_command(tab):
+async def test_tab_send_command(tab):
     # Test valid request with correct command
     response = await tab.send_command(command="Page.enable")
     check_response_dictionary(response, {"result": {}})
