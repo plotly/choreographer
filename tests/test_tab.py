@@ -28,8 +28,17 @@ async def test_create_and_close_session(tab):
 
 @pytest.mark.asyncio
 async def test_send_command(tab):
-    response = await tab.send_command("Page.enable")
+    # Test valid request with correct command
+    response = await tab.send_command(command="Page.enable")
     check_response_dictionary(response, {"result": {}})
+    
+    # Test invalid method name should return error
+    response = await tab.send_command(command="dkadklqwmd")
+    assert "error" in response
+
+"""    # Test int method should return error
+    response = await tab.send_command(command=12345)
+    assert "error" in response"""
 
 
 @pytest.mark.asyncio

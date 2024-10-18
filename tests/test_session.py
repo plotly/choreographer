@@ -17,5 +17,14 @@ async def session(browser):
 
 @pytest.mark.asyncio
 async def test_send_command(session):
-    response = await session.send_command("Target.getTargets")
+    # Test valid request with correct command
+    response = await session.send_command(command="Target.getTargets")
     assert "result" in response and "targetInfos" in response["result"]
+    
+    # Test invalid method name should return error
+    response = await session.send_command(command="dkadklqwmd")
+    assert "error" in response
+
+"""    # Test int method should return error
+    response = await session.send_command(command=12345)
+    assert "error" in response"""
