@@ -20,7 +20,7 @@ async def test_session_send_command(session):
     # Test valid request with correct command
     response = await session.send_command(command="Target.getTargets")
     assert "result" in response and "targetInfos" in response["result"]
-    
+
     # Test invalid method name should return error
     response = await session.send_command(command="dkadklqwmd")
     assert "error" in response

@@ -68,11 +68,10 @@ async def test_browser_write_json(browser):
     # Test int method should return error
     response = await browser.write_json({"id": 3, "method": 12345})
     assert "error" in response
-    
+
 """    # Test non-integer id should return error
     response = await browser.write_json({"id": "2", "method": "Target.getTargets"})
     assert "error" in response"""
-    
 
 
 @pytest.mark.asyncio
@@ -80,7 +79,7 @@ async def test_browser_send_command(browser):
     # Test valid request with correct command
     response = await browser.send_command(command="Target.getTargets")
     assert "result" in response and "targetInfos" in response["result"]
-    
+
     # Test invalid method name should return error
     response = await browser.send_command(command="dkadklqwmd")
     assert "error" in response

@@ -31,7 +31,7 @@ async def test_tab_send_command(tab):
     # Test valid request with correct command
     response = await tab.send_command(command="Page.enable")
     check_response_dictionary(response, {"result": {}})
-    
+
     # Test invalid method name should return error
     response = await tab.send_command(command="dkadklqwmd")
     assert "error" in response
