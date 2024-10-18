@@ -30,8 +30,49 @@ async def test_create_and_close_session(browser):
 
 @pytest.mark.asyncio
 async def test_browser_write_json(browser):
+    # Test valid request with correct id and method
     response = await browser.write_json({"id": 0, "method": "Target.getTargets"})
     assert "result" in response and "targetInfos" in response["result"]
+
+    # Test missing 'id' key
+    with pytest.raises(
+        RuntimeError, match="Each message object must contain an id and method key"
+    ):
+        await browser.write_json({"method": "Target.getTargets"})
+
+    # Test missing 'method' key
+    with pytest.raises(
+        RuntimeError, match="Each message object must contain an id and method key"
+    ):
+        await browser.write_json({"id": 1})
+
+    # Test empty dictionary
+    with pytest.raises(
+        RuntimeError, match="Each message object must contain an id and method key"
+    ):
+        await browser.write_json({})
+
+    # Test invalid parameter in the message
+    with pytest.raises(
+        RuntimeError,
+        match="Message objects must have id and method keys, and may have params and sessionId keys.",
+    ):
+        await browser.write_json(
+            {"id": 0, "method": "Target.getTargets", "invalid_parameter": "kamksamdk"}
+        )
+
+    # Test invalid method name should return error
+    response = await browser.write_json({"id": 2, "method": "dkadklqwmd"})
+    assert "error" in response
+
+    # Test int method should return error
+    response = await browser.write_json({"id": 3, "method": 12345})
+    assert "error" in response
+    
+"""    # Test non-integer id should return error
+    response = await browser.write_json({"id": "2", "method": "Target.getTargets"})
+    assert "error" in response"""
+    
 
 
 @pytest.mark.asyncio
