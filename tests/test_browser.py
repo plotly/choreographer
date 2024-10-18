@@ -71,6 +71,8 @@ async def test_browser_write_json(browser):
 
 """    # Test non-integer id should return error
     response = await browser.write_json({"id": "2", "method": "Target.getTargets"})
+    # Fails in browser.py Line 611, and that's why write_json gets a future but
+    # doesn't result it (I feel the Line 697)
     assert "error" in response"""
 
 
