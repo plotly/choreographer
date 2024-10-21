@@ -1,13 +1,13 @@
 # Choreographer
 
-`choreographer` allows remote control of browsers from Python.
+choreographer allows remote control of browsers from Python.
 It was created to support image generation from browser-based charting tools,
 but can be used for other purposes as well.
 
 ## Wait—I Thought This Was Kaleido?
 
 [Kaleido][kaleido] is a cross-platform library for generating static images of plots.
-The existing implementation includes a custom build of Chrome,
+The original implementation included a custom build of Chrome,
 which has proven very difficult to maintain.
 In contrast,
 this package uses the Chrome binary on the user's machine
@@ -16,7 +16,7 @@ the next step is to re-implement Kaleido as a layer on top of it.
 
 ## Status
 
-`choreographer` is a work in progress:
+choreographer is a work in progress:
 only Chrome-ish browsers are supported at the moment,
 though we hope to add others.
 (Pull requests are greatly appreciated.)
@@ -83,7 +83,7 @@ Step by step, this example:
 1.  Imports the required libraries.
 1.  Defines an `async` function
     (because `await` can only be used inside `async` functions).
-1.  Asks `choreographer` to create a browser.
+1.  Asks choreographer to create a browser.
     `headless=False` tells it to display the browser on the screen;
     the default is no display.
 1.  Wait three seconds for the browser to be created.
