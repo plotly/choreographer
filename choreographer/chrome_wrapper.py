@@ -43,6 +43,7 @@ def open_browser(to_chromium, from_chromium, stderr=None, env=None, loop=None, l
         "--enable-logging=stderr",
         f"--user-data-dir={user_data_dir}",
         "--no-first-run",
+        "--disable-gpu",
     ]
 
     if "HEADLESS" in env:
