@@ -36,7 +36,7 @@ async def test_send_command(tab):
 
 @pytest.mark.asyncio
 async def test_subscribe_once(tab):
-    subscription_result = tab.subscribe_once("Page*")
+    subscription_result = tab.subscribe_once("Page.*")
     assert "Page.*" in list(tab.sessions.values())[0].subscriptions_futures
     _ = await tab.send_command("Page.enable")
     _ = await tab.send_command("Page.reload")
