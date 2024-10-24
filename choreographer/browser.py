@@ -419,13 +419,16 @@ class Browser(Target):
                 if not self.future_self.done():
                     self.future_self.set_exception(BrowserFailedError("Close() was called before the browser finished opening- maybe it crashed?"))
                 for future in self.futures.values():
+                    if future.done(): continue
                     future.set_exception(BrowserClosedError("Command not completed because browser closed."))
                 for session in self.sessions.values():
                     for future in session.subscriptions_futures.values():
+                        if future.done(): continue
                         future.set_exception(BrowserClosedError("Event not complete because browser closed."))
                 for tab in self.tabs.values():
                     for session in tab.sessions.values():
                         for future in session.subscriptions_futures.values():
+                            if future.done(): continue
                             future.set_exception(BrowserClosedError("Event not completed because browser closed."))
                 try:
                     await self._async_close()
