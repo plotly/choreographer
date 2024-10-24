@@ -1,3 +1,5 @@
+import asyncio
+
 import pytest
 import pytest_asyncio
 
@@ -51,10 +53,12 @@ async def test_subscribe_and_unsubscribe(tab):
     assert "Page.*" in list(tab.sessions.values())[0].subscriptions
     await tab.send_command("Page.enable")
     await tab.send_command("Page.reload")
+    await asyncio.sleep(.5)
     assert counter > 1
-    old_counter = counter
 
     tab.unsubscribe("Page.*")
+    old_counter = counter
+
     assert "Page.*" not in list(tab.sessions.values())[0].subscriptions
     await tab.send_command("Page.enable")
     await tab.send_command("Page.reload")
