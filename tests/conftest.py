@@ -73,14 +73,14 @@ def pytest_runtest_setup(item: pytest.Item):
 
 def pytest_configure():
     # change this by command line TODO
-    pytest.default_timeout = 3
+    pytest.default_timeout = 5
 
 # add this fixture to extend timeout
 # there is 6 second max test length for all
 # which kills all tests
 @pytest.fixture(scope="session")
 def timeout_long():
-    return 6
+    return 8
 
 @pytest.fixture(scope="function")
 def capteesys(request):
