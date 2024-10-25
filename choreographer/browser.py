@@ -602,6 +602,14 @@ class Browser(Target):
         return None
 
     def run_read_loop(self):
+        def check_error(result):
+            e = result.exception()
+            if e:
+                if isinstance(e, asyncio.CancelledError):
+                    pass
+                elif self.debug:
+                    print(f"Error in run_read_loop: {str(e)}", file=sys.stderr)
+                self.close()
         async def read_loop():
             try:
                 responses = await self.loop.run_in_executor(
@@ -687,9 +695,11 @@ class Browser(Target):
                 if self.debug:
                     print("PipeClosedError caught", file=sys.stderr)
                 return
-            self.loop.create_task(read_loop())
+            f = self.loop.create_task(read_loop())
+            f.add_done_callback(check_error)
 
-        self.loop.create_task(read_loop())
+        f = self.loop.create_task(read_loop())
+        f.add_done_callback(check_error)
 
     def write_json(self, obj):
         self.protocol.verify_json(obj)
