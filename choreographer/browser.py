@@ -422,14 +422,16 @@ class Browser(Target):
                     if future.done(): continue
                     future.set_exception(BrowserClosedError("Command not completed because browser closed."))
                 for session in self.sessions.values():
-                    for future in session.subscriptions_futures.values():
-                        if future.done(): continue
-                        future.set_exception(BrowserClosedError("Event not complete because browser closed."))
+                    for futures in session.subscriptions_futures.values():
+                        for future in futures:
+                            if future.done(): continue
+                            future.set_exception(BrowserClosedError("Event not complete because browser closed."))
                 for tab in self.tabs.values():
                     for session in tab.sessions.values():
-                        for future in session.subscriptions_futures.values():
-                            if future.done(): continue
-                            future.set_exception(BrowserClosedError("Event not completed because browser closed."))
+                        for futures in session.subscriptions_futures.values():
+                            for future in futures:
+                                if future.done(): continue
+                                future.set_exception(BrowserClosedError("Event not completed because browser closed."))
                 try:
                     await self._async_close()
                 except ProcessLookupError:
