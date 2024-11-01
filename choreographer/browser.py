@@ -73,7 +73,7 @@ class Browser(Target):
 
         # Set up temp dir
         if platform.system() == "Linux":
-            temp_args = dict(prefix=".kaleido-", dir=Path.home())
+            temp_args = dict(prefix=".choreographer-", dir=Path.home())
         else:
             temp_args = {}
         if platform.system() != "Windows":
