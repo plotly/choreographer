@@ -9,7 +9,7 @@ jobs:
       - uses: actions/setup-python@v1 # Would be nice to bump this? Regressions.
       - name: Install Dependencies
         run:  sudo apt-get update && sudo apt-get install chromium-browser xvfb
-        timeout-minutes: 10 # because sometimes it dies
+        timeout-minutes: 4 # because sometimes it dies
         #- uses: ./.github/actions/ # it would be nice but it doesn't support timeout-minutes
       - name: Install choreographer
         run:  pip install .[dev]
