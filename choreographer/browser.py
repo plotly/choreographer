@@ -1,5 +1,6 @@
 import platform
 import os
+from pathlib import Path
 import sys
 import subprocess
 import time
@@ -71,20 +72,24 @@ class Browser(Target):
         self._stderr = stderr
 
         # Set up temp dir
+        if platform.system() == "Linux":
+            temp_args = dict(prefix=".kaleido-", dir=Path.home())
+        else:
+            temp_args = {}
         if platform.system() != "Windows":
-            self.temp_dir = tempfile.TemporaryDirectory()
+            self.temp_dir = tempfile.TemporaryDirectory(**temp_args)
         else:
             vinfo = sys.version_info[:3]
             if vinfo >= (3, 12):
                 self.temp_dir = tempfile.TemporaryDirectory(
-                    delete=False, ignore_cleanup_errors=True
+                    delete=False, ignore_cleanup_errors=True, **temp_args
                 )
             elif vinfo >= (3, 10):
                 self.temp_dir = tempfile.TemporaryDirectory(
-                    ignore_cleanup_errors=True
+                    ignore_cleanup_errors=True, **temp_args
                 )
             else:
-                self.temp_dir = tempfile.TemporaryDirectory()
+                self.temp_dir = tempfile.TemporaryDirectory(**temp_args)
 
         # Set up process env
         new_env = os.environ.copy()
