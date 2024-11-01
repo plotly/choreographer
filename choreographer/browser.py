@@ -68,8 +68,10 @@ class Browser(Target):
         elif debug_browser is True:
             stderr = None
         else:
-            stderr = debug
+            stderr = debug_browser
         self._stderr = stderr
+        if debug:
+            print(f"STDERR: {stderr}", file=sys.stderr)
 
         # Set up temp dir
         if platform.system() == "Linux":
