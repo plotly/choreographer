@@ -69,11 +69,11 @@ async def test_browser_write_json(browser):
     response = await browser.write_json({"id": 3, "method": 12345})
     assert "error" in response
 
-"""    # Test non-integer id should return error
+    # Test non-integer id should return error
     response = await browser.write_json({"id": "2", "method": "Target.getTargets"})
     # Fails in browser.py Line 611, and can be why write_json gets a future but
     # doesn't result it (I feel it is the Line 697)
-    assert "error" in response"""
+    assert "error" in response
 
 
 @pytest.mark.asyncio
