@@ -711,6 +711,8 @@ class Browser(Target):
         f.add_done_callback(check_error)
 
     def write_json(self, obj):
+        if self.lock.locked():
+            raise BrowserClosedError()
         self.protocol.verify_json(obj)
         key = self.protocol.calculate_key(obj)
         if self.loop:

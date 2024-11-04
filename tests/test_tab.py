@@ -17,7 +17,10 @@ def check_response_dictionary(response_received, response_expected):
 async def tab(browser):
     tab_browser = await browser.create_tab("")
     yield tab_browser
-    await browser.close_tab(tab_browser)
+    try:
+        await browser.close_tab(tab_browser)
+    except choreo.browser.BrowserClosedError:
+        pass
 
 
 @pytest.mark.asyncio
@@ -38,9 +41,12 @@ async def test_tab_send_command(tab):
     response = await tab.send_command(command="dkadklqwmd")
     assert "error" in response
 
-"""    # Test int method should return error
-    response = await tab.send_command(command=12345)
-    assert "error" in response"""
+    # Test int method should return error
+    with pytest.raises(choreo.browser.BrowserClosedError):
+        # chrome doesn't send back sessionId with this error, so we have to fatal fail
+        # assert "error" in response
+        response = await tab.send_command(command=12345)
+
 
 
 @pytest.mark.asyncio
