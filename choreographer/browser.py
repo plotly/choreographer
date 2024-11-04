@@ -514,6 +514,8 @@ class Browser(Target):
             raise RuntimeError(
                 "There is no eventloop, or was not passed to browser. Cannot use async methods"
             )
+        if self.lock.locked():
+            raise BrowserClosedError("Calling commands after closed browser")
         if isinstance(target_id, Target):
             target_id = target_id.target_id
         # NOTE: we don't need to manually remove sessions because
@@ -614,11 +616,11 @@ class Browser(Target):
         def check_error(result):
             e = result.exception()
             if e:
-                if isinstance(e, asyncio.CancelledError):
-                    pass
-                elif self.debug:
-                    print(f"Error in run_read_loop: {str(e)}", file=sys.stderr)
                 self.close()
+                if self.debug:
+                    print(f"Error in run_read_loop: {str(e)}", file=sys.stderr)
+                if not isinstance(e, asyncio.CancelledError):
+                    raise e
         async def read_loop():
             try:
                 responses = await self.loop.run_in_executor(
@@ -692,6 +694,8 @@ class Browser(Target):
                                     f"run_read_loop() found future for key {key}", file=sys.stderr
                                 )
                             future = self.futures.pop(key)
+                        elif "error" in response:
+                            raise DevtoolsProtocolError(response)
                         else:
                             raise RuntimeError(f"Couldn't find a future for key: {key}")
                         if error:
@@ -711,8 +715,6 @@ class Browser(Target):
         f.add_done_callback(check_error)
 
     def write_json(self, obj):
-        if self.lock.locked():
-            raise BrowserClosedError()
         self.protocol.verify_json(obj)
         key = self.protocol.calculate_key(obj)
         if self.loop:

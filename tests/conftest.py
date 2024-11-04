@@ -40,7 +40,10 @@ async def browser(request):
         headless=headless, debug=debug, debug_browser=debug
     )
     yield browser
-    await browser.close()
+    try:
+        await browser.close()
+    except choreo.browser.BrowserClosedError:
+        pass
 
 
 

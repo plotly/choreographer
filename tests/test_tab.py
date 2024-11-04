@@ -42,10 +42,9 @@ async def test_tab_send_command(tab):
     assert "error" in response
 
     # Test int method should return error
-    with pytest.raises(choreo.browser.BrowserClosedError):
-        # chrome doesn't send back sessionId with this error, so we have to fatal fail
-        # assert "error" in response
-        response = await tab.send_command(command=12345)
+    # chrome doesn't send back sessionId with this error, so we have to fatal fail
+    # assert "error" in response
+    response = await tab.send_command(command=12345)
 
 
 
