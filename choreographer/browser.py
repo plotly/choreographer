@@ -1,5 +1,6 @@
 import platform
 import os
+from pathlib import Path
 import sys
 import subprocess
 import time
@@ -67,24 +68,30 @@ class Browser(Target):
         elif debug_browser is True:
             stderr = None
         else:
-            stderr = debug
+            stderr = debug_browser
         self._stderr = stderr
+        if debug:
+            print(f"STDERR: {stderr}", file=sys.stderr)
 
         # Set up temp dir
+        if platform.system() == "Linux":
+            temp_args = dict(prefix=".choreographer-", dir=Path.home())
+        else:
+            temp_args = {}
         if platform.system() != "Windows":
-            self.temp_dir = tempfile.TemporaryDirectory()
+            self.temp_dir = tempfile.TemporaryDirectory(**temp_args)
         else:
             vinfo = sys.version_info[:3]
             if vinfo >= (3, 12):
                 self.temp_dir = tempfile.TemporaryDirectory(
-                    delete=False, ignore_cleanup_errors=True
+                    delete=False, ignore_cleanup_errors=True, **temp_args
                 )
             elif vinfo >= (3, 10):
                 self.temp_dir = tempfile.TemporaryDirectory(
-                    ignore_cleanup_errors=True
+                    ignore_cleanup_errors=True, **temp_args
                 )
             else:
-                self.temp_dir = tempfile.TemporaryDirectory()
+                self.temp_dir = tempfile.TemporaryDirectory(**temp_args)
 
         # Set up process env
         new_env = os.environ.copy()
@@ -419,14 +426,19 @@ class Browser(Target):
                 if not self.future_self.done():
                     self.future_self.set_exception(BrowserFailedError("Close() was called before the browser finished opening- maybe it crashed?"))
                 for future in self.futures.values():
+                    if future.done(): continue
                     future.set_exception(BrowserClosedError("Command not completed because browser closed."))
                 for session in self.sessions.values():
-                    for future in session.subscriptions_futures.values():
-                        future.set_exception(BrowserClosedError("Event not complete because browser closed."))
+                    for futures in session.subscriptions_futures.values():
+                        for future in futures:
+                            if future.done(): continue
+                            future.set_exception(BrowserClosedError("Event not complete because browser closed."))
                 for tab in self.tabs.values():
                     for session in tab.sessions.values():
-                        for future in session.subscriptions_futures.values():
-                            future.set_exception(BrowserClosedError("Event not completed because browser closed."))
+                        for futures in session.subscriptions_futures.values():
+                            for future in futures:
+                                if future.done(): continue
+                                future.set_exception(BrowserClosedError("Event not completed because browser closed."))
                 try:
                     await self._async_close()
                 except ProcessLookupError:
@@ -599,6 +611,14 @@ class Browser(Target):
         return None
 
     def run_read_loop(self):
+        def check_error(result):
+            e = result.exception()
+            if e:
+                if isinstance(e, asyncio.CancelledError):
+                    pass
+                elif self.debug:
+                    print(f"Error in run_read_loop: {str(e)}", file=sys.stderr)
+                self.close()
         async def read_loop():
             try:
                 responses = await self.loop.run_in_executor(
@@ -684,9 +704,11 @@ class Browser(Target):
                 if self.debug:
                     print("PipeClosedError caught", file=sys.stderr)
                 return
-            self.loop.create_task(read_loop())
+            f = self.loop.create_task(read_loop())
+            f.add_done_callback(check_error)
 
-        self.loop.create_task(read_loop())
+        f = self.loop.create_task(read_loop())
+        f.add_done_callback(check_error)
 
     def write_json(self, obj):
         self.protocol.verify_json(obj)
