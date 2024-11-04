@@ -524,6 +524,8 @@ class Browser(Target):
             command="Target.closeTarget",
             params={"targetId": target_id},
         )
+        # TODO, without the lock, if we close and then call close_tab, does it hang like it did for
+        # test_tab_send_command in test_tab.py, or does it throw an error about a closed pipe?
         self._remove_tab(target_id)
         if "error" in response:
             raise RuntimeError("Could not close tab") from DevtoolsProtocolError(
