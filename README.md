@@ -1,51 +1,65 @@
-# Devtools Protocol
+# Choreographer
 
-`choreographer` allows remote control of browsers from Python.
-It is a work in progress:
+choreographer allows remote control of browsers from Python.
+It was created to support image generation from browser-based charting tools,
+but can be used for other purposes as well.
+
+## Wait—I Thought This Was Kaleido?
+
+[Kaleido][kaleido] is a cross-platform library for generating static images of plots.
+The original implementation included a custom build of Chrome,
+which has proven very difficult to maintain.
+In contrast,
+this package uses the Chrome binary on the user's machine
+in the same way as testing tools like [Puppeteer][puppeteer];
+the next step is to re-implement Kaleido as a layer on top of it.
+
+## Status
+
+choreographer is a work in progress:
 only Chrome-ish browsers are supported at the moment,
-and the name will change before the first release to PyPI.
+though we hope to add others.
+(Pull requests are greatly appreciated.)
+
 Note that we strongly recommend using async/await with this package,
 but it is not absolutely required.
-The synchronous functions described below are intended as building blocks
+The synchronous functions in this package are intended as building blocks
 for other asynchronous strategies that Python may favor over async/await in the future.
 
-## Testers Wanted!
+## Testing
+
+### Process Control Tests
+
+- Verbose: `pytest -W error -n auto -vvv -rA --capture=tee-sys tests/test_process.py`
+- Quiet:`pytest -W error -n auto -v -rFe --capture=fd tests/test_process.py`
+
+### Browser Interaction Tests
+
+- Verbose: `pytest --debug -n auto -W error -vvv -rA --capture=tee-sys --ignore=tests/test_process.py`
+- Quiet :`pytest -W error -n auto -v -rFe --capture=fd --ignore=tests/test_process.py`
+
+You can also add "--no-headless" to these if you want to see the browser pop up.
+
+### Writing Tests
+
+-   Put async and sync tests in different files. Add `_sync.py` to synchronous tests.
+-   If doing process tests, maybe use the same decorators and fixtures in the `test_process.py` file.
+-   If doing browser interaction tests, use `test_placeholder.py` as the minimum template.
+
+## Help Wanted
 
 We need your help to test this package on different platforms
 and for different use cases.
 To get started:
 
 1.  Clone this repository.
-
 1.  Create and activate a Python virtual environment.
-
 1.  Install this repository using `pip install .` or the equivalent.
-
 1.  Run `dtdoctor` and paste the output into an issue in this repository.
-
-## Wait—I Thought This Was Kaleido?
-
-[Kaleido][kaleido] is a cross-platform library for generating static images of plots.
-The existing implementation includes a custom build of Chrome,
-which has proven very difficult to maintain.
-In contrast,
-this package uses the Chrome binary on the user's machine
-in the same way as testing tools like [Puppeteer][puppeteer];
-the next step is to re-implement Kaleido as a layer on top of it.
-We can already regenerate all of the existing Kaleido tests:
-to do this,
-run `kaleido/app.py`.
-Please note,
-however,
-that it takes quite a while,
-and will grab focus on your screen as it runs.
-Please also note that the version of Kaleido in this repository has some bugs
-that have been fixed in the version that will be released.
 
 ## Quickstart with `asyncio`
 
-Save the following code to `example-01.py` and run with Python.
-(Feel free to choose a more meaningful name for the program.)
+Save the following code to `example.py` and run with Python.
 
 ```
 import asyncio
@@ -69,7 +83,7 @@ Step by step, this example:
 1.  Imports the required libraries.
 1.  Defines an `async` function
     (because `await` can only be used inside `async` functions).
-1.  Asks `choreographer` to create a browser.
+1.  Asks choreographer to create a browser.
     `headless=False` tells it to display the browser on the screen;
     the default is no display.
 1.  Wait three seconds for the browser to be created.
@@ -79,7 +93,7 @@ Step by step, this example:
 1.  Sleep again.
 1.  Runs the example function.
 
-See [the devtools reference][devtools-ref] for a list of all possible commands.
+See [the devtools reference][devtools-ref] for a list of possible commands.
 
 ### Subscribing to Events
 
@@ -125,7 +139,7 @@ In other words,
 unles you're really, really sure you know what you're doing,
 use `asyncio`.
 
-### Low-Level Use
+## Low-Level Use
 
 We provide a `Browser` and `Tab` interface,
 but there is also a lower-level `Target` and `Session` interface that one can use if needed.

@@ -22,7 +22,7 @@ import asyncio #noqa
 system = platform.system()
 if system == "Windows":
     import msvcrt  # noqa
-else: 
+else:
     os.set_inheritable(4, True)
     os.set_inheritable(3, True)
 
@@ -38,10 +38,13 @@ def open_browser(to_chromium, from_chromium, stderr=None, env=None, loop=None, l
         path,
         "--remote-debugging-pipe",
         "--disable-breakpad",
+        "--no-sandbox",
         "--allow-file-access-from-files",
         "--enable-logging=stderr",
         f"--user-data-dir={user_data_dir}",
         "--no-first-run",
+        "--disable-gpu",
+        "--enable-unsafe-swiftshader"
     ]
 
     if "HEADLESS" in env:
@@ -95,11 +98,7 @@ if __name__ == "__main__":
     signal.signal(signal.SIGTERM, kill_proc)
     signal.signal(signal.SIGINT, kill_proc)
 
-    if system == "Windows": # never will be main tbh
-        process.wait()
-    else:
-        signal.pause()
-
+    process.wait()
     # NOTE is bad but we don't detect closed pipe (stdout doesn't close from other end?)
     # doesn't seem to impact in sync, maybe because we're doing manual cleanup in sequence
     # should try to see if shutting down chrome browser can provoke pipeerror in threadmode and asyncmode

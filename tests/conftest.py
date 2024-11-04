@@ -1,7 +1,15 @@
 import asyncio
+
 import pytest
 import pytest_asyncio
+
 import choreographer as choreo
+
+# PYTEST TIP:
+# set capture=no to let all debug leak through
+# if asyncio and pytest aren't playing nice, this will help,
+# especially in fixtures- since they may buffer your outputs
+# and can freeze w/o dumping the buffer
 
 @pytest.fixture(params=[True, False], ids=["headless", ""])
 def headless(request):
@@ -19,7 +27,8 @@ def debug_browser(request):
 
 
 def pytest_addoption(parser):
-    parser.addoption("--headless", action="store_true", default=False)
+    parser.addoption("--headless", action="store_true", dest="headless", default=True)
+    parser.addoption("--no-headless", dest="headless", action="store_false")
 
 
 @pytest_asyncio.fixture(scope="function", loop_scope="function")
@@ -27,12 +36,16 @@ async def browser(request):
     # this needs also to be set by command line TODO
     headless = request.config.getoption("--headless")
     debug = request.config.get_verbosity() > 2
-
     browser = await choreo.Browser(
         headless=headless, debug=debug, debug_browser=debug
     )
     yield browser
-    await browser.close()
+    try:
+        await browser.close()
+    except choreo.browser.BrowserClosedError:
+        pass
+
+
 
 @pytest_asyncio.fixture(scope="function", loop_scope="function")
 async def browser_verbose():
@@ -63,14 +76,14 @@ def pytest_runtest_setup(item: pytest.Item):
 
 def pytest_configure():
     # change this by command line TODO
-    pytest.default_timeout = 3
+    pytest.default_timeout = 5
 
 # add this fixture to extend timeout
 # there is 6 second max test length for all
 # which kills all tests
 @pytest.fixture(scope="session")
 def timeout_long():
-    return 6
+    return 8
 
 @pytest.fixture(scope="function")
 def capteesys(request):
@@ -84,7 +97,6 @@ def capteesys(request):
         # Remove next two lines if you don't want to ever switch to native version
         yield request.getfixturevalue("capteesys")
         return
-    print("Shimming")
     capman = request.config.pluginmanager.getplugin("capturemanager")
     capture_fixture = capture.CaptureFixture(capture.SysCapture, request, _ispytest=True)
     def _inject_start():

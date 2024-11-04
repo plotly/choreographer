@@ -3,6 +3,7 @@ import sys
 import json
 import platform
 import warnings
+from threading import Lock
 
 with_block = bool(sys.version_info[:3] >= (3, 12) or platform.system() != "Windows")
 class BlockWarning(UserWarning):
@@ -41,7 +42,12 @@ class Pipe:
         self.debug = debug
         self.cls=cls
 
+        # this is just a convenience to prevent multiple shutdowns
+        self.shutdown_lock = Lock()
+
     def write_json(self, obj, debug=None):
+        if self.shutdown_lock.locked():
+            raise PipeClosedError()
         if not debug: debug = self.debug
         if debug:
             print("write_json:", file=sys.stderr)
@@ -51,9 +57,17 @@ class Pipe:
             print(f"write_json: {message}", file=sys.stderr)
             # windows may print weird characters if we set utf-8 instead of utf-16
             # check this TODO
-        os.write(self.write_to_chromium, encoded_message)
+        try:
+            os.write(self.write_to_chromium, encoded_message)
+        except OSError as e:
+            self.close()
+            raise PipeClosedError() from e
+        if debug:
+            print("wrote_json.", file=sys.stderr)
 
     def read_jsons(self, blocking=True, debug=None):
+        if self.shutdown_lock.locked():
+            raise PipeClosedError()
         if not with_block and not blocking:
             warnings.warn("Windows python version < 3.12 does not support non-blocking", BlockWarning)
         if not debug:
@@ -64,6 +78,7 @@ class Pipe:
         try:
             if with_block: os.set_blocking(self.read_from_chromium, blocking)
         except OSError as e:
+            self.close()
             raise PipeClosedError() from e
         try:
             raw_buffer = None # if we fail in read, we already defined
@@ -83,6 +98,7 @@ class Pipe:
                 print("read_jsons: BlockingIOError caught.", file=sys.stderr)
             return jsons
         except OSError as e:
+            self.close()
             if debug:
                 print(f"caught OSError in read() {str(e)}", file=sys.stderr)
             if not raw_buffer or raw_buffer == b'{bye}\n':
@@ -129,13 +145,14 @@ class Pipe:
                 print(f"Caught expected error in self-wrte bye: {str(e)}", file=sys.stderr)
 
     def close(self):
-        if platform.system() == "Windows":
-            self._fake_bye()
-        self._unblock_fd(self.write_from_chromium)
-        self._unblock_fd(self.read_from_chromium)
-        self._unblock_fd(self.write_to_chromium)
-        self._unblock_fd(self.read_to_chromium)
-        self._close_fd(self.write_to_chromium)
-        self._close_fd(self.read_from_chromium)
-        self._close_fd(self.write_from_chromium)
-        self._close_fd(self.read_to_chromium)
+        if self.shutdown_lock.acquire(blocking=False):
+            if platform.system() == "Windows":
+                self._fake_bye()
+            self._unblock_fd(self.write_from_chromium)
+            self._unblock_fd(self.read_from_chromium)
+            self._unblock_fd(self.write_to_chromium)
+            self._unblock_fd(self.read_to_chromium)
+            self._close_fd(self.write_to_chromium) # no more writes
+            self._close_fd(self.write_from_chromium) # we're done with writes
+            self._close_fd(self.read_from_chromium) # no more attemps at read
+            self._close_fd(self.read_to_chromium) #
