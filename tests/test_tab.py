@@ -63,6 +63,7 @@ async def test_subscribe_once(tab):
 @pytest.mark.asyncio
 async def test_subscribe_and_unsubscribe(tab):
     counter = 0
+    old_counter = counter
 
     async def count_event(r):
         nonlocal counter
@@ -73,7 +74,7 @@ async def test_subscribe_and_unsubscribe(tab):
     await tab.send_command("Page.enable")
     await tab.send_command("Page.reload")
     await asyncio.sleep(0.5)
-    assert counter > 1
+    assert counter > old_counter
 
     tab.unsubscribe("Page.*")
     old_counter = counter
