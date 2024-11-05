@@ -36,19 +36,22 @@ async def test_browser_write_json(browser):
 
     # Test missing 'id' key
     with pytest.raises(
-        choreo.protocol.MissingKeyError, match="Message missing required key/s id. Message received: {'method': 'Target.getTargets'}"
+        choreo.protocol.MissingKeyError,
+        match="Message missing required key/s id. Message received: {'method': 'Target.getTargets'}",
     ):
         await browser.write_json({"method": "Target.getTargets"})
 
     # Test missing 'method' key
     with pytest.raises(
-        choreo.protocol.MissingKeyError, match="Message missing required key/s method. Message received: {'id': 1}"
+        choreo.protocol.MissingKeyError,
+        match="Message missing required key/s method. Message received: {'id': 1}",
     ):
         await browser.write_json({"id": 1})
 
     # Test empty dictionary
     with pytest.raises(
-        choreo.protocol.MissingKeyError, match="Message missing required key/s id. Message received: {}"
+        choreo.protocol.MissingKeyError,
+        match="Message missing required key/s id. Message received: {}",
     ):
         await browser.write_json({})
 
@@ -60,10 +63,6 @@ async def test_browser_write_json(browser):
         await browser.write_json(
             {"id": 0, "method": "Target.getTargets", "invalid_parameter": "kamksamdk"}
         )
-
-    # Test invalid method name should return error
-    response = await browser.write_json({"id": 2, "method": "dkadklqwmd"})
-    assert "error" in response
 
     # Test int method should return error
     with pytest.raises(
@@ -79,9 +78,20 @@ async def test_browser_write_json(browser):
     ):
         await browser.write_json({"id": "2", "method": "Target.getTargets"})
 
+    # Test invalid method name should return error
+    response = await browser.write_json({"id": 2, "method": "dkadklqwmd"})
+    assert "error" in response
+
 
 @pytest.mark.asyncio
 async def test_browser_send_command(browser):
+    # Test int method should return error
+    with pytest.raises(
+        choreo.protocol.MessageTypeError,
+        match="Message with key method must have type <class 'str'>, not <class 'type'>.",
+    ):
+        await browser.send_command(command=12345)
+
     # Test valid request with correct command
     response = await browser.send_command(command="Target.getTargets")
     assert "result" in response and "targetInfos" in response["result"]
@@ -89,13 +99,6 @@ async def test_browser_send_command(browser):
     # Test invalid method name should return error
     response = await browser.send_command(command="dkadklqwmd")
     assert "error" in response
-
-    # Test int method should return error
-    with pytest.raises(
-        choreo.protocol.MessageTypeError,
-        match="Message with key method must have type <class 'str'>, not <class 'type'>.",
-    ):
-        await browser.send_command(command=12345)
 
 
 @pytest.mark.asyncio
