@@ -10,7 +10,9 @@ def check_response_dictionary(response_received, response_expected):
     for k, v in response_expected.items():
         if isinstance(v, dict):
             check_response_dictionary(v, response_expected[k])
-        assert k in response_received and response_received[k] == v, "Expected: {response_expected}\nReceived: {response_received}"
+        assert (
+            k in response_received and response_received[k] == v
+        ), "Expected: {response_expected}\nReceived: {response_received}"
 
 
 @pytest_asyncio.fixture(scope="function", loop_scope="function")
@@ -33,14 +35,6 @@ async def test_create_and_close_session(tab):
 
 @pytest.mark.asyncio
 async def test_tab_send_command(tab):
-    # Test valid request with correct command
-    response = await tab.send_command(command="Page.enable")
-    check_response_dictionary(response, {"result": {}})
-
-    # Test invalid method name should return error
-    response = await tab.send_command(command="dkadklqwmd")
-    assert "error" in response
-
     # Test int method should return error
     with pytest.raises(
         choreo.protocol.MessageTypeError,
@@ -48,6 +42,13 @@ async def test_tab_send_command(tab):
     ):
         await tab.send_command(command=12345)
 
+    # Test valid request with correct command
+    response = await tab.send_command(command="Page.enable")
+    check_response_dictionary(response, {"result": {}})
+
+    # Test invalid method name should return error
+    response = await tab.send_command(command="dkadklqwmd")
+    assert "error" in response
 
 
 @pytest.mark.asyncio
@@ -63,14 +64,16 @@ async def test_subscribe_once(tab):
 @pytest.mark.asyncio
 async def test_subscribe_and_unsubscribe(tab):
     counter = 0
+
     async def count_event(r):
         nonlocal counter
         counter += 1
+
     tab.subscribe("Page.*", count_event)
     assert "Page.*" in list(tab.sessions.values())[0].subscriptions
     await tab.send_command("Page.enable")
     await tab.send_command("Page.reload")
-    await asyncio.sleep(.5)
+    await asyncio.sleep(0.5)
     assert counter > 1
 
     tab.unsubscribe("Page.*")
