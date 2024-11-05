@@ -8,7 +8,6 @@ class DevtoolsProtocolError(Exception):
         self.message = response["error"]["message"]
 
 
-
 class MessageTypeError(TypeError):
     def __init__(self, key, value, expected_type):
         value = type(value) if not isinstance(value, type) else value
@@ -23,9 +22,9 @@ class MissingKeyError(ValueError):
             f"Message missing required key/s {key}. Message received: {obj}"
         )
 
+
 class ExperimentalFeatureWarning(UserWarning):
     pass
-
 
 
 class Protocol:
