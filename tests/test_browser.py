@@ -34,6 +34,10 @@ async def test_browser_write_json(browser):
     response = await browser.write_json({"id": 0, "method": "Target.getTargets"})
     assert "result" in response and "targetInfos" in response["result"]
 
+    # Test invalid method name should return error
+    response = await browser.write_json({"id": 2, "method": "dkadklqwmd"})
+    assert "error" in response
+
     # Test missing 'id' key
     with pytest.raises(
         choreo.protocol.MissingKeyError,
@@ -72,19 +76,9 @@ async def test_browser_write_json(browser):
     ):
         await browser.write_json({"id": "2", "method": "Target.getTargets"})
 
-    # Test invalid method name should return error
-    response = await browser.write_json({"id": 2, "method": "dkadklqwmd"})
-    assert "error" in response
-
 
 @pytest.mark.asyncio
 async def test_browser_send_command(browser):
-    # Test int method should return error
-    with pytest.raises(
-        choreo.protocol.MessageTypeError,
-    ):
-        await browser.send_command(command=12345)
-
     # Test valid request with correct command
     response = await browser.send_command(command="Target.getTargets")
     assert "result" in response and "targetInfos" in response["result"]
@@ -92,6 +86,12 @@ async def test_browser_send_command(browser):
     # Test invalid method name should return error
     response = await browser.send_command(command="dkadklqwmd")
     assert "error" in response
+
+    # Test int method should return error
+    with pytest.raises(
+        choreo.protocol.MessageTypeError,
+    ):
+        await browser.send_command(command=12345)
 
 
 @pytest.mark.asyncio

@@ -35,12 +35,6 @@ async def test_create_and_close_session(tab):
 
 @pytest.mark.asyncio
 async def test_tab_send_command(tab):
-    # Test int method should return error
-    with pytest.raises(
-        choreo.protocol.MessageTypeError,
-    ):
-        await tab.send_command(command=12345)
-
     # Test valid request with correct command
     response = await tab.send_command(command="Page.enable")
     check_response_dictionary(response, {"result": {}})
@@ -48,6 +42,12 @@ async def test_tab_send_command(tab):
     # Test invalid method name should return error
     response = await tab.send_command(command="dkadklqwmd")
     assert "error" in response
+
+    # Test int method should return error
+    with pytest.raises(
+        choreo.protocol.MessageTypeError,
+    ):
+        await tab.send_command(command=12345)
 
 
 @pytest.mark.asyncio
