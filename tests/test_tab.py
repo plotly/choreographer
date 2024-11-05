@@ -38,7 +38,7 @@ async def test_tab_send_command(tab):
     # Test int method should return error
     with pytest.raises(
         choreo.protocol.MessageTypeError,
-        match="Message with key method must have type <class 'str'>, not <class 'type'>.",
+        match="Message with key method must have type <class 'str'>, not <class 'int'>.",
     ):
         await tab.send_command(command=12345)
 

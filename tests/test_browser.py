@@ -67,14 +67,14 @@ async def test_browser_write_json(browser):
     # Test int method should return error
     with pytest.raises(
         choreo.protocol.MessageTypeError,
-        match="Message with key method must have type <class 'str'>, not <class 'type'>.",
+        match="Message with key method must have type <class 'str'>, not <class 'int'>.",
     ):
         await browser.write_json({"id": 3, "method": 12345})
 
     # Test non-integer id should return error
     with pytest.raises(
         choreo.protocol.MessageTypeError,
-        match="Message with key id must have type <class 'int'>, not <class 'type'>.",
+        match="Message with key id must have type <class 'int'>, not <class 'str'>.",
     ):
         await browser.write_json({"id": "2", "method": "Target.getTargets"})
 
@@ -88,7 +88,7 @@ async def test_browser_send_command(browser):
     # Test int method should return error
     with pytest.raises(
         choreo.protocol.MessageTypeError,
-        match="Message with key method must have type <class 'str'>, not <class 'type'>.",
+        match="Message with key method must have type <class 'str'>, not <class 'int'>.",
     ):
         await browser.send_command(command=12345)
 
