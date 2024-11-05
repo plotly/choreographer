@@ -56,6 +56,7 @@ class Browser(Target):
         executor=None,
         debug=False,
         debug_browser=None,
+        **kwargs
     ):
         # Configuration
         self.headless = headless
@@ -107,6 +108,10 @@ class Browser(Target):
                 "Could not find an acceptable browser. Please set environmental variable BROWSER_PATH or pass `path=/path/to/browser` into the Browser() constructor."
             )
 
+        if kwargs.get('gpu_enabled', False):
+            new_env["GPU_ENABLED"] = "true"
+        if kwargs.get('sandbox_enabled', False):
+            new_env["SANDBOX_ENABLED"] = "true"
 
         new_env["USER_DATA_DIR"] = str(self.temp_dir.name)
 
