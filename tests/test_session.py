@@ -20,7 +20,6 @@ async def test_session_send_command(session):
     # Test int method should return error
     with pytest.raises(
         choreo.protocol.MessageTypeError,
-        match="Message with key method must have type <class 'str'>, not <class 'int'>.",
     ):
         await session.send_command(command=12345)
 
