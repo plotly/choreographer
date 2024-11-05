@@ -17,6 +17,13 @@ async def session(browser):
 
 @pytest.mark.asyncio
 async def test_session_send_command(session):
+    # Test int method should return error
+    with pytest.raises(
+        choreo.protocol.MessageTypeError,
+        match="Message with key method must have type <class 'str'>, not <class 'type'>.",
+    ):
+        await session.send_command(command=12345)
+
     # Test valid request with correct command
     response = await session.send_command(command="Target.getTargets")
     assert "result" in response and "targetInfos" in response["result"]
@@ -24,10 +31,3 @@ async def test_session_send_command(session):
     # Test invalid method name should return error
     response = await session.send_command(command="dkadklqwmd")
     assert "error" in response
-
-    # Test int method should return error
-    with pytest.raises(
-        choreo.protocol.MessageTypeError,
-        match="Message with key method must have type <class 'str'>, not <class 'type'>.",
-    ):
-        await session.send_command(command=12345)
