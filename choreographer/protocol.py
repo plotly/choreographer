@@ -11,8 +11,9 @@ class DevtoolsProtocolError(Exception):
 
 class MessageTypeError(TypeError):
     def __init__(self, key, value, expected_type):
+        value = type(value) if not isinstance(value, type) else value
         super().__init__(
-            f"Message with key {key} must have type {expected_type}, not {type(value)}."
+            f"Message with key {key} must have type {expected_type}, not {value}."
         )
 
 
