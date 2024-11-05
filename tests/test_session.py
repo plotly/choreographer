@@ -25,6 +25,9 @@ async def test_session_send_command(session):
     response = await session.send_command(command="dkadklqwmd")
     assert "error" in response
 
-"""    # Test int method should return error
-    response = await session.send_command(command=12345)
-    assert "error" in response"""
+    # Test int method should return error
+    with pytest.raises(
+        choreo.protocol.MessageTypeError,
+        match="Message with key method must have type <class 'str'>, not <class 'type'>.",
+    ):
+        await session.send_command(command=12345)

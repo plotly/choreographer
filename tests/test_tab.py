@@ -42,9 +42,11 @@ async def test_tab_send_command(tab):
     assert "error" in response
 
     # Test int method should return error
-    # chrome doesn't send back sessionId with this error, so we have to fatal fail
-    # assert "error" in response
-    response = await tab.send_command(command=12345)
+    with pytest.raises(
+        choreo.protocol.MessageTypeError,
+        match="Message with key method must have type <class 'str'>, not <class 'type'>.",
+    ):
+        await tab.send_command(command=12345)
 
 
 
