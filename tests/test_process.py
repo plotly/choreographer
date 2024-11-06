@@ -10,11 +10,13 @@ from async_timeout import timeout
 import choreographer as choreo
 
 @pytest.mark.asyncio(loop_scope="function")
-async def test_context(capteesys, headless, debug, debug_browser):
+async def test_context(capteesys, headless, debug, debug_browser, sandbox, gpu):
     async with choreo.Browser(
         headless=headless,
         debug=debug,
         debug_browser=debug_browser,
+        enable_sandbox=sandbox,
+        enable_gpu=gpu
     ) as browser, timeout(pytest.default_timeout):
         response = await browser.send_command(command="Target.getTargets")
         assert "result" in response and "targetInfos" in response["result"]
@@ -29,11 +31,13 @@ async def test_context(capteesys, headless, debug, debug_browser):
     await asyncio.sleep(0)
 
 @pytest.mark.asyncio(loop_scope="function")
-async def test_no_context(capteesys, headless, debug, debug_browser):
+async def test_no_context(capteesys, headless, debug, debug_browser, sandbox, gpu):
     browser = await choreo.Browser(
         headless=headless,
         debug=debug,
         debug_browser=debug_browser,
+        enable_sandbox=sandbox,
+        enable_gpu=gpu
     )
     try:
         async with timeout(pytest.default_timeout):
