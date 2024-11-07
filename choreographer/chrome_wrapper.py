@@ -38,14 +38,16 @@ def open_browser(to_chromium, from_chromium, stderr=None, env=None, loop=None, l
         path,
         "--remote-debugging-pipe",
         "--disable-breakpad",
-        "--no-sandbox",
         "--allow-file-access-from-files",
         "--enable-logging=stderr",
         f"--user-data-dir={user_data_dir}",
         "--no-first-run",
-        "--disable-gpu",
         "--enable-unsafe-swiftshader"
     ]
+    if not env.get("GPU_ENABLED", False):
+        cli.append("--disable-gpu")
+    if not env.get("SANDBOX_ENABLED", False):
+        cli.append("--no-sandbox")
 
     if "HEADLESS" in env:
         cli.append("--headless=old") # temporary fix
