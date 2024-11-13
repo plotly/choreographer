@@ -56,7 +56,7 @@ class Browser(Target):
         loop=None,
         executor=None,
         debug=False,
-        debug_browser=None,
+        debug_browser=False,
         **kwargs
     ):
         # Configuration
@@ -69,7 +69,7 @@ class Browser(Target):
         self.loop_hack = False # subprocess needs weird stuff w/ SelectorEventLoop
 
         # Set up stderr
-        if not debug_browser:  # false o None
+        if debug_browser is False:  # false o None
             stderr = subprocess.DEVNULL
         elif debug_browser is True:
             stderr = sys.stderr
