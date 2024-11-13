@@ -2,6 +2,7 @@ import platform
 import os
 from pathlib import Path
 import sys
+import io
 import subprocess
 import time
 import tempfile
@@ -74,7 +75,17 @@ class Browser(Target):
             stderr = sys.stderr
         else:
             stderr = debug_browser
+
+        # awful
+        if stderr and stderr != subprocess.PIPE and stderr != subprocess.STDOUT and stderr != subprocess.DEVNULL and not isinstance(stderr, int):
+            try: stderr.fileno()
+            except io.UnsupportedOperation:
+                warnings.warn("A value has been passed to debug_browser which is not compatible with python. The default value if deug_browser is True is whatever the value of sys.stderr is. sys.stderr may be many things but debug_browser must be a value Popen accepts for stderr, or True.")
+
+
+
         self._stderr = stderr
+
         if debug:
             print(f"STDERR: {stderr}", file=sys.stderr)
 
