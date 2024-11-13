@@ -1,16 +1,15 @@
 import os
 
 # importing modules has side effects, so we do this before imports
-# chromium reads on 3, writes on 4
 # linter complains.
+env = None
 
+
+# chromium reads on 3, writes on 4
 # really this means windows only, but a more readable platform.system()
-# needs to come later for the above reasons
-# windows will import, not run as separate process
 if __name__ == "__main__":
     os.dup2(0, 3)  # make our stdin their input
     os.dup2(1, 4)  # make our stdout their output
-
 
 
 import subprocess  # noqa
