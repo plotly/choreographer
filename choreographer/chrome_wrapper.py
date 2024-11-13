@@ -3,7 +3,6 @@ import os
 # importing modules has side effects, so we do this before imports
 # chromium reads on 3, writes on 4
 # linter complains.
-env = None
 
 # really this means windows only, but a more readable platform.system()
 # needs to come later for the above reasons
@@ -18,6 +17,7 @@ import subprocess  # noqa
 import signal  # noqa
 import platform  # noqa
 import asyncio #noqa
+import sys #noqa
 
 system = platform.system()
 if system == "Windows":
@@ -26,7 +26,7 @@ else:
     os.set_inheritable(4, True)
     os.set_inheritable(3, True)
 
-def open_browser(to_chromium, from_chromium, stderr=None, env=None, loop=None, loop_hack=False):
+def open_browser(to_chromium, from_chromium, stderr=sys.stderr, env=None, loop=None, loop_hack=False):
     path = env.get("BROWSER_PATH")
     if not path:
         raise RuntimeError("No browser path was passed to run")

@@ -71,7 +71,7 @@ class Browser(Target):
         if not debug_browser:  # false o None
             stderr = subprocess.DEVNULL
         elif debug_browser is True:
-            stderr = None
+            stderr = sys.stderr
         else:
             stderr = debug_browser
         self._stderr = stderr
