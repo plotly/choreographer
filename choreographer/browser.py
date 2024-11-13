@@ -56,8 +56,13 @@ class Browser(Target):
         executor=None,
         debug=False,
         debug_browser=None,
+        **kwargs
     ):
         # Configuration
+        self.enable_gpu = kwargs.pop("enable_gpu", False)
+        self.enable_sandbox = kwargs.pop("enable_sandbox", False)
+        if len(kwargs):
+            raise ValueError(f"Unknown keyword arguments: {kwargs}")
         self.headless = headless
         self.debug = debug
         self.loop_hack = False # subprocess needs weird stuff w/ SelectorEventLoop
@@ -107,6 +112,10 @@ class Browser(Target):
                 "Could not find an acceptable browser. Please set environmental variable BROWSER_PATH or pass `path=/path/to/browser` into the Browser() constructor."
             )
 
+        if self.enable_gpu:
+            new_env["GPU_ENABLED"] = "true"
+        if self.enable_sandbox:
+            new_env["SANDBOX_ENABLED"] = "true"
 
         new_env["USER_DATA_DIR"] = str(self.temp_dir.name)
 

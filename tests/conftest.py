@@ -11,6 +11,14 @@ import choreographer as choreo
 # especially in fixtures- since they may buffer your outputs
 # and can freeze w/o dumping the buffer
 
+@pytest.fixture(params=[True, False], ids=["enable_sandbox", ""])
+def sandbox(request):
+    return request.param
+
+@pytest.fixture(params=[True, False], ids=["enable_gpu", ""])
+def gpu(request):
+    return request.param
+
 @pytest.fixture(params=[True, False], ids=["headless", ""])
 def headless(request):
     return request.param
