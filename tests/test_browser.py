@@ -30,14 +30,68 @@ async def test_create_and_close_session(browser):
 
 @pytest.mark.asyncio
 async def test_browser_write_json(browser):
+    # Test valid request with correct id and method
     response = await browser.write_json({"id": 0, "method": "Target.getTargets"})
     assert "result" in response and "targetInfos" in response["result"]
+
+    # Test invalid method name should return error
+    response = await browser.write_json({"id": 2, "method": "dkadklqwmd"})
+    assert "error" in response
+
+    # Test missing 'id' key
+    with pytest.raises(
+        choreo.protocol.MissingKeyError,
+    ):
+        await browser.write_json({"method": "Target.getTargets"})
+
+    # Test missing 'method' key
+    with pytest.raises(
+        choreo.protocol.MissingKeyError,
+    ):
+        await browser.write_json({"id": 1})
+
+    # Test empty dictionary
+    with pytest.raises(
+        choreo.protocol.MissingKeyError,
+    ):
+        await browser.write_json({})
+
+    # Test invalid parameter in the message
+    with pytest.raises(
+        RuntimeError,
+    ):
+        await browser.write_json(
+            {"id": 0, "method": "Target.getTargets", "invalid_parameter": "kamksamdk"}
+        )
+
+    # Test int method should return error
+    with pytest.raises(
+        choreo.protocol.MessageTypeError,
+    ):
+        await browser.write_json({"id": 3, "method": 12345})
+
+    # Test non-integer id should return error
+    with pytest.raises(
+        choreo.protocol.MessageTypeError,
+    ):
+        await browser.write_json({"id": "2", "method": "Target.getTargets"})
 
 
 @pytest.mark.asyncio
 async def test_browser_send_command(browser):
+    # Test valid request with correct command
     response = await browser.send_command(command="Target.getTargets")
     assert "result" in response and "targetInfos" in response["result"]
+
+    # Test invalid method name should return error
+    response = await browser.send_command(command="dkadklqwmd")
+    assert "error" in response
+
+    # Test int method should return error
+    with pytest.raises(
+        choreo.protocol.MessageTypeError,
+    ):
+        await browser.send_command(command=12345)
 
 
 @pytest.mark.asyncio

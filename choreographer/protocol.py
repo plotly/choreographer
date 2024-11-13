@@ -8,6 +8,21 @@ class DevtoolsProtocolError(Exception):
         self.message = response["error"]["message"]
 
 
+class MessageTypeError(TypeError):
+    def __init__(self, key, value, expected_type):
+        value = type(value) if not isinstance(value, type) else value
+        super().__init__(
+            f"Message with key {key} must have type {expected_type}, not {value}."
+        )
+
+
+class MissingKeyError(ValueError):
+    def __init__(self, key, obj):
+        super().__init__(
+            f"Message missing required key/s {key}. Message received: {obj}"
+        )
+
+
 class ExperimentalFeatureWarning(UserWarning):
     pass
 
@@ -31,10 +46,13 @@ class Protocol:
 
     def verify_json(self, obj):
         n_keys = 0
-        if "id" in obj and "method" in obj:
-            n_keys += 2
-        else:
-            raise RuntimeError("Each message object must contain an id and method key")
+        required_keys = {"id": int, "method": str}
+        for key, type_key in required_keys.items():
+            if key not in obj:
+                raise MissingKeyError(key, obj)
+            if not isinstance(obj[key], type_key):
+                raise MessageTypeError(key, type(obj[key]), type_key)
+        n_keys += 2
 
         if "params" in obj:
             n_keys += 1
