@@ -203,11 +203,17 @@ class Browser(Target):
 
 
     async def _watchdog(self):
+        self._watchdog_healthy = True
         if self.debug: print("Starting watchdog", file=sys.stderr)
         await self.subprocess.wait()
+        if self.lock.locked(): return # it was locked and closed
+        self._watchdog_healthy = False
         if self.debug:
             print("Browser is being closed because chrom* closed", file=sys.stderr)
         await self.close()
+        await asyncio.sleep(1)
+        self._retry_delete_manual(self.temp_dir.name, delete=True)
+
 
 
     async def _open_async(self):
