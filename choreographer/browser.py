@@ -99,7 +99,7 @@ class Browser(Target):
                 self.temp_dir = tempfile.TemporaryDirectory(**temp_args)
         self._temp_dir_name = self.temp_dir.name
         if self.debug:
-            print(f"TEMP DIR NAME: {self.temp_dir_name}", file=sys.stderr)
+            print(f"TEMP DIR NAME: {self._temp_dir_name}", file=sys.stderr)
 
         # Set up process env
         new_env = os.environ.copy()
