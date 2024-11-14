@@ -98,6 +98,8 @@ class Browser(Target):
             else:
                 self.temp_dir = tempfile.TemporaryDirectory(**temp_args)
         self._temp_dir_name = self.temp_dir.name
+        if self.debug:
+            print(f"TEMP DIR NAME: {self.temp_dir_name}", file=sys.stderr)
 
         # Set up process env
         new_env = os.environ.copy()
@@ -249,7 +251,9 @@ class Browser(Target):
 
     def _retry_delete_manual(self, path, delete=False):
         if not os.path.exists(path):
-            return 0, 0, [(path, FileNotFoundError("Supplied path doesn't exist"))]
+            if self.debug:
+                print("No retry delete manual necessary, path doesn't exist", file=sys.stderr)
+            return 0, 0, []
         n_dirs = 0
         n_files = 0
         errors = []
@@ -258,21 +262,23 @@ class Browser(Target):
             n_files += len(files)
             if delete:
                 for f in files:
-                    if self.debug:
-                        print(f"Removing file: {f}", file=sys.stderr)
                     fp = os.path.join(root, f)
+                    if self.debug:
+                        print(f"Removing file: {fp}", file=sys.stderr)
                     try:
                         os.chmod(fp, stat.S_IWUSR)
                         os.remove(fp)
+                        if self.debug: print("Success", file=sys.stderr)
                     except BaseException as e:
                         errors.append((fp, e))
                 for d in dirs:
-                    if self.debug:
-                        print(f"Removing dir: {d}", file=sys.stderr)
                     fp = os.path.join(root, d)
+                    if self.debug:
+                        print(f"Removing dir: {fp}", file=sys.stderr)
                     try:
                         os.chmod(fp, stat.S_IWUSR)
                         os.rmdir(fp)
+                        if self.debug: print("Success", file=sys.stderr)
                     except BaseException as e:
                         errors.append((fp, e))
             # clean up directory
