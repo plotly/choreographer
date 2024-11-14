@@ -287,16 +287,14 @@ class Browser(Target):
         name = self.temp_dir.name
         clean = False
         try:
+            # no faith in this python implementation, always fails with windows
+            # very unstable recently as well, lots new arguments in tempfile package
             self.temp_dir.cleanup()
             clean=True
         except BaseException as e:
-            if platform.system() == "Windows":
-                if self.debug:
-                    print(f"TempDirWarning: {str(e)}", file=sys.stderr)
-            else:
-                warnings.warn(str(e), TempDirWarning)
+            if self.debug:
+                print(f"First tempdir deletion failed: TempDirWarning: {str(e)}", file=sys.stderr)
 
-        # windows+old vers doesn't like python's default cleanup
 
         def remove_readonly(func, path, excinfo):
             os.chmod(path, stat.S_IWUSR)
@@ -313,17 +311,14 @@ class Browser(Target):
         except FileNotFoundError:
             pass # it worked!
         except BaseException as e:
+            if self.debug:
+                print(f"Second tmpdir deletion failed (shutil.rmtree): {str(e)}", file=sys.stderr)
             if not clean:
-                if platform.system() == "Windows":
-                    def extra_clean():
-                        time.sleep(5)
-                        self._retry_delete_manual(name, delete=True)
-                    t = Thread(target=extra_clean)
-                    t.run()
-                else:
-                    warnings.warn(
-                            f"The temporary directory could not be deleted, execution will continue. {type(e)}: {e}", TempDirWarning
-                    )
+                def extra_clean():
+                    time.sleep(2)
+                    self._retry_delete_manual(name, delete=True)
+                t = Thread(target=extra_clean)
+                t.run()
         if self.debug:
             print(f"Tempfile still exists?: {bool(os.path.exists(str(name)))}", file=sys.stderr)
 
