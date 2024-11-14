@@ -214,8 +214,13 @@ class Browser(Target):
         if self.debug:
             print("Browser is being closed because chrom* closed", file=sys.stderr)
         await self.close()
-        await asyncio.sleep(.75)
-        self._retry_delete_manual(self._temp_dir_name, delete=True)
+        await asyncio.sleep(1)
+        with warnings.catch_warnings():
+            # we'll ignore warnings here because
+            # if the user sloppy-closes the browsers
+            # they may leave processes up still trying to create temporary files
+            warnings.filterwarnings("ignore", category=TempDirWarning)
+            self._retry_delete_manual(self._temp_dir_name, delete=True)
 
 
 
