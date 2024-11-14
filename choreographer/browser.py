@@ -61,6 +61,7 @@ class Browser(Target):
         # Configuration
         self.enable_gpu = kwargs.pop("enable_gpu", False)
         self.enable_sandbox = kwargs.pop("enable_sandbox", False)
+        self._tmpdir_path = kwargs.pop("tmp_path", None)
         if len(kwargs):
             raise ValueError(f"Unknown keyword arguments: {kwargs}")
         self.headless = headless
@@ -78,25 +79,6 @@ class Browser(Target):
         if debug:
             print(f"STDERR: {stderr}", file=sys.stderr)
 
-        # Set up temp dir
-        if platform.system() == "Linux":
-            temp_args = dict(prefix=".choreographer-", dir=Path.home())
-        else:
-            temp_args = {}
-        if platform.system() != "Windows":
-            self.temp_dir = tempfile.TemporaryDirectory(**temp_args)
-        else:
-            vinfo = sys.version_info[:3]
-            if vinfo >= (3, 12):
-                self.temp_dir = tempfile.TemporaryDirectory(
-                    delete=False, ignore_cleanup_errors=True, **temp_args
-                )
-            elif vinfo >= (3, 10):
-                self.temp_dir = tempfile.TemporaryDirectory(
-                    ignore_cleanup_errors=True, **temp_args
-                )
-            else:
-                self.temp_dir = tempfile.TemporaryDirectory(**temp_args)
 
         # Set up process env
         new_env = os.environ.copy()
@@ -112,12 +94,40 @@ class Browser(Target):
                 "Could not find an acceptable browser. Please set environmental variable BROWSER_PATH or pass `path=/path/to/browser` into the Browser() constructor."
             )
 
+        if self._tmpdir_path:
+            temp_args = dict(dir=self._tmpdir_path)
+        elif "snap" in path:
+            self._tmpdir_path = Path.home()
+            if self.debug:
+                print("Snap detected, moving tmp directory to home", file=sys.stderr)
+            temp_args = dict(prefix=".choreographer-", dir=Path.home())
+        else:
+            self._snap = False
+            temp_args = {}
+        if platform.system() != "Windows":
+            self.temp_dir = tempfile.TemporaryDirectory(**temp_args)
+        else:
+            vinfo = sys.version_info[:3]
+            if vinfo >= (3, 12):
+                self.temp_dir = tempfile.TemporaryDirectory(
+                    delete=False, ignore_cleanup_errors=True, **temp_args
+                )
+            elif vinfo >= (3, 10):
+                self.temp_dir = tempfile.TemporaryDirectory(
+                    ignore_cleanup_errors=True, **temp_args
+                )
+            else:
+                self.temp_dir = tempfile.TemporaryDirectory(**temp_args)
+        self._temp_dir_name = self.temp_dir.name
+        if self.debug:
+            print(f"TEMP DIR NAME: {self._temp_dir_name}", file=sys.stderr)
+
         if self.enable_gpu:
             new_env["GPU_ENABLED"] = "true"
         if self.enable_sandbox:
             new_env["SANDBOX_ENABLED"] = "true"
 
-        new_env["USER_DATA_DIR"] = str(self.temp_dir.name)
+        new_env["USER_DATA_DIR"] = str(self._temp_dir_name)
 
         if headless:
             new_env["HEADLESS"] = "--headless"  # unset if false
@@ -203,11 +213,22 @@ class Browser(Target):
 
 
     async def _watchdog(self):
+        self._watchdog_healthy = True
         if self.debug: print("Starting watchdog", file=sys.stderr)
         await self.subprocess.wait()
+        if self.lock.locked(): return # it was locked and closed
+        self._watchdog_healthy = False
         if self.debug:
             print("Browser is being closed because chrom* closed", file=sys.stderr)
         await self.close()
+        await asyncio.sleep(1)
+        with warnings.catch_warnings():
+            # we'll ignore warnings here because
+            # if the user sloppy-closes the browsers
+            # they may leave processes up still trying to create temporary files
+            warnings.filterwarnings("ignore", category=TempDirWarning)
+            self._retry_delete_manual(self._temp_dir_name, delete=True)
+
 
 
     async def _open_async(self):
@@ -242,7 +263,9 @@ class Browser(Target):
 
     def _retry_delete_manual(self, path, delete=False):
         if not os.path.exists(path):
-            return 0, 0, [(path, FileNotFoundError("Supplied path doesn't exist"))]
+            if self.debug:
+                print("No retry delete manual necessary, path doesn't exist", file=sys.stderr)
+            return 0, 0, []
         n_dirs = 0
         n_files = 0
         errors = []
@@ -252,16 +275,22 @@ class Browser(Target):
             if delete:
                 for f in files:
                     fp = os.path.join(root, f)
+                    if self.debug:
+                        print(f"Removing file: {fp}", file=sys.stderr)
                     try:
                         os.chmod(fp, stat.S_IWUSR)
                         os.remove(fp)
+                        if self.debug: print("Success", file=sys.stderr)
                     except BaseException as e:
                         errors.append((fp, e))
                 for d in dirs:
                     fp = os.path.join(root, d)
+                    if self.debug:
+                        print(f"Removing dir: {fp}", file=sys.stderr)
                     try:
                         os.chmod(fp, stat.S_IWUSR)
                         os.rmdir(fp)
+                        if self.debug: print("Success", file=sys.stderr)
                     except BaseException as e:
                         errors.append((fp, e))
             # clean up directory
@@ -278,19 +307,17 @@ class Browser(Target):
         return n_dirs, n_files, errors
 
     def _clean_temp(self):
-        name = self.temp_dir.name
+        name = self._temp_dir_name
         clean = False
         try:
+            # no faith in this python implementation, always fails with windows
+            # very unstable recently as well, lots new arguments in tempfile package
             self.temp_dir.cleanup()
             clean=True
         except BaseException as e:
-            if platform.system() == "Windows":
-                if self.debug:
-                    print(f"TempDirWarning: {str(e)}", file=sys.stderr)
-            else:
-                warnings.warn(str(e), TempDirWarning)
+            if self.debug:
+                print(f"First tempdir deletion failed: TempDirWarning: {str(e)}", file=sys.stderr)
 
-        # windows+old vers doesn't like python's default cleanup
 
         def remove_readonly(func, path, excinfo):
             os.chmod(path, stat.S_IWUSR)
@@ -298,26 +325,23 @@ class Browser(Target):
 
         try:
             if with_onexc:
-                shutil.rmtree(self.temp_dir.name, onexc=remove_readonly)
+                shutil.rmtree(self._temp_dir_name, onexc=remove_readonly)
                 clean=True
             else:
-                shutil.rmtree(self.temp_dir.name, onerror=remove_readonly)
+                shutil.rmtree(self._temp_dir_name, onerror=remove_readonly)
                 clean=True
             del self.temp_dir
         except FileNotFoundError:
             pass # it worked!
         except BaseException as e:
+            if self.debug:
+                print(f"Second tmpdir deletion failed (shutil.rmtree): {str(e)}", file=sys.stderr)
             if not clean:
-                if platform.system() == "Windows":
-                    def extra_clean():
-                        time.sleep(5)
-                        self._retry_delete_manual(name, delete=True)
-                    t = Thread(target=extra_clean)
-                    t.run()
-                else:
-                    warnings.warn(
-                            f"The temporary directory could not be deleted, execution will continue. {type(e)}: {e}", TempDirWarning
-                    )
+                def extra_clean():
+                    time.sleep(2)
+                    self._retry_delete_manual(name, delete=True)
+                t = Thread(target=extra_clean)
+                t.run()
         if self.debug:
             print(f"Tempfile still exists?: {bool(os.path.exists(str(name)))}", file=sys.stderr)
 
