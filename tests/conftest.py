@@ -1,4 +1,5 @@
 import asyncio
+import os
 
 import pytest
 import pytest_asyncio
@@ -47,19 +48,25 @@ async def browser(request):
     browser = await choreo.Browser(
         headless=headless, debug=debug, debug_browser=debug
     )
+    temp_dir = browser.temp_dir.name
     yield browser
     try:
         await browser.close()
     except choreo.browser.BrowserClosedError:
         pass
+    if os.path.exists(temp_dir):
+        raise RuntimeError(f"Temporary directory not deleted successfully: {temp_dir}")
 
 
 
 @pytest_asyncio.fixture(scope="function", loop_scope="function")
 async def browser_verbose():
     browser = await choreo.Browser(debug=True, debug_browser=True)
+    temp_dir = browser.temp_dir.name
     yield browser
     await browser.close()
+    if os.path.exists(temp_dir):
+        raise RuntimeError(f"Temporary directory not deleted successfully: {temp_dir}")
 
 # add a 2 second timeout if there is a browser fixture
 # we do timeouts manually in test_process because it
