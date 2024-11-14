@@ -14,7 +14,7 @@ async def test_context(capteesys, headless, debug, debug_browser, sandbox, gpu):
     async with choreo.Browser(
         headless=headless,
         debug=debug,
-        debug_browser=debug_browser,
+        debug_browser=None if debug_browser else False,
         enable_sandbox=sandbox,
         enable_gpu=gpu
     ) as browser, timeout(pytest.default_timeout):
@@ -37,7 +37,7 @@ async def test_no_context(capteesys, headless, debug, debug_browser, sandbox, gp
     browser = await choreo.Browser(
         headless=headless,
         debug=debug,
-        debug_browser=debug_browser,
+        debug_browser=None if debug_browser else False,
         enable_sandbox=sandbox,
         enable_gpu=gpu
     )
@@ -63,7 +63,7 @@ async def test_watchdog(capteesys, headless, debug, debug_browser):
     browser = await choreo.Browser(
         headless=headless,
         debug=debug,
-        debug_browser=debug_browser,
+        debug_browser=None if debug_browser else False,
     )
     #temp_dir = browser._temp_dir_name
     #async with timeout(pytest.default_timeout):

@@ -45,8 +45,9 @@ async def browser(request):
     # this needs also to be set by command line TODO
     headless = request.config.getoption("--headless")
     debug = request.config.get_verbosity() > 2
+    debug_browser = None if debug else False
     browser = await choreo.Browser(
-        headless=headless, debug=debug, debug_browser=debug
+        headless=headless, debug=debug, debug_browser=debug_browser
     )
     temp_dir = browser._temp_dir_name
     yield browser
