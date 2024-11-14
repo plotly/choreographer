@@ -78,10 +78,27 @@ class Browser(Target):
         if debug:
             print(f"STDERR: {stderr}", file=sys.stderr)
 
-        # Set up temp dir
-        if platform.system() == "Linux":
+
+        # Set up process env
+        new_env = os.environ.copy()
+
+        if not path: # use argument first
+            path = os.environ.get("BROWSER_PATH", None)
+        if not path:
+            path = default_path
+        if path:
+            new_env["BROWSER_PATH"] = str(path)
+        else:
+            raise BrowserFailedError(
+                "Could not find an acceptable browser. Please set environmental variable BROWSER_PATH or pass `path=/path/to/browser` into the Browser() constructor."
+            )
+        if path.contains("snap"):
+            self._snap = True
+            if self.debug:
+                print("Snap detected, moving tmp directory to home", file=sys.stderr)
             temp_args = dict(prefix=".choreographer-", dir=Path.home())
         else:
+            self._snap = False
             temp_args = {}
         if platform.system() != "Windows":
             self.temp_dir = tempfile.TemporaryDirectory(**temp_args)
@@ -100,20 +117,6 @@ class Browser(Target):
         self._temp_dir_name = self.temp_dir.name
         if self.debug:
             print(f"TEMP DIR NAME: {self._temp_dir_name}", file=sys.stderr)
-
-        # Set up process env
-        new_env = os.environ.copy()
-
-        if not path: # use argument first
-            path = os.environ.get("BROWSER_PATH", None)
-        if not path:
-            path = default_path
-        if path:
-            new_env["BROWSER_PATH"] = str(path)
-        else:
-            raise BrowserFailedError(
-                "Could not find an acceptable browser. Please set environmental variable BROWSER_PATH or pass `path=/path/to/browser` into the Browser() constructor."
-            )
 
         if self.enable_gpu:
             new_env["GPU_ENABLED"] = "true"
