@@ -18,7 +18,7 @@ async def test_context(capteesys, headless, debug, debug_browser, sandbox, gpu):
         enable_sandbox=sandbox,
         enable_gpu=gpu
     ) as browser, timeout(pytest.default_timeout):
-        temp_dir = browser.temp_dir.name
+        temp_dir = browser._temp_dir_name
         response = await browser.send_command(command="Target.getTargets")
         assert "result" in response and "targetInfos" in response["result"]
         assert (len(response["result"]["targetInfos"]) != 0) != headless
@@ -41,7 +41,7 @@ async def test_no_context(capteesys, headless, debug, debug_browser, sandbox, gp
         enable_sandbox=sandbox,
         enable_gpu=gpu
     )
-    temp_dir = browser.temp_dir.name
+    temp_dir = browser._temp_dir_name
     try:
         async with timeout(pytest.default_timeout):
             response = await browser.send_command(command="Target.getTargets")
@@ -65,7 +65,7 @@ async def test_watchdog(capteesys, headless, debug, debug_browser):
         debug=debug,
         debug_browser=debug_browser,
     )
-    temp_dir = browser.temp_dir.name
+    temp_dir = browser._temp_dir_name
     #async with timeout(pytest.default_timeout):
 
     if platform.system() == "Windows":

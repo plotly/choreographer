@@ -97,6 +97,7 @@ class Browser(Target):
                 )
             else:
                 self.temp_dir = tempfile.TemporaryDirectory(**temp_args)
+        self._temp_dir_name = self.temp_dir.name
 
         # Set up process env
         new_env = os.environ.copy()
@@ -117,7 +118,7 @@ class Browser(Target):
         if self.enable_sandbox:
             new_env["SANDBOX_ENABLED"] = "true"
 
-        new_env["USER_DATA_DIR"] = str(self.temp_dir.name)
+        new_env["USER_DATA_DIR"] = str(self._temp_dir_name)
 
         if headless:
             new_env["HEADLESS"] = "--headless"  # unset if false
@@ -211,8 +212,8 @@ class Browser(Target):
         if self.debug:
             print("Browser is being closed because chrom* closed", file=sys.stderr)
         await self.close()
-        await asyncio.sleep(1)
-        self._retry_delete_manual(self.temp_dir.name, delete=True)
+        await asyncio.sleep(.5)
+        self._retry_delete_manual(self._temp_dir_name, delete=True)
 
 
 
@@ -284,7 +285,7 @@ class Browser(Target):
         return n_dirs, n_files, errors
 
     def _clean_temp(self):
-        name = self.temp_dir.name
+        name = self._temp_dir_name
         clean = False
         try:
             # no faith in this python implementation, always fails with windows
@@ -302,10 +303,10 @@ class Browser(Target):
 
         try:
             if with_onexc:
-                shutil.rmtree(self.temp_dir.name, onexc=remove_readonly)
+                shutil.rmtree(self._temp_dir_name, onexc=remove_readonly)
                 clean=True
             else:
-                shutil.rmtree(self.temp_dir.name, onerror=remove_readonly)
+                shutil.rmtree(self._temp_dir_name, onerror=remove_readonly)
                 clean=True
             del self.temp_dir
         except FileNotFoundError:

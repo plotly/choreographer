@@ -48,7 +48,7 @@ async def browser(request):
     browser = await choreo.Browser(
         headless=headless, debug=debug, debug_browser=debug
     )
-    temp_dir = browser.temp_dir.name
+    temp_dir = browser._temp_dir_name
     yield browser
     try:
         await browser.close()
@@ -62,7 +62,7 @@ async def browser(request):
 @pytest_asyncio.fixture(scope="function", loop_scope="function")
 async def browser_verbose():
     browser = await choreo.Browser(debug=True, debug_browser=True)
-    temp_dir = browser.temp_dir.name
+    temp_dir = browser._temp_dir_name
     yield browser
     await browser.close()
     if os.path.exists(temp_dir):
