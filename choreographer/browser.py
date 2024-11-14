@@ -96,7 +96,7 @@ class Browser(Target):
 
         if self._tmpdir_path:
             temp_args = dict(dir=self._tmpdir_path)
-        elif path.contains("snap"):
+        elif "snap" in path:
             self._tmpdir_path = Path.home()
             if self.debug:
                 print("Snap detected, moving tmp directory to home", file=sys.stderr)
