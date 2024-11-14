@@ -61,6 +61,7 @@ class Browser(Target):
         # Configuration
         self.enable_gpu = kwargs.pop("enable_gpu", False)
         self.enable_sandbox = kwargs.pop("enable_sandbox", False)
+        self._tmpdir_path = kwargs.pop("tmp_path", None)
         if len(kwargs):
             raise ValueError(f"Unknown keyword arguments: {kwargs}")
         self.headless = headless
@@ -92,8 +93,11 @@ class Browser(Target):
             raise BrowserFailedError(
                 "Could not find an acceptable browser. Please set environmental variable BROWSER_PATH or pass `path=/path/to/browser` into the Browser() constructor."
             )
-        if path.contains("snap"):
-            self._snap = True
+
+        if self._tmpdir_path:
+            temp_args = dict(dir=self._tmpdir_path)
+        elif path.contains("snap"):
+            self._tmpdir_path = Path.home()
             if self.debug:
                 print("Snap detected, moving tmp directory to home", file=sys.stderr)
             temp_args = dict(prefix=".choreographer-", dir=Path.home())
