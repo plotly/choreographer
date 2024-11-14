@@ -212,7 +212,7 @@ class Browser(Target):
         if self.debug:
             print("Browser is being closed because chrom* closed", file=sys.stderr)
         await self.close()
-        await asyncio.sleep(.5)
+        await asyncio.sleep(.75)
         self._retry_delete_manual(self._temp_dir_name, delete=True)
 
 
@@ -258,6 +258,8 @@ class Browser(Target):
             n_files += len(files)
             if delete:
                 for f in files:
+                    if self.debug:
+                        print(f"Removing file: {f}", file=sys.stderr)
                     fp = os.path.join(root, f)
                     try:
                         os.chmod(fp, stat.S_IWUSR)
@@ -265,6 +267,8 @@ class Browser(Target):
                     except BaseException as e:
                         errors.append((fp, e))
                 for d in dirs:
+                    if self.debug:
+                        print(f"Removing dir: {d}", file=sys.stderr)
                     fp = os.path.join(root, d)
                     try:
                         os.chmod(fp, stat.S_IWUSR)
