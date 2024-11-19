@@ -11,7 +11,7 @@ class BlockWarning(UserWarning):
 
 # TODO: don't know about this
 # TODO: use has_attr instead of np.integer, you'll be fine
-class NumpyEncoder(simplejson.JSONEncoder):
+class MultiEncoder(simplejson.JSONEncoder):
     """Special json encoder for numpy types"""
 
     def default(self, obj):
@@ -38,7 +38,7 @@ class PipeClosedError(IOError):
     pass
 
 class Pipe:
-    def __init__(self, debug=False, json_encoder=NumpyEncoder):
+    def __init__(self, debug=False, json_encoder=MultiEncoder):
         self.read_from_chromium, self.write_from_chromium = list(os.pipe())
         self.read_to_chromium, self.write_to_chromium = list(os.pipe())
         self.debug = debug
