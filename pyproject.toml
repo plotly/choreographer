@@ -21,6 +21,9 @@ authors = [
 maintainers = [
   {name = "Andrew Pikul", email = "ajpikul@gmail.com"},
 ]
+dependencies = [
+  "simplejson"
+  ]
 
 [project.optional-dependencies]
 dev = [

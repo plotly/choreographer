@@ -1,6 +1,6 @@
 import os
 import sys
-import json
+import simplejson
 import platform
 import warnings
 from threading import Lock
@@ -11,7 +11,7 @@ class BlockWarning(UserWarning):
 
 # TODO: don't know about this
 # TODO: use has_attr instead of np.integer, you'll be fine
-class NumpyEncoder(json.JSONEncoder):
+class NumpyEncoder(simplejson.JSONEncoder):
     """Special json encoder for numpy types"""
 
     def default(self, obj):
@@ -29,18 +29,18 @@ class NumpyEncoder(json.JSONEncoder):
             return float(obj)
         elif hasattr(obj, "dtype") and obj.shape != ():
             return obj.tolist()
-        return json.JSONEncoder.default(self, obj)
+        return simplejson.JSONEncoder.default(self, obj)
 
 
 class PipeClosedError(IOError):
     pass
 
 class Pipe:
-    def __init__(self, debug=False, cls=NumpyEncoder):
+    def __init__(self, debug=False, json_encoder=NumpyEncoder):
         self.read_from_chromium, self.write_from_chromium = list(os.pipe())
         self.read_to_chromium, self.write_to_chromium = list(os.pipe())
         self.debug = debug
-        self.cls=cls
+        self.json_encoder = json_encoder
 
         # this is just a convenience to prevent multiple shutdowns
         self.shutdown_lock = Lock()
@@ -51,7 +51,7 @@ class Pipe:
         if not debug: debug = self.debug
         if debug:
             print("write_json:", file=sys.stderr)
-        message = json.dumps(obj, ensure_ascii=False, cls=self.cls)
+        message = simplejson.dumps(obj, ensure_ascii=False, ignore_nan=True, cls=self.json_encoder)
         encoded_message = message.encode("utf-8") + b"\0"
         if debug:
             print(f"write_json: {message}", file=sys.stderr)
@@ -112,7 +112,7 @@ class Pipe:
         for raw_message in decoded_buffer.split("\0"):
             if raw_message:
                 try:
-                    jsons.append(json.loads(raw_message))
+                    jsons.append(simplejson.loads(raw_message))
                 except BaseException as e:
                     if debug:
                         print(f"Problem with {raw_message} in json: {e}", file=sys.stderr)
