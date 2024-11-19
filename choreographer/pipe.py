@@ -29,6 +29,8 @@ class NumpyEncoder(json.JSONEncoder):
             return float(obj)
         elif hasattr(obj, "dtype") and obj.shape != ():
             return obj.tolist()
+        elif hasattr(obj, "isoformat"):
+            return obj.isoformat()
         return json.JSONEncoder.default(self, obj)
 
 
