@@ -29,8 +29,8 @@ class Pipe:
             print("write_json:", file=sys.stderr)
         if (
             hasattr(obj, "dtype")
-            and hasattr(obj, "shape")
-            and hasattr(obj.dtype, "kind")
+            and (hasattr(obj, "shape") and hasattr(obj.dtype, "kind"))
+            or hasattr(obj, "real")
         ):
             message = orjson.dumps(obj, option=orjson.OPT_SERIALIZE_NUMPY)
         else:
