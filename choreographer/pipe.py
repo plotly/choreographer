@@ -30,7 +30,7 @@ class Pipe:
         if (
             hasattr(obj, "dtype")
             and hasattr(obj, "shape")
-            and ((obj.dtype.kind == "i") or (obj.dtype.kind == "f"))
+            and hasattr(obj.dtype, "kind")
         ):
             message = orjson.dumps(obj, option=orjson.OPT_SERIALIZE_NUMPY)
         else:
