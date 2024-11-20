@@ -22,7 +22,7 @@ maintainers = [
   {name = "Andrew Pikul", email = "ajpikul@gmail.com"},
 ]
 dependencies = [
-  "simplejson"
+  "orjson"
   ]
 
 [project.optional-dependencies]
