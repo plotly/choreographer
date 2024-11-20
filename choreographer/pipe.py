@@ -1,6 +1,6 @@
 import os
 import sys
-import simplejson
+import orjson
 import platform
 import warnings
 from threading import Lock
@@ -9,40 +9,14 @@ with_block = bool(sys.version_info[:3] >= (3, 12) or platform.system() != "Windo
 class BlockWarning(UserWarning):
     pass
 
-# TODO: don't know about this
-# TODO: use has_attr instead of np.integer, you'll be fine
-class MultiEncoder(simplejson.JSONEncoder):
-    """Special json encoder for numpy types"""
-
-    def default(self, obj):
-        if (
-            hasattr(obj, "dtype")
-            and obj.dtype.kind == "i"
-            and obj.shape == ()
-        ):
-            return int(obj)
-        elif (
-            hasattr(obj, "dtype")
-            and obj.dtype.kind == "f"
-            and obj.shape == ()
-        ):
-            return float(obj)
-        elif hasattr(obj, "dtype") and obj.shape != ():
-            return obj.tolist()
-        elif hasattr(obj, "isoformat"):
-            return obj.isoformat()
-        return simplejson.JSONEncoder.default(self, obj)
-
-
 class PipeClosedError(IOError):
     pass
 
 class Pipe:
-    def __init__(self, debug=False, json_encoder=MultiEncoder):
+    def __init__(self, debug=False):
         self.read_from_chromium, self.write_from_chromium = list(os.pipe())
         self.read_to_chromium, self.write_to_chromium = list(os.pipe())
         self.debug = debug
-        self.json_encoder = json_encoder
 
         # this is just a convenience to prevent multiple shutdowns
         self.shutdown_lock = Lock()
@@ -53,8 +27,15 @@ class Pipe:
         if not debug: debug = self.debug
         if debug:
             print("write_json:", file=sys.stderr)
-        message = simplejson.dumps(obj, ensure_ascii=False, ignore_nan=True, cls=self.json_encoder)
-        encoded_message = message.encode("utf-8") + b"\0"
+        if (
+            hasattr(obj, "dtype")
+            and hasattr(obj, "shape")
+            and ((obj.dtype.kind == "i") or (obj.dtype.kind == "f"))
+        ):
+            message = orjson.dumps(obj, option=orjson.OPT_SERIALIZE_NUMPY)
+        else:
+            message = orjson.dumps(obj)
+        encoded_message = message + b"\0"
         if debug:
             print(f"write_json: {message}", file=sys.stderr)
             # windows may print weird characters if we set utf-8 instead of utf-16
@@ -114,7 +95,7 @@ class Pipe:
         for raw_message in decoded_buffer.split("\0"):
             if raw_message:
                 try:
-                    jsons.append(simplejson.loads(raw_message))
+                    jsons.append(orjson.loads(raw_message))
                 except BaseException as e:
                     if debug:
                         print(f"Problem with {raw_message} in json: {e}", file=sys.stderr)
