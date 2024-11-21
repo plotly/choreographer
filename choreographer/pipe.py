@@ -1,5 +1,6 @@
 import os
 import sys
+import json
 import orjson
 import platform
 import warnings
@@ -89,13 +90,15 @@ class Pipe:
             # TODO this could be hard to test as it is a real OS corner case
             # but possibly raw_buffer is partial
             # and we don't check for partials
+        if debug:
+            print(f"This is the RAW_BUFFER {raw_buffer}", file=sys.stderr)
         decoded_buffer = raw_buffer.decode("utf-8")
         if debug:
             print(decoded_buffer, file=sys.stderr)
         for raw_message in decoded_buffer.split("\0"):
             if raw_message:
                 try:
-                    jsons.append(orjson.loads(raw_message))
+                    jsons.append(json.loads(raw_message))
                 except BaseException as e:
                     if debug:
                         print(f"Problem with {raw_message} in json: {e}", file=sys.stderr)
