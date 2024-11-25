@@ -7,10 +7,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v1 # Would be nice to bump this? Regressions.
-      - name: Install Dependencies
-        run:  sudo apt-get update && sudo apt-get install chromium-browser xvfb
+      - name: Install Dependencies- Other
+        run:  sudo apt-get update && sudo apt-get install xvfb curl wget jq unzip
         timeout-minutes: 4 # because sometimes it dies
         #- uses: ./.github/actions/ # it would be nice but it doesn't support timeout-minutes
+      - name: Install Dependencies- Chrome
+        run: wget $(curl -s https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json | jq -r '.versions.[-1].downloads.chrome.[] | select(.platform == "linux64").url') && unzip chrome* && export BROWSER_PATH="$(realpath chrome-linux64)/chrome"
       - name: Install choreographer
         run:  pip install .[dev]
       - name: DTDoctor
