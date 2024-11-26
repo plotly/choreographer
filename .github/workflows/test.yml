@@ -43,13 +43,11 @@ jobs:
       - name: Install Dependencies- Chrome
         run: .\.github\workflows\download_chrome.ps1 "win64"
       - name: Set Env
-        run: echo "BROWSER_PATH=$(realpath ./chrome-win64/chrome.exe)" >> $GITHUB_ENV
+        run: echo "BROWSER_PATH=$(Resolve-Path .\chrome-win64\chrome.exe)" >> $env:GITHUB_ENV
       - name: Install choreographer
         run:  pip install .[dev]
-      - name: Check
-        run: ls ./chrome-win64
       - name: DTDoctor
-        run:  BROWSER_PATH="$(realpath ./chrome-win64/chrome.exe)" dtdoctor --no-run
+        run:  dtdoctor --no-run
         timeout-minutes: 1
       - name: Test Process Control DEBUG
         if: runner.debug
