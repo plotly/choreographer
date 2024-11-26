@@ -41,7 +41,7 @@ jobs:
       - uses: actions/setup-python@v5
         #- uses: ./.github/actions/ # it would be nice but it doesn't support timeout-minutes
       - name: Install Dependencies- Chrome
-        run: ./.github/workflows/download_chrome.ps "win64"
+        run: .\.github\workflows\download_chrome.ps1 "win64"
       - name: Install choreographer
         run:  pip install .[dev]
       - name: DTDoctor

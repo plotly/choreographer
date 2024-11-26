@@ -1,4 +1,7 @@
 # Exit on error
+
+echo "Test"
+
 $ErrorActionPreference = "Stop"
 
 # Get the platform (like 'win', 'mac', 'linux')
