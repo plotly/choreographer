@@ -39,10 +39,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-      - name: Install Dependencies
-        run:  choco install googlechrome -y --ignore-checksums
-        timeout-minutes: 4 # because sometimes it dies
-      #- uses: ./.github/actions/
+      - name: Install Dependencies- Other
+        run:  choco install curl wget jq unzip
+        #- uses: ./.github/actions/ # it would be nice but it doesn't support timeout-minutes
+      - name: Install Dependencies- Chrome
+        run: ./.github/workflows/download_chrome.sh "win64"
       - name: Install choreographer
         run:  pip install .[dev]
       - name: DTDoctor
