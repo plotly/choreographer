@@ -42,6 +42,8 @@ jobs:
         #- uses: ./.github/actions/ # it would be nice but it doesn't support timeout-minutes
       - name: Install Dependencies- Chrome
         run: .\.github\workflows\download_chrome.ps1 "win64"
+      - name: Set Env
+        run: echo "BROWSER_PATH=$(realpath ./chrome-win64/chrome.exe)" >> $GITHUB_ENV
       - name: Install choreographer
         run:  pip install .[dev]
       - name: DTDoctor
