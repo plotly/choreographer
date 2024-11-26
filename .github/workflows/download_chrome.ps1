@@ -22,6 +22,6 @@ $browserPath = (Get-ChildItem -Directory | Where-Object { $_.Name -like "chrome-
 
 # Export the browser path as an environment variable (for the current session)
 $env:BROWSER_PATH = $browserPath
+[Environment]::SetEnvironmentVariable("BROWSER_PATH", $browserPath, "Machine")
 
 Write-Host "BROWSER_PATH set to $env:BROWSER_PATH"
-
