@@ -49,7 +49,7 @@ def open_browser(to_chromium, from_chromium, stderr=sys.stderr, env=None, loop=N
         cli.append("--no-sandbox")
 
     if "HEADLESS" in env:
-        cli.append("--headless=old") # temporary fix
+        cli.append("--headless")
 
     system_dependent = {}
     if system == "Windows":
