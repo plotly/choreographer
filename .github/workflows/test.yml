@@ -7,10 +7,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v1 # Would be nice to bump this? Regressions.
-      - name: Install Dependencies
-        run:  sudo apt-get update && sudo apt-get install chromium-browser xvfb
+      - name: Install Dependencies- Other
+        run:  sudo apt-get update && sudo apt-get install xvfb curl wget jq unzip
         timeout-minutes: 4 # because sometimes it dies
         #- uses: ./.github/actions/ # it would be nice but it doesn't support timeout-minutes
+      - name: Install Dependencies- Chrome
+        run: chmod +x ./.github/workflows/download_chrome.sh && ./.github/workflows/download_chrome.sh "linux64"
       - name: Install choreographer
         run:  pip install .[dev]
       - name: DTDoctor
@@ -37,10 +39,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-      - name: Install Dependencies
-        run:  choco install googlechrome -y --ignore-checksums
-        timeout-minutes: 4 # because sometimes it dies
-      #- uses: ./.github/actions/
+        #- uses: ./.github/actions/ # it would be nice but it doesn't support timeout-minutes
+      - name: Install Dependencies- Chrome
+        run: .\.github\workflows\download_chrome.ps1 "win64"
+      - name: Set Env
+        run: echo "BROWSER_PATH=$(Resolve-Path .\chrome-win64\chrome.exe)" >> $env:GITHUB_ENV
       - name: Install choreographer
         run:  pip install .[dev]
       - name: DTDoctor

@@ -802,7 +802,8 @@ def diagnose():
     print(platform.version())
     print(platform.uname())
     print("Looking for browser:".center(50, "*"))
-    print(which_browser(debug=True))
+    print(f"which: {which_browser(debug=True)}")
+    print(f"os.environ: {os.environ.get('BROWSER_PATH')}")
     try:
         print("Looking for version info:".center(50, "*"))
         print(subprocess.check_output([sys.executable, '-m', 'pip', 'freeze']))
@@ -818,6 +819,7 @@ def diagnose():
         try:
             print("Sync test headless".center(50, "*"))
             browser = Browser(debug=True, debug_browser=True, headless=True)
+            print(browser.path)
             time.sleep(3)
             browser.close()
         except BaseException as e:
@@ -826,6 +828,7 @@ def diagnose():
             print("Done with sync test headless".center(50, "*"))
         async def test_headless():
             browser = await Browser(debug=True, debug_browser=True, headless=True)
+            print(browser.path)
             await asyncio.sleep(3)
             await browser.close()
         try:
