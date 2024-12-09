@@ -82,7 +82,8 @@ class Browser(Target):
             and not isinstance(stderr, int) ):
             try: stderr.fileno()
             except io.UnsupportedOperation:
-                warnings.warn("A value has been passed to debug_browser which is not compatible with python. The default value if deug_browser is True is whatever the value of sys.stderr is. sys.stderr may be many things but debug_browser must be a value Popen accepts for stderr, or True.")
+                warnings.warn("A value has been passed to debug_browser which is not compatible with python's Popen. This may be because one was passed to Browser or because sys.stderr has been overrided by a framework. Browser logs will not be handled by python in this case.")
+                stderr = None
 
 
 

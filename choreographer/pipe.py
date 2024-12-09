@@ -47,18 +47,24 @@ class Pipe:
         # this is just a convenience to prevent multiple shutdowns
         self.shutdown_lock = Lock()
 
+    def serialize(self, obj):
+        message = simplejson.dumps(obj, ensure_ascii=False, ignore_nan=True, cls=self.json_encoder)
+        #if debug:
+        #    print(f"write_json: {message}", file=sys.stderr)
+            # windows may print weird characters if we set utf-8 instead of utf-16
+            # check this TODO
+        return message.encode("utf-8") + b"\0"
+
+    def deserialize(self, message):
+        return simplejson.loads(message)
+
     def write_json(self, obj, debug=None):
         if self.shutdown_lock.locked():
             raise PipeClosedError()
         if not debug: debug = self.debug
         if debug:
             print("write_json:", file=sys.stderr)
-        message = simplejson.dumps(obj, ensure_ascii=False, ignore_nan=True, cls=self.json_encoder)
-        encoded_message = message.encode("utf-8") + b"\0"
-        if debug:
-            print(f"write_json: {message}", file=sys.stderr)
-            # windows may print weird characters if we set utf-8 instead of utf-16
-            # check this TODO
+        encoded_message = self.serialize(obj)
         try:
             os.write(self.write_to_chromium, encoded_message)
         except OSError as e:
@@ -114,7 +120,7 @@ class Pipe:
         for raw_message in decoded_buffer.split("\0"):
             if raw_message:
                 try:
-                    jsons.append(simplejson.loads(raw_message))
+                    jsons.append(self.deserialize(raw_message))
                 except BaseException as e:
                     if debug:
                         print(f"Problem with {raw_message} in json: {e}", file=sys.stderr)
