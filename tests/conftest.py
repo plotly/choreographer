@@ -12,6 +12,9 @@ import choreographer as choreo
 # especially in fixtures- since they may buffer your outputs
 # and can freeze w/o dumping the buffer
 
+##### Parameterized Arguments
+# Are used to re-run tests under different conditions
+
 @pytest.fixture(params=[True, False], ids=["enable_sandbox", ""])
 def sandbox(request):
     return request.param
@@ -24,28 +27,26 @@ def gpu(request):
 def headless(request):
     return request.param
 
-
 @pytest.fixture(params=[True, False], ids=["debug", ""])
 def debug(request):
     return request.param
-
 
 @pytest.fixture(params=[True, False], ids=["debug_browser", ""])
 def debug_browser(request):
     return request.param
 
 
+# --headless is the default flag for most tests, but you can set --no-headless if you want to watch
 def pytest_addoption(parser):
     parser.addoption("--headless", action="store_true", dest="headless", default=True)
     parser.addoption("--no-headless", dest="headless", action="store_false")
 
-
+# browser fixture will supply a browser for you
 @pytest_asyncio.fixture(scope="function", loop_scope="function")
 async def browser(request):
-    # this needs also to be set by command line TODO
     headless = request.config.getoption("--headless")
     debug = request.config.get_verbosity() > 2
-    debug_browser = None if debug else False
+    debug_browser = None if debug else False # what's going on here
     browser = await choreo.Browser(
         headless=headless, debug=debug, debug_browser=debug_browser
     )
@@ -58,29 +59,18 @@ async def browser(request):
     if os.path.exists(temp_dir):
         raise RuntimeError(f"Temporary directory not deleted successfully: {temp_dir}")
 
-
-
-@pytest_asyncio.fixture(scope="function", loop_scope="function")
-async def browser_verbose():
-    browser = await choreo.Browser(debug=True, debug_browser=True)
-    temp_dir = browser._temp_dir_name
-    yield browser
-    await browser.close()
-    if os.path.exists(temp_dir):
-        raise RuntimeError(f"Temporary directory not deleted successfully: {temp_dir}")
-
-# add a 2 second timeout if there is a browser fixture
-# we do timeouts manually in test_process because it
-# does/tests its own browser.close()
+# add a timeout if tests requests browser
+# but if tests creates their own browser they are responsible
+# a fixture can be used to specify the timeout: timeout=10
+# else it uses pytest.default_timeout
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
 def pytest_runtest_setup(item: pytest.Item):
     yield
-
-    if "browser" in item.funcargs or "browser_verbose" in item.funcargs:
+    if "browser" in item.funcargs:
         raw_test_fn = item.obj
         timeouts = [k for k in item.funcargs if k.startswith("timeout")]
         timeout = item.funcargs[timeouts[-1]] if len(timeouts) else pytest.default_timeout
-        if item.get_closest_marker("asyncio") and timeout:
+        if item.get_closest_marker("asyncio") and timeout: # "closest" because markers can be function/session/package etc
             async def wrapped_test_fn(*args, **kwargs):
                 try:
                     return await asyncio.wait_for(
@@ -94,13 +84,12 @@ def pytest_configure():
     # change this by command line TODO
     pytest.default_timeout = 5
 
-# add this fixture to extend timeout
-# there is 6 second max test length for all
-# which kills all tests
-@pytest.fixture(scope="session")
-def timeout_long():
-    return 8
-
+# pytests capture-but-display mechanics for output are somewhat spaghetti
+# more information here:
+# https://github.com/pytest-dev/pytest/pull/12854
+# is in the note above, capture=no will cancel all capture but also allow all error
+# to bubble up without buffering, which is helpful since sometimes error break the
+# buffering mechanics
 @pytest.fixture(scope="function")
 def capteesys(request):
     from _pytest import capture

@@ -57,7 +57,8 @@ async def test_no_context(capteesys, headless, debug, debug_browser, sandbox, gp
     await asyncio.sleep(0)
     assert not os.path.exists(temp_dir)
 
-# we're basically just harrassing choreographer with a kill in this test to see if it behaves well
+# Harrass choreographer with a kill in this test to see if its clean in a way
+# tempdir may survive protected by chromium subprocess surviving the kill
 @pytest.mark.asyncio(loop_scope="function")
 async def test_watchdog(capteesys, headless, debug, debug_browser):
     browser = await choreo.Browser(
@@ -65,8 +66,6 @@ async def test_watchdog(capteesys, headless, debug, debug_browser):
         debug=debug,
         debug_browser=None if debug_browser else False,
     )
-    #temp_dir = browser._temp_dir_name
-    #async with timeout(pytest.default_timeout):
 
     if platform.system() == "Windows":
         subprocess.call(
@@ -77,10 +76,9 @@ async def test_watchdog(capteesys, headless, debug, debug_browser):
     else:
         os.kill(browser.subprocess.pid, signal.SIGKILL)
     await asyncio.sleep(1.5)
+
     with pytest.raises((choreo.browser.PipeClosedError, choreo.browser.BrowserClosedError)):
-        await browser.send_command(command="Target.getTargets") # could check for error, for close
-    # interestingly, try/except doesn't work here? maybe problem with pytest
+        await browser.send_command(command="Target.getTargets")
 
     await browser.close()
     await asyncio.sleep(0)
-    # assert not os.path.exists(temp_dir) # since we slopily kill the browser, we have no idea whats going to happen
