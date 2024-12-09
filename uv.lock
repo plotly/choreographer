@@ -12,7 +12,7 @@ wheels = [
 
 [[package]]
 name = "choreographer"
-version = "0.99.6.post6+git.7e8fc4f6.dirty"
+version = "0.99.6.post7+git.21473e69.dirty"
 source = { editable = "." }
 dependencies = [
     { name = "simplejson" },

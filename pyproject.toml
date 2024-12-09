@@ -51,11 +51,11 @@ _debug-test_fn = "pytest -W error -vvvx -rA --capture=tee-sys --ignore=tests/tes
 
 # the capture on these is weird, the mechanics are weird, i forget exactly whats its doing
 [tool.poe.tasks.test]
-cmd = ["_test_proc", "_test_fn"]
+sequence = ["_test_proc", "_test_fn"]
 help = "Run all tests quickly"
 
 [tool.poe.tasks.debug-test]
-cmd = ["_debug-test_proc", "_debug-test_fn"]
+sequence = ["_debug-test_proc", "_debug-test_fn"]
 help = "Run test by test, slowly, quitting after first error"
 
 [tool.poe.tasks.filter-test]
