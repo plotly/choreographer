@@ -2,16 +2,11 @@ import pytest
 
 import choreographer as choreo
 
-
-url = (
-    "",
-    "",
-)
-
+# We no longer use live URLs to as not depend on the network
 
 @pytest.mark.asyncio
 async def test_create_and_close_tab(browser):
-    tab = await browser.create_tab(url[0])
+    tab = await browser.create_tab("")
     assert isinstance(tab, choreo.tab.Tab)
     assert tab.target_id in browser.tabs
     await browser.close_tab(tab)
@@ -28,6 +23,8 @@ async def test_create_and_close_session(browser):
     assert session.session_id not in browser.sessions
 
 
+# Along with testing, this could be repurposed as well to diagnose
+# This deserves some thought re. difference between write_json and send_command
 @pytest.mark.asyncio
 async def test_browser_write_json(browser):
     # Test valid request with correct id and method
@@ -74,7 +71,7 @@ async def test_browser_write_json(browser):
     with pytest.raises(
         choreo.protocol.MessageTypeError,
     ):
-        await browser.write_json({"id": "2", "method": "Target.getTargets"})
+        await browser.write_json({"id": "string", "method": "Target.getTargets"})
 
 
 @pytest.mark.asyncio
@@ -96,7 +93,7 @@ async def test_browser_send_command(browser):
 
 @pytest.mark.asyncio
 async def test_populate_targets(browser):
-    await browser.send_command(command="Target.createTarget", params={"url": url[1]})
+    await browser.send_command(command="Target.createTarget", params={"url": ""})
     await browser.populate_targets()
     if browser.headless is False:
         assert len(browser.tabs) == 2
@@ -106,8 +103,8 @@ async def test_populate_targets(browser):
 
 @pytest.mark.asyncio
 async def test_get_tab(browser):
-    await browser.create_tab(url[0])
+    await browser.create_tab("")
     assert browser.get_tab() == list(browser.tabs.values())[0]
     await browser.create_tab()
-    await browser.create_tab(url[1])
+    await browser.create_tab("")
     assert browser.get_tab() == list(browser.tabs.values())[0]
