@@ -148,5 +148,3 @@ We will document these as the API stabilizes.
 [devtools-ref]: https://chromedevtools.github.io/devtools-protocol/
 [kaleido]: https://pypi.org/project/kaleido/
 [puppeteer]: https://pptr.dev/
-
-
