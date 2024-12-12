@@ -19,3 +19,12 @@ jobs:
       - name: Diagnose
         run:  uv run choreo_diagnose --no-run
         timeout-minutes: 1
+
+      - name: Test
+        if: ${{ ! runner.debug }}
+        run: xvfb-run uv run poe test
+        timeout-minutes: 4
+      - name: Test (Debug)
+        if: runner.debug
+        run: xvfb-run uv run poe debug-test
+        timeout-minutes: 10
