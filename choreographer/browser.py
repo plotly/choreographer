@@ -899,8 +899,6 @@ class Browser(Target):
             return key
 
 
-# this is the dtdoctor.exe function to help get debug reports
-# it is not really part of this program
 def diagnose():
     import subprocess, sys, time  # noqa
     import argparse
@@ -911,23 +909,26 @@ def diagnose():
     run = parser.parse_args().run
     fail = []
     print("*".center(50, "*"))
-    print("Collecting information about the system:".center(50, "*"))
+    print("SYSTEM:".center(50, "*"))
     print(platform.system())
     print(platform.release())
     print(platform.version())
     print(platform.uname())
-    print("Looking for browser:".center(50, "*"))
+    print("BROWSER:".center(50, "*"))
     print(which_browser(debug=True))
-    print("Looking for version info:".center(50, "*"))
+    print("VERSION INFO:".center(50, "*"))
     try:
+        print("PIP:".center(25, "*"))
         print(subprocess.check_output([sys.executable, "-m", "pip", "freeze"]))
     except BaseException as e:
         print(f"Error w/ pip: {e}")
     try:
+        print("UV:".center(25, "*"))
         print(subprocess.check_output(["uv", "pip", "freeze"]))
     except BaseException as e:
         print(f"Error w/ uv: {e}")
     try:
+        print("GIT:".center(25, "*"))
         print(
             subprocess.check_output(
                 ["git", "describe", "--all", "--tags", "--long", "--always"],
@@ -942,7 +943,7 @@ def diagnose():
         pass
     if run:
         try:
-            print("Sync test headless".center(50, "*"))
+            print("Sync Test Headless".center(50, "*"))
             browser = Browser(debug=True, debug_browser=True, headless=True)
             time.sleep(3)
             browser.close()
@@ -957,7 +958,7 @@ def diagnose():
             await browser.close()
 
         try:
-            print("Async Test headless".center(50, "*"))
+            print("Async Test Headless".center(50, "*"))
             asyncio.run(test_headless())
         except BaseException as e:
             fail.append(("Async test headless", e))
