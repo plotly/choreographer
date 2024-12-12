@@ -918,19 +918,26 @@ def diagnose():
     print(platform.uname())
     print("Looking for browser:".center(50, "*"))
     print(which_browser(debug=True))
+    print("Looking for version info:".center(50, "*"))
     try:
-        print("Looking for version info:".center(50, "*"))
         print(subprocess.check_output([sys.executable, "-m", "pip", "freeze"]))
+    except BaseException as e:
+        print(f"Error w/ pip: {e}")
+    try:
+        print(subprocess.check_output(["uv", "pip", "freeze"]))
+    except BaseException as e:
+        print(f"Error w/ uv: {e}")
+    try:
         print(
             subprocess.check_output(
                 ["git", "describe", "--all", "--tags", "--long", "--always"],
             ),
         )
+    except BaseException as e:
+        print(f"Error w/ git: {e}")
+    finally:
         print(sys.version)
         print(sys.version_info)
-    except BaseException as e:
-        fail.append(("System Info", e))
-    finally:
         print("Done with version info.".center(50, "*"))
         pass
     if run:
