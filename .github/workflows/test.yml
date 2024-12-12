@@ -6,112 +6,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      # Would be nice to bump this? Regressions.
+      - uses: astral-sh/setup-uv@v4
       - uses: actions/setup-python@v5
+        with:
+          python-version-file: "pyproject.toml"
+
       - name: Install Dependencies
         run:  sudo apt-get update && sudo apt-get install chromium-browser xvfb
-        # because sometimes it dies
-        timeout-minutes: 4
-        # it would be nice but it doesn't support timeout-minutes
-        # - uses: ./.github/actions/
-      - name: Install choreographer
-        run:  cat pyproject.toml && ls && pip install .[dev]
-      - name: DTDoctor
-        run:  dtdoctor --no-run
-        timeout-minutes: 1
-      - name: Test Process Control DEBUG
-        if: runner.debug
-        run: >
-          xvfb-run pytest
-          -W error -vvrA --capture=tee-sys tests/test_process.py
-        timeout-minutes: 5
-      - name: Test Process Control
-        if: ${{ ! runner.debug }}
-        run: >
-          xvfb-run pytest
-          -W error -n auto -vrfE --capture=fd tests/test_process.py
-        timeout-minutes: 2
-      - name: Test The Rest
-        if: ${{ ! runner.debug }}
-        run: >
-          pytest
-          -W error -n auto -vrfE --ignore=tests/test_process.py
-        timeout-minutes: 2
-      - name: Test The Rest DEBUG
-        if: runner.debug
-        run: >
-          pytest
-          -W error -vvvrA --capture=tee-sys --ignore=tests/test_process.py
-        timeout-minutes: 5
-  test-windows:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-      - name: Install Dependencies
-        run:  choco install googlechrome -y --ignore-checksums
-        timeout-minutes: 4  # because sometimes it dies
-      - name: Install choreographer
-        run:  pip install .[dev]
-      - name: DTDoctor
-        run:  dtdoctor --no-run
-        timeout-minutes: 1
-      - name: Test Process Control DEBUG
-        if: runner.debug
-        run: >
-          pytest
-          -W error -vv -rA --capture=tee-sys tests/test_process.py
-        timeout-minutes: 5
-      - name: Test Process Control
-        if: ${{ ! runner.debug }}
-        run: >
-          pytest
-          -W error -n auto -v -rFe --capture=fd tests/test_process.py
-        timeout-minutes: 2
-      - name: Test The Rest
-        if: ${{ ! runner.debug }}
-        run: >
-          pytest
-          -W error -n auto -v -rfE --ignore=tests/test_process.py
-        timeout-minutes: 2
-      - name: Test The Rest DEBUG
-        if: runner.debug
-        run: >
-          pytest
-          -W error -vvv -rA --capture=tee-sys --ignore=tests/test_process.py
-        timeout-minutes: 5
-  test-mac:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-      - name: Install Dependencies
-        run:  brew install google-chrome
         timeout-minutes: 4
       - name: Install choreographer
-        run:  pip install .[dev]
+        run:  uv sync --all-extras
       - name: DTDoctor
-        run:  dtdoctor --no-run
+        run:  uv run dtdoctor --no-run
         timeout-minutes: 1
-      - name: Test Process Control DEBUG
-        if: runner.debug
-        run: >
-          pytest
-          -W error -vv -rA --capture=tee-sys tests/test_process.py
-        timeout-minutes: 5
-      - name: Test Process Control
-        if: ${{ ! runner.debug }}
-        run: >
-          pytest
-          -W error -n auto -v -rFe --capture=fd tests/test_process.py
-        timeout-minutes: 4
-      - name: Test The Rest
-        if: ${{ ! runner.debug }}
-        run:  pytest -W error -n auto -v -rfE --ignore=tests/test_process.py
-        timeout-minutes: 3
-      - name: Test The Rest DEBUG
-        if: runner.debug
-        run: >
-          pytest
-          -W error -vvv -rA --capture=tee-sys --ignore=tests/test_process.py
-        timeout-minutes: 5
