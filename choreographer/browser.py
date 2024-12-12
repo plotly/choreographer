@@ -919,12 +919,12 @@ def diagnose():
     print("VERSION INFO:".center(50, "*"))
     try:
         print("PIP:".center(25, "*"))
-        print(subprocess.check_output([sys.executable, "-m", "pip", "freeze"]))
+        print(subprocess.check_output([sys.executable, "-m", "pip", "freeze"]).decode())
     except BaseException as e:
         print(f"Error w/ pip: {e}")
     try:
         print("UV:".center(25, "*"))
-        print(subprocess.check_output(["uv", "pip", "freeze"]))
+        print(subprocess.check_output(["uv", "pip", "freeze"]).decode())
     except BaseException as e:
         print(f"Error w/ uv: {e}")
     try:
@@ -932,7 +932,7 @@ def diagnose():
         print(
             subprocess.check_output(
                 ["git", "describe", "--all", "--tags", "--long", "--always"],
-            ),
+            ).decode(),
         )
     except BaseException as e:
         print(f"Error w/ git: {e}")
