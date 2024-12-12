@@ -40,6 +40,9 @@ dtdoctor = "choreographer.browser:diagnose"
 [tool.ruff.lint]
 ignore = ["E701"]
 
+[tool.ruff.format]
+exclude = ["E701"]
+
 [tool.pytest.ini_options]
 asyncio_default_fixture_loop_scope = "function"
 

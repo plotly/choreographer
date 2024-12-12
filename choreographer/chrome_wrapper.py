@@ -15,8 +15,8 @@ if __name__ == "__main__":
 import subprocess  # noqa
 import signal  # noqa
 import platform  # noqa
-import asyncio #noqa
-import sys #noqa
+import asyncio  # noqa
+import sys  # noqa
 
 system = platform.system()
 if system == "Windows":
@@ -25,7 +25,15 @@ else:
     os.set_inheritable(4, True)
     os.set_inheritable(3, True)
 
-def open_browser(to_chromium, from_chromium, stderr=sys.stderr, env=None, loop=None, loop_hack=False):
+
+def open_browser(
+    to_chromium,
+    from_chromium,
+    stderr=sys.stderr,
+    env=None,
+    loop=None,
+    loop_hack=False,
+):
     path = env.get("BROWSER_PATH")
     if not path:
         raise RuntimeError("No browser path was passed to run")
@@ -41,7 +49,7 @@ def open_browser(to_chromium, from_chromium, stderr=sys.stderr, env=None, loop=N
         "--enable-logging=stderr",
         f"--user-data-dir={user_data_dir}",
         "--no-first-run",
-        "--enable-unsafe-swiftshader"
+        "--enable-unsafe-swiftshader",
     ]
     if not env.get("GPU_ENABLED", False):
         cli.append("--disable-gpu")
@@ -49,7 +57,7 @@ def open_browser(to_chromium, from_chromium, stderr=sys.stderr, env=None, loop=N
         cli.append("--no-sandbox")
 
     if "HEADLESS" in env:
-        cli.append("--headless=old") # temporary fix
+        cli.append("--headless=old")  # temporary fix
 
     system_dependent = {}
     if system == "Windows":
@@ -58,12 +66,12 @@ def open_browser(to_chromium, from_chromium, stderr=sys.stderr, env=None, loop=N
         from_chromium_handle = msvcrt.get_osfhandle(from_chromium)
         os.set_handle_inheritable(from_chromium_handle, True)
         cli += [
-            f"--remote-debugging-io-pipes={str(to_chromium_handle)},{str(from_chromium_handle)}"
+            f"--remote-debugging-io-pipes={str(to_chromium_handle)},{str(from_chromium_handle)}",
         ]
         system_dependent["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
         system_dependent["close_fds"] = False
     else:
-        system_dependent["pass_fds"]=(to_chromium, from_chromium)
+        system_dependent["pass_fds"] = (to_chromium, from_chromium)
 
     if not loop:
         return subprocess.Popen(
@@ -72,19 +80,22 @@ def open_browser(to_chromium, from_chromium, stderr=sys.stderr, env=None, loop=N
             **system_dependent,
         )
     elif loop_hack:
+
         def run():
             return subprocess.Popen(
                 cli,
                 stderr=stderr,
                 **system_dependent,
             )
+
         return asyncio.to_thread(run)
     else:
         return asyncio.create_subprocess_exec(
-                cli[0],
-                *cli[1:],
-                stderr=stderr,
-                **system_dependent)
+            cli[0],
+            *cli[1:],
+            stderr=stderr,
+            **system_dependent,
+        )
 
 
 # THIS MAY BE PART OF KILL
@@ -93,6 +104,7 @@ def kill_proc(*nope):
     process.terminate()
     process.wait(3)  # 3 seconds to clean up nicely, it's a lot
     process.kill()
+
 
 if __name__ == "__main__":
     process = open_browser(to_chromium=3, from_chromium=4, env=os.environ)

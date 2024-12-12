@@ -42,9 +42,9 @@ You can also add "--no-headless" to these if you want to see the browser pop up.
 
 ### Writing Tests
 
--   Put async and sync tests in different files. Add `_sync.py` to synchronous tests.
--   If doing process tests, maybe use the same decorators and fixtures in the `test_process.py` file.
--   If doing browser interaction tests, use `test_placeholder.py` as the minimum template.
+- Put async and sync tests in different files. Add `_sync.py` to synchronous tests.
+- For process tests, use the same decorators/fixtures like `test_process.py` file.
+- For API tests, use `test_placeholder.py` as the minimum template.
 
 ## Help Wanted
 
@@ -52,10 +52,10 @@ We need your help to test this package on different platforms
 and for different use cases.
 To get started:
 
-1.  Clone this repository.
-1.  Create and activate a Python virtual environment.
-1.  Install this repository using `pip install .` or the equivalent.
-1.  Run `dtdoctor` and paste the output into an issue in this repository.
+1. Clone this repository.
+1. Create and activate a Python virtual environment.
+1. Install this repository using `pip install .` or the equivalent.
+1. Run `dtdoctor` and paste the output into an issue in this repository.
 
 ## Quickstart with `asyncio`
 
@@ -80,18 +80,18 @@ if __name__ == "__main__":
 
 Step by step, this example:
 
-1.  Imports the required libraries.
-1.  Defines an `async` function
+1. Imports the required libraries.
+1. Defines an `async` function
     (because `await` can only be used inside `async` functions).
-1.  Asks choreographer to create a browser.
+1. Asks choreographer to create a browser.
     `headless=False` tells it to display the browser on the screen;
     the default is no display.
-1.  Wait three seconds for the browser to be created.
-1.  Create another tab.
+1. Wait three seconds for the browser to be created.
+1. Create another tab.
     (Note that users can't rearrange programmatically-generated tabs using the mouse,
     but that's OK: we're not trying to replace testing tools like [Puppeteer][puppeteer].)
-1.  Sleep again.
-1.  Runs the example function.
+1. Sleep again.
+1. Runs the example function.
 
 See [the devtools reference][devtools-ref] for a list of possible commands.
 
@@ -130,20 +130,20 @@ You can use this library without `asyncio`,
 my_browser = choreo.Browser() # blocking until open
 ```
 
-However,
-you are responsible for calling `browser.pipe.read_jsons(blocking=True|False)` when necessary
+However, you must call `browser.pipe.read_jsons(blocking=True|False)` manually,
 and organizing the results.
-`browser.run_output_thread()` will start a second thread that constantly prints all responses from the browser,
-but it can't be used with `asyncio` and won't play nice with any other read.
-In other words,
-unles you're really, really sure you know what you're doing,
+
+`browser.run_output_thread()` starts another thread constantly printing
+messages received from the browser but it can't be used with `asyncio`
+nor will it play nice with any other read.
+
+In other words, unless you're really, really sure you know what you're doing,
 use `asyncio`.
 
 ## Low-Level Use
 
-We provide a `Browser` and `Tab` interface,
-but there is also a lower-level `Target` and `Session` interface that one can use if needed.
-We will document these as the API stabilizes.
+We provide a `Browser` and `Tab` interface, but there are lower-level `Target`
+and `Session` interfaces if needed.
 
 [devtools-ref]: https://chromedevtools.github.io/devtools-protocol/
 [kaleido]: https://pypi.org/project/kaleido/
