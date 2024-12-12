@@ -16,6 +16,6 @@ jobs:
         timeout-minutes: 4
       - name: Install choreographer
         run:  uv sync --all-extras
-      - name: DTDoctor
-        run:  uv run dtdoctor --no-run
+      - name: Diagnose
+        run:  uv run choreo_diagnose --no-run
         timeout-minutes: 1
