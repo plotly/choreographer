@@ -36,7 +36,7 @@ dev = [
 
 [project.scripts]
 choreo_diagnose = "choreographer.cli_utils:diagnose"
-choreo_get_browser = "choreographer.cli_utils:get_browser"
+choreo_get_browser = "choreographer.cli_utils:get_browser_cli"
 
 # Format breaks this anyway
 # [tool.ruff.lint]
