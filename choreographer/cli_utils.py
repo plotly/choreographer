@@ -71,11 +71,22 @@ def get_browser_sync(platform, i=-1, path=default_exe_path):
         shutil.copyfileobj(response, out_file)
     with ZipFilePermissions(filename, "r") as zip_ref:
         zip_ref.extractall(path)
-    exe_name = os.path.join(path, f"chrome-{platform}", "chrome")
+
+    if platform.startswith("linux"):
+        exe_name = os.path.join(path, f"chrome-{platform}", "chrome")
+    elif platform.startswith("mac"):
+        exe_name = os.path.join(
+            path,
+            f"chrome-{platform}",
+            "Google Chrome for Testing.app",
+            "Contents",
+            "MacOS",
+            "Google Chrome for Testing",
+        )
+    elif platform.startswith("win"):
+        exe_name = os.path.join(path, f"chrome-{platform}", "chrome.exe")
+
     return exe_name
-
-
-async def get_browser(): ...
 
 
 def diagnose():
