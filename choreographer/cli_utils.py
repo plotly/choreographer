@@ -10,14 +10,46 @@ import time
 import urllib.request
 import zipfile
 
-from choreographer import Browser
-from choreographer import which_browser
-
 platforms = ["linux64", "win32", "win64", "mac-x64", "mac-arm64"]
-default_exe_path = os.path.join(
+
+default_local_exe_path = os.path.join(
     os.path.dirname(os.path.realpath(__file__)),
     "browser_exe",
 )
+
+platform_detected = platform.system()
+arch_size_detected = "64" if sys.maxsize > 2**32 else "32"
+arch_detected = "arm" if platform.processor() == "arm" else "x"
+
+if platform_detected == "Windows":
+    chrome_platform_detected = "win" + arch_size_detected
+elif platform_detected == "Linux":
+    chrome_platform_detected = "linux" + arch_size_detected
+elif platform_detected == "Darwin":
+    chrome_platform_detected = "mac-" + arch_detected + arch_size_detected
+
+default_exe_name = None
+if platform_detected.startswith("Linux"):
+    default_exe_name = os.path.join(
+        default_local_exe_path,
+        f"chrome-{chrome_platform_detected}",
+        "chrome",
+    )
+elif platform_detected.startswith("Darwin"):
+    default_exe_name = os.path.join(
+        default_local_exe_path,
+        f"chrome-{chrome_platform_detected}",
+        "Google Chrome for Testing.app",
+        "Contents",
+        "MacOS",
+        "Google Chrome for Testing",
+    )
+elif platform_detected.startswith("Win"):
+    default_exe_name = os.path.join(
+        default_local_exe_path,
+        f"chrome-{chrome_platform_detected}",
+        "chrome.exe",
+    )
 
 
 # https://stackoverflow.com/questions/39296101/python-zipfile-removes-execute-permissions-from-binaries
@@ -40,7 +72,8 @@ def get_browser_cli():
     parser.add_argument("--platform", dest="platform")
     parser.add_argument("--path", dest="path")  # TODO, unused
     parser.set_defaults(i=-1)
-    parser.set_defaults(path=default_exe_path)
+    parser.set_defaults(path=default_local_exe_path)
+    parser.set_defaults(platform=chrome_platform_detected)
     parsed = parser.parse_args()
     i = parsed.i
     platform = parsed.platform
@@ -52,7 +85,11 @@ def get_browser_cli():
     print(get_browser_sync(platform, i, path))
 
 
-def get_browser_sync(platform, i=-1, path=default_exe_path):
+def get_browser_sync(
+    platform=chrome_platform_detected,
+    i=-1,
+    path=default_local_exe_path,
+):
     browser_list = json.loads(
         urllib.request.urlopen(
             "https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json",
@@ -90,11 +127,17 @@ def get_browser_sync(platform, i=-1, path=default_exe_path):
 
 
 # to_thread everything
-async def get_browser(platform, i=-1, path=default_exe_path):
-    return asyncio.to_thread(get_browser_sync, platform=platform, i=i, path=path)
+async def get_browser(
+    platform=chrome_platform_detected,
+    i=-1,
+    path=default_local_exe_path,
+):
+    return await asyncio.to_thread(get_browser_sync, platform=platform, i=i, path=path)
 
 
 def diagnose():
+    from choreographer import Browser, which_browser
+
     parser = argparse.ArgumentParser(description="tool to help debug problems")
     parser.add_argument("--no-run", dest="run", action="store_false")
     parser.set_defaults(run=True)

@@ -12,10 +12,13 @@ jobs:
           python-version-file: "pyproject.toml"
 
       - name: Install Dependencies
-        run:  sudo apt-get update && sudo apt-get install chromium-browser xvfb
-        timeout-minutes: 4
+        run:  sudo apt-get update && sudo apt-get install xvfb
+        timeout-minutes: 1
+
       - name: Install choreographer
         run:  uv sync --all-extras
+      - name: Install google-chrome-for-testing
+        run: uv run choreo_get_browser
       - name: Diagnose
         run:  uv run choreo_diagnose --no-run
         timeout-minutes: 1

@@ -3,6 +3,8 @@ import platform
 import shutil
 import sys
 
+from .cli_utils import default_exe_name
+
 chrome = [
     "chrome",
     "Chrome",
@@ -22,6 +24,7 @@ chromium = ["chromium", "chromium-browser"]
 system = platform.system()
 
 default_path_chrome = None
+
 if system == "Windows":
     default_path_chrome = [
         r"c:\Program Files\Google\Chrome\Application\chrome.exe",
@@ -68,6 +71,12 @@ def _is_exe(path):
 
 
 def which_browser(executable_name=chrome, debug=False):
+    if debug:
+        print(f"Checking {default_exe_name}", file=sys.stderr)
+    if os.path.exists(default_exe_name):
+        if debug:
+            print(f"Found {default_exe_name}", file=sys.stderr)
+        return default_exe_name
     path = None
     if isinstance(executable_name, str):
         executable_name = [executable_name]

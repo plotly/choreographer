@@ -57,7 +57,7 @@ def open_browser(
         cli.append("--no-sandbox")
 
     if "HEADLESS" in env:
-        cli.append("--headless=old")  # temporary fix
+        cli.append("--headless")
 
     system_dependent = {}
     if system == "Windows":

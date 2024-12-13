@@ -42,8 +42,11 @@ class BrowserClosedError(RuntimeError):
     pass
 
 
-default_path = which_browser()  # probably handle this better
 with_onexc = bool(sys.version_info[:3] >= (3, 12))
+
+
+def get_browser_path():
+    return os.environ.get("BROWSER_PATH", which_browser())
 
 
 class Browser(Target):
@@ -113,15 +116,13 @@ class Browser(Target):
         new_env = os.environ.copy()
 
         if not path:  # use argument first
-            path = os.environ.get("BROWSER_PATH", None)
-        if not path:
-            path = default_path
-        if path:
-            new_env["BROWSER_PATH"] = str(path)
-        else:
-            raise BrowserFailedError(
-                "Could not find an acceptable browser. Please set environmental variable BROWSER_PATH or pass `path=/path/to/browser` into the Browser() constructor.",
-            )
+            path = get_browser_path()
+            if not path:
+                raise BrowserFailedError(
+                    "Could not find an acceptable browser. Please set environmental variable BROWSER_PATH or pass `path=/path/to/browser` into the Browser() constructor. See documentation for downloading browser from python.",
+                )
+
+        new_env["BROWSER_PATH"] = str(path)
 
         if self._tmpdir_path:
             temp_args = dict(dir=self._tmpdir_path)
