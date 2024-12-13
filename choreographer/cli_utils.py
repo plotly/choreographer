@@ -89,6 +89,11 @@ def get_browser_sync(platform, i=-1, path=default_exe_path):
     return exe_name
 
 
+# to_thread everything
+async def get_browser(platform, i=-1, path=default_exe_path):
+    return asyncio.to_thread(get_browser_sync, platform=platform, i=i, path=path)
+
+
 def diagnose():
     parser = argparse.ArgumentParser(description="tool to help debug problems")
     parser.add_argument("--no-run", dest="run", action="store_false")
