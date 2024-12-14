@@ -1,9 +1,10 @@
 # .github/workflows/publish_testpypi.yml
 ---
+name: test-n-build
 on: pull_request
   #  push:
-    #    tags:
-      #      - v*
+  #    tags:
+  #      - v*
 jobs:
   super-test:
     strategy:
@@ -27,7 +28,7 @@ jobs:
       - run: uv build
       - run: uv venv ${{ matrix.pyvers }} --python ${{ matrix.pyvers }}
       - run: echo "UV_PROJECT_ENVIRONMENT=${{ matrix.pyvers }}" >> $GITHUB_ENV
-      - run: uv pip install dist/choreographer*.whl
+      - run: ls && uv pip install dist/choreographer*.whl
 
     # different versions of chrome
 

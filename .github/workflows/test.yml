@@ -1,6 +1,10 @@
 ---
 name: test-wf
-on: pull_request
+on:
+  pull_request:
+  push:
+    tags-ignore:
+      - v*
 jobs:
   test-all:
     strategy:
