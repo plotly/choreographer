@@ -21,19 +21,19 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
-      # needs tags for version determination
-      # git fetch --tags will fetch more
+      # must actually checkout for version determination
+      # this will eventually be ${{ github.ref_name }}
       - run: git fetch --tags && git checkout main
       - uses: astral-sh/setup-uv@v4
       - run: uv python install ${{ matrix.pyvers }}
       - run: uv sync --all-extras
-      - run: uv pip install setuptools-git-versioning
-      - run: uv run setuptools-git-versioning
       - run: uv build
       - run: uv pip install dist/choreographer*.whl
+      # should we delete choreographer?
+      - run: uv run --no-sync choreo_get_browser
+      - run: uv run --no-sync poe test
+      # different versions of chrome
 
-    # different versions of chrome
-
-  #    REMEMBER TO GO BACK ONE COMMIT ON OTHER BRANCH
-  #- name: Publish package distributions to PyPI
-  #  uses: pypa/gh-action-pypi-publish@release/v1
+      #    REMEMBER TO GO BACK ONE COMMIT ON OTHER BRANCH
+      #- name: Publish package distributions to PyPI
+      #  uses: pypa/gh-action-pypi-publish@release/v1
