@@ -16,10 +16,7 @@ jobs:
 
       - name: Install Dependencies
         if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: >
-          sudo apt-get update &&
-          sudo apt-get install xvfb &&
-          alias uv='xvfb-run uv'
+        run: sudo apt-get update && sudo apt-get install xvfb
         timeout-minutes: 1
 
       - name: Install choreographer
@@ -31,10 +28,15 @@ jobs:
         timeout-minutes: 1
 
       - name: Test
-        if: ${{ ! runner.debug }}
+        if: ${{ ! runner.debug && matrix.os != 'ubuntu-latest' }}
         run: uv run poe test
         timeout-minutes: 4
+
+      - name: Test (Linux)
+        if: ${{ ! runner.debug && matrix.os == 'ubuntu-latest' }}
+        run: xvfb-run uv run poe test
+        timeout-minutes: 4
+
       - name: Test (Debug)
         if: runner.debug
         run: uv run poe debug-test
-        timeout-minutes: 10
