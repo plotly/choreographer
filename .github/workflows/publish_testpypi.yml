@@ -23,11 +23,11 @@ jobs:
       - uses: actions/checkout@v4
       # must actually checkout for version determination
       # this will eventually be ${{ github.ref_name }}
+      - run: uv run choreo_get_browser
       - run: git fetch --tags && git checkout main
       - uses: astral-sh/setup-uv@v4
       - run: uv python install ${{ matrix.pyvers }}
       - run: uv sync --all-extras
-      - run: uv run choreo_get_browser
       - run: uv build
       - run: uv pip install dist/choreographer*.whl
       # should we delete choreographer?
