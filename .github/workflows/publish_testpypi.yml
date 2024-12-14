@@ -25,9 +25,10 @@ jobs:
       # must actually checkout for version determination
       - run: git checkout ${{ github.ref_name }}
       - run: uv python install ${{ matrix.pyvers }}
-      - run: uv sync --all-extras
-      - run: uv run choreo_get_browser
       - run: uv build
+      # --locked = no updating lock file (causes a dirty git stage)
+      - run: uv sync --locked --all-extras
+      - run: uv run choreo_get_browser
       - run: uv pip install dist/choreographer*.whl
       # should we delete choreographer?
       - run: uv run --no-sync poe test
