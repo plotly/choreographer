@@ -27,6 +27,8 @@ jobs:
       - uses: astral-sh/setup-uv@v4
       - run: uv python install ${{ matrix.pyvers }}
       - run: uv sync --all-extras
+      - run: uv pip install setuptools-git-versioning
+      - run: uv run setuptools-git-versioning
       - run: uv build
       - run: uv pip install dist/choreographer*.whl
 
