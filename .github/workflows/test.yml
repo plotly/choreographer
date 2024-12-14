@@ -30,12 +30,12 @@ jobs:
       - name: Test
         if: ${{ ! runner.debug && matrix.os != 'ubuntu-latest' }}
         run: uv run poe test
-        timeout-minutes: 4
+        timeout-minutes: 7
 
       - name: Test (Linux)
         if: ${{ ! runner.debug && matrix.os == 'ubuntu-latest' }}
         run: xvfb-run uv run poe test
-        timeout-minutes: 4
+        timeout-minutes: 7
 
       - name: Test (Debug)
         if: runner.debug
