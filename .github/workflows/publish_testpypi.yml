@@ -27,7 +27,7 @@ jobs:
       - run: uv run choreo_get_browser
       # must actually checkout for version determination
       # this will eventually be ${{ github.ref_name }}
-      - run: git fetch --tags && git checkout main
+      - run: git fetch --tags && git stash && git checkout main
       - run: uv build
       - run: uv pip install dist/choreographer*.whl
       # should we delete choreographer?
