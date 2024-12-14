@@ -22,15 +22,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version-file: "pyproject.toml"
+      - run: uv python install ${{ matrix.pyvers }}
       - run: uv build
-      - run: echo "UV_PROJECT_ENVIRONMENT=${{ matrix.pyvers }}" >> $GITHUB_ENV
       - run: uv venv
-      - run: uv venv ${{ matrix.pyvers }} --python ${{ matrix.pyvers }}
       - run: ls && export && uv pip install dist/choreographer*.whl
-      - run: uv run -- which python
 
     # different versions of chrome
 
