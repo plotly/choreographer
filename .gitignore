@@ -1,3 +1,7 @@
+# specific
+browser_exe
+
+# normal stuff
 .venv
 
 # ignore build artifacts
