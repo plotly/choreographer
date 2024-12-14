@@ -28,7 +28,7 @@ jobs:
       - run: uv build
       # --locked = no updating lock file (causes a dirty git stage)
       - run: uv sync --locked --all-extras
-      - run: uv run choreo_get_browser
+      - run: uv run --no-sync choreo_get_browser
       - run: uv pip install dist/choreographer*.whl
       # should we delete choreographer?
       - run: uv run --no-sync poe test
