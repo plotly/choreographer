@@ -1,10 +1,11 @@
 # .github/workflows/publish_testpypi.yml
 ---
 name: test-n-build
-on: pull_request
-  #  push:
-  #    tags:
-  #      - v*
+on:
+  pull_request:
+  push:
+    tags:
+      - v*
 jobs:
   super-test:
     strategy:
@@ -22,12 +23,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v4
+      # must actually checkout for version determination
+      - run: git fetch --tags && git checkout ${{ github.ref_name }}
       - run: uv python install ${{ matrix.pyvers }}
       - run: uv sync --all-extras
       - run: uv run choreo_get_browser
-      # must actually checkout for version determination
-      # this will eventually be ${{ github.ref_name }}
-      - run: git fetch --tags && git stash && git checkout main
       - run: uv build
       - run: uv pip install dist/choreographer*.whl
       # should we delete choreographer?
