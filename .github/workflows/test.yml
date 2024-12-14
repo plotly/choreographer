@@ -2,8 +2,11 @@
 name: test-wf
 on: pull_request
 jobs:
-  test-linux:
-    runs-on: ubuntu-latest
+  test-all:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v4
@@ -12,7 +15,11 @@ jobs:
           python-version-file: "pyproject.toml"
 
       - name: Install Dependencies
-        run:  sudo apt-get update && sudo apt-get install xvfb
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        run: >
+          sudo apt-get update &&
+          sudo apt-get install xvfb &&
+          alias uv='xvfb-run uv'
         timeout-minutes: 1
 
       - name: Install choreographer
@@ -25,9 +32,9 @@ jobs:
 
       - name: Test
         if: ${{ ! runner.debug }}
-        run: xvfb-run uv run poe test
+        run: uv run poe test
         timeout-minutes: 4
       - name: Test (Debug)
         if: runner.debug
-        run: xvfb-run uv run poe debug-test
+        run: uv run poe debug-test
         timeout-minutes: 10
