@@ -140,8 +140,12 @@ def diagnose():
 
     parser = argparse.ArgumentParser(description="tool to help debug problems")
     parser.add_argument("--no-run", dest="run", action="store_false")
+    parser.add_argument("--show", dest="headless", action="store_false")
     parser.set_defaults(run=True)
-    run = parser.parse_args().run
+    parser.set_defaults(headless=True)
+    args = parser.parse_args()
+    run = args.run
+    headless = args.headless
     fail = []
     print("*".center(50, "*"))
     print("SYSTEM:".center(50, "*"))
@@ -179,7 +183,7 @@ def diagnose():
     if run:
         try:
             print("Sync Test Headless".center(50, "*"))
-            browser = Browser(debug=True, debug_browser=True, headless=True)
+            browser = Browser(debug=True, debug_browser=True, headless=headless)
             time.sleep(3)
             browser.close()
         except BaseException as e:
@@ -188,7 +192,7 @@ def diagnose():
             print("Done with sync test headless".center(50, "*"))
 
         async def test_headless():
-            browser = await Browser(debug=True, debug_browser=True, headless=True)
+            browser = await Browser(debug=True, debug_browser=True, headless=headless)
             await asyncio.sleep(3)
             await browser.close()
 
