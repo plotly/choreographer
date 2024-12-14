@@ -13,9 +13,9 @@ jobs:
         pyvers: [3.09] #, 3.10, 3.11, 3.12, 3.13]
     name: Build and Test
     runs-on: ${{ matrix.os }}
-    environment:
-      name: pypi
-      url: https://pypi.org/p/pozo
+    #    environment:
+    #      name: pypi
+    #      url: https://test.pypi.org/p/choreographer
     # IMPORTANT: this permission is mandatory for trusted publishing
     permissions:
       id-token: write
