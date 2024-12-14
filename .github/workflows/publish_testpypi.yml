@@ -26,7 +26,7 @@ jobs:
       - run: git checkout ${{ github.ref_name }}
       - run: uv python install ${{ matrix.pyvers }}
       - run: git status
-      - run: uv sync --all-extras
+      - run: uv sync --all-extras || git status && false
       - run: git restore . # delete uv.lock changest
       - run: uv build
       - run: uv run --no-sync choreo_get_browser
