@@ -23,9 +23,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v4
       - run: uv python install ${{ matrix.pyvers }}
+      - run: uv sync --all-extras
       - run: uv build
-      - run: uv venv
-      - run: ls && export && uv pip install dist/choreographer*.whl
+      - run: uv pip install dist/choreographer*.whl
 
     # different versions of chrome
 
