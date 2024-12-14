@@ -10,7 +10,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest] #, windows-latest, macos-latest]
-        pyvers: [3.09] #, 3.10, 3.11, 3.12, 3.13]
+        pyvers: [3.09, ''] #, 3.10, 3.11, 3.12, 3.13]
     name: Build and Test
     runs-on: ${{ matrix.os }}
     #    environment:
@@ -22,6 +22,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v4
+      - name: Install Dependencies
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        run: sudo apt-get update && sudo apt-get install xvfb
+        timeout-minutes: 1
       # must actually checkout for version determination
       - run: git checkout ${{ github.ref_name }}
       - run: uv python install ${{ matrix.pyvers }}
@@ -33,6 +37,20 @@ jobs:
       - run: uv run --no-sync choreo_get_browser
       - run: uv pip install dist/choreographer*.whl
       # should we delete choreographer?
+
+      - name: Test
+        if: ${{ ! runner.debug && matrix.os != 'ubuntu-latest' }}
+        run: uv run poe test
+        timeout-minutes: 7
+
+      - name: Test (Linux)
+        if: ${{ ! runner.debug && matrix.os == 'ubuntu-latest' }}
+        run: xvfb-run uv run poe test
+        timeout-minutes: 7
+
+      - name: Test (Debug)
+        if: runner.debug
+        run: uv run poe debug-test
       - run: uv run --no-sync poe test
       # different versions of chrome
 
