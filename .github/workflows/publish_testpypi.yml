@@ -40,18 +40,17 @@ jobs:
 
       - name: Test
         if: ${{ ! runner.debug && matrix.os != 'ubuntu-latest' }}
-        run: uv run poe test
+        run: uv run --no-sync poe test
         timeout-minutes: 7
 
       - name: Test (Linux)
         if: ${{ ! runner.debug && matrix.os == 'ubuntu-latest' }}
-        run: xvfb-run uv run poe test
+        run: xvfb-run uv run --no-sync poe test
         timeout-minutes: 7
 
       - name: Test (Debug)
         if: runner.debug
-        run: uv run poe debug-test
-      - run: uv run --no-sync poe test
+        run: uv run --no-sync poe debug-test
       # different versions of chrome
 
       #    REMEMBER TO GO BACK ONE COMMIT ON OTHER BRANCH
