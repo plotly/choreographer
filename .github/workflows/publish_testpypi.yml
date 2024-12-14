@@ -28,7 +28,7 @@ jobs:
       - run: uv build
       - run: uv venv ${{ matrix.pyvers }} --python ${{ matrix.pyvers }}
       - run: echo "UV_PROJECT_ENVIRONMENT=${{ matrix.pyvers }}" >> $GITHUB_ENV
-      - run: ls && uv pip install dist/choreographer*.whl
+      - run: ls && export && uv pip install dist/choreographer*.whl
 
     # different versions of chrome
 
