@@ -21,6 +21,9 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
+      # needs tags for version determination
+      # git fetch --tags will fetch more
+      - run: git fetch origin 'refs/tags/*:refs/tags/*'
       - uses: astral-sh/setup-uv@v4
       - run: uv python install ${{ matrix.pyvers }}
       - run: uv sync --all-extras
