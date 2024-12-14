@@ -1,0 +1,36 @@
+# .github/workflows/publish_testpypi.yml
+---
+on: pull_request
+  #  push:
+    #    tags:
+      #      - v*
+jobs:
+  super-test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest] #, windows-latest, macos-latest]
+        pyvers: [3.09] #, 3.10, 3.11, 3.12, 3.13]
+    name: Upload release to PyPI
+    runs-on: ${{ matrix.os }}
+    environment:
+      name: pypi
+      url: https://pypi.org/p/pozo
+    # IMPORTANT: this permission is mandatory for trusted publishing
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: "pyproject.toml"
+      - run: uv build
+      - run: uv venv ${{ matrix.pyvers }} --python ${{ matrix.pyvers }}
+      - run: echo "UV_PROJECT_ENVIRONMENT=${{ matrix.pyvers }}" >> $GITHUB_ENV
+      - run: uv pip install dist/choreographer*.whl
+
+    # different versions of chrome
+
+  #    REMEMBER TO GO BACK ONE COMMIT ON OTHER BRANCH
+  #- name: Publish package distributions to PyPI
+  #  uses: pypa/gh-action-pypi-publish@release/v1
