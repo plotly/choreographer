@@ -9,8 +9,8 @@ jobs:
   super-test:
     strategy:
       matrix:
-        os: [ubuntu-latest] #, windows-latest, macos-latest]
-        python_v: [3.09, ''] #, 3.10, 3.11, 3.12, 3.13]
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python_v: [3.09, 3.10, '']
         chrome_v: [0, -1]
     name: Build and Test
     runs-on: ${{ matrix.os }}
@@ -35,7 +35,7 @@ jobs:
       - run: uv sync --frozen --all-extras
       - run: git restore . # delete uv.lock changest
       - run: uv build
-      - run: uv run --no-sync choreo_get_browser --i ${{ matrix.chrome_v }}
+      - run: uv run --no-sync choreo_get_browser -v --i ${{ matrix.chrome_v }}
       - run: uv pip install dist/choreographer*.whl
       # should we delete choreographer?
 

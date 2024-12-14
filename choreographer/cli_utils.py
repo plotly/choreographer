@@ -71,31 +71,44 @@ def get_browser_cli():
     parser.add_argument("--i", "-i", type=int, dest="i")
     parser.add_argument("--platform", dest="platform")
     parser.add_argument("--path", dest="path")  # TODO, unused
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        dest="verbose",
+        action="store_true",
+    )  # TODO, unused
     parser.set_defaults(i=-1)
     parser.set_defaults(path=default_local_exe_path)
     parser.set_defaults(platform=chrome_platform_detected)
+    parser.set_defaults(verbose=False)
     parsed = parser.parse_args()
     i = parsed.i
     platform = parsed.platform
     path = parsed.path
+    verbose = parsed.verbose
     if not platform or platform not in platforms:
         raise RuntimeError(
             f"You must specify a platform: linux64, win32, win64, mac-x64, mac-arm64, not {platform}",
         )
-    print(get_browser_sync(platform, i, path))
+    print(get_browser_sync(platform=platform, i=i, path=path, verbose=verbose))
 
 
 def get_browser_sync(
     platform=chrome_platform_detected,
     i=-1,
     path=default_local_exe_path,
+    verbose=False,
 ):
     browser_list = json.loads(
         urllib.request.urlopen(
             "https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json",
         ).read(),
     )
-    chromium_sources = browser_list["versions"][i]["downloads"]["chrome"]
+    version_obj = browser_list["versions"][i]
+    if verbose:
+        print(version_obj["version"])
+        print(version_obj["revision"])
+    chromium_sources = version_obj["downloads"]["chrome"]
     url = None
     for src in chromium_sources:
         if src["platform"] == platform:
