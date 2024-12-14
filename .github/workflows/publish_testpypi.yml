@@ -25,8 +25,9 @@ jobs:
       # must actually checkout for version determination
       - run: git checkout ${{ github.ref_name }}
       - run: uv python install ${{ matrix.pyvers }}
+      - run: git status
       - run: uv sync --all-extras
-      - run: git restore . # delete uv.lock changes
+      - run: git restore . # delete uv.lock changest
       - run: uv build
       - run: uv run --no-sync choreo_get_browser
       - run: uv pip install dist/choreographer*.whl
