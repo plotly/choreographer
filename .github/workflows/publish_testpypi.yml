@@ -55,7 +55,11 @@ jobs:
       - name: Test (Debug)
         if: runner.debug
         run: uv run --no-sync poe debug-test
-      # different versions of chrome
+
+      - name: Test (Debug, Linux)
+        if: ${{ runner.debug && matrix.os == 'ubuntu-latest' }}
+        run: xvfb-run uv run --no-sync poe debug-test
+        timeout-minutes: 7
 
       #    REMEMBER TO GO BACK ONE COMMIT ON OTHER BRANCH
       #- name: Publish package distributions to PyPI

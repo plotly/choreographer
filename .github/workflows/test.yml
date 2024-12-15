@@ -44,3 +44,8 @@ jobs:
       - name: Test (Debug)
         if: runner.debug
         run: uv run poe debug-test
+
+      - name: Test (Debug, Linux)
+        if: ${{ runner.debug && matrix.os == 'ubuntu-latest' }}
+        run: xvfb-run uv run poe debug-test
+        timeout-minutes: 7
