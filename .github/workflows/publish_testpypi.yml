@@ -38,10 +38,9 @@ jobs:
       - run: uv run --no-sync choreo_get_browser -v --i ${{ matrix.chrome_v }}
       - name: Reinstall from wheel
         run: >
-          uv pip install dist/choreographer-
-          $(uv run --no-sync --with setuptools-git-versioning
-          setuptools-git-versioning)
-          .whl
+          uv pip install dist/choreographer-$(uv
+          run --no-sync --with setuptools-git-versioning
+          setuptools-git-versioning).whl
       - run: uv run --no-sync choreo_diagnose --no-run
       - name: Test
         if: ${{ ! runner.debug && matrix.os != 'ubuntu-latest' }}
