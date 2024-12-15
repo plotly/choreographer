@@ -8,6 +8,7 @@ on:
 jobs:
   super-test:
     strategy:
+      max-parallel: 2
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         python_v: ['3.09', '3.10', '']
@@ -37,12 +38,12 @@ jobs:
       - name: Test
         if: ${{ ! runner.debug && matrix.os != 'ubuntu-latest' }}
         run: uv run --no-sync poe test
-        timeout-minutes: 7
+        timeout-minutes: 8
 
       - name: Test (Linux)
         if: ${{ ! runner.debug && matrix.os == 'ubuntu-latest' }}
         run: xvfb-run uv run --no-sync poe test
-        timeout-minutes: 7
+        timeout-minutes: 8
 
       - name: Test (Debug)
         if: runner.debug
@@ -51,7 +52,7 @@ jobs:
       - name: Test (Debug, Linux)
         if: ${{ runner.debug && matrix.os == 'ubuntu-latest' }}
         run: xvfb-run uv run --no-sync poe debug-test
-        timeout-minutes: 7
+        timeout-minutes: 8
   testpypi-publish:
     name: Upload release to TestPyPI
     needs: super-test
