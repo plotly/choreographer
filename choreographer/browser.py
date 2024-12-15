@@ -42,7 +42,7 @@ def get_browser_path():
 
 class Browser(Target):
     # Some frameworks configure windows use SelectorEventLoop, which lacks
-    # certain features.
+    # certain features, so we need to know.
     def _check_loop(self):
         # Lock
         if not self.lock:
