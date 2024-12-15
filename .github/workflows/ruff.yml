@@ -1,3 +1,4 @@
+---
 name: ruff-wf
 on: pull_request
 jobs:
