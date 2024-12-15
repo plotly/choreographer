@@ -14,12 +14,6 @@ jobs:
         chrome_v: ['0', '-1']
     name: Build and Test
     runs-on: ${{ matrix.os }}
-    #    environment:
-    #      name: pypi
-    #      url: https://test.pypi.org/p/choreographer
-    # IMPORTANT: this permission is mandatory for trusted publishing
-    permissions:
-      id-token: write
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v4
@@ -30,10 +24,8 @@ jobs:
       # must actually checkout for version determination
       - run: git checkout ${{ github.ref_name }}
       - run: uv python install ${{ matrix.python_v }}
-      - run: git status
       # don't modify sync file! messes up version!
       - run: uv sync --frozen --all-extras
-      - run: git restore .  # delete uv.lock changest
       - run: uv build
       - run: uv run --no-sync choreo_get_browser -v --i ${{ matrix.chrome_v }}
       - name: Reinstall from wheel
@@ -60,7 +52,24 @@ jobs:
         if: ${{ runner.debug && matrix.os == 'ubuntu-latest' }}
         run: xvfb-run uv run --no-sync poe debug-test
         timeout-minutes: 7
-
-      #    REMEMBER TO GO BACK ONE COMMIT ON OTHER BRANCH
-      #- name: Publish package distributions to PyPI
-      #  uses: pypa/gh-action-pypi-publish@release/v1
+  testpypi-publish:
+    name: Upload release to TestPyPI
+    runs-on: ubuntu-latest
+    environment:
+      name: testpypi
+      url: https://pypi.org/p/pozo
+    # Signs this workflow so pypi trusts it
+    permissions:
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: "pyproject.toml"
+      - run: git checkout ${{ github.ref_name }}
+      - run: uv sync --frozen --all-extras
+      - run: uv build
+      - name: Publish package distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
