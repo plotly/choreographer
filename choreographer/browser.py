@@ -19,6 +19,8 @@ from .session import Session
 from .system import which_browser
 from .tab import Tab
 from .target import Target
+from .tempfile import TempDirectory
+from .tempfile import TempDirWarning
 
 
 class UnhandledMessageWarning(UserWarning):
@@ -31,9 +33,6 @@ class BrowserFailedError(RuntimeError):
 
 class BrowserClosedError(RuntimeError):
     pass
-
-
-with_onexc = bool(sys.version_info[:3] >= (3, 12))
 
 
 def get_browser_path():
@@ -69,14 +68,17 @@ class Browser(Target):
         self._loop_hack = False  # see _check_loop
         self.lock = None  # TODO where else is this set
         self.tabs = OrderedDict()
+        self.sandboxed = False  # this is if our processes can't use /tmp
 
         # Browser Configuration
         if not path:
             path = get_browser_path()
         if not path:
             raise BrowserFailedError(
-                "Could not find an acceptable browser. Please set environmental variable BROWSER_PATH or pass `path=/path/to/browser` into the Browser() constructor. See documentation for downloading browser from python.",
+                "Could not find an acceptable browser. Please call `choreo.get_browser()`, set environmental variable BROWSER_PATH or pass `path=/path/to/browser` into the Browser() constructor. The latter two work with Edge.",
             )
+        if "snap" in str(path):
+            self.sandboxed = True
         self._env["BROWSER_PATH"] = str(path)
         self.headless = headless
         if headless:
@@ -90,8 +92,9 @@ class Browser(Target):
             self._env["SANDBOX_ENABLED"] = "true"
 
         # Expert Configuration
-        self._tmp_path = kwargs.pop("tmp_path", None)
-        # TODO: stub, tempfile, must create
+        tmp_path = kwargs.pop("tmp_path", None)
+        self.tmp_dir = TempDirectory(tmp_path, sneak=self.sandboxed)
+
         try:
             self.loop = kwargs.pop("loop", asyncio.get_running_loop())
         except Exception:
@@ -386,7 +389,7 @@ class Browser(Target):
                 except ProcessLookupError:
                     pass
                 self.pipe.close()
-                self._clean_temp()
+                self.temp_dir.clean()
 
             return asyncio.create_task(close_task())
         else:
@@ -395,7 +398,7 @@ class Browser(Target):
             except ProcessLookupError:
                 pass
             self.pipe.close()
-            self._clean_temp()
+            self.temp_dir.clean()
 
     async def _watchdog(self):
         self._watchdog_healthy = True
@@ -410,11 +413,13 @@ class Browser(Target):
         await self.close()
         await asyncio.sleep(1)
         with warnings.catch_warnings():
-            # we'll ignore warnings here because
-            # if the user sloppy-closes the browsers
-            # they may leave processes up still trying to create temporary files
-            # warnings.filterwarnings("ignore", category=TempDirWarning) #TODO
-            self._retry_delete_manual(self._temp_dir_name, delete=True)
+            # ignore warnings here because
+            # watchdog killing is last resort
+            # and can leaves stuff in weird state
+            warnings.filterwarnings("ignore", category=TempDirWarning)
+            self.temp_dir.clean()
+            if self.temp_dir.exists:
+                self.temp_dir.delete_manually()
 
     def __exit__(self, type, value, traceback):
         self.close()
