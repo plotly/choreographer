@@ -70,7 +70,7 @@ def _is_exe(path):
         return res
 
 
-def which_browser(executable_name=chrome, debug=False, skip_local=False):
+def browser_which(executable_name=chrome, debug=False, skip_local=False):
     if debug:
         print(f"Checking {default_exe_name}", file=sys.stderr)
     if not skip_local and os.path.exists(default_exe_name):

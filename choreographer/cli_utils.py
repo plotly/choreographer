@@ -149,7 +149,7 @@ async def get_browser(
 
 
 def diagnose():
-    from choreographer import Browser, which_browser
+    from choreographer import Browser, browser_which
 
     parser = argparse.ArgumentParser(description="tool to help debug problems")
     parser.add_argument("--no-run", dest="run", action="store_false")
@@ -167,7 +167,7 @@ def diagnose():
     print(platform.version())
     print(platform.uname())
     print("BROWSER:".center(50, "*"))
-    print(which_browser(debug=True))
+    print(browser_which(debug=True))
     print("VERSION INFO:".center(50, "*"))
     try:
         print("PIP:".center(25, "*"))
