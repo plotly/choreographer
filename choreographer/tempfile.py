@@ -19,6 +19,7 @@ class TempDirWarning(UserWarning):
 # Here we have our own class to deal with it.
 class TempDirectory:
     def __init__(self, path=None, sneak=False):
+        self.debug = True  # temporary! TODO
         self._with_onexc = bool(sys.version_info[:3] >= (3, 12))
         args = {}
 
