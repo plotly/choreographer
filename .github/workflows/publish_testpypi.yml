@@ -54,6 +54,8 @@ jobs:
         timeout-minutes: 7
   testpypi-publish:
     name: Upload release to TestPyPI
+    needs: super-test
+    if: always() && !cancelled() && !failure()
     runs-on: ubuntu-latest
     environment:
       name: testpypi
