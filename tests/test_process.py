@@ -22,7 +22,7 @@ async def test_context(capteesys, headless, debug, debug_browser, sandbox, gpu):
         ) as browser,
         timeout(pytest.default_timeout),
     ):
-        temp_dir = browser._temp_dir_name
+        temp_dir = browser.tmp_dir
         response = await browser.send_command(command="Target.getTargets")
         assert "result" in response and "targetInfos" in response["result"]
         assert len(response["result"]["targetInfos"]) != 0
@@ -33,7 +33,7 @@ async def test_context(capteesys, headless, debug, debug_browser, sandbox, gpu):
     assert capteesys.readouterr().out == "\n", "stdout should be silent!"
     # let asyncio do some cleaning up if it wants, may prevent warnings
     await asyncio.sleep(0)
-    assert not os.path.exists(temp_dir)
+    assert not temp_dir.exists
 
 
 @pytest.mark.asyncio(loop_scope="function")
@@ -45,7 +45,7 @@ async def test_no_context(capteesys, headless, debug, debug_browser, sandbox, gp
         enable_sandbox=sandbox,
         enable_gpu=gpu,
     )
-    temp_dir = browser._temp_dir_name
+    temp_dir = browser.tmp_dir
     try:
         async with timeout(pytest.default_timeout):
             response = await browser.send_command(command="Target.getTargets")
@@ -58,7 +58,7 @@ async def test_no_context(capteesys, headless, debug, debug_browser, sandbox, gp
     print("")  # this make sure that capturing is working
     assert capteesys.readouterr().out == "\n", "stdout should be silent!"
     await asyncio.sleep(0)
-    assert not os.path.exists(temp_dir)
+    assert not temp_dir.exists
 
 
 # Harass choreographer with a kill in this test to see if its clean in a way

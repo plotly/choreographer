@@ -133,7 +133,7 @@ class Browser(Target):
         if debug:
             print(f"STDERR: {stderr}", file=sys.stderr)
 
-        self._env["USER_DATA_DIR"] = str(self._temp_dir_name)
+        self._env["USER_DATA_DIR"] = str(self.tmp_dir.path)
 
         # Compose Resources
         self.pipe = Pipe(debug=debug)
@@ -389,7 +389,7 @@ class Browser(Target):
                 except ProcessLookupError:
                     pass
                 self.pipe.close()
-                self.temp_dir.clean()
+                self.tmp_dir.clean()
 
             return asyncio.create_task(close_task())
         else:
@@ -398,7 +398,7 @@ class Browser(Target):
             except ProcessLookupError:
                 pass
             self.pipe.close()
-            self.temp_dir.clean()
+            self.tmp_dir.clean()
 
     async def _watchdog(self):
         self._watchdog_healthy = True
@@ -417,9 +417,9 @@ class Browser(Target):
             # watchdog killing is last resort
             # and can leaves stuff in weird state
             warnings.filterwarnings("ignore", category=TempDirWarning)
-            self.temp_dir.clean()
-            if self.temp_dir.exists:
-                self.temp_dir.delete_manually()
+            self.tmp_dir.clean()
+            if self.tmp_dir.exists:
+                self.tmp_dir.delete_manually()
 
     def __exit__(self, type, value, traceback):
         self.close()

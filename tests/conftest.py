@@ -1,5 +1,4 @@
 import asyncio
-import os
 
 import pytest
 import pytest_asyncio
@@ -58,13 +57,13 @@ async def browser(request):
         debug=debug,
         debug_browser=debug_browser,
     )
-    temp_dir = browser._temp_dir_name
+    temp_dir = browser.tmp_dir
     yield browser
     try:
         await browser.close()
     except choreo.browser.BrowserClosedError:
         pass
-    if os.path.exists(temp_dir):
+    if temp_dir.exists:
         raise RuntimeError(f"Temporary directory not deleted successfully: {temp_dir}")
 
 
