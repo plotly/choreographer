@@ -49,7 +49,7 @@ class TempDirectory:
         self.path = self.temp_dir.name
         self.exists = True
         if self.debug:
-            print(f"TEMP DIR NAME: {self._temp_dir_name}", file=sys.stderr)
+            print(f"TEMP DIR PATH: {self.path}", file=sys.stderr)
 
     def delete_manually(self, check_only=False):
         if not os.path.exists(self.path):
