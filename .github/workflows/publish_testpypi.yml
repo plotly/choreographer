@@ -61,7 +61,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: testpypi
-      url: https://pypi.org/p/pozo
+      url: https://pypi.org/p/choreographer
     # Signs this workflow so pypi trusts it
     permissions:
       id-token: write
