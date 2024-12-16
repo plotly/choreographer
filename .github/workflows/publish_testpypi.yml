@@ -26,7 +26,7 @@ jobs:
       - run: git checkout ${{ github.ref_name }}
       - run: uv python install ${{ matrix.python_v }}
       # don't modify sync file! messes up version!
-      - run: uv sync --frozen --all-extras
+      - run: uv sync --all-extras --frozen # does order matter?
       - run: uv build
       - run: uv run --no-sync choreo_get_browser -v --i ${{ matrix.chrome_v }}
       - name: Reinstall from wheel
