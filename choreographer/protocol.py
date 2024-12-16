@@ -12,14 +12,14 @@ class MessageTypeError(TypeError):
     def __init__(self, key, value, expected_type):
         value = type(value) if not isinstance(value, type) else value
         super().__init__(
-            f"Message with key {key} must have type {expected_type}, not {value}."
+            f"Message with key {key} must have type {expected_type}, not {value}.",
         )
 
 
 class MissingKeyError(ValueError):
     def __init__(self, key, obj):
         super().__init__(
-            f"Message missing required key/s {key}. Message received: {obj}"
+            f"Message missing required key/s {key}. Message received: {obj}",
         )
 
 
@@ -61,7 +61,7 @@ class Protocol:
 
         if len(obj.keys()) != n_keys:
             raise RuntimeError(
-                "Message objects must have id and method keys, and may have params and sessionId keys."
+                "Message objects must have id and method keys, and may have params and sessionId keys.",
             )
 
     def match_key(self, response, key):

@@ -31,7 +31,7 @@ class Session:
             raise ValueError("You may use this method with a loop in Browser")
         if string in self.subscriptions:
             raise ValueError(
-                "You are already subscribed to this string, duplicate subscriptions are not allowed."
+                "You are already subscribed to this string, duplicate subscriptions are not allowed.",
             )
         else:
             self.subscriptions[string] = (callback, repeating)
@@ -41,7 +41,7 @@ class Session:
             raise ValueError("You may use this method with a loop in Browser")
         if string not in self.subscriptions:
             raise ValueError(
-                "Cannot unsubscribe as string is not present in subscriptions"
+                "Cannot unsubscribe as string is not present in subscriptions",
             )
         del self.subscriptions[string]
 
