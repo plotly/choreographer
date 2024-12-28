@@ -32,6 +32,7 @@ dev = [
   "pytest-xdist",
   "async-timeout",
   "poethepoet>=0.31.1",
+  "numpy"
 ]
 
 [project.scripts]
