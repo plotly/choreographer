@@ -11,6 +11,7 @@ import urllib.request
 import warnings
 import zipfile
 
+# we use arch instead of platform when singular since platform is a package
 platforms = ["linux64", "win32", "win64", "mac-x64", "mac-arm64"]
 
 default_local_exe_path = os.path.join(
@@ -100,7 +101,7 @@ def get_browser_cli():
         raise RuntimeError(
             f"You must specify a platform: linux64, win32, win64, mac-x64, mac-arm64, not {platform}",
         )
-    print(get_browser_sync(platform=platform, i=i, path=path, verbose=verbose))
+    print(get_browser_sync(arch=arch, i=i, path=path, verbose=verbose))
 
 
 def get_browser_sync(
@@ -133,18 +134,18 @@ def get_browser_sync(
         zip_ref.extractall(path)
 
     if arch.startswith("linux"):
-        exe_name = os.path.join(path, f"chrome-{platform}", "chrome")
+        exe_name = os.path.join(path, f"chrome-{arch}", "chrome")
     elif arch.startswith("mac"):
         exe_name = os.path.join(
             path,
-            f"chrome-{platform}",
+            f"chrome-{arch}",
             "Google Chrome for Testing.app",
             "Contents",
             "MacOS",
             "Google Chrome for Testing",
         )
     elif arch.startswith("win"):
-        exe_name = os.path.join(path, f"chrome-{platform}", "chrome.exe")
+        exe_name = os.path.join(path, f"chrome-{arch}", "chrome.exe")
 
     return exe_name
 
