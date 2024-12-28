@@ -8,6 +8,7 @@ import subprocess
 import sys
 import time
 import urllib.request
+import warnings
 import zipfile
 
 platforms = ["linux64", "win32", "win64", "mac-x64", "mac-arm64"]
@@ -67,9 +68,18 @@ class ZipFilePermissions(zipfile.ZipFile):
 
 
 def get_browser_cli():
+    if "ubuntu" in platform.version().lower():
+        warnings.warn(
+            "You are using `get_browser()` on Ubuntu."
+            " Ubuntu is **very strict** about where binaries come from."
+            " You have to disable the sandbox with use_sandbox=False"
+            " when you initialize the browser OR you can install from Ubuntu's"
+            " package manager.",
+            UserWarning,
+        )
     parser = argparse.ArgumentParser(description="tool to help debug problems")
     parser.add_argument("--i", "-i", type=int, dest="i")
-    parser.add_argument("--platform", dest="platform")
+    parser.add_argument("--arch", dest="arch")
     parser.add_argument("--path", dest="path")  # TODO, unused
     parser.add_argument(
         "-v",
@@ -79,14 +89,14 @@ def get_browser_cli():
     )  # TODO, unused
     parser.set_defaults(i=-1)
     parser.set_defaults(path=default_local_exe_path)
-    parser.set_defaults(platform=chrome_platform_detected)
+    parser.set_defaults(arch=chrome_platform_detected)
     parser.set_defaults(verbose=False)
     parsed = parser.parse_args()
     i = parsed.i
-    platform = parsed.platform
+    arch = parsed.arch
     path = parsed.path
     verbose = parsed.verbose
-    if not platform or platform not in platforms:
+    if not arch or arch not in platforms:
         raise RuntimeError(
             f"You must specify a platform: linux64, win32, win64, mac-x64, mac-arm64, not {platform}",
         )
@@ -94,7 +104,7 @@ def get_browser_cli():
 
 
 def get_browser_sync(
-    platform=chrome_platform_detected,
+    arch=chrome_platform_detected,
     i=-1,
     path=default_local_exe_path,
     verbose=False,
@@ -111,7 +121,7 @@ def get_browser_sync(
     chromium_sources = version_obj["downloads"]["chrome"]
     url = None
     for src in chromium_sources:
-        if src["platform"] == platform:
+        if src["platform"] == arch:
             url = src["url"]
             break
     if not os.path.exists(path):
@@ -122,9 +132,9 @@ def get_browser_sync(
     with ZipFilePermissions(filename, "r") as zip_ref:
         zip_ref.extractall(path)
 
-    if platform.startswith("linux"):
+    if arch.startswith("linux"):
         exe_name = os.path.join(path, f"chrome-{platform}", "chrome")
-    elif platform.startswith("mac"):
+    elif arch.startswith("mac"):
         exe_name = os.path.join(
             path,
             f"chrome-{platform}",
@@ -133,7 +143,7 @@ def get_browser_sync(
             "MacOS",
             "Google Chrome for Testing",
         )
-    elif platform.startswith("win"):
+    elif arch.startswith("win"):
         exe_name = os.path.join(path, f"chrome-{platform}", "chrome.exe")
 
     return exe_name
@@ -141,11 +151,11 @@ def get_browser_sync(
 
 # to_thread everything
 async def get_browser(
-    platform=chrome_platform_detected,
+    arch=chrome_platform_detected,
     i=-1,
     path=default_local_exe_path,
 ):
-    return await asyncio.to_thread(get_browser_sync, platform=platform, i=i, path=path)
+    return await asyncio.to_thread(get_browser_sync, arch=arch, i=i, path=path)
 
 
 def diagnose():

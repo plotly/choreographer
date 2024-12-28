@@ -71,14 +71,20 @@ class Browser(Target):
         self.sandboxed = False  # this is if our processes can't use /tmp
 
         # Browser Configuration
+        self.enable_sandbox = kwargs.pop("enable_sandbox", False)
+        if self.enable_sandbox:
+            self._env["SANDBOX_ENABLED"] = "true"
         if not path:
-            path = get_browser_path()
+            skip_local = bool(
+                "ubuntu" in platform.version().lower() and self.enable_sandbox,
+            )
+            path = get_browser_path(skip_local=skip_local)
         if not path:
             raise BrowserFailedError(
                 "Could not find an acceptable browser. Please call `choreo.get_browser()`, set environmental variable BROWSER_PATH or pass `path=/path/to/browser` into the Browser() constructor. The latter two work with Edge.",
             )
         if "snap" in str(path):
-            self.sandboxed = True
+            self.sandboxed = True  # not chromium sandbox, snap sandbox
         self._env["BROWSER_PATH"] = str(path)
         self.headless = headless
         if headless:
@@ -87,9 +93,6 @@ class Browser(Target):
         self.enable_gpu = kwargs.pop("enable_gpu", False)
         if self.enable_gpu:
             self._env["GPU_ENABLED"] = "true"
-        self.enable_sandbox = kwargs.pop("enable_sandbox", False)
-        if self.enable_sandbox:
-            self._env["SANDBOX_ENABLED"] = "true"
 
         # Expert Configuration
         tmp_path = kwargs.pop("tmp_path", None)

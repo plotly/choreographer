@@ -17,11 +17,13 @@ async def test_context(capteesys, headless, debug, debug_browser, sandbox, gpu):
             headless=headless,
             debug=debug,
             debug_browser=None if debug_browser else False,
-            enable_sandbox=False,
+            enable_sandbox=sandbox,
             enable_gpu=gpu,
         ) as browser,
         timeout(pytest.default_timeout),
     ):
+        if sandbox and "ubuntu" in platform.version().lower():
+            pytest.skip("Ubuntu doesn't support sandbox")
         temp_dir = browser.tmp_dir
         response = await browser.send_command(command="Target.getTargets")
         assert "result" in response and "targetInfos" in response["result"]
