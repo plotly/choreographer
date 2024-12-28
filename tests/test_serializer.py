@@ -1,5 +1,7 @@
 from datetime import datetime
 
+import numpy as np
+
 from choreographer.pipe import Pipe
 
 data = [1, 2.00, 3, float("nan"), float("inf"), float("-inf"), datetime(1970, 1, 1)]
@@ -13,6 +15,11 @@ def test_de_serialize():
     assert message == expected_message
     obj = pipe.deserialize(message[:-1])  # split out \0
     for o, t in zip(obj, converted_type):
+        assert isinstance(o, t)
+    message_np = pipe.serialize(np.array(data))
+    assert message_np == expected_message
+    obj_np = pipe.deserialize(message_np[:-1])  # split out \0
+    for o, t in zip(obj_np, converted_type):
         assert isinstance(o, t)
 
 
