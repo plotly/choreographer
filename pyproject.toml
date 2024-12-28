@@ -30,8 +30,10 @@ dev = [
   "pytest",
   "pytest-asyncio",
   "pytest-xdist",
-  "async-timeout"
-  ]
+  "async-timeout",
+  "poethepoet>=0.31.1",
+  "numpy"
+]
 
 [project.scripts]
 dtdoctor = "choreographer.browser:diagnose"
@@ -42,3 +44,21 @@ ignore = ["E701"]
 [tool.pytest.ini_options]
 asyncio_default_fixture_loop_scope = "function"
 
+[tool.poe.tasks]
+_test_proc = "pytest -W error -n auto -v -rfE --capture=fd tests/test_process.py"
+_test_fn = "pytest -W error -n auto -v -rfE --ignore=tests/test_process.py"
+_debug-test_proc = "pytest -W error -vvx -rA --capture=tee-sys tests/test_process.py"
+_debug-test_fn = "pytest -W error -vvvx -rA --capture=tee-sys --ignore=tests/test_process.py"
+
+# the capture on these is weird, the mechanics are weird, i forget exactly whats its doing
+[tool.poe.tasks.test]
+sequence = ["_test_proc", "_test_fn"]
+help = "Run all tests quickly"
+
+[tool.poe.tasks.debug-test]
+sequence = ["_debug-test_proc", "_debug-test_fn"]
+help = "Run test by test, slowly, quitting after first error"
+
+[tool.poe.tasks.filter-test]
+cmd = "pytest -W error -vvvx -rA --capture=tee-sys"
+help = "Run any/all tests one by one with basic settings: can include filename and -k filters"

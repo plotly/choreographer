@@ -24,14 +24,14 @@ jobs:
         if: ${{ ! runner.debug }}
         run:  xvfb-run pytest -W error -n auto -v -rfE --capture=fd tests/test_process.py
         timeout-minutes: 2
-      - name: Test The Rest DEBUG
-        if: runner.debug
-        run:  pytest -W error -vvv -rA --capture=tee-sys --ignore=tests/test_process.py
-        timeout-minutes: 5
       - name: Test The Rest
         if: ${{ ! runner.debug }}
         run:  pytest -W error -n auto -v -rfE --ignore=tests/test_process.py
         timeout-minutes: 2
+      - name: Test The Rest DEBUG
+        if: runner.debug
+        run:  pytest -W error -vvv -rA --capture=tee-sys --ignore=tests/test_process.py
+        timeout-minutes: 5
   test-windows:
     runs-on: windows-latest
     steps:
@@ -54,14 +54,14 @@ jobs:
         if: ${{ ! runner.debug }}
         run:  pytest -W error -n auto -v -rFe --capture=fd tests/test_process.py
         timeout-minutes: 2
-      - name: Test The Rest DEBUG
-        if: runner.debug
-        run:  pytest -W error -vvv -rA --capture=tee-sys --ignore=tests/test_process.py
-        timeout-minutes: 5
       - name: Test The Rest
         if: ${{ ! runner.debug }}
         run:  pytest -W error -n auto -v -rfE --ignore=tests/test_process.py
         timeout-minutes: 2
+      - name: Test The Rest DEBUG
+        if: runner.debug
+        run:  pytest -W error -vvv -rA --capture=tee-sys --ignore=tests/test_process.py
+        timeout-minutes: 5
   test-mac:
     runs-on: macos-latest
     steps:
@@ -84,12 +84,12 @@ jobs:
         if: ${{ ! runner.debug }}
         run:  pytest -W error -n auto -v -rFe --capture=fd tests/test_process.py
         timeout-minutes: 4
-      - name: Test The Rest DEBUG
-        if: runner.debug
-        run:  pytest -W error -vvv -rA --capture=tee-sys --ignore=tests/test_process.py
-        timeout-minutes: 5
       - name: Test The Rest
         if: ${{ ! runner.debug }}
         run:  pytest -W error -n auto -v -rfE --ignore=tests/test_process.py
         timeout-minutes: 3
+      - name: Test The Rest DEBUG
+        if: runner.debug
+        run:  pytest -W error -vvv -rA --capture=tee-sys --ignore=tests/test_process.py
+        timeout-minutes: 5
 
