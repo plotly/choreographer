@@ -46,7 +46,7 @@ def pytest_addoption(parser):
 async def browser(request):
     headless = request.config.getoption("--headless")
     debug = request.config.get_verbosity() > 2
-    debug_browser = None if debug else False # what's going on here
+    debug_browser = None if debug else False
     browser = await choreo.Browser(
         headless=headless, debug=debug, debug_browser=debug_browser
     )
