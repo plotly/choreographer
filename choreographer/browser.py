@@ -35,8 +35,8 @@ class BrowserClosedError(RuntimeError):
     pass
 
 
-def get_browser_path():
-    return os.environ.get("BROWSER_PATH", browser_which())
+def get_browser_path(**kwargs):
+    return os.environ.get("BROWSER_PATH", browser_which(**kwargs))
 
 
 class Browser(Target):
