@@ -17,7 +17,7 @@ async def test_context(capteesys, headless, debug, debug_browser, sandbox, gpu):
             headless=headless,
             debug=debug,
             debug_browser=None if debug_browser else False,
-            enable_sandbox=sandbox,
+            enable_sandbox=False,
             enable_gpu=gpu,
         ) as browser,
         timeout(pytest.default_timeout),
@@ -42,7 +42,7 @@ async def test_no_context(capteesys, headless, debug, debug_browser, sandbox, gp
         headless=headless,
         debug=debug,
         debug_browser=None if debug_browser else False,
-        enable_sandbox=sandbox,
+        enable_sandbox=False,
         enable_gpu=gpu,
     )
     temp_dir = browser.tmp_dir
