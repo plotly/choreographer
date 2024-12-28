@@ -36,10 +36,12 @@ dev = [
 ]
 
 [project.scripts]
-dtdoctor = "choreographer.browser:diagnose"
+choreo_diagnose = "choreographer.cli_utils:diagnose"
+choreo_get_browser = "choreographer.cli_utils:get_browser_cli"
 
-[tool.ruff.lint]
-ignore = ["E701"]
+# Format breaks this anyway
+# [tool.ruff.lint]
+# ignore = ["E701"]
 
 [tool.pytest.ini_options]
 asyncio_default_fixture_loop_scope = "function"

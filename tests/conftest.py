@@ -1,5 +1,4 @@
 import asyncio
-import os
 
 import pytest
 import pytest_asyncio
@@ -15,21 +14,26 @@ import choreographer as choreo
 ##### Parameterized Arguments
 # Are used to re-run tests under different conditions
 
+
 @pytest.fixture(params=[True, False], ids=["enable_sandbox", ""])
 def sandbox(request):
     return request.param
+
 
 @pytest.fixture(params=[True, False], ids=["enable_gpu", ""])
 def gpu(request):
     return request.param
 
+
 @pytest.fixture(params=[True, False], ids=["headless", ""])
 def headless(request):
     return request.param
 
+
 @pytest.fixture(params=[True, False], ids=["debug", ""])
 def debug(request):
     return request.param
+
 
 @pytest.fixture(params=[True, False], ids=["debug_browser", ""])
 def debug_browser(request):
@@ -41,6 +45,7 @@ def pytest_addoption(parser):
     parser.addoption("--headless", action="store_true", dest="headless", default=True)
     parser.addoption("--no-headless", dest="headless", action="store_false")
 
+
 # browser fixture will supply a browser for you
 @pytest_asyncio.fixture(scope="function", loop_scope="function")
 async def browser(request):
@@ -48,16 +53,19 @@ async def browser(request):
     debug = request.config.get_verbosity() > 2
     debug_browser = None if debug else False
     browser = await choreo.Browser(
-        headless=headless, debug=debug, debug_browser=debug_browser
+        headless=headless,
+        debug=debug,
+        debug_browser=debug_browser,
     )
-    temp_dir = browser._temp_dir_name
+    temp_dir = browser.tmp_dir
     yield browser
     try:
         await browser.close()
     except choreo.browser.BrowserClosedError:
         pass
-    if os.path.exists(temp_dir):
+    if temp_dir.exists:
         raise RuntimeError(f"Temporary directory not deleted successfully: {temp_dir}")
+
 
 # add a timeout if tests requests browser
 # but if tests creates their own browser they are responsible
@@ -69,20 +77,31 @@ def pytest_runtest_setup(item: pytest.Item):
     if "browser" in item.funcargs:
         raw_test_fn = item.obj
         timeouts = [k for k in item.funcargs if k.startswith("timeout")]
-        timeout = item.funcargs[timeouts[-1]] if len(timeouts) else pytest.default_timeout
-        if item.get_closest_marker("asyncio") and timeout: # "closest" because markers can be function/session/package etc
+        timeout = (
+            item.funcargs[timeouts[-1]] if len(timeouts) else pytest.default_timeout
+        )
+        if (
+            item.get_closest_marker("asyncio") and timeout
+        ):  # "closest" because markers can be function/session/package etc
+
             async def wrapped_test_fn(*args, **kwargs):
                 try:
                     return await asyncio.wait_for(
-                            raw_test_fn(*args, **kwargs), timeout=timeout
-                                )
+                        raw_test_fn(*args, **kwargs),
+                        timeout=timeout,
+                    )
                 except TimeoutError:
-                    pytest.fail(f"Test {item.name} failed a timeout. This can be extended, but shouldn't be. See conftest.py.")
+                    pytest.fail(
+                        f"Test {item.name} failed a timeout. This can be extended, but shouldn't be. See conftest.py.",
+                    )
+
             item.obj = wrapped_test_fn
+
 
 def pytest_configure():
     # change this by command line TODO
     pytest.default_timeout = 5
+
 
 # pytests capture-but-display mechanics for output are somewhat spaghetti
 # more information here:
@@ -94,25 +113,36 @@ def pytest_configure():
 def capteesys(request):
     from _pytest import capture
     import warnings
+
     if hasattr(capture, "capteesys"):
-        warnings.warn(( "You are using a polyfill for capteesys, but this"
-                        " version of pytest supports it natively- you may"
-                        f" remove the polyfill from your {__file__}"),
-                        DeprecationWarning)
+        warnings.warn(
+            (
+                "You are using a polyfill for capteesys, but this"
+                " version of pytest supports it natively- you may"
+                f" remove the polyfill from your {__file__}"
+            ),
+            DeprecationWarning,
+        )
         # Remove next two lines if you don't want to ever switch to native version
         yield request.getfixturevalue("capteesys")
         return
     capman = request.config.pluginmanager.getplugin("capturemanager")
-    capture_fixture = capture.CaptureFixture(capture.SysCapture, request, _ispytest=True)
+    capture_fixture = capture.CaptureFixture(
+        capture.SysCapture,
+        request,
+        _ispytest=True,
+    )
+
     def _inject_start():
-        self = capture_fixture # closure seems easier than importing Type or Partial
+        self = capture_fixture  # closure seems easier than importing Type or Partial
         if self._capture is None:
             self._capture = capture.MultiCapture(
-                in_ = None,
-                out = self.captureclass(1, tee=True),
-                err = self.captureclass(2, tee=True)
+                in_=None,
+                out=self.captureclass(1, tee=True),
+                err=self.captureclass(2, tee=True),
             )
             self._capture.start_capturing()
+
     capture_fixture._start = _inject_start
     capman.set_fixture(capture_fixture)
     capture_fixture._start()
