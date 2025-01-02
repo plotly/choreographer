@@ -8,19 +8,20 @@ if __name__ == "__main__":
     os.dup2(0, 3)  # make our stdin their input
     os.dup2(1, 4)  # make our stdout their output
 
-import asyncio  #  noqa: I001 unformatted input, probs cause of above
-import partial
+import asyncio
 import platform
 import signal
 import subprocess
 import sys
+from functools import partial
 
 system = platform.system()
 if system == "Windows":
     import msvcrt
 else:
-    os.set_inheritable(4, inheritable=True)
-    os.set_inheritable(3, inheritable=True)
+    inheritable = True
+    os.set_inheritable(4, inheritable)
+    os.set_inheritable(3, inheritable)
 
 
 def open_browser(  # noqa: PLR0913 too many args in func
