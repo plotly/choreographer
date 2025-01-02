@@ -52,7 +52,7 @@ dev = [
 #]
 
 [project.scripts]
-choreo_diagnose = "choreographer._cli_utils:diagnose"
+choreo_diagnose = "choreographer._cli_utils_no_qa:diagnose"
 choreo_get_browser = "choreographer._cli_utils:get_browser_cli"
 
 [tool.ruff.lint]
