@@ -52,8 +52,8 @@ dev = [
 #]
 
 [project.scripts]
-choreo_diagnose = "choreographer.cli_utils:diagnose"
-choreo_get_browser = "choreographer.cli_utils:get_browser_cli"
+choreo_diagnose = "choreographer._cli_utils:diagnose"
+choreo_get_browser = "choreographer._cli_utils:get_browser_cli"
 
 [tool.ruff.lint]
 select = ["ALL"]
