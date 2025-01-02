@@ -8,6 +8,7 @@ import sys
 import warnings
 from collections import OrderedDict
 from functools import partial
+from pathlib import Path
 from threading import Thread
 
 from ._devtools_protocol_layer._protocol import (
@@ -19,10 +20,14 @@ from ._devtools_protocol_layer._protocol import (
 from ._devtools_protocol_layer._session import Session
 from ._devtools_protocol_layer._target import Target
 from ._pipe import Pipe, PipeClosedError
-from ._system_utils._chrome_wrapper import __file__ as chromewrapper_path
 from ._system_utils._system import browser_which
 from ._system_utils._tempfile import TempDirectory, TempDirWarning
 from ._tab import Tab
+
+# importing the below via __file__ causes __name__ weirdness when its exe'd ???
+chromewrapper_path = (
+    Path(__file__).resolve().parent / "_system_utils" / "_chrome_wrapper.py"
+)
 
 
 class UnhandledMessageWarning(UserWarning):
