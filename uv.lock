@@ -16,14 +16,14 @@ wheels = [
 
 [[package]]
 name = "choreographer"
-version = "1.0.0a0.post14+git.b98a6e33.dirty"
+version = "1.0.0a0.post33+git.81206c70.dirty"
 source = { editable = "." }
 dependencies = [
     { name = "logistro" },
     { name = "simplejson" },
 ]
 
-[package.optional-dependencies]
+[package.dev-dependencies]
 dev = [
     { name = "async-timeout" },
     { name = "numpy", version = "2.0.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
@@ -36,14 +36,18 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "async-timeout", marker = "extra == 'dev'" },
     { name = "logistro", specifier = ">=1.0.2" },
-    { name = "numpy", marker = "extra == 'dev'" },
-    { name = "poethepoet", marker = "extra == 'dev'", specifier = ">=0.31.1" },
-    { name = "pytest", marker = "extra == 'dev'" },
-    { name = "pytest-asyncio", marker = "extra == 'dev'" },
-    { name = "pytest-xdist", marker = "extra == 'dev'" },
     { name = "simplejson" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "async-timeout" },
+    { name = "numpy" },
+    { name = "poethepoet", specifier = ">=0.31.1" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "pytest-xdist" },
 ]
 
 [[package]]

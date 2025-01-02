@@ -10,18 +10,17 @@ from collections import OrderedDict
 from pathlib import Path
 from threading import Thread
 
-from _devtools_protocol_layer._protocol import (
+from ._devtools_protocol_layer._protocol import (
     TARGET_NOT_FOUND,
     DevtoolsProtocolError,
     ExperimentalFeatureWarning,
     Protocol,
 )
-from _devtools_protocol_layer._session import Session
-from _devtools_protocol_layer._target import Target
-from _system_utils._system import browser_which
-from _system_utils._tempfile import TempDirectory, TempDirWarning
-
+from ._devtools_protocol_layer._session import Session
+from ._devtools_protocol_layer._target import Target
 from ._pipe import Pipe, PipeClosedError
+from ._system_utils._system import browser_which
+from ._system_utils._tempfile import TempDirectory, TempDirWarning
 from ._tab import Tab
 
 
