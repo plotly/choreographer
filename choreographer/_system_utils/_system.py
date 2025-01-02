@@ -28,7 +28,7 @@ if system == "Windows":
     default_path_chrome = [
         r"c:\Program Files\Google\Chrome\Application\chrome.exe",
         f"c:\\Users\\{os.environ.get('USER', 'default')}\\AppData\\"
-                "Local\\Google\\Chrome\\Application\\chrome.exe",
+        "Local\\Google\\Chrome\\Application\\chrome.exe",
     ]
 elif system == "Linux":
     default_path_chrome = [
@@ -57,7 +57,7 @@ def which_windows_chrome():
             "",
         )[0]
         exe = re.search('"(.*?)"', command).group(1)
-    except BaseException: # noqa: BLE001 don't care why, best effort search
+    except BaseException:  # noqa: BLE001 don't care why, best effort search
         return None
     return exe
 
@@ -65,11 +65,11 @@ def which_windows_chrome():
 def _is_exe(path):
     try:
         return os.access(path, os.X_OK)
-    except: # noqa: E722 bare except ok, weird errors, best effort.
+    except:  # noqa: E722 bare except ok, weird errors, best effort.
         return False
 
 
-def browser_which(executable_name=chrome, *, debug=False, skip_local=False): # noqa: PLR0912, C901
+def browser_which(executable_name=chrome, *, debug=False, skip_local=False):  # noqa: PLR0912, C901
     if debug:
         print(f"Checking {default_exe_name}", file=sys.stderr)
     if not skip_local and default_exe_name.exists():
@@ -80,7 +80,7 @@ def browser_which(executable_name=chrome, *, debug=False, skip_local=False): # n
     if isinstance(executable_name, str):
         executable_name = [executable_name]
     if platform.system() == "Windows":
-        os.environ["NoDefaultCurrentDirectoryInExePath"] = "0" # noqa: SIM112 var name set by windows
+        os.environ["NoDefaultCurrentDirectoryInExePath"] = "0"  # noqa: SIM112 var name set by windows
     for exe in executable_name:
         if debug:
             print(f"looking for {exe}", file=sys.stderr)

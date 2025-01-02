@@ -36,7 +36,7 @@ class Target:
             )
         response = await self.browser.send_command(
             "Target.attachToTarget",
-            params={"targetId":self.target_id, "flatten":True}
+            params={"targetId": self.target_id, "flatten": True},
         )
         if "error" in response:
             raise RuntimeError("Could not create session") from DevtoolsProtocolError(

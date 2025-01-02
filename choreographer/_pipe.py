@@ -70,11 +70,11 @@ class Pipe:
         if debug:
             print("wrote_json.", file=sys.stderr)
 
-    def read_jsons(self, *, blocking=True, debug=None): # noqa: PLR0912, C901 branches, complexity
+    def read_jsons(self, *, blocking=True, debug=None):  # noqa: PLR0912, C901 branches, complexity
         if self.shutdown_lock.locked():
             raise PipeClosedError
         if not with_block and not blocking:
-            warnings.warn( # noqa: B028
+            warnings.warn(  # noqa: B028
                 "Windows python version < 3.12 does not support non-blocking",
                 BlockWarning,
             )
@@ -143,7 +143,7 @@ class Pipe:
         try:
             if with_block:
                 os.set_blocking(fd, False)
-        except BaseException as e: # noqa: BLE001 OS errors are not consistent, catch blind
+        except BaseException as e:  # noqa: BLE001 OS errors are not consistent, catch blind
             # also, best effort.
             if self.debug:
                 print(f"Expected error unblocking {fd!s}: {e!s}", file=sys.stderr)
@@ -151,7 +151,7 @@ class Pipe:
     def _close_fd(self, fd):
         try:
             os.close(fd)
-        except BaseException as e: # noqa: BLE001 OS errors are not consistent, catch blind
+        except BaseException as e:  # noqa: BLE001 OS errors are not consistent, catch blind
             # also, best effort.
             if self.debug:
                 print(f"Expected error closing {fd!s}: {e!s}", file=sys.stderr)
@@ -160,7 +160,7 @@ class Pipe:
         self._unblock_fd(self.write_from_chromium)
         try:
             os.write(self.write_from_chromium, b"{bye}\n")
-        except BaseException as e: # noqa: BLE001 OS errors are not consistent, catch blind
+        except BaseException as e:  # noqa: BLE001 OS errors are not consistent, catch blind
             # also, best effort.
             if self.debug:
                 print(

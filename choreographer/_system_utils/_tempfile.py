@@ -25,9 +25,9 @@ class TempDirectory:
         args = {}
 
         if path:
-            args = {"dir":path}
+            args = {"dir": path}
         elif sneak:
-            args = {"prefix":".choreographer-", "dir":Path.home()}
+            args = {"prefix": ".choreographer-", "dir": Path.home()}
 
         if platform.system() != "Windows":
             self.temp_dir = tempfile.TemporaryDirectory(**args)
@@ -52,7 +52,7 @@ class TempDirectory:
         if self.debug:
             print(f"TEMP DIR PATH: {self.path}", file=sys.stderr)
 
-    def delete_manually(self, *, check_only=False): # noqa: C901, PLR0912
+    def delete_manually(self, *, check_only=False):  # noqa: C901, PLR0912
         if not self.path.exists():
             self.exists = False
             if self.debug:
@@ -77,7 +77,7 @@ class TempDirectory:
                         fp.unlink()
                         if self.debug:
                             print("Success", file=sys.stderr)
-                    except BaseException as e: # noqa: BLE001 yes catch and report
+                    except BaseException as e:  # noqa: BLE001 yes catch and report
                         errors.append((fp, e))
                 for d in dirs:
                     fp = Path(root) / d
@@ -88,7 +88,7 @@ class TempDirectory:
                         fp.rmdir()
                         if self.debug:
                             print("Success", file=sys.stderr)
-                    except BaseException as e: # noqa: BLE001 yes catch and report
+                    except BaseException as e:  # noqa: BLE001 yes catch and report
                         errors.append((fp, e))
 
             # clean up directory
@@ -96,7 +96,7 @@ class TempDirectory:
             try:
                 self.path.chmod(stat.S_IWUSR)
                 self.path.rmdir()
-            except BaseException as e: # noqa: BLE001 yes catch and report
+            except BaseException as e:  # noqa: BLE001 yes catch and report
                 errors.append((self.path, e))
 
         if check_only:
@@ -105,7 +105,7 @@ class TempDirectory:
             else:
                 self.exists = False
         elif errors:
-            warnings.warn( # noqa: B028
+            warnings.warn(  # noqa: B028
                 "The temporary directory could not be deleted, "
                 f"execution will continue. errors: {errors}",
                 TempDirWarning,
@@ -116,19 +116,18 @@ class TempDirectory:
 
         return n_dirs, n_files, errors
 
-    def clean(self): # noqa: C901
+    def clean(self):  # noqa: C901
         try:
             # no faith in this python implementation, always fails with windows
             # very unstable recently as well, lots new arguments in tempfile package
             self.temp_dir.cleanup()
             self.exists = False
-        except BaseException as e: # noqa: BLE001 yes catch and report
+        except BaseException as e:  # noqa: BLE001 yes catch and report
             if self.debug:
                 print(
                     f"First tempdir deletion failed: TempDirWarning: {e!s}",
                     file=sys.stderr,
                 )
-
 
         def remove_readonly(func, path, _excinfo):
             try:
@@ -146,7 +145,7 @@ class TempDirectory:
             del self.temp_dir
         except FileNotFoundError:
             pass  # it worked!
-        except BaseException as e: # noqa: BLE001 yes catch like this and report and try
+        except BaseException as e:  # noqa: BLE001 yes catch like this and report and try
             if self.debug:
                 print(
                     f"Second tmpdir deletion failed (shutil.rmtree): {e!s}",

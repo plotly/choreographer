@@ -27,23 +27,21 @@ elif platform_detected == "Darwin":
 
 default_exe_name = None
 if platform_detected.startswith("Linux"):
-    default_exe_name = (default_local_exe_path /
-                        f"chrome-{chrome_platform_detected}" /
-                        "chrome" )
+    default_exe_name = (
+        default_local_exe_path / f"chrome-{chrome_platform_detected}" / "chrome"
+    )
 elif platform_detected.startswith("Darwin"):
     default_exe_name = (
-        default_local_exe_path /
-        f"chrome-{chrome_platform_detected}" /
-        "Google Chrome for Testing.app" /
-        "Contents" /
-        "MacOS" /
-        "Google Chrome for Testing"
+        default_local_exe_path
+        / f"chrome-{chrome_platform_detected}"
+        / "Google Chrome for Testing.app"
+        / "Contents"
+        / "MacOS"
+        / "Google Chrome for Testing"
     )
 elif platform_detected.startswith("Win"):
     default_exe_name = (
-        default_local_exe_path /
-        f"chrome-{chrome_platform_detected}" /
-        "chrome.exe"
+        default_local_exe_path / f"chrome-{chrome_platform_detected}" / "chrome.exe"
     )
 
 
@@ -63,7 +61,7 @@ class ZipFilePermissions(zipfile.ZipFile):
 
 def get_browser_cli():
     if "ubuntu" in platform.version().lower():
-        warnings.warn( # noqa: B028
+        warnings.warn(  # noqa: B028
             "You are using `get_browser()` on Ubuntu."
             " Ubuntu is **very strict** about where binaries come from."
             " You have to disable the sandbox with use_sandbox=False"
@@ -105,7 +103,7 @@ def get_browser_sync(
     *,
     verbose=False,
 ):
-    path=Path(path)
+    path = Path(path)
     browser_list = json.loads(
         urllib.request.urlopen(
             "https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json",
@@ -124,7 +122,7 @@ def get_browser_sync(
     if not path.exists:
         path.mkdir(parents=True)
     filename = path / "chrome.zip"
-    with urllib.request.urlopen(url) as response, filename.open("wb") as out_file: # noqa: S310 audit url
+    with urllib.request.urlopen(url) as response, filename.open("wb") as out_file:  # noqa: S310 audit url
         shutil.copyfileobj(response, out_file)
     with ZipFilePermissions(filename, "r") as zip_ref:
         zip_ref.extractall(path)
@@ -133,12 +131,12 @@ def get_browser_sync(
         exe_name = path / f"chrome-{arch}" / "chrome"
     elif arch.startswith("mac"):
         exe_name = (
-            path /
-            f"chrome-{arch}" /
-            "Google Chrome for Testing.app" /
-            "Contents" /
-            "MacOS" /
-            "Google Chrome for Testing"
+            path
+            / f"chrome-{arch}"
+            / "Google Chrome for Testing.app"
+            / "Contents"
+            / "MacOS"
+            / "Google Chrome for Testing"
         )
     elif arch.startswith("win"):
         exe_name = path / f"chrome-{arch}" / "chrome.exe"
@@ -153,5 +151,3 @@ async def get_browser(
     path=default_local_exe_path,
 ):
     return await asyncio.to_thread(get_browser_sync, arch=arch, i=i, path=path)
-
-

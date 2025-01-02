@@ -57,7 +57,7 @@ class Browser(Target):
                 print("We are in a selector event loop, use loop_hack", file=sys.stderr)
             self._loop_hack = True
 
-    def __init__( # noqa: PLR0915, PLR0912, C901 It's too complex
+    def __init__(  # noqa: PLR0915, PLR0912, C901 It's too complex
         self,
         path=None,
         *,
@@ -132,7 +132,7 @@ class Browser(Target):
             try:
                 stderr.fileno()
             except io.UnsupportedOperation:
-                warnings.warn( # noqa: B028
+                warnings.warn(  # noqa: B028
                     "A value has been passed to debug_browser which "
                     "is not compatible with python's Popen. This may "
                     "be because one was passed to Browser or because "
@@ -176,12 +176,12 @@ class Browser(Target):
     # for use with `await Browser()`
     def __await__(self):
         return self.__aenter__().__await__()
+
     # ? why have to call __await__ when __aenter__ returns a future
 
     def _open(self):
         if platform.system() != "Windows":
-            self.subprocess = subprocess.Popen( # noqa: S603, false positive, input fine
-
+            self.subprocess = subprocess.Popen(  # noqa: S603, false positive, input fine
                 [
                     sys.executable,
                     Path(__file__).resolve().parent / "chrome_wrapper.py",
@@ -262,7 +262,7 @@ class Browser(Target):
 
     # _sync_close and _async_close are basically the same thing
 
-    def _sync_close(self): # noqa: PLR0912, C901
+    def _sync_close(self):  # noqa: PLR0912, C901
         if self._is_closed():
             if self.debug:
                 print("Browser was already closed.", file=sys.stderr)
@@ -285,8 +285,8 @@ class Browser(Target):
         # Start a kill
         if platform.system() == "Windows":
             if not self._is_closed():
-                subprocess.call( # noqa: S603, false positive, input fine
-                    ["taskkill", "/F", "/T", "/PID", str(self.subprocess.pid)], # noqa: S607 windows full path...
+                subprocess.call(  # noqa: S603, false positive, input fine
+                    ["taskkill", "/F", "/T", "/PID", str(self.subprocess.pid)],  # noqa: S607 windows full path...
                     stderr=subprocess.DEVNULL,
                     stdout=subprocess.DEVNULL,
                 )
@@ -306,7 +306,7 @@ class Browser(Target):
                 print("kill() closed the browser", file=sys.stderr)
         return
 
-    async def _async_close(self): # noqa: PLR0912, C901
+    async def _async_close(self):  # noqa: PLR0912, C901
         if await self._is_closed_async():
             if self.debug:
                 print("Browser was already closed.", file=sys.stderr)
@@ -326,7 +326,8 @@ class Browser(Target):
         if platform.system() == "Windows":
             if not await self._is_closed_async():
                 # could we use native asyncio process here? or hackcheck?
-                asyncio.to_thread(subprocess.call,
+                asyncio.to_thread(
+                    subprocess.call,
                     ["taskkill", "/F", "/T", "/PID", str(self.subprocess.pid)],
                     stderr=subprocess.DEVNULL,
                     stdout=subprocess.DEVNULL,
@@ -347,10 +348,10 @@ class Browser(Target):
                 print("kill() closed the browser", file=sys.stderr)
         return
 
-    def close(self): # noqa: C901
+    def close(self):  # noqa: C901
         if self.loop:
 
-            async def close_task(): # noqa: PLR0912, C901
+            async def close_task():  # noqa: PLR0912, C901
                 if self.lock.locked():
                     return
                 await self.lock.acquire()
@@ -455,13 +456,13 @@ class Browser(Target):
         if self.lock.locked():
             raise BrowserClosedError("create_tab() called on a closed browser.")
         if self.headless and (width or height):
-            warnings.warn( # noqa: B028
+            warnings.warn(  # noqa: B028
                 "Width and height only work for headless chrome mode, "
                 "they will be ignored.",
             )
             width = None
             height = None
-        params = {url:url}
+        params = {url: url}
         if width:
             params["width"] = width
         if height:
@@ -499,7 +500,7 @@ class Browser(Target):
     async def create_session(self):
         if self.lock.locked():
             raise BrowserClosedError("create_session() called on a closed browser")
-        warnings.warn( # noqa: B028
+        warnings.warn(  # noqa: B028
             "Creating new sessions on Browser() only works with some "
             "versions of Chrome, it is experimental.",
             ExperimentalFeatureWarning,
@@ -576,7 +577,7 @@ class Browser(Target):
             return self
         return None
 
-    def run_read_loop(self): # noqa: PLR0915, C901 complexity
+    def run_read_loop(self):  # noqa: PLR0915, C901 complexity
         def check_error(result):
             e = result.exception()
             if e:
@@ -586,7 +587,7 @@ class Browser(Target):
                 if not isinstance(e, asyncio.CancelledError):
                     raise e
 
-        async def read_loop(): # noqa: PLR0915, PLR0912, C901 complexity
+        async def read_loop():  # noqa: PLR0915, PLR0912, C901 complexity
             try:
                 responses = await self.loop.run_in_executor(
                     self.executor,
@@ -594,7 +595,7 @@ class Browser(Target):
                     args=[
                         True,  # blocking argument to read_jsons
                         self.debug,  # debug argument to read_jsons
-                    ]
+                    ],
                 )
                 for response in responses:
                     error = self.protocol.get_error(response)
@@ -668,7 +669,7 @@ class Browser(Target):
                                 continue  # browser closing anyway
                             target_closed = self._get_target_for_session(session_closed)
                             if target_closed:
-                                target_closed._remove_session(session_closed) # noqa: SLF001
+                                target_closed._remove_session(session_closed)  # noqa: SLF001
                                 # TODO(Andrew): private access # noqa: FIX002, TD003
 
                             _ = self.protocol.sessions.pop(session_closed, None)
@@ -698,7 +699,7 @@ class Browser(Target):
                         else:
                             future.set_result(response)
                     else:
-                        warnings.warn( # noqa: B028
+                        warnings.warn(  # noqa: B028
                             f"Unhandled message type:{response!s}",
                             UnhandledMessageWarning,
                         )

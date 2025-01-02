@@ -8,7 +8,7 @@ if __name__ == "__main__":
     os.dup2(0, 3)  # make our stdin their input
     os.dup2(1, 4)  # make our stdout their output
 
-import asyncio #  noqa: I001 unformatted input, probs cause of above
+import asyncio  #  noqa: I001 unformatted input, probs cause of above
 import partial
 import platform
 import signal

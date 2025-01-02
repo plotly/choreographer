@@ -6,7 +6,7 @@ import sys
 import time
 
 # diagnose function is too weird and ruff guts it
-# ruff has line-level and file-level QA supression
+# ruff has line-level and file-level QA suppression
 # so lets give diagnose a separate file
 
 # ruff: noqa: PLR0915, C901, S603, BLE001, S607, PERF203, TRY002
@@ -15,10 +15,11 @@ import time
 # - function complexity (statements?)
 # - function complexity (algo measure)
 # - validate subprocess input arguments
-# - blind execption
+# - blind exception
 # - partial executable path
 # - performance overhead of try-except in loop
 # - make own exceptions
+
 
 def diagnose():
     from choreographer import Browser, browser_which
