@@ -124,7 +124,7 @@ class TempDirectory:
         except BaseException as e:
             if self.debug:
                 print(
-                    f"First tempdir deletion failed: TempDirWarning: {str(e)}",
+                    f"First tempdir deletion failed: TempDirWarning: {e!s}",
                     file=sys.stderr,
                 )
 
@@ -148,7 +148,7 @@ class TempDirectory:
         except BaseException as e:
             if self.debug:
                 print(
-                    f"Second tmpdir deletion failed (shutil.rmtree): {str(e)}",
+                    f"Second tmpdir deletion failed (shutil.rmtree): {e!s}",
                     file=sys.stderr,
                 )
             self.delete_manually(check_only=True)

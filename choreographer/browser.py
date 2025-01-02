@@ -575,7 +575,7 @@ class Browser(Target):
             if e:
                 self.close()
                 if self.debug:
-                    print(f"Error in run_read_loop: {str(e)}", file=sys.stderr)
+                    print(f"Error in run_read_loop: {e!s}", file=sys.stderr)
                 if not isinstance(e, asyncio.CancelledError):
                     raise e
 
@@ -684,7 +684,7 @@ class Browser(Target):
                             future.set_result(response)
                     else:
                         warnings.warn(
-                            f"Unhandled message type:{str(response)}",
+                            f"Unhandled message type:{response!s}",
                             UnhandledMessageWarning,
                         )
             except PipeClosedError:
@@ -712,7 +712,7 @@ class Browser(Target):
             def check_future(fut):
                 if fut.exception():
                     if self.debug:
-                        print(f"Write json future error: {str(fut)}", file=sys.stderr)
+                        print(f"Write json future error: {fut!s}", file=sys.stderr)
                     if not future.done():
                         print("Setting future based on pipe error", file=sys.stderr)
                         future.set_exception(fut.exception())

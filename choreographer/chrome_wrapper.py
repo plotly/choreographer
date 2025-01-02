@@ -20,7 +20,7 @@ import sys  # noqa
 
 system = platform.system()
 if system == "Windows":
-    import msvcrt  # noqa
+    import msvcrt
 else:
     os.set_inheritable(4, True)
     os.set_inheritable(3, True)
@@ -66,7 +66,7 @@ def open_browser(
         from_chromium_handle = msvcrt.get_osfhandle(from_chromium)
         os.set_handle_inheritable(from_chromium_handle, True)
         cli += [
-            f"--remote-debugging-io-pipes={str(to_chromium_handle)},{str(from_chromium_handle)}",
+            f"--remote-debugging-io-pipes={to_chromium_handle!s},{from_chromium_handle!s}",
         ]
         system_dependent["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
         system_dependent["close_fds"] = False

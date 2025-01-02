@@ -44,8 +44,8 @@ else:  # assume mac, or system == "Darwin"
 
 def which_windows_chrome():
     try:
-        import winreg
         import re
+        import winreg
 
         command = winreg.QueryValueEx(
             winreg.OpenKey(

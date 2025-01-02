@@ -111,8 +111,9 @@ def pytest_configure():
 # buffering mechanics
 @pytest.fixture(scope="function")
 def capteesys(request):
-    from _pytest import capture
     import warnings
+
+    from _pytest import capture
 
     if hasattr(capture, "capteesys"):
         warnings.warn(

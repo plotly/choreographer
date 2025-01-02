@@ -66,9 +66,9 @@ class Protocol:
 
     def match_key(self, response, key):
         session_id, message_id = key
-        if "session_id" not in response and session_id == "":
-            pass
-        elif "session_id" in response and response["session_id"] == session_id:
+        if ("session_id" not in response and session_id == "") or (
+            "session_id" in response and response["session_id"] == session_id
+        ):
             pass
         else:
             return False

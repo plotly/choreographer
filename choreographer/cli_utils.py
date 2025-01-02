@@ -203,7 +203,6 @@ def diagnose():
         print(sys.version)
         print(sys.version_info)
         print("Done with version info.".center(50, "*"))
-        pass
     if run:
         try:
             print("Sync Test Headless".center(50, "*"))
@@ -227,7 +226,7 @@ def diagnose():
             fail.append(("Async test headless", e))
         finally:
             print("Done with async test headless".center(50, "*"))
-    print("")
+    print()
     sys.stdout.flush()
     sys.stderr.flush()
     if fail:
