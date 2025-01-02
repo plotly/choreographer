@@ -28,7 +28,7 @@ class ExperimentalFeatureWarning(UserWarning):
 
 
 class Protocol:
-    def __init__(self, debug=False):
+    def __init__(self, *, debug=False):
         # Stored Resources
 
         # Configuration
@@ -38,8 +38,8 @@ class Protocol:
         self.sessions = {}
 
     def calculate_key(self, response):
-        session_id = response["sessionId"] if "sessionId" in response else ""
-        message_id = response["id"] if "id" in response else None
+        session_id = response.get("sessionId", "")
+        message_id = response.get("id", None)
         if message_id is None:
             return None
         return (session_id, message_id)
@@ -61,7 +61,8 @@ class Protocol:
 
         if len(obj.keys()) != n_keys:
             raise RuntimeError(
-                "Message objects must have id and method keys, and may have params and sessionId keys.",
+                "Message objects must have id and method keys, "
+                "and may have params and sessionId keys.",
             )
 
     def match_key(self, response, key):
@@ -102,6 +103,4 @@ class Protocol:
 
     def is_event(self, response):
         required_keys = {"method", "params"}
-        if required_keys <= response.keys() and "id" not in response:
-            return True
-        return False
+        return required_keys <= response.keys() and "id" not in response
