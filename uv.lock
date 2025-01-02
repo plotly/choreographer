@@ -16,9 +16,10 @@ wheels = [
 
 [[package]]
 name = "choreographer"
-version = "1.0.0a0.post0+git.03c25504.dirty"
+version = "1.0.0a0.post14+git.b98a6e33.dirty"
 source = { editable = "." }
 dependencies = [
+    { name = "logistro" },
     { name = "simplejson" },
 ]
 
@@ -36,6 +37,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "async-timeout", marker = "extra == 'dev'" },
+    { name = "logistro", specifier = ">=1.0.2" },
     { name = "numpy", marker = "extra == 'dev'" },
     { name = "poethepoet", marker = "extra == 'dev'", specifier = ">=0.31.1" },
     { name = "pytest", marker = "extra == 'dev'" },
@@ -78,6 +80,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/d7/4b/cbd8e699e64a6f16ca3a8220661b5f83792b3017d0f79807cb8708d33913/iniconfig-2.0.0.tar.gz", hash = "sha256:2d91e135bf72d31a410b17c16da610a82cb55f6b0477d1a902134b24a455b8b3", size = 4646 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/ef/a6/62565a6e1cf69e10f5727360368e451d4b7f58beeac6173dc9db836a5b46/iniconfig-2.0.0-py3-none-any.whl", hash = "sha256:b6a85871a79d2e3b22d2d1b94ac2824226a63c6b741c88f7ae975f18b6778374", size = 5892 },
+]
+
+[[package]]
+name = "logistro"
+version = "1.0.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/c4/37/616339aa4c47c8316caa74c6be0e42a7db2e5f11bb4df7b1589e2347c8d2/logistro-1.0.2.tar.gz", hash = "sha256:0d437c0f4fd9abef6eca0a28d85c171fc14f4f17aa1ce0f2f91d2e93f82a5c18", size = 5973 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/3d/fb/a0d753951886ace90e2a92f55f119450e0dedabe81733c9f7655c9009d1c/logistro-1.0.2-py3-none-any.whl", hash = "sha256:f3435161b12a7f6a463aa23885c076ed2d2876255db9b5af3e302bdba6e2ed02", size = 5343 },
 ]
 
 [[package]]
