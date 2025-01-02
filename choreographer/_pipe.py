@@ -13,10 +13,8 @@ class BlockWarning(UserWarning):
     pass
 
 
-# TODO: don't know about this
-# TODO: use has_attr instead of np.integer, you'll be fine
 class MultiEncoder(simplejson.JSONEncoder):
-    """Special json encoder for numpy types"""
+    """Special json encoder for numpy types."""
 
     def default(self, obj):
         if hasattr(obj, "dtype") and obj.dtype.kind == "i" and obj.shape == ():
@@ -35,7 +33,7 @@ class PipeClosedError(IOError):
 
 
 class Pipe:
-    def __init__(self, debug=False, json_encoder=MultiEncoder):
+    def __init__(self, *, debug=False, json_encoder=MultiEncoder):
         self.read_from_chromium, self.write_from_chromium = list(os.pipe())
         self.read_to_chromium, self.write_to_chromium = list(os.pipe())
         self.debug = debug
@@ -51,10 +49,6 @@ class Pipe:
             ignore_nan=True,
             cls=self.json_encoder,
         )
-        # if debug:
-        #    print(f"write_json: {message}", file=sys.stderr)
-        # windows may print weird characters if we set utf-8 instead of utf-16
-        # check this TODO
         return message.encode("utf-8") + b"\0"
 
     def deserialize(self, message):
@@ -76,11 +70,11 @@ class Pipe:
         if debug:
             print("wrote_json.", file=sys.stderr)
 
-    def read_jsons(self, blocking=True, debug=None):
+    def read_jsons(self, *, blocking=True, debug=None): # noqa: PLR0912, C901 branches, complexity
         if self.shutdown_lock.locked():
             raise PipeClosedError
         if not with_block and not blocking:
-            warnings.warn(
+            warnings.warn( # noqa: B028
                 "Windows python version < 3.12 does not support non-blocking",
                 BlockWarning,
             )
@@ -123,10 +117,8 @@ class Pipe:
             if debug:
                 print(f"caught OSError in read() {e!s}", file=sys.stderr)
             if not raw_buffer or raw_buffer == b"{bye}\n":
-                raise PipeClosedError
-            # TODO this could be hard to test as it is a real OS corner case
-            # but possibly raw_buffer is partial
-            # and we don't check for partials
+                raise PipeClosedError from e
+            # this could be hard to test as it is a real OS corner case
         decoded_buffer = raw_buffer.decode("utf-8")
         if debug:
             print(decoded_buffer, file=sys.stderr)
@@ -134,14 +126,15 @@ class Pipe:
             if raw_message:
                 try:
                     jsons.append(self.deserialize(raw_message))
-                except BaseException as e:
+                except simplejson.decoder.JSONDecodeError as e:
                     if debug:
                         print(
                             f"Problem with {raw_message} in json: {e}",
                             file=sys.stderr,
                         )
                 if debug:
-                    # This debug is kinda late but the jsons package helps with decoding, since JSON optionally
+                    # This debug is kinda late but the jsons package
+                    # helps with decoding, since JSON optionally
                     # allows escaping unicode characters, which chrome does (oof)
                     print(f"read_jsons: {jsons[-1]}", file=sys.stderr)
         return jsons
@@ -150,14 +143,16 @@ class Pipe:
         try:
             if with_block:
                 os.set_blocking(fd, False)
-        except BaseException as e:
+        except BaseException as e: # noqa: BLE001 OS errors are not consistent, catch blind
+            # also, best effort.
             if self.debug:
                 print(f"Expected error unblocking {fd!s}: {e!s}", file=sys.stderr)
 
     def _close_fd(self, fd):
         try:
             os.close(fd)
-        except BaseException as e:
+        except BaseException as e: # noqa: BLE001 OS errors are not consistent, catch blind
+            # also, best effort.
             if self.debug:
                 print(f"Expected error closing {fd!s}: {e!s}", file=sys.stderr)
 
@@ -165,7 +160,8 @@ class Pipe:
         self._unblock_fd(self.write_from_chromium)
         try:
             os.write(self.write_from_chromium, b"{bye}\n")
-        except BaseException as e:
+        except BaseException as e: # noqa: BLE001 OS errors are not consistent, catch blind
+            # also, best effort.
             if self.debug:
                 print(
                     f"Caught expected error in self-wrte bye: {e!s}",
