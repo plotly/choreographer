@@ -7,7 +7,7 @@ import subprocess
 import sys
 import warnings
 from collections import OrderedDict
-from pathlib import Path
+from functools import partial
 from threading import Thread
 
 from ._devtools_protocol_layer._protocol import (
@@ -19,6 +19,7 @@ from ._devtools_protocol_layer._protocol import (
 from ._devtools_protocol_layer._session import Session
 from ._devtools_protocol_layer._target import Target
 from ._pipe import Pipe, PipeClosedError
+from ._system_utils._chrome_wrapper import __file__ as chromewrapper_path
 from ._system_utils._system import browser_which
 from ._system_utils._tempfile import TempDirectory, TempDirWarning
 from ._tab import Tab
@@ -183,7 +184,7 @@ class Browser(Target):
             self.subprocess = subprocess.Popen(  # noqa: S603, false positive, input fine
                 [
                     sys.executable,
-                    Path(__file__).resolve().parent / "chrome_wrapper.py",
+                    chromewrapper_path,
                 ],
                 close_fds=True,
                 stdin=self.pipe.read_to_chromium,
@@ -192,7 +193,7 @@ class Browser(Target):
                 env=self._env,
             )
         else:
-            from .chrome_wrapper import open_browser
+            from ._system_utils._chrome_wrapper import open_browser
 
             self.subprocess = open_browser(
                 to_chromium=self.pipe.read_to_chromium,
@@ -207,7 +208,7 @@ class Browser(Target):
             if platform.system() != "Windows":
                 self.subprocess = await asyncio.create_subprocess_exec(
                     sys.executable,
-                    Path(__file__).resolve().parent / "chrome_wrapper.py",
+                    chromewrapper_path,
                     stdin=self.pipe.read_to_chromium,
                     stdout=self.pipe.write_from_chromium,
                     stderr=self._stderr,
@@ -215,7 +216,7 @@ class Browser(Target):
                     env=self._env,
                 )
             else:
-                from .chrome_wrapper import open_browser
+                from ._system_utils._chrome_wrapper import open_browser
 
                 self.subprocess = await open_browser(
                     to_chromium=self.pipe.read_to_chromium,
@@ -588,13 +589,14 @@ class Browser(Target):
 
         async def read_loop():  # noqa: PLR0915, PLR0912, C901 complexity
             try:
+                read_jsons = partial(
+                    self.pipe.read_jsons,
+                    blocking=True,
+                    debug=self.debug,
+                )
                 responses = await self.loop.run_in_executor(
                     self.executor,
-                    self.pipe.read_jsons,
-                    args=[
-                        True,  # blocking argument to read_jsons
-                        self.debug,  # debug argument to read_jsons
-                    ],
+                    read_jsons,
                 )
                 for response in responses:
                     error = self.protocol.get_error(response)
