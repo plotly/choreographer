@@ -1,43 +1,40 @@
 import os
 
 # importing modules has side effects, so we do this before imports
-# linter complains.
-env = None
 
-
-# chromium reads on 3, writes on 4
-# really this means windows only, but a more readable platform.system()
+# not everyone uses the wrapper as a process
 if __name__ == "__main__":
+    # chromium reads on 3, writes on 4
     os.dup2(0, 3)  # make our stdin their input
     os.dup2(1, 4)  # make our stdout their output
 
-
-import subprocess  # noqa
-import signal  # noqa
-import platform  # noqa
-import asyncio  # noqa
-import sys  # noqa
+import asyncio #  noqa: I001 unformatted input, probs cause of above
+import partial
+import platform
+import signal
+import subprocess
+import sys
 
 system = platform.system()
 if system == "Windows":
     import msvcrt
 else:
-    os.set_inheritable(4, True)
-    os.set_inheritable(3, True)
+    os.set_inheritable(4, inheritable=True)
+    os.set_inheritable(3, inheritable=True)
 
 
-def open_browser(
+def open_browser(  # noqa: PLR0913 too many args in func
     to_chromium,
     from_chromium,
     stderr=sys.stderr,
     env=None,
     loop=None,
+    *,
     loop_hack=False,
 ):
     path = env.get("BROWSER_PATH")
     if not path:
         raise RuntimeError("No browser path was passed to run")
-    # TODO: check that browser exists (windows, mac) w/ --version (TODO: how to do on wndows?)
 
     user_data_dir = env["USER_DATA_DIR"]
 
@@ -62,9 +59,9 @@ def open_browser(
     system_dependent = {}
     if system == "Windows":
         to_chromium_handle = msvcrt.get_osfhandle(to_chromium)
-        os.set_handle_inheritable(to_chromium_handle, True)
+        os.set_handle_inheritable(to_chromium_handle, inheritable=True)
         from_chromium_handle = msvcrt.get_osfhandle(from_chromium)
-        os.set_handle_inheritable(from_chromium_handle, True)
+        os.set_handle_inheritable(from_chromium_handle, inheritable=True)
         cli += [
             f"--remote-debugging-io-pipes={to_chromium_handle!s},{from_chromium_handle!s}",
         ]
@@ -74,7 +71,7 @@ def open_browser(
         system_dependent["pass_fds"] = (to_chromium, from_chromium)
 
     if not loop:
-        return subprocess.Popen(
+        return subprocess.Popen(  # noqa: S603 input fine.
             cli,
             stderr=stderr,
             **system_dependent,
@@ -82,7 +79,7 @@ def open_browser(
     elif loop_hack:
 
         def run():
-            return subprocess.Popen(
+            return subprocess.Popen(  # noqa: S603 input fine.
                 cli,
                 stderr=stderr,
                 **system_dependent,
@@ -98,24 +95,22 @@ def open_browser(
         )
 
 
-# THIS MAY BE PART OF KILL
-def kill_proc(*nope):
-    global process
+def kill_proc(process, _sig_num, _frame):
     process.terminate()
-    process.wait(3)  # 3 seconds to clean up nicely, it's a lot
+    process.wait(5)  # 5 seconds to clean up nicely, it's a lot
     process.kill()
 
 
 if __name__ == "__main__":
     process = open_browser(to_chromium=3, from_chromium=4, env=os.environ)
-    signal.signal(signal.SIGTERM, kill_proc)
-    signal.signal(signal.SIGINT, kill_proc)
+    kp = partial(kill_proc, process)
+    signal.signal(signal.SIGTERM, kp)
+    signal.signal(signal.SIGINT, kp)
 
     process.wait()
-    # NOTE is bad but we don't detect closed pipe (stdout doesn't close from other end?)
-    # doesn't seem to impact in sync, maybe because we're doing manual cleanup in sequence
-    # should try to see if shutting down chrome browser can provoke pipeerror in threadmode and asyncmode
-    # i think getting rid of this would be really good, and seeing what's going on in both
-    # async and sync mode would help
-    # see NOTE in pipe.py (line 38?)
+
+    # not great but it seems that
+    # pipe isn't always closed when chrome closes
+    # so we pretend to be chrome and send a bye instead
+    # also, above depends on async/sync, platform, etc
     print("{bye}")
