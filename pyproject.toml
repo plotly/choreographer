@@ -21,14 +21,14 @@ authors = [
 maintainers = [
   {name = "Andrew Pikul", email = "ajpikul@gmail.com"},
 ]
-[project.urls]
-Homepage = "https://github.com/plotly/choreographer"
-Repository = "https://github.com/geopozo/logistro"
-
 dependencies = [
   "logistro>=1.0.2",
   "simplejson",
 ]
+
+[project.urls]
+Homepage = "https://github.com/plotly/choreographer"
+Repository = "https://github.com/geopozo/logistro"
 
 [dependency-groups]
 dev = [
