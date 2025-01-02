@@ -7,20 +7,21 @@ import subprocess
 import sys
 import warnings
 from collections import OrderedDict
+from pathlib import Path
 from threading import Thread
 
-from _devtools_protocol_layer._protocol import DevtoolsProtocolError
-from _devtools_protocol_layer._protocol import ExperimentalFeatureWarning
-from _devtools_protocol_layer._protocol import Protocol
-from _devtools_protocol_layer._protocol import TARGET_NOT_FOUND
+from _devtools_protocol_layer._protocol import (
+    TARGET_NOT_FOUND,
+    DevtoolsProtocolError,
+    ExperimentalFeatureWarning,
+    Protocol,
+)
 from _devtools_protocol_layer._session import Session
 from _devtools_protocol_layer._target import Target
 from _system_utils._system import browser_which
-from _system_utils._tempfile import TempDirectory
-from _system_utils._tempfile import TempDirWarning
+from _system_utils._tempfile import TempDirectory, TempDirWarning
 
-from ._pipe import Pipe
-from ._pipe import PipeClosedError
+from ._pipe import Pipe, PipeClosedError
 from ._tab import Tab
 
 
@@ -56,9 +57,10 @@ class Browser(Target):
                 print("We are in a selector event loop, use loop_hack", file=sys.stderr)
             self._loop_hack = True
 
-    def __init__(
+    def __init__( # noqa: PLR0915, PLR0912, C901 It's too complex
         self,
         path=None,
+        *,
         headless=True,
         debug=False,
         debug_browser=False,
@@ -67,7 +69,7 @@ class Browser(Target):
         ### Set some defaults
         self._env = os.environ.copy()  # environment for subprocesses
         self._loop_hack = False  # see _check_loop
-        self.lock = None  # TODO where else is this set
+        self.lock = None
         self.tabs = OrderedDict()
         self.sandboxed = False  # this is if our processes can't use /tmp
 
@@ -82,7 +84,10 @@ class Browser(Target):
             path = get_browser_path(skip_local=skip_local)
         if not path:
             raise BrowserFailedError(
-                "Could not find an acceptable browser. Please call `choreo.get_browser()`, set environmental variable BROWSER_PATH or pass `path=/path/to/browser` into the Browser() constructor. The latter two work with Edge.",
+                "Could not find an acceptable browser. Please call "
+                "`choreo.get_browser()`, set environmental variable "
+                "BROWSER_PATH or pass `path=/path/to/browser` into "
+                "the Browser() constructor. The latter two work with Edge.",
             )
         if "snap" in str(path):
             self.sandboxed = True  # not chromium sandbox, snap sandbox
@@ -101,7 +106,7 @@ class Browser(Target):
 
         try:
             self.loop = kwargs.pop("loop", asyncio.get_running_loop())
-        except Exception:
+        except RuntimeError:
             self.loop = False
         if self.loop:
             self.futures = {}
@@ -127,8 +132,12 @@ class Browser(Target):
             try:
                 stderr.fileno()
             except io.UnsupportedOperation:
-                warnings.warn(
-                    "A value has been passed to debug_browser which is not compatible with python's Popen. This may be because one was passed to Browser or because sys.stderr has been overridden by a framework. Browser logs will not be handled by python in this case.",
+                warnings.warn( # noqa: B028
+                    "A value has been passed to debug_browser which "
+                    "is not compatible with python's Popen. This may "
+                    "be because one was passed to Browser or because "
+                    "sys.stderr has been overridden by a framework. "
+                    "Browser logs will not be handled by python in this case.",
                 )
                 stderr = None
 
@@ -165,19 +174,17 @@ class Browser(Target):
         return self
 
     # for use with `await Browser()`
-    # TODO: why have to call __await__ when __aenter__ returns a future
     def __await__(self):
         return self.__aenter__().__await__()
+    # ? why have to call __await__ when __aenter__ returns a future
 
     def _open(self):
         if platform.system() != "Windows":
-            self.subprocess = subprocess.Popen(
+            self.subprocess = subprocess.Popen( # noqa: S603, false positive, input fine
+
                 [
                     sys.executable,
-                    os.path.join(
-                        os.path.dirname(os.path.realpath(__file__)),
-                        "chrome_wrapper.py",
-                    ),
+                    Path(__file__).resolve().parent / "chrome_wrapper.py",
                 ],
                 close_fds=True,
                 stdin=self.pipe.read_to_chromium,
@@ -201,10 +208,7 @@ class Browser(Target):
             if platform.system() != "Windows":
                 self.subprocess = await asyncio.create_subprocess_exec(
                     sys.executable,
-                    os.path.join(
-                        os.path.dirname(os.path.realpath(__file__)),
-                        "chrome_wrapper.py",
-                    ),
+                    Path(__file__).resolve().parent / "chrome_wrapper.py",
                     stdin=self.pipe.read_to_chromium,
                     stdout=self.pipe.write_from_chromium,
                     stderr=self._stderr,
@@ -227,7 +231,8 @@ class Browser(Target):
             self.future_self.set_result(self)
         except (BrowserClosedError, BrowserFailedError, asyncio.CancelledError) as e:
             raise BrowserFailedError(
-                "The browser seemed to close immediately after starting. Perhaps adding debug_browser=True will help.",
+                "The browser seemed to close immediately after starting. "
+                "Perhaps adding debug_browser=True will help.",
             ) from e
 
     async def _is_closed_async(self, wait=0):
@@ -241,26 +246,23 @@ class Browser(Target):
             if wait == 0:  # this never works cause processing
                 wait = 0.15
             await asyncio.wait_for(waiter, wait)
-            return True
-        except Exception:
+        except TimeoutError:
             return False
+        return True
 
     def _is_closed(self, wait=0):
         if wait == 0:
-            if self.subprocess.poll() is None:
-                return False
-            else:
-                return True
+            return self.subprocess.poll() is None
         else:
             try:
                 self.subprocess.wait(wait)
-                return True
-            except:  # noqa
+            except subprocess.TimeoutExpired:
                 return False
+        return True
 
     # _sync_close and _async_close are basically the same thing
 
-    def _sync_close(self):
+    def _sync_close(self): # noqa: PLR0912, C901
         if self._is_closed():
             if self.debug:
                 print("Browser was already closed.", file=sys.stderr)
@@ -283,8 +285,8 @@ class Browser(Target):
         # Start a kill
         if platform.system() == "Windows":
             if not self._is_closed():
-                subprocess.call(
-                    ["taskkill", "/F", "/T", "/PID", str(self.subprocess.pid)],
+                subprocess.call( # noqa: S603, false positive, input fine
+                    ["taskkill", "/F", "/T", "/PID", str(self.subprocess.pid)], # noqa: S607 windows full path...
                     stderr=subprocess.DEVNULL,
                     stdout=subprocess.DEVNULL,
                 )
@@ -300,12 +302,11 @@ class Browser(Target):
                 return
 
             self.subprocess.kill()
-            if self._is_closed(wait=4):
-                if self.debug:
-                    print("kill() closed the browser", file=sys.stderr)
+            if self._is_closed(wait=4) and self.debug:
+                print("kill() closed the browser", file=sys.stderr)
         return
 
-    async def _async_close(self):
+    async def _async_close(self): # noqa: PLR0912, C901
         if await self._is_closed_async():
             if self.debug:
                 print("Browser was already closed.", file=sys.stderr)
@@ -324,7 +325,8 @@ class Browser(Target):
         # Start a kill
         if platform.system() == "Windows":
             if not await self._is_closed_async():
-                subprocess.call(
+                # could we use native asyncio process here? or hackcheck?
+                asyncio.to_thread(subprocess.call,
                     ["taskkill", "/F", "/T", "/PID", str(self.subprocess.pid)],
                     stderr=subprocess.DEVNULL,
                     stdout=subprocess.DEVNULL,
@@ -341,22 +343,22 @@ class Browser(Target):
                 return
 
             self.subprocess.kill()
-            if await self._is_closed_async(wait=4):
-                if self.debug:
-                    print("kill() closed the browser", file=sys.stderr)
+            if await self._is_closed_async(wait=4) and self.debug:
+                print("kill() closed the browser", file=sys.stderr)
         return
 
-    def close(self):
+    def close(self): # noqa: C901
         if self.loop:
 
-            async def close_task():
+            async def close_task(): # noqa: PLR0912, C901
                 if self.lock.locked():
                     return
                 await self.lock.acquire()
                 if not self.future_self.done():
                     self.future_self.set_exception(
                         BrowserFailedError(
-                            "Close() was called before the browser finished opening- maybe it crashed?",
+                            "Close() was called before the browser "
+                            "finished opening- maybe it crashed?",
                         ),
                     )
                 for future in self.futures.values():
@@ -403,6 +405,7 @@ class Browser(Target):
                 pass
             self.pipe.close()
             self.tmp_dir.clean()
+            return None
 
     async def _watchdog(self):
         self._watchdog_healthy = True
@@ -425,10 +428,10 @@ class Browser(Target):
             if self.tmp_dir.exists:
                 self.tmp_dir.delete_manually()
 
-    def __exit__(self, type, value, traceback):
+    def __exit__(self, exc_type, exc_value, exc_traceback):
         self.close()
 
-    async def __aexit__(self, type, value, traceback):
+    async def __aexit__(self, exc_type, exc_value, exc_traceback):
         await self.close()
 
     # Basic synchronous functions
@@ -444,19 +447,21 @@ class Browser(Target):
 
     def get_tab(self):
         if self.tabs.values():
-            return list(self.tabs.values())[0]
+            return next(iter(self.tabs.values()))
+        return None
 
     # Better functions that require asynchronous
     async def create_tab(self, url="", width=None, height=None):
         if self.lock.locked():
             raise BrowserClosedError("create_tab() called on a closed browser.")
         if self.headless and (width or height):
-            warnings.warn(
-                "Width and height only work for headless chrome mode, they will be ignored.",
+            warnings.warn( # noqa: B028
+                "Width and height only work for headless chrome mode, "
+                "they will be ignored.",
             )
             width = None
             height = None
-        params = dict(url=url)
+        params = {url:url}
         if width:
             params["width"] = width
         if height:
@@ -494,8 +499,9 @@ class Browser(Target):
     async def create_session(self):
         if self.lock.locked():
             raise BrowserClosedError("create_session() called on a closed browser")
-        warnings.warn(
-            "Creating new sessions on Browser() only works with some versions of Chrome, it is experimental.",
+        warnings.warn( # noqa: B028
+            "Creating new sessions on Browser() only works with some "
+            "versions of Chrome, it is experimental.",
             ExperimentalFeatureWarning,
         )
         response = await self.browser.send_command("Target.attachToBrowserTarget")
@@ -530,12 +536,13 @@ class Browser(Target):
                     if e.code == TARGET_NOT_FOUND:
                         if self.debug:
                             print(
-                                f"Target {target_id} not found (could be closed before)",
+                                f"Target {target_id} not found "
+                                "(could be closed before)",
                                 file=sys.stderr,
                             )
                         continue
                     else:
-                        raise e
+                        raise
                 self._add_tab(new_tab)
                 if self.debug:
                     print(f"The target {target_id} was added", file=sys.stderr)
@@ -550,15 +557,14 @@ class Browser(Target):
         def run_print(debug):
             if debug:
                 print("Starting run_print loop", file=sys.stderr)
-            while True:
-                try:
+            try:
+                while True:
                     responses = self.pipe.read_jsons(debug=debug)
                     for response in responses:
                         print(json.dumps(response, indent=4))
-                except PipeClosedError:
-                    if self.debug:
-                        print("PipeClosedError caught", file=sys.stderr)
-                    break
+            except PipeClosedError:
+                if self.debug:
+                    print("PipeClosedError caught", file=sys.stderr)
 
         Thread(target=run_print, args=(debug,)).start()
 
@@ -570,7 +576,7 @@ class Browser(Target):
             return self
         return None
 
-    def run_read_loop(self):
+    def run_read_loop(self): # noqa: PLR0915, C901 complexity
         def check_error(result):
             e = result.exception()
             if e:
@@ -580,13 +586,15 @@ class Browser(Target):
                 if not isinstance(e, asyncio.CancelledError):
                     raise e
 
-        async def read_loop():
+        async def read_loop(): # noqa: PLR0915, PLR0912, C901 complexity
             try:
                 responses = await self.loop.run_in_executor(
                     self.executor,
                     self.pipe.read_jsons,
-                    True,  # blocking argument to read_jsons
-                    self.debug,  # debug argument to read_jsons
+                    args=[
+                        True,  # blocking argument to read_jsons
+                        self.debug,  # debug argument to read_jsons
+                    ]
                 )
                 for response in responses:
                     error = self.protocol.get_error(response)
@@ -610,7 +618,8 @@ class Browser(Target):
                             ) or (response["method"] == query)
                             if self.debug:
                                 print(
-                                    f"Checking subscription key: {query} against event method {response['method']}",
+                                    f"Checking subscription key: {query} "
+                                    "against event method {response['method']}",
                                     file=sys.stderr,
                                 )
                             if match:
@@ -622,7 +631,7 @@ class Browser(Target):
                                         event_session_id
                                     ].unsubscribe(query)
 
-                        ### THIS IS FOR SUBSCRIBE_ONCE (that's not clear from variable names)
+                        ### THIS IS FOR SUBSCRIBE_ONCE
                         for query, futures in list(subscriptions_futures.items()):
                             match = (
                                 query.endswith("*")
@@ -630,7 +639,8 @@ class Browser(Target):
                             ) or (response["method"] == query)
                             if self.debug:
                                 print(
-                                    f"Checking subscription key: {query} against event method {response['method']}",
+                                    f"Checking subscription key: {query} against "
+                                    "event method {response['method']}",
                                     file=sys.stderr,
                                 )
                             if match:
@@ -658,11 +668,15 @@ class Browser(Target):
                                 continue  # browser closing anyway
                             target_closed = self._get_target_for_session(session_closed)
                             if target_closed:
-                                target_closed._remove_session(session_closed)
+                                target_closed._remove_session(session_closed) # noqa: SLF001
+                                # TODO(Andrew): private access # noqa: FIX002, TD003
+
                             _ = self.protocol.sessions.pop(session_closed, None)
                             if self.debug:
                                 print(
-                                    f"Use intern subscription key: 'Target.detachedFromTarget'. Session {session_closed} was closed.",
+                                    "Use intern subscription key: "
+                                    "'Target.detachedFromTarget'. "
+                                    f"Session {session_closed} was closed.",
                                     file=sys.stderr,
                                 )
 
@@ -684,7 +698,7 @@ class Browser(Target):
                         else:
                             future.set_result(response)
                     else:
-                        warnings.warn(
+                        warnings.warn( # noqa: B028
                             f"Unhandled message type:{response!s}",
                             UnhandledMessageWarning,
                         )
