@@ -3,7 +3,7 @@ import platform
 import shutil
 import sys
 
-from .cli_utils import default_exe_name
+from choreographer._cli_utils import default_exe_name
 
 chrome = [
     "chrome",

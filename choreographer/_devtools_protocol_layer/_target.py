@@ -1,8 +1,8 @@
 import sys
 from collections import OrderedDict
 
-from .protocol import DevtoolsProtocolError
-from .session import Session
+from ._protocol import DevtoolsProtocolError
+from ._session import Session
 
 
 class Target:
