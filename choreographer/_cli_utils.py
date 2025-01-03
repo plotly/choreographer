@@ -119,7 +119,7 @@ def get_browser_sync(
         if src["platform"] == arch:
             url = src["url"]
             break
-    if not path.exists:
+    if not path.exists():
         path.mkdir(parents=True)
     filename = path / "chrome.zip"
     with urllib.request.urlopen(url) as response, filename.open("wb") as out_file:  # noqa: S310 audit url
