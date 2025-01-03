@@ -11,10 +11,13 @@ def check_response_dictionary(response_received, response_expected):
     for k, v in response_expected.items():
         if isinstance(v, dict):
             check_response_dictionary(v, response_expected[k])
-        assert response_received.get(
-            "k",
-            None,
-        ), "Expected: {response_expected}\nReceived: {response_received}"
+        assert (
+            response_received.get(
+                k,
+                float("NaN"),
+            )
+            == v
+        ), f"Expected: {response_expected}\nReceived: {response_received}"
 
 
 @pytest_asyncio.fixture(scope="function", loop_scope="function")
