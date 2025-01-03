@@ -1,6 +1,6 @@
-from ._protocol.py import DevtoolsProtocolError, MessageTypeError
-from ._session.py import Session
-from ._target.py import Target
+from ._protocol import DevtoolsProtocolError, MessageTypeError
+from ._session import Session
+from ._target import Target
 
 __all__ = [
     "DevtoolsProtocolError",
