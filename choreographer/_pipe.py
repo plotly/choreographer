@@ -9,6 +9,10 @@ import simplejson
 with_block = bool(sys.version_info[:3] >= (3, 12) or platform.system() != "Windows")
 
 
+class PipeClosedError(IOError):
+    pass
+
+
 class BlockWarning(UserWarning):
     pass
 
@@ -26,10 +30,6 @@ class MultiEncoder(simplejson.JSONEncoder):
         elif hasattr(obj, "isoformat"):
             return obj.isoformat()
         return simplejson.JSONEncoder.default(self, obj)
-
-
-class PipeClosedError(IOError):
-    pass
 
 
 class Pipe:
