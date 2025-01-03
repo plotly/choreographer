@@ -30,7 +30,7 @@ async def test_create_and_close_session(browser):
 async def test_browser_write_json(browser):
     # Test valid request with correct id and method
     response = await browser.write_json({"id": 0, "method": "Target.getTargets"})
-    assert "result" in response and "targetInfos" in response["result"]
+    assert "result" in response and "targetInfos" in response["result"]  # noqa: PT018 I like this assertion
 
     # Test invalid method name should return error
     response = await browser.write_json({"id": 2, "method": "dkadklqwmd"})
@@ -79,7 +79,7 @@ async def test_browser_write_json(browser):
 async def test_browser_send_command(browser):
     # Test valid request with correct command
     response = await browser.send_command(command="Target.getTargets")
-    assert "result" in response and "targetInfos" in response["result"]
+    assert "result" in response and "targetInfos" in response["result"]  # noqa: PT018 I like this assertion
 
     # Test invalid method name should return error
     response = await browser.send_command(command="dkadklqwmd")
@@ -102,7 +102,7 @@ async def test_populate_targets(browser):
 @pytest.mark.asyncio
 async def test_get_tab(browser):
     await browser.create_tab("")
-    assert browser.get_tab() == list(browser.tabs.values())[0]
+    assert browser.get_tab() == next(iter(browser.tabs.values()))
     await browser.create_tab()
     await browser.create_tab("")
-    assert browser.get_tab() == list(browser.tabs.values())[0]
+    assert browser.get_tab() == next(iter(browser.tabs.values()))

@@ -1,10 +1,12 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 import numpy as np
 
-from choreographer.pipe import Pipe
+from choreographer._pipe import Pipe
 
-data = [1, 2.00, 3, float("nan"), float("inf"), float("-inf"), datetime(1970, 1, 1)]
+_timestamp = datetime(1970, 1, 1, tzinfo=timezone.utc)
+
+data = [1, 2.00, 3, float("nan"), float("inf"), float("-inf"), _timestamp]
 expected_message = b'[1, 2.0, 3, null, null, null, "1970-01-01T00:00:00"]\x00'
 converted_type = [int, float, int, type(None), type(None), type(None), str]
 
@@ -21,7 +23,3 @@ def test_de_serialize():
     obj_np = pipe.deserialize(message_np[:-1])  # split out \0
     for o, t in zip(obj_np, converted_type):
         assert isinstance(o, t)
-
-
-# TODO: Not sure if this all the data we have to worry about:
-# we should also run through mocks and have it print data.

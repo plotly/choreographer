@@ -19,7 +19,7 @@ async def session(browser):
 async def test_session_send_command(session):
     # Test valid request with correct command
     response = await session.send_command(command="Target.getTargets")
-    assert "result" in response and "targetInfos" in response["result"]
+    assert "result" in response and "targetInfos" in response["result"]  # noqa: PT018 I like this assertion
 
     # Test invalid method name should return error
     response = await session.send_command(command="dkadklqwmd")

@@ -9,6 +9,8 @@ from async_timeout import timeout
 
 import choreographer as choreo
 
+# ruff: noqa: PLR0913 (lots of parameters)
+
 
 @pytest.mark.asyncio(loop_scope="function")
 async def test_context(capteesys, headless, debug, debug_browser, sandbox, gpu):
@@ -23,15 +25,16 @@ async def test_context(capteesys, headless, debug, debug_browser, sandbox, gpu):
         timeout(pytest.default_timeout),
     ):
         if sandbox and "ubuntu" in platform.version().lower():
-            pytest.skip("Ubuntu doesn't support sandbox")
+            pytest.skip("Ubuntu doesn't support sandbox unless installed from snap.")
         temp_dir = browser.tmp_dir
         response = await browser.send_command(command="Target.getTargets")
-        assert "result" in response and "targetInfos" in response["result"]
+        assert "result" in response and "targetInfos" in response["result"]  # noqa: PT018 combined assert
         assert len(response["result"]["targetInfos"]) != 0
-        assert isinstance(browser.get_tab(), choreo.tab.Tab)
+        assert isinstance(browser.get_tab(), choreo.Tab)
         assert len(browser.get_tab().sessions) == 1
     print()  # this makes sure that capturing is working
-    # stdout should be empty, but not because capsys is broken, because nothing was print
+    # stdout should be empty, but not
+    # because capsys is broken, because nothing was print
     assert capteesys.readouterr().out == "\n", "stdout should be silent!"
     # let asyncio do some cleaning up if it wants, may prevent warnings
     await asyncio.sleep(0)
@@ -44,16 +47,18 @@ async def test_no_context(capteesys, headless, debug, debug_browser, sandbox, gp
         headless=headless,
         debug=debug,
         debug_browser=None if debug_browser else False,
-        enable_sandbox=False,
+        enable_sandbox=sandbox,
         enable_gpu=gpu,
     )
+    if sandbox and "ubuntu" in platform.version().lower():
+        pytest.skip("Ubuntu doesn't support sandbox unless installed from snap.")
     temp_dir = browser.tmp_dir
     try:
         async with timeout(pytest.default_timeout):
             response = await browser.send_command(command="Target.getTargets")
-            assert "result" in response and "targetInfos" in response["result"]
+            assert "result" in response and "targetInfos" in response["result"]  # noqa: PT018 combined assert
             assert len(response["result"]["targetInfos"]) != 0
-            assert isinstance(browser.get_tab(), choreo.tab.Tab)
+            assert isinstance(browser.get_tab(), choreo.Tab)
             assert len(browser.get_tab().sessions) == 1
     finally:
         await browser.close()
@@ -74,8 +79,9 @@ async def test_watchdog(capteesys, headless, debug, debug_browser):
     )
 
     if platform.system() == "Windows":
-        subprocess.call(
-            ["taskkill", "/F", "/T", "/PID", str(browser.subprocess.pid)],
+        # Blocking process here because it ensures the kill will occur rn
+        subprocess.call(  # noqa: S603, ASYNC221 sanitize input, blocking process
+            ["taskkill", "/F", "/T", "/PID", str(browser.subprocess.pid)],  # noqa: S607
             stderr=subprocess.DEVNULL,
             stdout=subprocess.DEVNULL,
         )
@@ -84,9 +90,11 @@ async def test_watchdog(capteesys, headless, debug, debug_browser):
     await asyncio.sleep(1.5)
 
     with pytest.raises(
-        (choreo.browser.PipeClosedError, choreo.browser.BrowserClosedError),
+        (choreo.PipeClosedError, choreo.BrowserClosedError),
     ):
         await browser.send_command(command="Target.getTargets")
 
     await browser.close()
     await asyncio.sleep(0)
+    print()
+    assert capteesys.readouterr().out == "\n", "stdout should be silent!"

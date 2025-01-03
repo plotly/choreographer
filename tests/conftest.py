@@ -13,6 +13,7 @@ import choreographer as choreo
 
 ##### Parameterized Arguments
 # Are used to re-run tests under different conditions
+VERBOSITY_FOR_DEBUG = 3
 
 
 @pytest.fixture(params=[True, False], ids=["enable_sandbox", ""])
@@ -40,7 +41,8 @@ def debug_browser(request):
     return request.param
 
 
-# --headless is the default flag for most tests, but you can set --no-headless if you want to watch
+# --headless is the default flag for most tests,
+# but you can set --no-headless if you want to watch
 def pytest_addoption(parser):
     parser.addoption("--headless", action="store_true", dest="headless", default=True)
     parser.addoption("--no-headless", dest="headless", action="store_false")
@@ -50,7 +52,7 @@ def pytest_addoption(parser):
 @pytest_asyncio.fixture(scope="function", loop_scope="function")
 async def browser(request):
     headless = request.config.getoption("--headless")
-    debug = request.config.get_verbosity() > 2
+    debug = request.config.get_verbosity() >= VERBOSITY_FOR_DEBUG
     debug_browser = None if debug else False
     browser = await choreo.Browser(
         headless=headless,
@@ -92,7 +94,8 @@ def pytest_runtest_setup(item: pytest.Item):
                     )
                 except TimeoutError:
                     pytest.fail(
-                        f"Test {item.name} failed a timeout. This can be extended, but shouldn't be. See conftest.py.",
+                        f"Test {item.name} failed a timeout. "
+                        "This can be extended, but shouldn't be. See conftest.py.",
                     )
 
             item.obj = wrapped_test_fn
@@ -116,7 +119,7 @@ def capteesys(request):
     from _pytest import capture
 
     if hasattr(capture, "capteesys"):
-        warnings.warn(
+        warnings.warn(  # noqa: B028
             (
                 "You are using a polyfill for capteesys, but this"
                 " version of pytest supports it natively- you may"
@@ -144,9 +147,9 @@ def capteesys(request):
             )
             self._capture.start_capturing()
 
-    capture_fixture._start = _inject_start
+    capture_fixture._start = _inject_start  # noqa: SLF001 private member hack
     capman.set_fixture(capture_fixture)
-    capture_fixture._start()
+    capture_fixture._start()  # noqa: SLF001 private member hack
     yield capture_fixture
     capture_fixture.close()
     capman.unset_fixture()
