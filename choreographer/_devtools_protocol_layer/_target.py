@@ -81,7 +81,7 @@ class Target:
 
     def subscribe(self, string, callback, *, repeating=True):
         session = self._get_first_session()
-        session.subscribe(string, callback, repeating)
+        session.subscribe(string, callback, repeating=repeating)
 
     def unsubscribe(self, string):
         session = self._get_first_session()
