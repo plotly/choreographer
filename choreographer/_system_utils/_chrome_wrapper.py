@@ -15,13 +15,14 @@ import subprocess
 import sys
 from functools import partial
 
+_inheritable = True
+
 system = platform.system()
 if system == "Windows":
     import msvcrt
 else:
-    inheritable = True
-    os.set_inheritable(4, inheritable)
-    os.set_inheritable(3, inheritable)
+    os.set_inheritable(4, _inheritable)
+    os.set_inheritable(3, _inheritable)
 
 
 def open_browser(  # noqa: PLR0913 too many args in func
@@ -60,9 +61,9 @@ def open_browser(  # noqa: PLR0913 too many args in func
     system_dependent = {}
     if system == "Windows":
         to_chromium_handle = msvcrt.get_osfhandle(to_chromium)
-        os.set_handle_inheritable(to_chromium_handle, inheritable=True)
+        os.set_handle_inheritable(to_chromium_handle, _inheritable)
         from_chromium_handle = msvcrt.get_osfhandle(from_chromium)
-        os.set_handle_inheritable(from_chromium_handle, inheritable=True)
+        os.set_handle_inheritable(from_chromium_handle, _inheritable)
         cli += [
             f"--remote-debugging-io-pipes={to_chromium_handle!s},{from_chromium_handle!s}",
         ]
