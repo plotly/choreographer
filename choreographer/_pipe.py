@@ -60,8 +60,10 @@ class Pipe:
         if not debug:
             debug = self.debug
         if debug:
-            print("write_json:", file=sys.stderr)
+            print(f"write_json: {obj}", file=sys.stderr)
         encoded_message = self.serialize(obj)
+        if debug:
+            print(f"write_json: {encoded_message}", file=sys.stderr)
         try:
             os.write(self.write_to_chromium, encoded_message)
         except OSError as e:
