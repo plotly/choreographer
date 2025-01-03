@@ -467,7 +467,7 @@ class Browser(Target):
             )
             width = None
             height = None
-        params = {url: url}
+        params = {"url": url}
         if width:
             params["width"] = width
         if height:
