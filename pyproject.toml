@@ -73,6 +73,7 @@ ignore = [
           "RUF012", # We don't do typing, so no typing
           "SIM105", # Too opionated (try-except-pass)
           "T201", # no print, remove after logistro TODO
+          "PT003", # scope="function" implied but I like readability
           ]
 
 [tool.ruff.lint.per-file-ignores]
