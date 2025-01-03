@@ -7,7 +7,7 @@ from choreographer._pipe import Pipe
 _timestamp = datetime(1970, 1, 1, tzinfo=timezone.utc)
 
 data = [1, 2.00, 3, float("nan"), float("inf"), float("-inf"), _timestamp]
-expected_message = b'[1, 2.0, 3, null, null, null, "1970-01-01T00:00:00"]\x00'
+expected_message = b'[1, 2.0, 3, null, null, null, "1970-01-01T00:00:00+00:00"]\x00'
 converted_type = [int, float, int, type(None), type(None), type(None), str]
 
 
