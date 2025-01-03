@@ -8,7 +8,7 @@ import choreographer as choreo
 @pytest.mark.asyncio
 async def test_create_and_close_tab(browser):
     tab = await browser.create_tab("")
-    assert isinstance(tab, choreo.tab.Tab)
+    assert isinstance(tab, choreo.Tab)
     assert tab.target_id in browser.tabs
     await browser.close_tab(tab)
     assert tab.target_id not in browser.tabs
@@ -18,7 +18,7 @@ async def test_create_and_close_tab(browser):
 async def test_create_and_close_session(browser):
     with pytest.warns(choreo.protocol.ExperimentalFeatureWarning):
         session = await browser.create_session()
-    assert isinstance(session, choreo.session.Session)
+    assert isinstance(session, choreo.protocol.Session)
     assert session.session_id in browser.sessions
     await browser.close_session(session)
     assert session.session_id not in browser.sessions
