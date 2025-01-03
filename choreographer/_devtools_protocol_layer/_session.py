@@ -26,12 +26,13 @@ class Session:
 
         return self.browser.write_json(json_command)
 
-    def subscribe(self, string, callback, repeating=True):
+    def subscribe(self, string, callback, *, repeating=True):
         if not self.browser.loop:
             raise ValueError("You may use this method with a loop in Browser")
         if string in self.subscriptions:
             raise ValueError(
-                "You are already subscribed to this string, duplicate subscriptions are not allowed.",
+                "You are already subscribed to this string, "
+                "duplicate subscriptions are not allowed.",
             )
         else:
             self.subscriptions[string] = (callback, repeating)

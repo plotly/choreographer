@@ -1,8 +1,8 @@
 import sys
 from collections import OrderedDict
 
-from .protocol import DevtoolsProtocolError
-from .session import Session
+from ._protocol import DevtoolsProtocolError
+from ._session import Session
 
 
 class Target:
@@ -31,11 +31,12 @@ class Target:
     async def create_session(self):
         if not self.browser.loop:
             raise RuntimeError(
-                "There is no eventloop, or was not passed to browser. Cannot use async methods",
+                "There is no eventloop, or was not passed "
+                "to browser. Cannot use async methods",
             )
         response = await self.browser.send_command(
             "Target.attachToTarget",
-            params=dict(targetId=self.target_id, flatten=True),
+            params={"targetId": self.target_id, "flatten": True},
         )
         if "error" in response:
             raise RuntimeError("Could not create session") from DevtoolsProtocolError(
@@ -49,7 +50,8 @@ class Target:
     async def close_session(self, session_id):
         if not self.browser.loop:
             raise RuntimeError(
-                "There is no eventloop, or was not passed to browser. Cannot use async methods",
+                "There is no eventloop, or was not passed to "
+                "browser. Cannot use async methods",
             )
         if isinstance(session_id, Session):
             session_id = session_id.session_id
@@ -68,18 +70,18 @@ class Target:
     def send_command(self, command, params=None):
         if not self.sessions.values():
             raise RuntimeError("Cannot send_command without at least one valid session")
-        return list(self.sessions.values())[0].send_command(command, params)
+        return next(iter(self.sessions.values())).send_command(command, params)
 
     def _get_first_session(self):
         if not self.sessions.values():
             raise RuntimeError(
                 "Cannot use this method without at least one valid session",
             )
-        return list(self.sessions.values())[0]
+        return next(iter(self.sessions.values()))
 
-    def subscribe(self, string, callback, repeating=True):
+    def subscribe(self, string, callback, *, repeating=True):
         session = self._get_first_session()
-        session.subscribe(string, callback, repeating)
+        session.subscribe(string, callback, repeating=repeating)
 
     def unsubscribe(self, string):
         session = self._get_first_session()

@@ -1,17 +1,24 @@
-from .browser import Browser
-from .browser import browser_which
-from .browser import get_browser_path
-from .cli_utils import get_browser
-from .cli_utils import get_browser_sync
-from .tempfile import TempDirectory
-from .tempfile import TempDirWarning
+"""choreographer is a browser controller for python."""
+
+import choreographer._devtools_protocol_layer as protocol
+
+from ._browser import Browser, BrowserClosedError, browser_which, get_browser_path
+from ._cli_utils import get_browser, get_browser_sync
+from ._pipe import BlockWarning, PipeClosedError
+from ._system_utils._tempfile import TempDirectory, TempDirWarning
+from ._tab import Tab
 
 __all__ = [
-    Browser,
-    get_browser,
-    get_browser_sync,
-    browser_which,
-    get_browser_path,
-    TempDirectory,
-    TempDirWarning,
+    "BlockWarning",
+    "Browser",
+    "BrowserClosedError",
+    "PipeClosedError",
+    "Tab",
+    "TempDirWarning",
+    "TempDirectory",
+    "browser_which",
+    "get_browser",
+    "get_browser_path",
+    "get_browser_sync",
+    "protocol",
 ]

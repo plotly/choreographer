@@ -22,10 +22,15 @@ maintainers = [
   {name = "Andrew Pikul", email = "ajpikul@gmail.com"},
 ]
 dependencies = [
-  "simplejson"
-  ]
+  "logistro>=1.0.2",
+  "simplejson",
+]
 
-[project.optional-dependencies]
+[project.urls]
+Homepage = "https://github.com/plotly/choreographer"
+Repository = "https://github.com/geopozo/logistro"
+
+[dependency-groups]
 dev = [
   "pytest",
   "pytest-asyncio",
@@ -35,9 +40,48 @@ dev = [
   "numpy"
 ]
 
+# uv doens't allow dependency groups to have separate python requirements
+# it resolves everything all at once
+# this group we need to require higher python
+# and only resolve if explicitly asked for
+
+#docs = [
+#    "mkquixote @ git+ssh://git@github.com/geopozo/mkquixote",
+#    "mkdocs>=1.6.1",
+#    "mkdocs-material>=9.5.49",
+#]
+
 [project.scripts]
-choreo_diagnose = "choreographer.cli_utils:diagnose"
-choreo_get_browser = "choreographer.cli_utils:get_browser_cli"
+choreo_diagnose = "choreographer._cli_utils_no_qa:diagnose"
+choreo_get_browser = "choreographer._cli_utils:get_browser_cli"
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+          "ANN", # no types
+          "EM", # allow strings in raise(), despite python being ugly about it
+          "TRY003", # allow long error messages inside raise()
+          "D203", # No blank before class docstring (D211 = require blank line)
+          "D212", # Commit message style docstring is D213, ignore D212
+          "COM812", # manual says linter rule conflicts with formatter
+          "ISC001", # manual says litner rule conflicts with formatter
+          "RET504", # Allow else if unnecessary because more readable
+          "RET505", # Allow else if unnecessary because more readable
+          "RET506", # Allow else if unnecessary because more readable
+          "RET507", # Allow else if unnecessary because more readable
+          "RET508", # Allow else if unnecessary because more readable
+          "RUF012", # We don't do typing, so no typing
+          "SIM105", # Too opionated (try-except-pass)
+          "T201", # no print, remove after logistro TODO
+          "PT003", # scope="function" implied but I like readability
+          ]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = [
+              "D", # ignore docstring errors
+              "S101", # allow assert
+              "INP001", # no need for __init__ in test directories
+            ]
 
 # Format breaks this anyway
 # [tool.ruff.lint]
@@ -45,6 +89,7 @@ choreo_get_browser = "choreographer.cli_utils:get_browser_cli"
 
 [tool.pytest.ini_options]
 asyncio_default_fixture_loop_scope = "function"
+log_cli = true
 
 [tool.poe.tasks]
 _test_proc = "pytest -W error -n auto -v -rfE --capture=fd tests/test_process.py"
