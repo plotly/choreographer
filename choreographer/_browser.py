@@ -331,7 +331,7 @@ class Browser(Target):
         if platform.system() == "Windows":
             if not await self._is_closed_async():
                 # could we use native asyncio process here? or hackcheck?
-                asyncio.to_thread(
+                await asyncio.to_thread(
                     subprocess.call,
                     ["taskkill", "/F", "/T", "/PID", str(self.subprocess.pid)],
                     stderr=subprocess.DEVNULL,
