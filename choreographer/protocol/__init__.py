@@ -1,3 +1,5 @@
+"""choreographer.protocol provides classes and tools for Chrome Devtools Protocol."""
+
 from ._protocol import (
     DevtoolsProtocolError,
     ExperimentalFeatureWarning,

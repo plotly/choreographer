@@ -1,6 +1,6 @@
 """choreographer is a browser controller for python."""
 
-import choreographer._devtools_protocol_layer as protocol
+from choreographer import protocol
 
 from ._browser import Browser, BrowserClosedError, browser_which, get_browser_path
 from ._cli_utils import get_browser, get_browser_sync

@@ -1,4 +1,4 @@
-from ._devtools_protocol_layer._target import Target
+from .protocol._target import Target
 
 
 class Tab(Target):

@@ -11,18 +11,18 @@ from functools import partial
 from pathlib import Path
 from threading import Thread
 
-from ._devtools_protocol_layer._protocol import (
+from ._pipe import Pipe, PipeClosedError
+from ._system_utils._system import browser_which
+from ._system_utils._tempfile import TempDirectory, TempDirWarning
+from ._tab import Tab
+from .protocol._protocol import (
     TARGET_NOT_FOUND,
     DevtoolsProtocolError,
     ExperimentalFeatureWarning,
     Protocol,
 )
-from ._devtools_protocol_layer._session import Session
-from ._devtools_protocol_layer._target import Target
-from ._pipe import Pipe, PipeClosedError
-from ._system_utils._system import browser_which
-from ._system_utils._tempfile import TempDirectory, TempDirWarning
-from ._tab import Tab
+from .protocol._session import Session
+from .protocol._target import Target
 
 # importing the below via __file__ causes __name__ weirdness when its exe'd ???
 chromewrapper_path = (

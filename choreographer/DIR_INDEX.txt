@@ -21,7 +21,7 @@ which has "Tabs".
 Directories
 -----------
 
-_devtools_protocol_layer/
+protocol/
 
 The browser-tab interface is intuitive, but here we have the interface that Chrome's
 Devtools Protocol actually provides.
