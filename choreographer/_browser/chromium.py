@@ -5,7 +5,7 @@ import platform
 import sys
 from pathlib import Path
 
-# TODO(Andrew): move this to its own subpackage comm # noqa: FIX002, TD003
+# TODO(Andrew): move to own subpackage during channel refactor # noqa: FIX002, TD003
 from choreographer._pipe import Pipe, WebSocket
 
 if platform.system() == "Windows":
@@ -13,8 +13,8 @@ if platform.system() == "Windows":
 
 
 class Chromium:
-    def __init__(self, pipe):
-        self._comm = pipe
+    def __init__(self, channel):
+        self._comm = channel
         # extra information from pipe
 
     # where do we get user data dir
@@ -56,19 +56,19 @@ class Chromium:
         if not sandbox:
             cli.append("--no-sandbox")
 
-        if isinstance(self._comm, Pipe):
+        if isinstance(self._channel, Pipe):
             cli.append("--remote-debugging-pipe")
             if platform.system() == "Windows":
                 _inheritable = True
-                write_handle = msvcrt.get_osfhandle(self._comm.from_choreo_to_external)
-                read_handle = msvcrt.get_osfhandle(self._comm.from_external_to_choreo)
-                os.set_handle_inheritable(write_handle, _inheritable)
-                os.set_handle_inheritable(read_handle, _inheritable)
+                w_handle = msvcrt.get_osfhandle(self._channel.from_choreo_to_external)
+                r_handle = msvcrt.get_osfhandle(self._channel.from_external_to_choreo)
+                os.set_handle_inheritable(w_handle, _inheritable)
+                os.set_handle_inheritable(r_handle, _inheritable)
                 cli += [
-                    f"--remote-debugging-io-pipes={read_handle!s},{write_handle!s}",
+                    f"--remote-debugging-io-pipes={r_handle!s},{w_handle!s}",
                 ]
-        elif isinstance(self._comm, WebSocket):
-            raise NotImplementedError("Websocket style comms are not implemented yet")
+        elif isinstance(self._channel, WebSocket):
+            raise NotImplementedError("Websocket style channels not implemented yet")
 
 
 def get_env():
