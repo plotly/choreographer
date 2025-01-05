@@ -1,4 +1,5 @@
 class Session:
+    # points to browser, bad
     def __init__(self, browser, session_id):
         if not isinstance(session_id, str):
             raise TypeError("session_id must be a string")

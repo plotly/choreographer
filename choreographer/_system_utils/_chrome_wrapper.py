@@ -17,8 +17,7 @@ from functools import partial
 
 _inheritable = True
 
-system = platform.system()
-if system == "Windows":
+if platform.system() == "Windows":
     import msvcrt
 else:
     os.set_inheritable(4, _inheritable)
@@ -59,7 +58,7 @@ def open_browser(  # noqa: PLR0913 too many args in func
         cli.append("--headless")
 
     system_dependent = {}
-    if system == "Windows":
+    if platform.system() == "Windows":
         to_chromium_handle = msvcrt.get_osfhandle(to_chromium)
         os.set_handle_inheritable(to_chromium_handle, _inheritable)
         from_chromium_handle = msvcrt.get_osfhandle(from_chromium)

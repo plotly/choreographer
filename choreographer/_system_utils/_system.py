@@ -20,17 +20,15 @@ chromium = ["chromium", "chromium-browser"]
 # firefox = // this needs to be tested
 # brave = // this needs to be tested
 
-system = platform.system()
-
 default_path_chrome = None
 
-if system == "Windows":
+if platform.system() == "Windows":
     default_path_chrome = [
         r"c:\Program Files\Google\Chrome\Application\chrome.exe",
         f"c:\\Users\\{os.environ.get('USER', 'default')}\\AppData\\"
         "Local\\Google\\Chrome\\Application\\chrome.exe",
     ]
-elif system == "Linux":
+elif platform.system() == "Linux":
     default_path_chrome = [
         "/usr/bin/google-chrome-stable",
         "/usr/bin/google-chrome",

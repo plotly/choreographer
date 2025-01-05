@@ -6,6 +6,7 @@ from ._session import Session
 
 
 class Target:
+    # points to browser, bad
     def __init__(self, target_id, browser):
         if not isinstance(target_id, str):
             raise TypeError("target_id must be string")
@@ -16,18 +17,21 @@ class Target:
         self.sessions = OrderedDict()
         self.target_id = target_id
 
+    # sync
     def _add_session(self, session):
         if not isinstance(session, Session):
             raise TypeError("session must be an object of class Session")
         self.sessions[session.session_id] = session
         self.browser.protocol.sessions[session.session_id] = session
 
+    # sync
     def _remove_session(self, session_id):
         if isinstance(session_id, Session):
             session_id = session_id.session_id
         _ = self.sessions.pop(session_id, None)
         _ = self.browser.protocol.sessions.pop(session_id, None)
 
+    # async only
     async def create_session(self):
         if not self.browser.loop:
             raise RuntimeError(
@@ -47,6 +51,7 @@ class Target:
         self._add_session(new_session)
         return new_session
 
+    # async only
     async def close_session(self, session_id):
         if not self.browser.loop:
             raise RuntimeError(
@@ -67,11 +72,7 @@ class Target:
         print(f"The session {session_id} has been closed", file=sys.stderr)
         return response
 
-    def send_command(self, command, params=None):
-        if not self.sessions.values():
-            raise RuntimeError("Cannot send_command without at least one valid session")
-        return next(iter(self.sessions.values())).send_command(command, params)
-
+    # internal
     def _get_first_session(self):
         if not self.sessions.values():
             raise RuntimeError(
@@ -79,14 +80,23 @@ class Target:
             )
         return next(iter(self.sessions.values()))
 
+    # wrapper
+    def send_command(self, command, params=None):
+        if not self.sessions.values():
+            raise RuntimeError("Cannot send_command without at least one valid session")
+        return self._get_first_session().send_command(command, params)
+
+    # async only
     def subscribe(self, string, callback, *, repeating=True):
         session = self._get_first_session()
         session.subscribe(string, callback, repeating=repeating)
 
+    # async only
     def unsubscribe(self, string):
         session = self._get_first_session()
         session.unsubscribe(string)
 
+    # async only
     def subscribe_once(self, string):
         session = self._get_first_session()
         return session.subscribe_once(string)
