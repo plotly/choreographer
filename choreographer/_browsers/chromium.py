@@ -6,6 +6,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import logistro  # noqa: F401 might use
+
 if platform.system() == "Windows":
     import msvcrt
 
@@ -40,7 +42,10 @@ class Chromium:
         )
 
         if not self.path:
-            self.path = get_browser_path(chrome_names, skip_local=self.skip_local)
+            self.path = get_browser_path(
+                executable_names=chrome_names,
+                skip_local=self.skip_local,
+            )
         if not self.path:
             # do typical chrome paths
             for candidate in typical_chrome_paths:
@@ -91,7 +96,7 @@ class Chromium:
                 "--disable-breakpad",
                 "--allow-file-access-from-files",
                 "--enable-logging=stderr",
-                f"--user-data-dir={self.tmp_dir.name}",
+                f"--user-data-dir={self.tmp_dir.path}",
                 "--no-first-run",
                 "--enable-unsafe-swiftshader",
             ],

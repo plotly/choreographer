@@ -11,7 +11,8 @@ chrome_names = [
     "Chrome.app",
     "Google Chrome",
     "Google Chrome.app",
-].extend(chromium_names)
+]
+chrome_names.extend(chromium_names)
 
 typical_chrome_paths = None
 if platform.system() == "Windows":

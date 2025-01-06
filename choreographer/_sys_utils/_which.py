@@ -37,7 +37,7 @@ def browser_which(executable_names, *, skip_local=False):
     path = None
 
     if isinstance(executable_names, str):
-        executable_name = [executable_names]
+        executable_names = [executable_names]
 
     local_chrome = get_chrome_download_path()
     if (
@@ -50,7 +50,7 @@ def browser_which(executable_names, *, skip_local=False):
     if platform.system() == "Windows":
         os.environ["NoDefaultCurrentDirectoryInExePath"] = "0"  # noqa: SIM112 var name set by windows
 
-    for exe in executable_name:
+    for exe in executable_names:
         if platform.system() == "Windows" and exe == "chrome":
             path = _which_from_windows_reg()
         if path and _is_exe(path):
