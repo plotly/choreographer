@@ -28,7 +28,7 @@ jobs:
       # don't modify sync file! messes up version!
       - run: uv sync --all-extras --frozen # does order matter?
       - run: uv build
-      - run: uv run --no-sync choreo_get_browser -v --i ${{ matrix.chrome_v }}
+      - run: uv run --no-sync choreo_get_chrome -v --i ${{ matrix.chrome_v }}
       - name: Reinstall from wheel
         run: >
           uv pip install dist/choreographer-$(uv
