@@ -1,5 +1,6 @@
 import argparse
-import asyncio
+
+# import asyncio
 import platform
 import subprocess
 import sys
@@ -22,7 +23,13 @@ import time
 
 
 def diagnose():
-    from choreographer import Browser, browser_which
+    import logistro
+
+    logistro.getLogger().setLevel("DEBUG")
+
+    # from choreographer import BrowserSync, Browser, browser_which
+    from choreographer import BrowserSync, browser_which
+    from choreographer._browsers._chrome_constants import chrome_names
 
     parser = argparse.ArgumentParser(description="tool to help debug problems")
     parser.add_argument("--no-run", dest="run", action="store_false")
@@ -40,7 +47,7 @@ def diagnose():
     print(platform.version())
     print(platform.uname())
     print("BROWSER:".center(50, "*"))
-    print(browser_which(debug=True))
+    print(browser_which(chrome_names))
     print("VERSION INFO:".center(50, "*"))
     try:
         print("PIP:".center(25, "*"))
@@ -68,22 +75,23 @@ def diagnose():
     if run:
         try:
             print("Sync Test Headless".center(50, "*"))
-            browser = Browser(debug=True, debug_browser=True, headless=headless)
+            browser = BrowserSync(headless=headless)
+            browser.open()
             time.sleep(3)
             browser.close()
         except BaseException as e:
             fail.append(("Sync test headless", e))
         finally:
             print("Done with sync test headless".center(50, "*"))
-
-        async def test_headless():
-            browser = await Browser(debug=True, debug_browser=True, headless=headless)
-            await asyncio.sleep(3)
-            await browser.close()
+        # ruff: noqa: ERA001
+        # async def test_headless():
+        #    browser = await Browser(debug=True, debug_browser=True, headless=headless)
+        #    await asyncio.sleep(3)
+        #    await browser.close()
 
         try:
             print("Async Test Headless".center(50, "*"))
-            asyncio.run(test_headless())
+        #    asyncio.run(test_headless())
         except BaseException as e:
             fail.append(("Async test headless", e))
         finally:

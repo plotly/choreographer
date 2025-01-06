@@ -66,7 +66,7 @@ class _ZipFilePermissions(zipfile.ZipFile):
 def get_chrome_sync(
     arch=_chrome_platform_detected,
     i=-1,
-    path=_default_exe_path,
+    path=_default_download_path,
     *,
     verbose=False,
 ):
@@ -114,7 +114,7 @@ def get_chrome_sync(
 async def get_chrome(
     arch=_chrome_platform_detected,
     i=-1,
-    path=_default_exe_path,
+    path=_default_download_path,
 ):
     return await asyncio.to_thread(get_chrome_sync, arch=arch, i=i, path=path)
 
@@ -140,7 +140,7 @@ def get_chrome_cli():
         action="store_true",
     )
     parser.set_defaults(i=-1)
-    parser.set_defaults(path=_default_exe_path)
+    parser.set_defaults(path=_default_download_path)
     parser.set_defaults(arch=_chrome_platform_detected)
     parser.set_defaults(verbose=False)
     parsed = parser.parse_args()

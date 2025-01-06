@@ -16,7 +16,7 @@ wheels = [
 
 [[package]]
 name = "choreographer"
-version = "1.0.0a0.post85+git.ac96c0b8.dirty"
+version = "1.0.0a0.post87+git.c84ac06b.dirty"
 source = { editable = "." }
 dependencies = [
     { name = "logistro" },

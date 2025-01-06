@@ -74,7 +74,7 @@ class Chromium:
 
         self.tmp_dir = TmpDirectory(
             path=self._tmp_dir_path,
-            sneak="snap" in self.path,
+            sneak="snap" in str(self.path),
         )
 
     def get_popen_args(self):
@@ -136,4 +136,5 @@ class Chromium:
         return os.environ.copy()
 
     def clean(self):
-        raise ValueError("Look at tempdir")
+        return
+        # raise ValueError("Look at tempdir")
