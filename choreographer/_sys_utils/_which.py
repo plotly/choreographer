@@ -64,5 +64,5 @@ def browser_which(executable_names, *, skip_local=False):
     return None
 
 
-def get_browser_path(**kwargs):
-    return os.environ.get("BROWSER_PATH", browser_which(**kwargs))
+def get_browser_path(*args, **kwargs):
+    return os.environ.get("BROWSER_PATH", browser_which(*args, **kwargs))
