@@ -1,5 +1,6 @@
 import simplejson
-from channel._errors import JSONError
+
+from ._errors import JSONError
 
 
 class MultiEncoder(simplejson.JSONEncoder):

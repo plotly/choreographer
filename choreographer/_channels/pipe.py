@@ -4,8 +4,8 @@ import sys
 import warnings
 from threading import Lock
 
-import channel._wire as wire
-from channel._errors import BlockWarning, ChannelClosedError, JSONError
+from . import _wire as wire
+from ._errors import BlockWarning, ChannelClosedError, JSONError
 
 _with_block = bool(sys.version_info[:3] >= (3, 12) or platform.system() != "Windows")
 

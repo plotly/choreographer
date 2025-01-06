@@ -1,4 +1,4 @@
-from ._kill.py import kill
+from ._kill import kill
 from ._tmpfile import TmpDirectory, TmpDirWarning
 from ._which import browser_which, get_browser_path
 

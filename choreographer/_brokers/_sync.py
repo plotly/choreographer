@@ -2,8 +2,7 @@ import json
 from threading import Thread
 
 from choreographer import protocol
-
-from ._channels import ChannelClosedError
+from choreographer._channels import ChannelClosedError
 
 
 class BrokerSync:
