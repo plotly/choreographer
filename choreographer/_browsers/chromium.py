@@ -2,6 +2,7 @@
 
 import os
 import platform
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -28,7 +29,15 @@ def _is_exe(path):
         return False
 
 
+_logs_parser_regex = re.compile(r"\d*:\d*:\d*\/\d*\.\d*:")
+
+
 class Chromium:
+    @classmethod
+    def logger_parser(cls, record, _old):
+        record.msg = _logs_parser_regex.sub("", record.msg)
+        return True
+
     def __init__(self, channel, path=None, **kwargs):
         self.path = path
         self.gpu_enabled = kwargs.pop("enable_gpu", False)

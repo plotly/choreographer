@@ -1,3 +1,4 @@
+import os
 import subprocess
 
 import logistro
@@ -94,13 +95,20 @@ class BrowserSync(TargetSync):
         self.channel = channel_cls()
         self.broker = BrokerSync(self, self.channel)
         self.browser_impl = browser_cls(self.channel, path, **kwargs)
-
+        if hasattr(browser_cls, "logger_parser"):
+            parser = browser_cls.logger_parser
+        else:
+            parser = None
+        self.logger_pipe, _ = logistro.getPipeLogger(
+            __name__ + "-subprocess",
+            parser=parser,
+        )
         # we do need something to indicate we're open TODO yeah an open lock
 
     def open(self):
         self.subprocess = subprocess.Popen(  # noqa: S603
             self.browser_impl.get_cli(),
-            # stderr= TODO make a pipe with logistro
+            stderr=self.logger_pipe,
             env=self.browser_impl.get_env(),
             **self.browser_impl.get_popen_args(),
         )
@@ -148,6 +156,7 @@ class BrowserSync(TargetSync):
             self._close()
         except ProcessLookupError:
             pass
+        os.close(self.logger_pipe)
         self.channel.close()
         self.browser_impl.clean()
 

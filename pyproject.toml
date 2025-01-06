@@ -51,6 +51,9 @@ dev = [
 #    "mkdocs-material>=9.5.49",
 #]
 
+[tool.uv.sources]
+logistro = { path = "../logistro", editable = true }
+
 [project.scripts]
 choreo_diagnose = "choreographer._cli_utils:diagnose"
 choreo_get_chrome = "choreographer._cli_utils:get_chrome_cli"
