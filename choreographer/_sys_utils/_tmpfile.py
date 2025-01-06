@@ -10,7 +10,7 @@ from pathlib import Path
 from threading import Thread
 
 
-class TempDirWarning(UserWarning):
+class TmpDirWarning(UserWarning):
     pass
 
 
@@ -18,7 +18,7 @@ class TempDirWarning(UserWarning):
 # In short, they don't handle removal well, and there's
 # lots of API changes over recent versions.
 # Here we have our own class to deal with it.
-class TempDirectory:
+class TmpDirectory:
     def __init__(self, path=None, *, sneak=False):
         self.debug = True  # temporary! TODO
         self._with_onexc = bool(sys.version_info[:3] >= (3, 12))
@@ -108,7 +108,7 @@ class TempDirectory:
             warnings.warn(  # noqa: B028
                 "The temporary directory could not be deleted, "
                 f"execution will continue. errors: {errors}",
-                TempDirWarning,
+                TmpDirWarning,
             )
             self.exists = True
         else:
@@ -125,7 +125,7 @@ class TempDirectory:
         except BaseException as e:  # noqa: BLE001 yes catch and report
             if self.debug:
                 print(
-                    f"First tempdir deletion failed: TempDirWarning: {e!s}",
+                    f"First tempdir deletion failed: TmpDirWarning: {e!s}",
                     file=sys.stderr,
                 )
 
@@ -163,6 +163,6 @@ class TempDirectory:
             t.run()
         if self.debug:
             print(
-                f"Tempfile still exists?: {self.path.exists()!s}",
+                f"Tmpfile still exists?: {self.path.exists()!s}",
                 file=sys.stderr,
             )

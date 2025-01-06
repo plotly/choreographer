@@ -1,9 +1,11 @@
-from ._tempfile import TempDirectory, TempDirWarning
+from ._kill.py import kill
+from ._tmpfile import TmpDirectory, TmpDirWarning
 from ._which import browser_which, get_browser_path
 
 __all__ = [
-    "TempDirWarning",
-    "TempDirectory",
+    "TmpDirWarning",
+    "TmpDirectory",
     "browser_which",
     "get_browser_path",
+    "kill",
 ]

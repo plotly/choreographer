@@ -6,6 +6,7 @@ from ._protocol import (
     ExperimentalFeatureWarning,
     MessageTypeError,
     MissingKeyError,
+    Protocol,
 )
 from ._session import Session
 from ._target import Target
@@ -16,6 +17,7 @@ __all__ = [
     "ExperimentalFeatureWarning",
     "MessageTypeError",
     "MissingKeyError",
+    "Protocol",
     "Session",
     "Target",
 ]

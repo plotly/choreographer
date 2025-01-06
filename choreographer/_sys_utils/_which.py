@@ -4,8 +4,6 @@ import shutil
 
 from choreographer._cli_utils import get_chrome_download_path
 
-from ._chrome_constants import chrome_names, typical_chrome_paths
-
 
 def _is_exe(path):
     try:
@@ -35,7 +33,7 @@ def _which_from_windows_reg():
     return exe
 
 
-def browser_which(executable_names=chrome_names, *, skip_local=False):  # noqa: C901
+def browser_which(executable_names, *, skip_local=False):
     path = None
 
     if isinstance(executable_names, str):
@@ -63,10 +61,6 @@ def browser_which(executable_names=chrome_names, *, skip_local=False):  # noqa: 
     # which didn't work
 
     # hail mary
-    if "chrome" in executable_names:
-        for candidate in typical_chrome_paths:
-            if _is_exe(candidate):
-                return candidate
     return None
 
 
