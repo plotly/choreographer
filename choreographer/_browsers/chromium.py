@@ -9,6 +9,7 @@ if platform.system() == "Windows":
     import msvcrt
 
 from choreographer._channels.pipe import Pipe, WebSocket
+from choreographer._sys_utils import get_browser_path
 
 
 class Chromium:
@@ -25,7 +26,10 @@ class Chromium:
             raise RuntimeError(
                 "Chromium.get_cli() received " f"invalid args: {kwargs.keys()}",
             )
-        path = None  # TODO(Andrew): not legit # noqa: FIX002,TD003
+        path = get_browser_path()
+        if not path:
+            raise RuntimeError("Browser not found.")
+
         chromium_wrapper_path = Path(__file__).resolve().parent / "chromium_wrapper.py"
         if platform.system() != "Windows":
             cli = [
