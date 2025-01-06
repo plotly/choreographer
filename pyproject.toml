@@ -77,6 +77,7 @@ ignore = [
           "SIM105", # Too opionated (try-except-pass)
           "T201", # no print, remove after logistro TODO
           "PT003", # scope="function" implied but I like readability
+          "G004", # fstrings in my logs
           ]
 
 [tool.ruff.lint.per-file-ignores]
