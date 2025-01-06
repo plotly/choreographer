@@ -7,7 +7,7 @@ class BrowserBase:
 
     def _add_tab(self, tab):
         if not isinstance(tab, Tab):
-            raise TypeError("tab must be an object of class Tab")
+            raise TypeError("tab must be an object of (sub)class Tab")
         self.tabs[tab.target_id] = tab
 
     def _remove_tab(self, target_id):

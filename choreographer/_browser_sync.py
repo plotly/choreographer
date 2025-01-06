@@ -18,6 +18,7 @@ class BrowserSync(BrowserBase, Target):
     """`BrowserSync` is the sync implementation of `Browser`."""
 
     def __init__(self, path=None, *, browser_cls=Chromium, channel_cls=Pipe, **kwargs):
+        self.tabs = {}
         # Compose Resources
         self.channel = channel_cls()
         self.broker = BrokerSync(self, self.channel)
@@ -25,8 +26,7 @@ class BrowserSync(BrowserBase, Target):
 
         # Explicit supers are better IMO
         super(BrowserBase, self).__init__()
-        super(Target, self).__init__("0", self)
-        self._add_session(Session(self, ""))
+        # we don't init ourselves as a target until we open?
 
     def open(self):
         self.subprocess = subprocess.Popen(  # noqa: S603
@@ -35,6 +35,8 @@ class BrowserSync(BrowserBase, Target):
             env=self.browser_impl.get_env(),
             **self.browser_impl.get_popen_args(),
         )
+        super(Target, self).__init__("0", self)
+        self._add_session(Session(self, ""))
         # start a watchdock
         # open can only be run once?
         # or depends on lock
