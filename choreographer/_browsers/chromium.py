@@ -25,19 +25,19 @@ def _is_exe(path):
 
 
 class Chromium:
-    def __init__(self, channel, **kwargs):
+    def __init__(self, channel, path=None, **kwargs):
+        self.path = path
         self.gpu_enabled = kwargs.pop("with_gpu", False)
         self.headless = kwargs.pop("headless", True)
         self.sandbox_enabled = kwargs.pop("with_sandbox", False)
-        self.path = kwargs.pop("path", None)
         self._tmp_dir_path = kwargs.pop("tmp_dir", None)
-        self.skip_local = bool(
-            "ubuntu" in platform.version().lower() and self.enable_sandbox,
-        )
         if kwargs:
             raise RuntimeError(
                 "Chromium.get_cli() received " f"invalid args: {kwargs.keys()}",
             )
+        self.skip_local = bool(
+            "ubuntu" in platform.version().lower() and self.enable_sandbox,
+        )
 
         if not self.path:
             self.path = get_browser_path(chrome_names, skip_local=self.skip_local)
