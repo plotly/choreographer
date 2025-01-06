@@ -1,4 +1,10 @@
-"""choreographer is a browser controller for python."""
+"""
+choreographer is a browser controller for python.
+
+choreographer is natively async, so while there are two main entrypoints:
+classes `Browser` and `BrowserSync`, the sync version is very limited, functioning
+as a building block.
+"""
 
 from choreographer import protocol
 
