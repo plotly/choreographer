@@ -1,6 +1,8 @@
 import json
 from threading import Thread
 
+from choreographer import protocol
+
 from ._channels import ChannelClosedError
 
 
@@ -21,3 +23,9 @@ class BrokerSync:
                 print("ChannelClosedError caught", **kwargs)
 
         Thread(target=run_print).start()
+
+    def send_json(self, obj):
+        protocol.verify_params(obj)
+        key = protocol.calculate_message_key(obj)
+        self.channel.write_json(obj)
+        return key
