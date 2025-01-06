@@ -6,24 +6,56 @@ classes `Browser` and `BrowserSync`, the sync version is very limited, functioni
 as a building block.
 """
 
-from choreographer import protocol
+from ._browser_sync import (  # noqa: F401 unused import
+    BrowserSync,
+    SessionSync,
+    TabSync,
+    TargetSync,
+)
+from ._browsers import (  # noqa: F401 unused import
+    BrowserClosedError,
+    BrowserFailedError,
+    Chromium,
+)
+from ._channels import BlockWarning, ChannelClosedError  # noqa: F401 unused import
+from ._cli_utils import get_browser, get_browser_sync  # noqa: F401 unused import
+from ._sys_utils import (  # noqa: F401 unused import
+    TmpDirectory,
+    TmpDirWarning,
+    browser_which,
+    get_browser_path,
+)
 
-from ._browser_sync import BrowserClosedError, BrowserSync, TabSync
-from ._channels import BlockWarning, ChannelClosedError
-from ._cli_utils import get_browser, get_browser_sync
-from ._sys_utils import TempDirectory, TempDirWarning, browser_which, get_browser_path
-
-__all__ = [
-    "BlockWarning",
-    "BrowserClosedError",
+_sync_api = [
     "BrowserSync",
-    "ChannelClosedError",
+    "SessionSync",
     "TabSync",
-    "TempDirWarning",
-    "TempDirectory",
-    "browser_which",
+    "TargetSync",
+]
+
+_browser_impls = [
+    "Chromium",
+]
+
+_errors = [
+    "BrowserClosedError",
+    "BrowserFailedError",
+    "ChannelClosedError",
+    "BlockWarning",
+    "TmpDirWarning",
+]
+
+_utils = [
     "get_browser",
-    "get_browser_path",
     "get_browser_sync",
-    "protocol",
+    "TmpDirectory",
+    "browser_which",
+    "get_browser_path",
+]
+
+__all__ = [  # noqa: PLE0604 non-string in all
+    *_sync_api,
+    *_browser_impls,
+    *_errors,
+    *_utils,
 ]

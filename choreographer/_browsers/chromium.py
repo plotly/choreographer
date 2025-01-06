@@ -8,14 +8,15 @@ from pathlib import Path
 if platform.system() == "Windows":
     import msvcrt
 
-from choreographer._channels.pipe import Pipe, WebSocket
+from choreographer._channels import Pipe
 from choreographer._sys_utils import get_browser_path
 
 
 class Chromium:
     def __init__(self, channel):
-        self._comm = channel
-        # extra information from pipe
+        self._channel = channel
+        if not isinstance(channel, Pipe):
+            raise NotImplementedError("Websocket style channels not implemented yet")
 
     # where do we get user data dir
     def get_cli(self, temp_dir, **kwargs):
@@ -70,8 +71,6 @@ class Chromium:
                 cli += [
                     f"--remote-debugging-io-pipes={r_handle!s},{w_handle!s}",
                 ]
-        elif isinstance(self._channel, WebSocket):
-            raise NotImplementedError("Websocket style channels not implemented yet")
 
 
 def get_env():

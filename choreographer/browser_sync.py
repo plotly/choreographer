@@ -76,8 +76,7 @@ class TargetSync:
 
 
 class TabSync(TargetSync):
-    def __init__(self, target_id, browser):
-        super().__init__(target_id, browser)
+    pass
 
 
 class BrowserSync(TargetSync):
