@@ -1,8 +1,9 @@
+import logistro
 import simplejson
 
 from ._errors import JSONError
 
-
+logger = logistro.getLogger(__name__)
 class MultiEncoder(simplejson.JSONEncoder):
     """Special json encoder for numpy types."""
 

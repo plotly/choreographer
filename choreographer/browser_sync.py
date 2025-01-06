@@ -100,7 +100,7 @@ class BrowserSync(TargetSync):
         else:
             parser = None
         self.logger_pipe, _ = logistro.getPipeLogger(
-            __name__ + "-subprocess",
+            "browser_proc",
             parser=parser,
         )
         # we do need something to indicate we're open TODO yeah an open lock
