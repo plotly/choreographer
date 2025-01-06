@@ -5,11 +5,10 @@ import platform
 import sys
 from pathlib import Path
 
-# TODO(Andrew): move to own subpackage during channel refactor # noqa: FIX002, TD003
-from choreographer._channels.pipe import Pipe, WebSocket
-
 if platform.system() == "Windows":
     import msvcrt
+
+from choreographer._channels.pipe import Pipe, WebSocket
 
 
 class Chromium:
