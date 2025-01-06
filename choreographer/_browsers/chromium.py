@@ -16,7 +16,9 @@ from choreographer._sys_utils import TmpDirectory, get_browser_path
 
 from ._chrome_constants import chrome_names, typical_chrome_paths
 
-chromium_wrapper_path = Path(__file__).resolve().parent / "chromium_wrapper.py"
+chromium_wrapper_path = (
+    Path(__file__).resolve().parent / "_unix_pipe_chromium_wrapper.py"
+)
 
 
 def _is_exe(path):
@@ -29,9 +31,9 @@ def _is_exe(path):
 class Chromium:
     def __init__(self, channel, path=None, **kwargs):
         self.path = path
-        self.gpu_enabled = kwargs.pop("with_gpu", False)
+        self.gpu_enabled = kwargs.pop("enable_gpu", False)
         self.headless = kwargs.pop("headless", True)
-        self.sandbox_enabled = kwargs.pop("with_sandbox", False)
+        self.sandbox_enabled = kwargs.pop("enable_sandbox", False)
         self._tmp_dir_path = kwargs.pop("tmp_dir", None)
         if kwargs:
             raise RuntimeError(
@@ -74,9 +76,9 @@ class Chromium:
             args["close_fds"] = False
         else:
             args["close_fds"] = True
-            if isinstance(self.channel, Pipe):
-                args["stdin"] = self.channel.from_choreo_to_external
-                args["stdout"] = self.channel.from_external_to_choreo
+            if isinstance(self._channel, Pipe):
+                args["stdin"] = self._channel.from_choreo_to_external
+                args["stdout"] = self._channel.from_external_to_choreo
         return args
 
     def get_cli(self):
@@ -121,8 +123,8 @@ class Chromium:
                 ]
         return cli
 
-    def get_env():
-        return os.environ().copy()
+    def get_env(self):
+        return os.environ.copy()
 
-    def clean():
+    def clean(self):
         raise ValueError("Look at tempdir")

@@ -88,6 +88,8 @@ class BrowserSync(TargetSync):
 
     def __init__(self, path=None, *, browser_cls=Chromium, channel_cls=Pipe, **kwargs):
         self.tabs = {}
+        self.targets = {}
+        self.all_sessions = {}
         # Compose Resources
         self.channel = channel_cls()
         self.broker = BrokerSync(self, self.channel)
@@ -102,11 +104,8 @@ class BrowserSync(TargetSync):
             env=self.browser_impl.get_env(),
             **self.browser_impl.get_popen_args(),
         )
-        super(TargetSync, self).__init__("0", self)
+        super().__init__("0", self)
         self._add_session(SessionSync(self, ""))
-        # start a watchdock
-        # open can only be run once?
-        # or depends on lock
 
     def __enter__(self):
         self.open()
