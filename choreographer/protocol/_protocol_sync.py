@@ -1,30 +1,6 @@
+from choreographer import protocol
+
 TARGET_NOT_FOUND = -32602
-
-
-class DevtoolsProtocolError(Exception):
-    def __init__(self, response):
-        super().__init__(response)
-        self.code = response["error"]["code"]
-        self.message = response["error"]["message"]
-
-
-class MessageTypeError(TypeError):
-    def __init__(self, key, value, expected_type):
-        value = type(value) if not isinstance(value, type) else value
-        super().__init__(
-            f"Message with key {key} must have type {expected_type}, not {value}.",
-        )
-
-
-class MissingKeyError(ValueError):
-    def __init__(self, key, obj):
-        super().__init__(
-            f"Message missing required key/s {key}. Message received: {obj}",
-        )
-
-
-class ExperimentalFeatureWarning(UserWarning):
-    pass
 
 
 class Protocol:
@@ -49,9 +25,9 @@ class Protocol:
         required_keys = {"id": int, "method": str}
         for key, type_key in required_keys.items():
             if key not in obj:
-                raise MissingKeyError(key, obj)
+                raise protocol.MissingKeyError(key, obj)
             if not isinstance(obj[key], type_key):
-                raise MessageTypeError(key, type(obj[key]), type_key)
+                raise protocol.MessageTypeError(key, type(obj[key]), type_key)
         n_keys += 2
 
         if "params" in obj:
