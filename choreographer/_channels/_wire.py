@@ -1,0 +1,35 @@
+import simplejson
+from channel._errors import JSONError
+
+
+class MultiEncoder(simplejson.JSONEncoder):
+    """Special json encoder for numpy types."""
+
+    def default(self, obj):
+        if hasattr(obj, "dtype") and obj.dtype.kind == "i" and obj.shape == ():
+            return int(obj)
+        elif hasattr(obj, "dtype") and obj.dtype.kind == "f" and obj.shape == ():
+            return float(obj)
+        elif hasattr(obj, "dtype") and obj.shape != ():
+            return obj.tolist()
+        elif hasattr(obj, "isoformat"):
+            return obj.isoformat()
+        return simplejson.JSONEncoder.default(self, obj)
+
+    def serialize(self, obj):
+        try:
+            message = simplejson.dumps(
+                obj,
+                ensure_ascii=False,
+                ignore_nan=True,
+                cls=MultiEncoder,
+            )
+        except simplejson.errors.JSONDecodeError as e:
+            raise JSONError from e
+        return message.encode("utf-8")
+
+    def deserialize(self, message):
+        try:
+            return simplejson.loads(message)
+        except simplejson.errors.JSONDecodeError as e:
+            raise JSONError from e
