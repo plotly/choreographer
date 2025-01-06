@@ -1,5 +1,6 @@
 import os
 import subprocess
+from threading import Lock
 
 import logistro
 
@@ -87,7 +88,25 @@ class BrowserSync(TargetSync):
     _session_type = SessionSync
     _target_type = TargetSync
 
+    def _make_lock(self):
+        self._open_lock = Lock()
+
+    def _lock_open(self):
+        # if open, acquire will return False, we want it to return True
+        return self._open_lock.acquire(blocking=False)
+
+    def _release_lock(self):
+        try:
+            if self._open_lock.locked():
+                self._open_lock.release()
+                return True
+            else:
+                return False
+        except RuntimeError:
+            return False
+
     def __init__(self, path=None, *, browser_cls=Chromium, channel_cls=Pipe, **kwargs):
+        self._make_lock()
         self.tabs = {}
         self.targets = {}
         self.all_sessions = {}
@@ -106,6 +125,8 @@ class BrowserSync(TargetSync):
         # we do need something to indicate we're open TODO yeah an open lock
 
     def open(self):
+        if not self._lock_open():
+            raise RuntimeError("Can't re-open the browser")
         self.subprocess = subprocess.Popen(  # noqa: S603
             self.browser_impl.get_cli(),
             stderr=self.logger_pipe,
@@ -113,7 +134,7 @@ class BrowserSync(TargetSync):
             **self.browser_impl.get_popen_args(),
         )
         super().__init__("0", self)
-        self._add_session(SessionSync(self, ""))
+        self._add_session(self._session_type(self, ""))
 
     def __enter__(self):
         self.open()
@@ -152,6 +173,8 @@ class BrowserSync(TargetSync):
             raise RuntimeError("Couldn't close or kill browser subprocess")
 
     def close(self):
+        if not self._release_lock():
+            return
         try:
             self._close()
         except ProcessLookupError:
@@ -162,10 +185,6 @@ class BrowserSync(TargetSync):
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
         self.close()
-
-    # wrap our broker for convenience
-    def start_output_thread(self, **kwargs):
-        self.broker.run_output_thread(**kwargs)
 
     def _add_tab(self, tab):
         if not isinstance(tab, self.tab_type):
@@ -181,3 +200,7 @@ class BrowserSync(TargetSync):
         if self.tabs.values():
             return next(iter(self.tabs.values()))
         return None
+
+    # wrap our broker for convenience
+    def start_output_thread(self, **kwargs):
+        self.broker.run_output_thread(**kwargs)

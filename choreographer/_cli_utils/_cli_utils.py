@@ -9,6 +9,7 @@ import warnings
 import zipfile
 from pathlib import Path
 
+# SOON TODO this isn't the right download path, look at uv, use sysconfig
 _default_download_path = Path(__file__).resolve().parent / "browser_exe"
 
 _chrome_for_testing_url = "https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json"
