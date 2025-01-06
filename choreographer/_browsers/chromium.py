@@ -54,7 +54,7 @@ class Chromium:
             )
         self._channel = channel
         if not isinstance(channel, Pipe):
-            raise NotImplementedError("Websocket style channels not implemented yet")
+            raise NotImplementedError("Websocket style channels not implemented yet.")
 
         self.tmp_dir = TmpDirectory(
             path=self._tmp_dir_path,
@@ -72,6 +72,7 @@ class Chromium:
             if isinstance(self.channel, Pipe):
                 args["stdin"] = self.channel.from_choreo_to_external
                 args["stdout"] = self.channel.from_external_to_choreo
+        return args
 
     def get_cli(self):
         if platform.system() != "Windows":
