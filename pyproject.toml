@@ -12,7 +12,7 @@ enabled = true
 name = "choreographer"
 description = "Devtools Protocol implementation for chrome."
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.11" # TODO change back
 dynamic = ["version"]
 authors = [
   {name = "Andrew Pikul", email="ajpikul@gmail.com"},
@@ -28,7 +28,7 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://github.com/plotly/choreographer"
-Repository = "https://github.com/geopozo/logistro"
+Repository = "https://github.com/plotly/choreographer"
 
 [dependency-groups]
 dev = [
@@ -45,14 +45,14 @@ dev = [
 # this group we need to require higher python
 # and only resolve if explicitly asked for
 
-#docs = [
-#    "mkquixote @ git+ssh://git@github.com/geopozo/mkquixote",
-#    "mkdocs>=1.6.1",
-#    "mkdocs-material>=9.5.49",
-#]
+docs = [
+    "mkquixote @ git+ssh://git@github.com/geopozo/mkquixote",
+    "mkdocs>=1.6.1",
+    "mkdocs-material>=9.5.49",
+]
 
 [tool.uv.sources]
-logistro = { path = "../logistro", editable = true }
+ mkquixote = { path = "../mkquixote", editable = true }
 
 [project.scripts]
 choreo_diagnose = "choreographer._cli_utils:diagnose"

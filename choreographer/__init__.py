@@ -28,36 +28,20 @@ from .browser_sync import (  # noqa: F401 unused import
     TargetSync,
 )
 
-_sync_api = [
+__all__ = [
     "BrowserSync",
     "SessionSync",
     "TabSync",
     "TargetSync",
-]
-
-_browser_impls = [
     "Chromium",
-]
-
-_errors = [
     "BrowserClosedError",
     "BrowserFailedError",
     "ChannelClosedError",
     "BlockWarning",
     "TmpDirWarning",
-]
-
-_utils = [
     "get_chrome",
     "get_chrome_sync",
     "TmpDirectory",
     "browser_which",
     "get_browser_path",
-]
-
-__all__ = [  # noqa: PLE0604 non-string in all
-    *_sync_api,
-    *_browser_impls,
-    *_errors,
-    *_utils,
 ]
