@@ -136,5 +136,8 @@ class Chromium:
         return os.environ.copy()
 
     def clean(self):
-        return
-        # raise ValueError("Look at tempdir")
+        """Clean up any leftovers form browser, like tmp files."""
+        self.tmp_dir.clean()
+
+    def __del__(self):
+        self.clean()
