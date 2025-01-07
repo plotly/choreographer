@@ -34,6 +34,14 @@ def _which_from_windows_reg():
 
 
 def browser_which(executable_names, *, skip_local=False):
+    """
+    Look for and return first name found in PATH.
+
+    Args:
+        executable_names: the list of names to look for
+        skip_local: (default False) don't look for a choreo download of anything.
+
+    """
     path = None
 
     if isinstance(executable_names, str):
@@ -65,4 +73,10 @@ def browser_which(executable_names, *, skip_local=False):
 
 
 def get_browser_path(*args, **kwargs):
+    """
+    Call `browser_which()` but check for user override first.
+
+    Accepts the same arguments as `browser_which`.
+
+    """
     return os.environ.get("BROWSER_PATH", browser_which(*args, **kwargs))

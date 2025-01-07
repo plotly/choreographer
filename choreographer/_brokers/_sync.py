@@ -1,8 +1,12 @@
 import json
 from threading import Thread
 
+import logistro
+
 from choreographer import protocol
 from choreographer._channels import ChannelClosedError
+
+logger = logistro.getLogger(__name__)
 
 
 class BrokerSync:
@@ -19,8 +23,9 @@ class BrokerSync:
                     for response in responses:
                         print(json.dumps(response, indent=4), **kwargs)
             except ChannelClosedError:
-                print("ChannelClosedError caught", **kwargs)
+                print("ChannelClosedError caught.", **kwargs)
 
+        logger.info("Starting thread to dump output to stdout.")
         Thread(target=run_print).start()
 
     def send_json(self, obj):
@@ -28,3 +33,6 @@ class BrokerSync:
         key = protocol.calculate_message_key(obj)
         self.channel.write_json(obj)
         return key
+
+    def clean(self):
+        pass

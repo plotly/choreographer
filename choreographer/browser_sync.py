@@ -1,3 +1,5 @@
+"""Provides the sync api: `BrowserSync`, `TabSync`, `TargetSync` and `SessionSync`."""
+
 import os
 import subprocess
 from threading import Lock
@@ -13,7 +15,20 @@ logger = logistro.getLogger(__name__)
 
 
 class SessionSync:
+    """A session is a single conversation with a single target."""
+
     def __init__(self, browser, session_id):
+        """
+        Construct a session from the browser as an object.
+
+        A session is like an open conversation with a target.
+        All commands are sent on sessions.
+
+        Args:
+            browser:  a reference to the main browser
+            session_id:  the id given by the browser
+
+        """
         if not isinstance(session_id, str):
             raise TypeError("session_id must be a string")
         # Resources
@@ -21,9 +36,20 @@ class SessionSync:
 
         # State
         self.session_id = session_id
+        logger.debug(f"New session: {session_id}")
         self.message_id = 0
 
     def send_command(self, command, params=None):
+        """
+        Send a devtools command on the session.
+
+        https://chromedevtools.github.io/devtools-protocol/
+
+        Args:
+            command: devtools command to send
+            params: the parameters to send
+
+        """
         current_id = self.message_id
         self.message_id += 1
         json_command = {
@@ -35,14 +61,20 @@ class SessionSync:
             json_command["sessionId"] = self.session_id
         if params:
             json_command["params"] = params
-
+        logger.debug(
+            f"Sending {command} with {params} on session {self.session_id}",
+        )
         return self.browser.broker.send_json(json_command)
 
 
 class TargetSync:
+    """A target like a browser, tab, or others. It sends commands. It has sessions."""
+
     _session_type = SessionSync
+    """Like generic typing<>. This is the session type associated with TargetSync."""
 
     def __init__(self, target_id, browser):
+        """Create a target after one ahs been created by the browser."""
         if not isinstance(target_id, str):
             raise TypeError("target_id must be string")
         # Resources
@@ -51,6 +83,7 @@ class TargetSync:
         # States
         self.sessions = {}
         self.target_id = target_id
+        logger.info(f"Created new target {target_id}.")
 
     def _add_session(self, session):
         if not isinstance(session, self._session_type):
@@ -72,13 +105,27 @@ class TargetSync:
         return next(iter(self.sessions.values()))
 
     def send_command(self, command, params=None):
+        """
+        Send a command to the first session in a target.
+
+        https://chromedevtools.github.io/devtools-protocol/
+
+        Args:
+            command: devtools command to send
+            params: the parameters to send
+
+        """
         if not self.sessions.values():
             raise RuntimeError("Cannot send_command without at least one valid session")
-        return self._get_first_session().send_command(command, params)
+        session = self._get_first_session()
+        logger.debug(
+            f"Sending {command} with {params} on session {session.session_id}",
+        )
+        return session.send_command(command, params)
 
 
 class TabSync(TargetSync):
-    pass
+    """A wrapper for TargetSync, so user can use TabSync, not TargetSync."""
 
 
 class BrowserSync(TargetSync):
@@ -106,6 +153,18 @@ class BrowserSync(TargetSync):
             return False
 
     def __init__(self, path=None, *, browser_cls=Chromium, channel_cls=Pipe, **kwargs):
+        """
+        Construct a new browser instance.
+
+        Args:
+            path: The path to the browser executable.
+            browser_cls: The type of browser (default: `Chromium`).
+            channel_cls: The type of channel to browser (default: `Pipe`).
+            kwargs: The arguments that the browser_cls takes. For example,
+                headless=True/False, enable_gpu=True/False, etc.
+
+        """
+        logger.debug("Attempting to open new browser.")
         self._make_lock()
         self.tabs = {}
         self.targets = {}
@@ -125,6 +184,7 @@ class BrowserSync(TargetSync):
         # we do need something to indicate we're open TODO yeah an open lock
 
     def open(self):
+        """Open the browser."""
         if not self._lock_open():
             raise RuntimeError("Can't re-open the browser")
         self.subprocess = subprocess.Popen(  # noqa: S603
@@ -137,6 +197,7 @@ class BrowserSync(TargetSync):
         self._add_session(self._session_type(self, ""))
 
     def __enter__(self):
+        """Open browser as context to launch on entry and close on exit."""
         self.open()
         return self
 
@@ -173,17 +234,26 @@ class BrowserSync(TargetSync):
             raise RuntimeError("Couldn't close or kill browser subprocess")
 
     def close(self):
+        """Close the browser."""
+        self.broker.clean()
+        logger.info("Broker cleaned up.")
         if not self._release_lock():
             return
         try:
+            logger.info("Trying to close browser.")
             self._close()
+            logger.info("browser._close() called successfully.")
         except ProcessLookupError:
             pass
         os.close(self.logger_pipe)
+        logger.info("Logging pipe closed.")
         self.channel.close()
+        logger.info("Browser channel closed.")
         self.browser_impl.clean()
+        logger.info("Browser implementation cleaned up.")
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
+        """Close the browser."""
         self.close()
 
     def _add_tab(self, tab):
@@ -197,10 +267,12 @@ class BrowserSync(TargetSync):
         del self.tabs[target_id]
 
     def get_tab(self):
+        """Get the first tab if there is one. Useful for default tabs."""
         if self.tabs.values():
             return next(iter(self.tabs.values()))
         return None
 
     # wrap our broker for convenience
     def start_output_thread(self, **kwargs):
+        """Start a separate thread that dumps all messages received to stdout."""
         self.broker.run_output_thread(**kwargs)

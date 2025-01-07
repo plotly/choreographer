@@ -7,7 +7,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-import logistro  # noqa: F401 might use
+import logistro
 
 if platform.system() == "Windows":
     import msvcrt
@@ -21,6 +21,8 @@ chromium_wrapper_path = (
     Path(__file__).resolve().parent / "_unix_pipe_chromium_wrapper.py"
 )
 
+logger = logistro.getLogger(__name__)
+
 
 def _is_exe(path):
     try:
@@ -33,12 +35,45 @@ _logs_parser_regex = re.compile(r"\d*:\d*:\d*\/\d*\.\d*:")
 
 
 class Chromium:
+    """
+    Chromium represents an implementation of the chromium browser.
+
+    It also includes chromium-like browsers (chrome, edge, and brave).
+    """
+
     @classmethod
     def logger_parser(cls, record, _old):
+        """
+        Parse (per logistro) and extract data from browser stderr for logging.
+
+        Args:
+            record: the `logging.LogRecord` object to read/modify
+            _old: data that was already stripped out.
+
+        """
         record.msg = _logs_parser_regex.sub("", record.msg)
+        # we just eliminate their stamp, we dont' extract it
         return True
 
     def __init__(self, channel, path=None, **kwargs):
+        """
+        Construct a chromium browser implementation.
+
+        Args:
+            channel: the choreographer.Channel we'll be using (WebSockets? Pipe?)
+            path: path to the browser
+            kwargs:
+                gpu_enabled (default False): Turn on GPU? Doesn't work in all envs.
+                headless (default True): Actually launch a browser?
+                sandbox_enabled (default False): Enable sandbox-
+                    a persnickety thing depending on environment, OS, user, etc
+                tmp_dir (default None): Manually set the temporary directory
+
+        Raises:
+            RuntimeError: Too many kwargs, or browser not found.
+            NotImplementedError: Pipe is the only channel type it'll accept right now.
+
+        """
         self.path = path
         self.gpu_enabled = kwargs.pop("enable_gpu", False)
         self.headless = kwargs.pop("headless", True)
@@ -51,6 +86,8 @@ class Chromium:
         self.skip_local = bool(
             "ubuntu" in platform.version().lower() and self.enable_sandbox,
         )
+        if self.skip_local:
+            logger.warning("Ubuntu + Sandbox won't work unless chrome from snap")
 
         if not self.path:
             self.path = get_browser_path(
@@ -68,6 +105,7 @@ class Chromium:
                 "Browser not found. You can use get_chrome(), "
                 "please see documentation.",
             )
+        logger.debug(f"Found path: {self.path}")
         self._channel = channel
         if not isinstance(channel, Pipe):
             raise NotImplementedError("Websocket style channels not implemented yet.")
@@ -76,8 +114,10 @@ class Chromium:
             path=self._tmp_dir_path,
             sneak="snap" in str(self.path),
         )
+        logger.info(f"Temporary directory at: {self.tmp_dir.name}")
 
     def get_popen_args(self):
+        """Return the args needed to runc chromium with subprocess.Popen()."""
         args = {}
         # need to check pipe
         if platform.system() == "Windows":
@@ -88,9 +128,11 @@ class Chromium:
             if isinstance(self._channel, Pipe):
                 args["stdin"] = self._channel.from_choreo_to_external
                 args["stdout"] = self._channel.from_external_to_choreo
+        logger.debug(f"Returning args: {args}")
         return args
 
     def get_cli(self):
+        """Return the CLI command for chromium."""
         if platform.system() != "Windows":
             cli = [
                 sys.executable,
@@ -130,9 +172,12 @@ class Chromium:
                 cli += [
                     f"--remote-debugging-io-pipes={r_handle!s},{w_handle!s}",
                 ]
+        logger.debug(f"Returning cli: {cli}")
         return cli
 
     def get_env(self):
+        """Return the env needed for chromium."""
+        logger.debug("Returning env: same env, no modification.")
         return os.environ.copy()
 
     def clean(self):

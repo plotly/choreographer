@@ -71,6 +71,7 @@ def get_chrome_sync(
     *,
     verbose=False,
 ):
+    """Download chrome synchronously: see `get_chrome()`."""
     path = Path(path)
     browser_list = json.loads(
         urllib.request.urlopen(  # noqa: S310 audit url for schemes
@@ -117,6 +118,16 @@ async def get_chrome(
     i=-1,
     path=_default_download_path,
 ):
+    """
+    Download google chrome from google-chrome-for-testing server.
+
+    Args:
+        arch: the target platform/os, as understood by google's json directory.
+        i: the chrome version: -1 being the latest version, 0 being the oldest
+           still in the testing directory.
+        path: where to download it too (the folder).
+
+    """
     return await asyncio.to_thread(get_chrome_sync, arch=arch, i=i, path=path)
 
 

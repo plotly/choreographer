@@ -1,10 +1,10 @@
 class BlockWarning(UserWarning):
-    pass
+    """A warning for when block modification operatins used on incompatible OS."""
 
 
 class ChannelClosedError(IOError):
-    pass
+    """An error to throw when the channel has closed from either end or error."""
 
 
 class JSONError(RuntimeError):
-    pass
+    """Another JSONError."""

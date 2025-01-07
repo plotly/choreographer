@@ -4,6 +4,8 @@ choreographer is a browser controller for python.
 choreographer is natively async, so while there are two main entrypoints:
 classes `Browser` and `BrowserSync`, the sync version is very limited, functioning
 as a building block.
+
+See the main README for a quickstart.
 """
 
 from ._browsers import (  # noqa: F401 unused import
