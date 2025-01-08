@@ -20,9 +20,9 @@ class TmpDirWarning(UserWarning):
 
 class TmpDirectory:
     """
-    The python stdlib TemporaryDirectory wrapper for easier use.
+    The python stdlib `TemporaryDirectory` wrapper for easier use.
 
-    Python's TemporaryDirectory suffered a couple API changes that mean
+    Python's `TemporaryDirectory` suffered a couple API changes that mean
     you can't call it the same way for similar versions. This wrapper is
     also much more aggressive about deleting the directory when it's done,
     not necessarily relying on OS functions.
