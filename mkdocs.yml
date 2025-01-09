@@ -15,12 +15,13 @@ nav:
         "src": "../README.md",
         "replace": {"src='docs/": "src='"}
       }
-  - Reference: >-
-      {
-        "api": "choreographer",
-        "test": "exports",
-        "tree": "imports"
-      }
+  - Reference:
+      - >-
+        {
+          "api": "choreographer",
+          "test": ["exports"],
+          "tree": "imports"
+        }
   # CLI tools?
 
 theme:

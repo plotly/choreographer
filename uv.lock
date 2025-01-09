@@ -78,7 +78,7 @@ wheels = [
 
 [[package]]
 name = "choreographer"
-version = "1.0.0a0.post91+git.24794414.dirty"
+version = "1.0.0a0.post93+git.7a73a599.dirty"
 source = { editable = "." }
 dependencies = [
     { name = "logistro" },
@@ -356,6 +356,7 @@ source = { editable = "../mkquixote" }
 dependencies = [
     { name = "griffe" },
     { name = "jinja2" },
+    { name = "logistro" },
     { name = "mkdocs" },
     { name = "mkdocs-material" },
 ]
@@ -364,6 +365,7 @@ dependencies = [
 requires-dist = [
     { name = "griffe", specifier = ">=1.5.1" },
     { name = "jinja2", specifier = ">=3.1.4" },
+    { name = "logistro", specifier = ">=1.0.2" },
     { name = "mkdocs", specifier = ">=1.6.1" },
     { name = "mkdocs-material", specifier = ">=9.5.49" },
 ]
