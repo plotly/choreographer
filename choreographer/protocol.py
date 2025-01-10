@@ -1,4 +1,4 @@
-"""protocol.py includes helpers and constants for the Chrome Devtools Protocol."""
+"""Includes helpers and constants for the Chrome Devtools Protocol."""
 
 from enum import Enum
 
@@ -7,6 +7,7 @@ class Ecode(Enum):
     """Ecodes are a list of possible error codes chrome returns."""
 
     TARGET_NOT_FOUND = -32602
+    """Self explanatory."""
 
 
 class DevtoolsProtocolError(Exception):
