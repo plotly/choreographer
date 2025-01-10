@@ -72,11 +72,17 @@ def browser_which(executable_names, *, skip_local=False):
     return None
 
 
-def get_browser_path(*args, **kwargs):
+def get_browser_path(*args, **kwargs):  # noqa: D417: don't pass args explicitly
     """
     Call `browser_which()` but check for user override first.
 
-    Accepts the same arguments as `browser_which`.
+    It looks for the browser in path.
+
+    Accepts the same arguments as `browser_which':
+
+    Args:
+        executable_names: the list of names to look for
+        skip_local: (default False) don't look for a choreo download of anything.
 
     """
     return os.environ.get("BROWSER_PATH", browser_which(*args, **kwargs))

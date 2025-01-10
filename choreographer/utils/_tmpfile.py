@@ -30,7 +30,7 @@ class TmpDirectory:
 
     def __init__(self, path=None, *, sneak=False):
         """
-        Construct a wrapped TemporaryDirectory (TmpDirectory).
+        Construct a wrapped `TemporaryDirectory`.
 
         Args:
             path: manually specify the directory to use

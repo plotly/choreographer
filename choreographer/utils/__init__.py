@@ -1,4 +1,4 @@
-"""Utils contains functions and class that primarily help us with the OS."""
+"""Contains functions and class that primarily help us with the OS."""
 
 from ._tmpfile import TmpDirectory, TmpDirWarning
 from ._which import get_browser_path
