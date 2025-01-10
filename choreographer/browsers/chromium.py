@@ -1,4 +1,4 @@
-"""chromium.py provides a class proving tools for running chromium browsers."""
+"""Provides a class proving tools for running chromium browsers."""
 
 import os
 import platform
@@ -17,11 +17,11 @@ from choreographer.utils import TmpDirectory, get_browser_path
 
 from ._chrome_constants import chrome_names, typical_chrome_paths
 
-chromium_wrapper_path = (
+_chromium_wrapper_path = (
     Path(__file__).resolve().parent / "_unix_pipe_chromium_wrapper.py"
 )
 
-logger = logistro.getLogger(__name__)
+_logger = logistro.getLogger(__name__)
 
 
 def _is_exe(path):
@@ -44,7 +44,7 @@ class Chromium:
     @classmethod
     def logger_parser(cls, record, _old):
         """
-        Parse (per logistro) and extract data from browser stderr for logging.
+        Parse (via `logging.Filter.parse()`) data from browser stderr for logging.
 
         Args:
             record: the `logging.LogRecord` object to read/modify
@@ -60,7 +60,7 @@ class Chromium:
         Construct a chromium browser implementation.
 
         Args:
-            channel: the choreographer.Channel we'll be using (WebSockets? Pipe?)
+            channel: the `choreographer.Channel` we'll be using (WebSockets? Pipe?)
             path: path to the browser
             kwargs:
                 gpu_enabled (default False): Turn on GPU? Doesn't work in all envs.
@@ -87,7 +87,7 @@ class Chromium:
             "ubuntu" in platform.version().lower() and self.enable_sandbox,
         )
         if self.skip_local:
-            logger.warning("Ubuntu + Sandbox won't work unless chrome from snap")
+            _logger.warning("Ubuntu + Sandbox won't work unless chrome from snap")
 
         if not self.path:
             self.path = get_browser_path(
@@ -105,7 +105,7 @@ class Chromium:
                 "Browser not found. You can use get_chrome(), "
                 "please see documentation.",
             )
-        logger.debug(f"Found path: {self.path}")
+        _logger.debug(f"Found path: {self.path}")
         self._channel = channel
         if not isinstance(channel, Pipe):
             raise NotImplementedError("Websocket style channels not implemented yet.")
@@ -114,10 +114,10 @@ class Chromium:
             path=self._tmp_dir_path,
             sneak="snap" in str(self.path),
         )
-        logger.info(f"Temporary directory at: {self.tmp_dir.name}")
+        _logger.info(f"Temporary directory at: {self.tmp_dir.name}")
 
     def get_popen_args(self):
-        """Return the args needed to runc chromium with subprocess.Popen()."""
+        """Return the args needed to runc chromium with `subprocess.Popen()`."""
         args = {}
         # need to check pipe
         if platform.system() == "Windows":
@@ -128,7 +128,7 @@ class Chromium:
             if isinstance(self._channel, Pipe):
                 args["stdin"] = self._channel.from_choreo_to_external
                 args["stdout"] = self._channel.from_external_to_choreo
-        logger.debug(f"Returning args: {args}")
+        _logger.debug(f"Returning args: {args}")
         return args
 
     def get_cli(self):
@@ -136,7 +136,7 @@ class Chromium:
         if platform.system() != "Windows":
             cli = [
                 sys.executable,
-                chromium_wrapper_path,
+                _chromium_wrapper_path,
                 self.path,
             ]
         else:
@@ -172,12 +172,12 @@ class Chromium:
                 cli += [
                     f"--remote-debugging-io-pipes={r_handle!s},{w_handle!s}",
                 ]
-        logger.debug(f"Returning cli: {cli}")
+        _logger.debug(f"Returning cli: {cli}")
         return cli
 
     def get_env(self):
         """Return the env needed for chromium."""
-        logger.debug("Returning env: same env, no modification.")
+        _logger.debug("Returning env: same env, no modification.")
         return os.environ.copy()
 
     def clean(self):
@@ -185,5 +185,5 @@ class Chromium:
         self.tmp_dir.clean()
 
     def __del__(self):
-        """Delete the temporary file and run clean()."""
+        """Delete the temporary file and run `clean()`."""
         self.clean()

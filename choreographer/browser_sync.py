@@ -12,11 +12,11 @@ from .channels import ChannelClosedError, Pipe
 from .protocol.sync import SessionSync, TargetSync
 from .utils._kill import kill
 
-logger = logistro.getLogger(__name__)
+_logger = logistro.getLogger(__name__)
 
 
 class TabSync(TargetSync):
-    """A wrapper for TargetSync, so user can use TabSync, not TargetSync."""
+    """A wrapper for `TargetSync`, so user can use `TabSync`, not `TargetSync`."""
 
 
 class BrowserSync(TargetSync):
@@ -55,7 +55,7 @@ class BrowserSync(TargetSync):
                 headless=True/False, enable_gpu=True/False, etc.
 
         """
-        logger.debug("Attempting to open new browser.")
+        _logger.debug("Attempting to open new browser.")
         self._make_lock()
         self.tabs = {}
         self.targets = {}
@@ -127,21 +127,21 @@ class BrowserSync(TargetSync):
     def close(self):
         """Close the browser."""
         self.broker.clean()
-        logger.info("Broker cleaned up.")
+        _logger.info("Broker cleaned up.")
         if not self._release_lock():
             return
         try:
-            logger.info("Trying to close browser.")
+            _logger.info("Trying to close browser.")
             self._close()
-            logger.info("browser._close() called successfully.")
+            _logger.info("browser._close() called successfully.")
         except ProcessLookupError:
             pass
         os.close(self.logger_pipe)
-        logger.info("Logging pipe closed.")
+        _logger.info("Logging pipe closed.")
         self.channel.close()
-        logger.info("Browser channel closed.")
+        _logger.info("Browser channel closed.")
         self.browser_impl.clean()
-        logger.info("Browser implementation cleaned up.")
+        _logger.info("Browser implementation cleaned up.")
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
         """Close the browser."""

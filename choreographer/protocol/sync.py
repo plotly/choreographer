@@ -2,7 +2,7 @@
 
 import logistro
 
-logger = logistro.getLogger(__name__)
+_logger = logistro.getLogger(__name__)
 
 
 class SessionSync:
@@ -27,7 +27,7 @@ class SessionSync:
 
         # State
         self.session_id = session_id
-        logger.debug(f"New session: {session_id}")
+        _logger.debug(f"New session: {session_id}")
         self.message_id = 0
 
     def send_command(self, command, params=None):
@@ -52,7 +52,7 @@ class SessionSync:
             json_command["sessionId"] = self.session_id
         if params:
             json_command["params"] = params
-        logger.debug(
+        _logger.debug(
             f"Sending {command} with {params} on session {self.session_id}",
         )
         return self.browser.broker.send_json(json_command)
@@ -74,7 +74,7 @@ class TargetSync:
         # States
         self.sessions = {}
         self.target_id = target_id
-        logger.info(f"Created new target {target_id}.")
+        _logger.info(f"Created new target {target_id}.")
 
     def _add_session(self, session):
         if not isinstance(session, self._session_type):
@@ -109,7 +109,7 @@ class TargetSync:
         if not self.sessions.values():
             raise RuntimeError("Cannot send_command without at least one valid session")
         session = self._get_first_session()
-        logger.debug(
+        _logger.debug(
             f"Sending {command} with {params} on session {session.session_id}",
         )
         return session.send_command(command, params)

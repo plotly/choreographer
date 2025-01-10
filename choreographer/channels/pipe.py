@@ -1,4 +1,4 @@
-"""Pipe is a channel based on operating system file pipes."""
+"""Provides a channel based on operating system file pipes."""
 
 import os
 import platform
@@ -13,12 +13,12 @@ from ._errors import BlockWarning, ChannelClosedError, JSONError
 
 _with_block = bool(sys.version_info[:3] >= (3, 12) or platform.system() != "Windows")
 
-logger = logistro.getLogger(__name__)
+_logger = logistro.getLogger(__name__)
 
 
 # if we're a pipe we expect these public attributes
 class Pipe:
-    """Pipe is the class defining an operating system pipe."""
+    """Defines an operating system pipe."""
 
     def __init__(self):
         """Construct a pipe using os functions."""
@@ -45,7 +45,7 @@ class Pipe:
 
     def write_json(self, obj):
         """
-        write_json sends jsons down the pipe.
+        Send one json down the pipe.
 
         Args:
             obj: any python object that serializes to json.
@@ -62,7 +62,7 @@ class Pipe:
 
     def read_jsons(self, *, blocking=True):  # noqa: PLR0912, C901 branches, complexity
         """
-        read_jsons will read from the pipe and return one or more jsons in a list.
+        Read from the pipe and return one or more jsons in a list.
 
         Args:
             blocking: The read option can be set to block or not.
@@ -112,7 +112,7 @@ class Pipe:
                 try:
                     jsons.append(wire.deserialize(raw_message))
                 except JSONError:
-                    logger.exception("JSONError decoding message.")
+                    _logger.exception("JSONError decoding message.")
         return jsons
 
     def _unblock_fd(self, fd):
