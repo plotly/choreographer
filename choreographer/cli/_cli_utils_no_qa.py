@@ -28,8 +28,9 @@ def diagnose():
     logistro.getLogger().setLevel("DEBUG")
 
     # from choreographer import BrowserSync, Browser, browser_which
-    from choreographer import BrowserSync, browser_which
-    from choreographer._browsers._chrome_constants import chrome_names
+    from choreographer import BrowserSync
+    from choreographer.browsers._chrome_constants import chrome_names
+    from choreographer.utils._which import browser_which
 
     parser = argparse.ArgumentParser(description="tool to help debug problems")
     parser.add_argument("--no-run", dest="run", action="store_false")

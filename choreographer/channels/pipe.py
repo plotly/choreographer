@@ -1,3 +1,5 @@
+"""Pipe is a channel based on operating system file pipes."""
+
 import os
 import platform
 import sys
@@ -16,7 +18,10 @@ logger = logistro.getLogger(__name__)
 
 # if we're a pipe we expect these public attributes
 class Pipe:
+    """Pipe is the class defining an operating system pipe."""
+
     def __init__(self):
+        """Construct a pipe using os functions."""
         # This is where pipe listens (from browser)
         # So pass the write to browser
         self._read_from_browser, self._write_from_browser = list(os.pipe())
@@ -39,6 +44,13 @@ class Pipe:
         self.shutdown_lock = Lock()  # should be private
 
     def write_json(self, obj):
+        """
+        write_json sends jsons down the pipe.
+
+        Args:
+            obj: any python object that serializes to json.
+
+        """
         if self.shutdown_lock.locked():
             raise ChannelClosedError
         encoded_message = wire.serialize(obj) + b"\0"
@@ -49,6 +61,16 @@ class Pipe:
             raise ChannelClosedError from e
 
     def read_jsons(self, *, blocking=True):  # noqa: PLR0912, C901 branches, complexity
+        """
+        read_jsons will read from the pipe and return one or more jsons in a list.
+
+        Args:
+            blocking: The read option can be set to block or not.
+
+        Returns:
+            A list of jsons.
+
+        """
         if self.shutdown_lock.locked():
             raise ChannelClosedError
         if not _with_block and not blocking:
@@ -114,6 +136,7 @@ class Pipe:
             pass
 
     def close(self):
+        """Close the pipe."""
         if self.shutdown_lock.acquire(blocking=False):
             if platform.system() == "Windows":
                 self._fake_bye()

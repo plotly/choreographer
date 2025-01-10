@@ -3,8 +3,9 @@ from threading import Thread
 
 import logistro
 
-from choreographer import protocol
-from choreographer._channels import ChannelClosedError
+from choreographer.channels import ChannelClosedError
+
+from . import protocol
 
 logger = logistro.getLogger(__name__)
 

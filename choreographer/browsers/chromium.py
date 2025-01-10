@@ -12,8 +12,8 @@ import logistro
 if platform.system() == "Windows":
     import msvcrt
 
-from choreographer._channels import Pipe
-from choreographer._sys_utils import TmpDirectory, get_browser_path
+from choreographer.channels import Pipe
+from choreographer.utils import TmpDirectory, get_browser_path
 
 from ._chrome_constants import chrome_names, typical_chrome_paths
 
@@ -185,4 +185,5 @@ class Chromium:
         self.tmp_dir.clean()
 
     def __del__(self):
+        """Delete the temporary file and run clean()."""
         self.clean()

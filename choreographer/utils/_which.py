@@ -2,7 +2,7 @@ import os
 import platform
 import shutil
 
-from choreographer._cli_utils import get_chrome_download_path
+from choreographer.cli import get_chrome_download_path
 
 
 def _is_exe(path):

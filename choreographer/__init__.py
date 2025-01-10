@@ -8,40 +8,26 @@ as a building block.
 See the main README for a quickstart.
 """
 
-from ._browsers import (
-    BrowserClosedError,
-    BrowserFailedError,
-    Chromium,
-)
-from ._channels import BlockWarning, ChannelClosedError
-from ._cli_utils import get_chrome, get_chrome_sync
-from ._sys_utils import (
-    TmpDirectory,
-    TmpDirWarning,
-    browser_which,
-    get_browser_path,
-)
+from . import browsers, channel, cli, errors, protocol, util
 from .browser_sync import (
     BrowserSync,
-    SessionSync,
     TabSync,
-    TargetSync,
+)
+from .cli import get_chrome, get_chrome_sync
+from .utils import (
+    get_browser_path,
 )
 
 __all__ = [
-    "BlockWarning",
-    "BrowserClosedError",
-    "BrowserFailedError",
     "BrowserSync",
-    "ChannelClosedError",
-    "Chromium",
-    "SessionSync",
     "TabSync",
-    "TargetSync",
-    "TmpDirWarning",
-    "TmpDirectory",
-    "browser_which",
+    "browsers",
+    "channel",
+    "cli",
+    "errors",
     "get_browser_path",
     "get_chrome",
     "get_chrome_sync",
+    "protocol",
+    "util",
 ]
