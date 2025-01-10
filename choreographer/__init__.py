@@ -8,7 +8,7 @@ as a building block.
 See the main README for a quickstart.
 """
 
-from . import browsers, channel, cli, errors, protocol, util
+from . import browsers, channel, cli, errors, protocol, utils
 from .browser_sync import (
     BrowserSync,
     TabSync,
@@ -29,5 +29,5 @@ __all__ = [
     "get_chrome",
     "get_chrome_sync",
     "protocol",
-    "util",
+    "utils",
 ]
