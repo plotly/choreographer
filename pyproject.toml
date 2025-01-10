@@ -55,8 +55,8 @@ docs = [
  mkquixote = { path = "../mkquixote", editable = true }
 
 [project.scripts]
-choreo_diagnose = "choreographer.cli:diagnose"
-choreo_get_chrome = "choreographer.cli:get_chrome_cli"
+choreo_diagnose = "choreographer.cli._cli_utils_no_qa:diagnose"
+choreo_get_chrome = "choreographer.cli._cli_utils:get_chrome_cli"
 
 [tool.ruff.lint]
 select = ["ALL"]

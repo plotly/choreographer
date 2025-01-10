@@ -15,12 +15,18 @@ nav:
         "src": "../README.md",
         "replace": {"src='docs/": "src='"}
       }
-  - Reference:
+  - User API: >-
+        {
+          "api": "choreographer",
+          "test": ["exports", "_prefix_local"],
+          "tree": "none"
+        }
+  - Developer API:
       - >-
         {
           "api": "choreographer",
-          "test": ["exports"],
-          "tree": "imports"
+          "test": ["exports", "_prefix_local"],
+          "tree": "packages"
         }
   # CLI tools?
 
