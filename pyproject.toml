@@ -30,6 +30,10 @@ dependencies = [
 Homepage = "https://github.com/plotly/choreographer"
 Repository = "https://github.com/plotly/choreographer"
 
+[project.scripts]
+choreo_diagnose = "choreographer.cli._cli_utils_no_qa:diagnose"
+choreo_get_chrome = "choreographer.cli._cli_utils:get_chrome_cli"
+
 [dependency-groups]
 dev = [
   "pytest",
@@ -54,10 +58,6 @@ docs = [
 [tool.uv.sources]
  mkquixote = { path = "../mkquixote", editable = true }
 
-[project.scripts]
-choreo_diagnose = "choreographer.cli._cli_utils_no_qa:diagnose"
-choreo_get_chrome = "choreographer.cli._cli_utils:get_chrome_cli"
-
 [tool.ruff.lint]
 select = ["ALL"]
 ignore = [
@@ -75,9 +75,9 @@ ignore = [
           "RET508", # Allow else if unnecessary because more readable
           "RUF012", # We don't do typing, so no typing
           "SIM105", # Too opionated (try-except-pass)
-          "T201", # no print, remove after logistro TODO
           "PT003", # scope="function" implied but I like readability
           "G004", # fstrings in my logs
+          "T201", # no print, remove after logistro TODO
           ]
 
 [tool.ruff.lint.per-file-ignores]

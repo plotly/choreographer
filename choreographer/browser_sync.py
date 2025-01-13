@@ -25,6 +25,7 @@ class BrowserSync(TargetSync):
     _tab_type = TabSync
     _session_type = SessionSync
     _target_type = TargetSync
+    """These three types tell BrowserSync what to expect... they're generics."""
 
     def _make_lock(self):
         self._open_lock = Lock()
@@ -59,11 +60,11 @@ class BrowserSync(TargetSync):
         self._make_lock()
         self.tabs = {}
         self.targets = {}
-        self.all_sessions = {}
+        self._all_sessions = {}
         # Compose Resources
-        self.channel = channel_cls()
-        self.broker = BrokerSync(self, self.channel)
-        self.browser_impl = browser_cls(self.channel, path, **kwargs)
+        self._channel = channel_cls()
+        self._broker = BrokerSync(self, self._channel)
+        self._browser_impl = browser_cls(self._channel, path, **kwargs)
         if hasattr(browser_cls, "logger_parser"):
             parser = browser_cls.logger_parser
         else:
@@ -79,10 +80,10 @@ class BrowserSync(TargetSync):
         if not self._lock_open():
             raise RuntimeError("Can't re-open the browser")
         self.subprocess = subprocess.Popen(  # noqa: S603
-            self.browser_impl.get_cli(),
+            self._browser_impl.get_cli(),
             stderr=self.logger_pipe,
-            env=self.browser_impl.get_env(),
-            **self.browser_impl.get_popen_args(),
+            env=self._browser_impl.get_env(),
+            **self._browser_impl.get_popen_args(),
         )
         super().__init__("0", self)
         self._add_session(self._session_type(self, ""))
@@ -113,7 +114,7 @@ class BrowserSync(TargetSync):
         except ChannelClosedError:
             pass
 
-        self.channel.close()
+        self._channel.close()
         if self._is_closed():
             return
 
@@ -126,7 +127,7 @@ class BrowserSync(TargetSync):
 
     def close(self):
         """Close the browser."""
-        self.broker.clean()
+        self._broker.clean()
         _logger.info("Broker cleaned up.")
         if not self._release_lock():
             return
@@ -138,9 +139,9 @@ class BrowserSync(TargetSync):
             pass
         os.close(self.logger_pipe)
         _logger.info("Logging pipe closed.")
-        self.channel.close()
+        self._channel.close()
         _logger.info("Browser channel closed.")
-        self.browser_impl.clean()
+        self._browser_impl.clean()
         _logger.info("Browser implementation cleaned up.")
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
@@ -166,4 +167,4 @@ class BrowserSync(TargetSync):
     # wrap our broker for convenience
     def start_output_thread(self, **kwargs):
         """Start a separate thread that dumps all messages received to stdout."""
-        self.broker.run_output_thread(**kwargs)
+        self._broker.run_output_thread(**kwargs)
