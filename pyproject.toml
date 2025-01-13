@@ -41,7 +41,8 @@ dev = [
   "pytest-xdist",
   "async-timeout",
   "poethepoet>=0.31.1",
-  "numpy"
+  "numpy",
+  "mypy>=1.14.1",
 ]
 
 # uv doens't allow dependency groups to have separate python requirements
