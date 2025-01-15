@@ -1,6 +1,5 @@
 """A compilation of the errors available in choreographer."""
 
-from ._tmpfile import TmpDirWarning
 from .browsers import (
     BrowserClosedError,
     BrowserFailedError,
@@ -12,6 +11,7 @@ from .protocol import (
     MessageTypeError,
     MissingKeyError,
 )
+from .utils import TmpDirWarning
 
 __all__ = [
     "BlockWarning",

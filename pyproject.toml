@@ -43,6 +43,7 @@ dev = [
   "poethepoet>=0.31.1",
   "numpy",
   "mypy>=1.14.1",
+  "types-simplejson>=3.19.0.20241221",
 ]
 
 # uv doens't allow dependency groups to have separate python requirements
