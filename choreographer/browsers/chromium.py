@@ -114,7 +114,7 @@ class Chromium:
             path=self._tmp_dir_path,
             sneak="snap" in str(self.path),
         )
-        _logger.info(f"Temporary directory at: {self.tmp_dir.name}")
+        _logger.info(f"Temporary directory at: {self.tmp_dir.path}")
 
     def get_popen_args(self):
         """Return the args needed to runc chromium with `subprocess.Popen()`."""
