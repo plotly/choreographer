@@ -8,7 +8,7 @@ _logger = logistro.getLogger(__name__)
 class SessionSync:
     """A session is a single conversation with a single target."""
 
-    def __init__(self, browser, session_id):
+    def __init__(self, broker, session_id):
         """
         Construct a session from the browser as an object.
 
@@ -16,14 +16,14 @@ class SessionSync:
         All commands are sent on sessions.
 
         Args:
-            browser:  a reference to the main browser
+            broker:  a reference to the browser's broker
             session_id:  the id given by the browser
 
         """
         if not isinstance(session_id, str):
             raise TypeError("session_id must be a string")
         # Resources
-        self.browser = browser
+        self.broker = broker
 
         # State
         self.session_id = session_id
@@ -55,7 +55,7 @@ class SessionSync:
         _logger.debug(
             f"Sending {command} with {params} on session {self.session_id}",
         )
-        return self.browser.broker.send_json(json_command)
+        return self.broker.send_json(json_command)
 
 
 class TargetSync:
@@ -64,12 +64,19 @@ class TargetSync:
     _session_type = SessionSync
     """Like generic typing<>. This is the session type associated with TargetSync."""
 
-    def __init__(self, target_id, browser):
-        """Create a target after one ahs been created by the browser."""
+    def __init__(self, target_id, broker):
+        """
+        Create a target after one ahs been created by the browser.
+
+        Args:
+            broker:  a reference to the browser's broker
+            target_id:  the id given by the browser
+
+        """
         if not isinstance(target_id, str):
             raise TypeError("target_id must be string")
         # Resources
-        self.browser = browser
+        self.broker = broker
 
         # States
         self.sessions = {}
@@ -80,13 +87,11 @@ class TargetSync:
         if not isinstance(session, self._session_type):
             raise TypeError("session must be a session type class")
         self.sessions[session.session_id] = session
-        self.browser.all_sessions[session.session_id] = session
 
     def _remove_session(self, session_id):
         if isinstance(session_id, self._session_type):
             session_id = session_id.session_id
         _ = self.sessions.pop(session_id, None)
-        _ = self.browser.all_sessions.pop(session_id, None)
 
     def _get_first_session(self):
         if not self.sessions.values():

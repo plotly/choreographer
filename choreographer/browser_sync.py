@@ -60,7 +60,6 @@ class BrowserSync(TargetSync):
         self._make_lock()
         self.tabs = {}
         self.targets = {}
-        self._all_sessions = {}
         # Compose Resources
         self._channel = channel_cls()
         self._broker = BrokerSync(self, self._channel)
@@ -86,7 +85,7 @@ class BrowserSync(TargetSync):
             **self._browser_impl.get_popen_args(),
         )
         super().__init__("0", self)
-        self._add_session(self._session_type(self, ""))
+        self._add_session(self._session_type(self._broker, ""))
 
     def __enter__(self):
         """Open browser as context to launch on entry and close on exit."""
