@@ -1,8 +1,11 @@
 """Provides the sync api: `BrowserSync`, `TabSync`."""
 
+from __future__ import annotations
+
 import os
 import subprocess
 from threading import Lock
+from typing import TYPE_CHECKING
 
 import logistro
 
@@ -11,6 +14,16 @@ from .browsers import BrowserClosedError, BrowserFailedError, Chromium
 from .channels import ChannelClosedError, Pipe
 from .protocol.sync import SessionSync, TargetSync
 from .utils._kill import kill
+
+if TYPE_CHECKING:
+    from collections.abc import MutableMapping
+    from pathlib import Path
+    from types import TracebackType  # BRO WHAT
+    from typing import Any, Self
+
+    from .browsers._interface_type import BrowserImplInterface
+    from .channels._interface_type import ChannelInterface
+    from .protocol._interfaces_type import TargetInterface
 
 _logger = logistro.getLogger(__name__)
 
@@ -25,16 +38,23 @@ class BrowserSync(TargetSync):
     _tab_type = TabSync
     _session_type = SessionSync
     _target_type = TargetSync
-    """These three types tell BrowserSync what to expect... they're generics."""
+    _broker_type = BrokerSync
+    # A list of the types that are essential to use
+    # with this class
 
-    def _make_lock(self):
+    tabs: MutableMapping[str, TabSync]
+    targets: MutableMapping[str, TargetSync]
+    # Don't init instance attributes with mutables
+
+    def _make_lock(self) -> None:
         self._open_lock = Lock()
 
-    def _lock_open(self):
-        # if open, acquire will return False, we want it to return True
-        return self._open_lock.acquire(blocking=False)
+    def _lock_open(self) -> bool:
+        # Did we acquire the lock? If so, return true, we locked open.
+        # If we are open, we did not lock open.
+        return not self._open_lock.acquire(blocking=False)
 
-    def _release_lock(self):
+    def _release_lock(self) -> bool:
         try:
             if self._open_lock.locked():
                 self._open_lock.release()
@@ -44,7 +64,14 @@ class BrowserSync(TargetSync):
         except RuntimeError:
             return False
 
-    def __init__(self, path=None, *, browser_cls=Chromium, channel_cls=Pipe, **kwargs):
+    def __init__(
+        self,
+        path: str | Path | None = None,
+        *,
+        browser_cls: type[BrowserImplInterface] = Chromium,
+        channel_cls: type[ChannelInterface] = Pipe,
+        **kwargs: Any,
+    ) -> None:
         """
         Construct a new browser instance.
 
@@ -60,39 +87,40 @@ class BrowserSync(TargetSync):
         self._make_lock()
         self.tabs = {}
         self.targets = {}
+
         # Compose Resources
         self._channel = channel_cls()
-        self._broker = BrokerSync(self, self._channel)
+        self._broker = self._broker_type(self, self._channel)
         self._browser_impl = browser_cls(self._channel, path, **kwargs)
         if hasattr(browser_cls, "logger_parser"):
             parser = browser_cls.logger_parser
         else:
             parser = None
-        self.logger_pipe, _ = logistro.getPipeLogger(
+        self._logger_pipe, _ = logistro.getPipeLogger(
             "browser_proc",
             parser=parser,
         )
         # we do need something to indicate we're open TODO yeah an open lock
 
-    def open(self):
+    def open(self) -> None:
         """Open the browser."""
         if not self._lock_open():
             raise RuntimeError("Can't re-open the browser")
         self.subprocess = subprocess.Popen(  # noqa: S603
             self._browser_impl.get_cli(),
-            stderr=self.logger_pipe,
+            stderr=self._logger_pipe,
             env=self._browser_impl.get_env(),
             **self._browser_impl.get_popen_args(),
         )
         super().__init__("0", self)
-        self._add_session(self._session_type(self._broker, ""))
+        self._add_session(self._session_type("", self._broker))
 
-    def __enter__(self):
+    def __enter__(self) -> Self:
         """Open browser as context to launch on entry and close on exit."""
         self.open()
         return self
 
-    def _is_closed(self, wait=0):
+    def _is_closed(self, wait: int = 0) -> bool:
         if wait == 0:
             return self.subprocess.poll() is None
         else:
@@ -102,7 +130,7 @@ class BrowserSync(TargetSync):
                 return False
         return True
 
-    def _close(self):
+    def _close(self) -> None:
         if self._is_closed():
             return
 
@@ -124,7 +152,7 @@ class BrowserSync(TargetSync):
         else:
             raise RuntimeError("Couldn't close or kill browser subprocess")
 
-    def close(self):
+    def close(self) -> None:
         """Close the browser."""
         self._broker.clean()
         _logger.info("Broker cleaned up.")
@@ -136,20 +164,25 @@ class BrowserSync(TargetSync):
             _logger.info("browser._close() called successfully.")
         except ProcessLookupError:
             pass
-        os.close(self.logger_pipe)
+        os.close(self._logger_pipe)
         _logger.info("Logging pipe closed.")
         self._channel.close()
         _logger.info("Browser channel closed.")
         self._browser_impl.clean()
         _logger.info("Browser implementation cleaned up.")
 
-    def __exit__(self, exc_type, exc_value, exc_traceback):
+    def __exit__(
+        self,
+        type_: type[BaseException] | None,
+        value: BaseException | None,
+        traceback: TracebackType | None,
+    ) -> None:  # None instead of False is fine, eases type checking
         """Close the browser."""
         self.close()
 
-    def _add_tab(self, tab):
-        if not isinstance(tab, self.tab_type):
-            raise TypeError("tab must be an object of (sub)class Tab")
+    def _add_tab(self, tab: TargetInterface) -> None:
+        if not isinstance(tab, self._tab_type):
+            raise TypeError(f"tab must be an object of {self._tab_type}")
         self.tabs[tab.target_id] = tab
 
     def _remove_tab(self, target_id):

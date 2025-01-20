@@ -180,7 +180,7 @@ class Chromium:
         _logger.debug("Returning env: same env, no modification.")
         return os.environ.copy()
 
-    def clean(self):
+    def clean(self) -> None:
         """Clean up any leftovers form browser, like tmp files."""
         self.tmp_dir.clean()
 

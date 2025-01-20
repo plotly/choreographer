@@ -7,6 +7,8 @@ the OS gives away first-come-first-serve everytime someone opens a
 file. chromium demands we use 3 and 4.
 """
 
+from __future__ import annotations
+
 import os
 
 # importing modules has side effects, so we do this before imports
@@ -24,13 +26,21 @@ import signal
 import subprocess
 import sys
 from functools import partial
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from types import FrameType
 
 # we're a wrapper, the cli is everything that came after us
 cli = sys.argv[1:]
 process = subprocess.Popen(cli, pass_fds=(3, 4))  # noqa: S603 untrusted input
 
 
-def kill_proc(process, _sig_num, _frame):
+def kill_proc(
+    process: subprocess.Popen[bytes],
+    _sig_num: int,
+    _frame: FrameType | None,
+) -> None:
     process.terminate()
     process.wait(5)  # 5 seconds to clean up nicely, it's a lot
     process.kill()

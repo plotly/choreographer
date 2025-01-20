@@ -1,6 +1,19 @@
 """Provide a lower-level sync interface to the Devtools Protocol."""
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import logistro
+
+from choreographer._broker import BrokerSync
+
+if TYPE_CHECKING:
+    from collections.abc import MutableMapping
+    from typing import Any
+
+    from choreographer import protocol
+
 
 _logger = logistro.getLogger(__name__)
 
@@ -8,7 +21,11 @@ _logger = logistro.getLogger(__name__)
 class SessionSync:
     """A session is a single conversation with a single target."""
 
-    def __init__(self, broker, session_id):
+    _broker_type = BrokerSync
+    # A list of the types that are essential to use
+    # with this class
+
+    def __init__(self, session_id: str, broker: BrokerSync) -> None:
         """
         Construct a session from the browser as an object.
 
@@ -30,7 +47,11 @@ class SessionSync:
         _logger.debug(f"New session: {session_id}")
         self.message_id = 0
 
-    def send_command(self, command, params=None):
+    def send_command(
+        self,
+        command: str,
+        params: MutableMapping[str, Any] | None = None,
+    ) -> protocol.MessageKey | None:
         """
         Send a devtools command on the session.
 
@@ -39,6 +60,9 @@ class SessionSync:
         Args:
             command: devtools command to send
             params: the parameters to send
+
+        Returns:
+            A message key (session, message id) tuple or None
 
         """
         current_id = self.message_id
@@ -62,9 +86,13 @@ class TargetSync:
     """A target like a browser, tab, or others. It sends commands. It has sessions."""
 
     _session_type = SessionSync
-    """Like generic typing<>. This is the session type associated with TargetSync."""
+    _broker_type = BrokerSync
+    """Needs to know."""
 
-    def __init__(self, target_id, broker):
+    target_id: str
+    """The browser's ID of the target."""
+
+    def __init__(self, target_id: str, broker: BrokerSync):
         """
         Create a target after one ahs been created by the browser.
 
@@ -93,14 +121,19 @@ class TargetSync:
             session_id = session_id.session_id
         _ = self.sessions.pop(session_id, None)
 
-    def _get_first_session(self):
+    def get_session(self):
+        """Retrieve the first session of the target, if it exists."""
         if not self.sessions.values():
             raise RuntimeError(
                 "Cannot use this method without at least one valid session",
             )
         return next(iter(self.sessions.values()))
 
-    def send_command(self, command, params=None):
+    def send_command(
+        self,
+        command: str,
+        params: MutableMapping[str, Any] | None = None,
+    ) -> protocol.MessageKey | None:
         """
         Send a command to the first session in a target.
 
@@ -113,7 +146,7 @@ class TargetSync:
         """
         if not self.sessions.values():
             raise RuntimeError("Cannot send_command without at least one valid session")
-        session = self._get_first_session()
+        session = self.get_session()
         _logger.debug(
             f"Sending {command} with {params} on session {session.session_id}",
         )

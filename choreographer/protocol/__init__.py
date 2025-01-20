@@ -4,11 +4,15 @@ Provides various implementations of Session and Target.
 It includes helpers and constants for the Chrome Devtools Protocol.
 """
 
+from __future__ import annotations
+
+from collections.abc import Mapping
 from enum import Enum
+from typing import Any, NewType
 
 from . import sync
 
-__all__ = ["sync"]
+__all__ = ["sync"]  # does this mean sync is the only export to someone?
 
 
 class Ecode(Enum):
@@ -109,24 +113,30 @@ def verify_params(obj):
         )
 
 
-def calculate_message_key(response):
+BrowserResponse = NewType("BrowserResponse", Mapping[str, Any])
+BrowserCommand = NewType("BrowserCommand", Mapping[str, Any])
+
+MessageKey = NewType("MessageKey", tuple[str, int | None])
+
+
+def calculate_message_key(msg: BrowserResponse | BrowserCommand) -> MessageKey | None:
     """
-    Given a response from the browser, calculate the key corresponding to the command.
+    Given a message to/from the browser, calculate the key corresponding to the command.
 
     Every message is uniquely identified by its sessionId and id (counter).
 
     Args:
-        response: the message for which to calculate the key.
+        msg: the message for which to calculate the key.
 
     """
-    session_id = response.get("sessionId", "")
-    message_id = response.get("id", None)
+    session_id = msg.get("sessionId", "")
+    message_id = msg.get("id")
     if message_id is None:
         return None
-    return (session_id, message_id)
+    return MessageKey((session_id, message_id))
 
 
-def match_message_key(response, key):
+def match_message_key(response: BrowserResponse, key: MessageKey) -> bool:
     """
     Report True if a response matches with a certain key (sessionId, id).
 
