@@ -9,7 +9,6 @@ from simplejson.errors import JSONDecodeError
 from ._errors import JSONError
 
 if TYPE_CHECKING:
-    from collections.abc import MutableMapping
     from typing import Any
 
 _logger = logistro.getLogger(__name__)
@@ -44,7 +43,7 @@ def serialize(obj: Any) -> bytes:
     return message.encode("utf-8")
 
 
-def deserialize(message: str) -> MutableMapping[str, Any]:
+def deserialize(message: str) -> Any:
     try:
         return simplejson.loads(message)
     except simplejson.errors.JSONDecodeError as e:

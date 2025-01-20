@@ -8,11 +8,16 @@ from __future__ import annotations
 
 from collections.abc import MutableMapping
 from enum import Enum
-from typing import Any, NewType
+from typing import Any, NewType, cast
 
 from . import sync
 
 __all__ = ["sync"]  # does this mean sync is the only export to someone?
+
+BrowserResponse = NewType("BrowserResponse", MutableMapping[str, Any])
+BrowserCommand = NewType("BrowserCommand", MutableMapping[str, Any])
+
+MessageKey = NewType("MessageKey", tuple[str, int | None])
 
 
 class Ecode(Enum):
@@ -25,7 +30,7 @@ class Ecode(Enum):
 class DevtoolsProtocolError(Exception):
     """Raise a general error reported by the devtools protocol."""
 
-    def __init__(self, response):
+    def __init__(self, response: BrowserResponse) -> None:
         """
         Construct a new DevtoolsProtocolError.
 
@@ -41,7 +46,7 @@ class DevtoolsProtocolError(Exception):
 class MessageTypeError(TypeError):
     """An error for poorly formatted devtools protocol message."""
 
-    def __init__(self, key, value, expected_type):
+    def __init__(self, key: str, value: Any, expected_type: type) -> None:
         """
         Construct a message about a poorly formed protocol message.
 
@@ -60,7 +65,7 @@ class MessageTypeError(TypeError):
 class MissingKeyError(ValueError):
     """An error for poorly formatted devtools protocol message."""
 
-    def __init__(self, key, obj):
+    def __init__(self, key: str, obj: BrowserCommand) -> None:
         """
         Construct a MissingKeyError specifying which key was missing.
 
@@ -78,7 +83,7 @@ class ExperimentalFeatureWarning(UserWarning):
     """An warning to report that a feature may or may not work."""
 
 
-def verify_params(obj):
+def verify_params(obj: BrowserCommand) -> None:
     """
     Verify the message obj hast he proper keys and values.
 
@@ -111,12 +116,6 @@ def verify_params(obj):
             "Message objects must have id and method keys, "
             "and may have params and sessionId keys.",
         )
-
-
-BrowserResponse = NewType("BrowserResponse", MutableMapping[str, Any])
-BrowserCommand = NewType("BrowserCommand", MutableMapping[str, Any])
-
-MessageKey = NewType("MessageKey", tuple[str, int | None])
 
 
 def calculate_message_key(msg: BrowserResponse | BrowserCommand) -> MessageKey | None:
@@ -160,13 +159,13 @@ def match_message_key(response: BrowserResponse, key: MessageKey) -> bool:
     return True
 
 
-def is_event(response):
+def is_event(response: BrowserResponse) -> bool:
     """Return true if the browser response is an event notification."""
     required_keys = {"method", "params"}
     return required_keys <= response.keys() and "id" not in response
 
 
-def get_target_id_from_result(response):
+def get_target_id_from_result(response: BrowserResponse) -> str | None:
     """
     Extract target id from a browser response.
 
@@ -175,12 +174,12 @@ def get_target_id_from_result(response):
 
     """
     if "result" in response and "targetId" in response["result"]:
-        return response["result"]["targetId"]
+        return cast(str, response["result"]["targetId"])
     else:
         return None
 
 
-def get_session_id_from_result(response):
+def get_session_id_from_result(response: BrowserResponse) -> str | None:
     """
     Extract session id from a browser response.
 
@@ -189,12 +188,12 @@ def get_session_id_from_result(response):
 
     """
     if "result" in response and "sessionId" in response["result"]:
-        return response["result"]["sessionId"]
+        return cast(str, response["result"]["sessionId"])
     else:
         return None
 
 
-def get_error_from_result(response):
+def get_error_from_result(response: BrowserResponse) -> str | None:
     """
     Extract error from a browser response.
 
@@ -203,6 +202,6 @@ def get_error_from_result(response):
 
     """
     if "error" in response:
-        return response["error"]
+        return cast(str, response["error"])
     else:
         return None

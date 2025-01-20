@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 import platform
 import shutil
@@ -8,10 +10,15 @@ import time
 import warnings
 from pathlib import Path
 from threading import Thread
+from typing import TYPE_CHECKING
 
 import logistro
 
-logger = logistro.getLogger(__name__)
+if TYPE_CHECKING:
+    from collections.abc import Callable, MutableMapping, Sequence
+    from typing import Any
+
+_logger = logistro.getLogger(__name__)
 
 
 class TmpDirWarning(UserWarning):
@@ -28,7 +35,7 @@ class TmpDirectory:
     not necessarily relying on OS functions.
     """
 
-    def __init__(self, path=None, *, sneak=False):
+    def __init__(self, path: str | None = None, *, sneak: bool = False):
         """
         Construct a wrapped `TemporaryDirectory`.
 
@@ -39,7 +46,7 @@ class TmpDirectory:
 
         """
         self._with_onexc = bool(sys.version_info[:3] >= (3, 12))
-        args = {}
+        args: MutableMapping[str, Any] = {}
 
         if path:
             args = {"dir": path}
@@ -67,7 +74,15 @@ class TmpDirectory:
         self.path = Path(self.temp_dir.name)
         self.exists = True
 
-    def _delete_manually(self, *, check_only=False):  # noqa: C901, PLR0912
+    def _delete_manually(  # noqa: C901, PLR0912
+        self,
+        *,
+        check_only: bool = False,
+    ) -> tuple[
+        int,
+        int,
+        Sequence[tuple[Path, BaseException]],
+    ]:
         if not self.path.exists():
             self.exists = False
             return 0, 0, []
@@ -118,7 +133,7 @@ class TmpDirectory:
 
         return n_dirs, n_files, errors
 
-    def clean(self):
+    def clean(self) -> None:
         """Try several different ways to eliminate the temporary directory."""
         try:
             # no faith in this python implementation, always fails with windows
@@ -126,9 +141,14 @@ class TmpDirectory:
             self.temp_dir.cleanup()
             self.exists = False
         except BaseException:
-            logger.exception("TemporaryDirectory.cleanup() failed.")
+            _logger.exception("TemporaryDirectory.cleanup() failed.")
 
-        def remove_readonly(func, path, _excinfo):
+        # bad typing but tough
+        def remove_readonly(
+            func: Callable[[str], None],
+            path: str | Path,
+            _excinfo: Any,
+        ) -> None:
             try:
                 Path(path).chmod(stat.S_IWUSR)
                 func(str(path))
@@ -148,13 +168,13 @@ class TmpDirectory:
             self._delete_manually(check_only=True)
             if not self.exists:
                 return
-            logger.exception("shutil.rmtree() failed to delete temporary file.")
+            _logger.exception("shutil.rmtree() failed to delete temporary file.")
 
-            def extra_clean():
+            def extra_clean() -> None:
                 time.sleep(3)
                 self._delete_manually()
 
             t = Thread(target=extra_clean)
             t.run()
             if self.path.exists():
-                logger.warning("Temporary dictory couldn't be removed manually.")
+                _logger.warning("Temporary dictory couldn't be removed manually.")

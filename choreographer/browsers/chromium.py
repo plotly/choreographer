@@ -1,11 +1,14 @@
 """Provides a class proving tools for running chromium browsers."""
 
+from __future__ import annotations
+
 import os
 import platform
 import re
 import subprocess
 import sys
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import logistro
 
@@ -17,6 +20,13 @@ from choreographer.utils import TmpDirectory, get_browser_path
 
 from ._chrome_constants import chrome_names, typical_chrome_paths
 
+if TYPE_CHECKING:
+    import logging
+    from collections.abc import Mapping, MutableMapping, Sequence
+    from typing import Any
+
+    from choreographer.channels._interface_type import ChannelInterface
+
 _chromium_wrapper_path = (
     Path(__file__).resolve().parent / "_unix_pipe_chromium_wrapper.py"
 )
@@ -24,7 +34,7 @@ _chromium_wrapper_path = (
 _logger = logistro.getLogger(__name__)
 
 
-def _is_exe(path):
+def _is_exe(path: str | Path) -> bool:
     try:
         return os.access(path, os.X_OK)
     except:  # noqa: E722 bare except ok, weird errors, best effort.
@@ -42,7 +52,11 @@ class Chromium:
     """
 
     @classmethod
-    def logger_parser(cls, record, _old):
+    def logger_parser(
+        cls,
+        record: logging.LogRecord,
+        _old: MutableMapping[str, Any],
+    ) -> bool:
         """
         Parse (via `logging.Filter.parse()`) data from browser stderr for logging.
 
@@ -55,7 +69,12 @@ class Chromium:
         # we just eliminate their stamp, we dont' extract it
         return True
 
-    def __init__(self, channel, path=None, **kwargs):
+    def __init__(
+        self,
+        channel: ChannelInterface,
+        path: Path | str | None = None,
+        **kwargs: Any,
+    ) -> None:
         """
         Construct a chromium browser implementation.
 
@@ -84,7 +103,7 @@ class Chromium:
                 "Chromium.get_cli() received " f"invalid args: {kwargs.keys()}",
             )
         self.skip_local = bool(
-            "ubuntu" in platform.version().lower() and self.enable_sandbox,
+            "ubuntu" in platform.version().lower() and self.sandbox_enabled,
         )
         if self.skip_local:
             _logger.warning("Ubuntu + Sandbox won't work unless chrome from snap")
@@ -94,7 +113,7 @@ class Chromium:
                 executable_names=chrome_names,
                 skip_local=self.skip_local,
             )
-        if not self.path:
+        if not self.path and typical_chrome_paths:
             # do typical chrome paths
             for candidate in typical_chrome_paths:
                 if _is_exe(candidate):
@@ -116,12 +135,12 @@ class Chromium:
         )
         _logger.info(f"Temporary directory at: {self.tmp_dir.path}")
 
-    def get_popen_args(self):
+    def get_popen_args(self) -> Mapping[str, Any]:
         """Return the args needed to runc chromium with `subprocess.Popen()`."""
         args = {}
         # need to check pipe
         if platform.system() == "Windows":
-            args["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
+            args["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP  # type: ignore [attr-defined]
             args["close_fds"] = False
         else:
             args["close_fds"] = True
@@ -131,17 +150,17 @@ class Chromium:
         _logger.debug(f"Returning args: {args}")
         return args
 
-    def get_cli(self):
+    def get_cli(self) -> Sequence[str]:
         """Return the CLI command for chromium."""
         if platform.system() != "Windows":
             cli = [
-                sys.executable,
-                _chromium_wrapper_path,
-                self.path,
+                str(sys.executable),
+                str(_chromium_wrapper_path),
+                str(self.path),
             ]
         else:
             cli = [
-                self.path,
+                str(self.path),
             ]
 
         cli.extend(
@@ -164,18 +183,18 @@ class Chromium:
         if isinstance(self._channel, Pipe):
             cli.append("--remote-debugging-pipe")
             if platform.system() == "Windows":
-                w_handle = msvcrt.get_osfhandle(self._channel.from_choreo_to_external)
-                r_handle = msvcrt.get_osfhandle(self._channel.from_external_to_choreo)
+                w_handle = msvcrt.get_osfhandle(self._channel.from_choreo_to_external)  # type: ignore [attr-defined]
+                r_handle = msvcrt.get_osfhandle(self._channel.from_external_to_choreo)  # type: ignore [attr-defined]
                 _inheritable = True
-                os.set_handle_inheritable(w_handle, _inheritable)
-                os.set_handle_inheritable(r_handle, _inheritable)
+                os.set_handle_inheritable(w_handle, _inheritable)  # type: ignore [attr-defined]
+                os.set_handle_inheritable(r_handle, _inheritable)  # type: ignore [attr-defined]
                 cli += [
                     f"--remote-debugging-io-pipes={r_handle!s},{w_handle!s}",
                 ]
         _logger.debug(f"Returning cli: {cli}")
         return cli
 
-    def get_env(self):
+    def get_env(self) -> MutableMapping[str, str]:
         """Return the env needed for chromium."""
         _logger.debug("Returning env: same env, no modification.")
         return os.environ.copy()
@@ -184,6 +203,6 @@ class Chromium:
         """Clean up any leftovers form browser, like tmp files."""
         self.tmp_dir.clean()
 
-    def __del__(self):
+    def __del__(self) -> None:
         """Delete the temporary file and run `clean()`."""
         self.clean()

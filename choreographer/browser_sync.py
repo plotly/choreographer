@@ -23,7 +23,6 @@ if TYPE_CHECKING:
 
     from .browsers._interface_type import BrowserImplInterface
     from .channels._interface_type import ChannelInterface
-    from .protocol._interfaces_type import TargetInterface
 
 _logger = logistro.getLogger(__name__)
 
@@ -180,23 +179,23 @@ class BrowserSync(TargetSync):
         """Close the browser."""
         self.close()
 
-    def _add_tab(self, tab: TargetInterface) -> None:
+    def _add_tab(self, tab: TabSync) -> None:
         if not isinstance(tab, self._tab_type):
             raise TypeError(f"tab must be an object of {self._tab_type}")
         self.tabs[tab.target_id] = tab
 
-    def _remove_tab(self, target_id):
-        if isinstance(target_id, self.tab_type):
+    def _remove_tab(self, target_id: str) -> None:
+        if isinstance(target_id, self._tab_type):
             target_id = target_id.target_id
         del self.tabs[target_id]
 
-    def get_tab(self):
+    def get_tab(self) -> TabSync | None:
         """Get the first tab if there is one. Useful for default tabs."""
         if self.tabs.values():
             return next(iter(self.tabs.values()))
         return None
 
     # wrap our broker for convenience
-    def start_output_thread(self, **kwargs):
+    def start_output_thread(self, **kwargs: Any) -> None:
         """Start a separate thread that dumps all messages received to stdout."""
         self._broker.run_output_thread(**kwargs)

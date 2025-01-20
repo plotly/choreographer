@@ -22,7 +22,7 @@ import time
 # - make own exceptions
 
 
-def diagnose():
+def diagnose() -> None:
     import logistro
 
     logistro.getLogger().setLevel("DEBUG")

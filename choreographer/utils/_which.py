@@ -1,39 +1,51 @@
+from __future__ import annotations
+
 import os
 import platform
 import shutil
+from typing import TYPE_CHECKING
 
 from choreographer.cli._cli_utils import get_chrome_download_path
 
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+    from pathlib import Path
+    from typing import Any
 
-def _is_exe(path):
+
+def _is_exe(path: str | Path) -> bool:
     try:
         return os.access(path, os.X_OK)
     except:  # noqa: E722 bare except ok, weird errors, best effort.
         return False
 
 
-def _which_from_windows_reg():
+def _which_from_windows_reg() -> str | None:
     try:
         import re
         import winreg
 
-        command = winreg.QueryValueEx(
-            winreg.OpenKey(
-                winreg.HKEY_CLASSES_ROOT,
+        command = winreg.QueryValueEx(  # type: ignore [attr-defined]
+            winreg.OpenKey(  # type: ignore [attr-defined]
+                winreg.HKEY_CLASSES_ROOT,  # type: ignore [attr-defined]
                 "ChromeHTML\\shell\\open\\command",
                 0,
-                winreg.KEY_READ,
+                winreg.KEY_READ,  # type: ignore [attr-defined]
             ),
             "",
         )[0]
-        exe = re.search('"(.*?)"', command).group(1)
+        exe = re.search('"(.*?)"', command).group(1)  # type: ignore [union-attr]
     except BaseException:  # noqa: BLE001 don't care why, best effort search
         return None
 
     return exe
 
 
-def browser_which(executable_names, *, skip_local=False):
+def browser_which(
+    executable_names: Sequence[str],
+    *,
+    skip_local: bool = False,
+) -> str | None:
     """
     Look for and return first name found in PATH.
 
@@ -53,7 +65,7 @@ def browser_which(executable_names, *, skip_local=False):
         and not skip_local
         and local_chrome.name in executable_names
     ):
-        return local_chrome
+        return str(local_chrome)
 
     if platform.system() == "Windows":
         os.environ["NoDefaultCurrentDirectoryInExePath"] = "0"  # noqa: SIM112 var name set by windows
@@ -72,7 +84,7 @@ def browser_which(executable_names, *, skip_local=False):
     return None
 
 
-def get_browser_path(*args, **kwargs):  # noqa: D417: don't pass args explicitly
+def get_browser_path(*args: Any, **kwargs: Any) -> str | None:  # noqa: D417: don't pass args explicitly
     """
     Call `browser_which()` but check for user override first.
 

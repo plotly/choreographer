@@ -13,8 +13,6 @@ if TYPE_CHECKING:
     from collections.abc import MutableMapping
     from typing import Any
 
-    from ._interfaces_type import SessionInterface
-
 
 _logger = logistro.getLogger(__name__)
 
@@ -52,7 +50,7 @@ class SessionSync:
         self,
         command: str,
         params: MutableMapping[str, Any] | None = None,
-    ) -> protocol.MessageKey | None:
+    ) -> Any:
         """
         Send a devtools command on the session.
 
@@ -110,33 +108,34 @@ class TargetSync:
         self.broker = broker
 
         # States
-        self.sessions: MutableMapping[str, SessionInterface] = {}
+        self.sessions: MutableMapping[str, SessionSync] = {}
         self.target_id = target_id
         _logger.info(f"Created new target {target_id}.")
 
-    def _add_session(self, session):
+    def _add_session(self, session: SessionSync) -> None:
         if not isinstance(session, self._session_type):
             raise TypeError("session must be a session type class")
         self.sessions[session.session_id] = session
 
-    def _remove_session(self, session_id):
+    def _remove_session(self, session_id: str) -> None:
         if isinstance(session_id, self._session_type):
             session_id = session_id.session_id
         _ = self.sessions.pop(session_id, None)
 
-    def get_session(self):
+    def get_session(self) -> SessionSync:
         """Retrieve the first session of the target, if it exists."""
         if not self.sessions.values():
             raise RuntimeError(
                 "Cannot use this method without at least one valid session",
             )
-        return next(iter(self.sessions.values()))
+        session = next(iter(self.sessions.values()))
+        return session
 
     def send_command(
         self,
         command: str,
         params: MutableMapping[str, Any] | None = None,
-    ) -> protocol.MessageKey | None:
+    ) -> Any:
         """
         Send a command to the first session in a target.
 

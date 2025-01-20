@@ -26,7 +26,7 @@ elif platform.system() == "Linux":
 elif platform.system() == "Darwin":
     _chrome_platform_detected = "mac-" + _arch_detected + _arch_size_detected
 
-_default_exe_path = None
+_default_exe_path = Path()
 if platform.system().startswith("Linux"):
     _default_exe_path = (
         _default_download_path / f"chrome-{_chrome_platform_detected}" / "chrome"
@@ -46,17 +46,17 @@ elif platform.system().startswith("Win"):
     )
 
 
-def get_chrome_download_path():
+def get_chrome_download_path() -> Path:
     return _default_exe_path
 
 
 # https://stackoverflow.com/questions/39296101/python-zipfile-removes-execute-permissions-from-binaries
 class _ZipFilePermissions(zipfile.ZipFile):
-    def _extract_member(self, member, targetpath, pwd):
+    def _extract_member(self, member, targetpath, pwd):  # type: ignore [no-untyped-def]
         if not isinstance(member, zipfile.ZipInfo):
             member = self.getinfo(member)
 
-        path = super()._extract_member(member, targetpath, pwd)
+        path = super()._extract_member(member, targetpath, pwd)  # type: ignore [misc]
         # High 16 bits are os specific (bottom is st_mode flag)
         attr = member.external_attr >> 16
         if attr != 0:
@@ -65,14 +65,15 @@ class _ZipFilePermissions(zipfile.ZipFile):
 
 
 def get_chrome_sync(
-    arch=_chrome_platform_detected,
-    i=-1,
-    path=_default_download_path,
+    arch: str = _chrome_platform_detected,
+    i: int = -1,
+    path: str | Path = _default_download_path,
     *,
-    verbose=False,
-):
+    verbose: bool = False,
+) -> Path | str:
     """Download chrome synchronously: see `get_chrome()`."""
-    path = Path(path)
+    if isinstance(path, str):
+        path = Path(path)
     browser_list = json.loads(
         urllib.request.urlopen(  # noqa: S310 audit url for schemes
             _chrome_for_testing_url,
@@ -83,7 +84,7 @@ def get_chrome_sync(
         print(version_obj["version"])
         print(version_obj["revision"])
     chromium_sources = version_obj["downloads"]["chrome"]
-    url = None
+    url = ""
     for src in chromium_sources:
         if src["platform"] == arch:
             url = src["url"]
@@ -114,10 +115,12 @@ def get_chrome_sync(
 
 
 async def get_chrome(
-    arch=_chrome_platform_detected,
-    i=-1,
-    path=_default_download_path,
-):
+    arch: str = _chrome_platform_detected,
+    i: int = -1,
+    path: str | Path = _default_download_path,
+    *,
+    verbose: bool = False,
+) -> Path | str:
     """
     Download google chrome from google-chrome-for-testing server.
 
@@ -126,12 +129,19 @@ async def get_chrome(
         i: the chrome version: -1 being the latest version, 0 being the oldest
            still in the testing directory.
         path: where to download it too (the folder).
+        verbose: print out version found
 
     """
-    return await asyncio.to_thread(get_chrome_sync, arch=arch, i=i, path=path)
+    return await asyncio.to_thread(
+        get_chrome_sync,
+        arch=arch,
+        i=i,
+        path=path,
+        verbose=verbose,
+    )
 
 
-def get_chrome_cli():
+def get_chrome_cli() -> None:
     if "ubuntu" in platform.version().lower():
         warnings.warn(  # noqa: B028
             "You are using `get_browser()` on Ubuntu."

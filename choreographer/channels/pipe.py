@@ -1,15 +1,24 @@
 """Provides a channel based on operating system file pipes."""
 
+from __future__ import annotations
+
 import os
 import platform
 import sys
 import warnings
 from threading import Lock
+from typing import TYPE_CHECKING
 
 import logistro
 
 from . import _wire as wire
 from ._errors import BlockWarning, ChannelClosedError, JSONError
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping, Sequence
+    from typing import Any
+
+    from choreographer.protocol import BrowserResponse
 
 _with_block = bool(sys.version_info[:3] >= (3, 12) or platform.system() != "Windows")
 
@@ -20,7 +29,7 @@ _logger = logistro.getLogger(__name__)
 class Pipe:
     """Defines an operating system pipe."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Construct a pipe using os functions."""
         # This is where pipe listens (from browser)
         # So pass the write to browser
@@ -43,7 +52,7 @@ class Pipe:
         # this is just a convenience to prevent multiple shutdowns
         self.shutdown_lock = Lock()  # should be private
 
-    def write_json(self, obj):
+    def write_json(self, obj: Mapping[str, Any]) -> None:
         """
         Send one json down the pipe.
 
@@ -60,7 +69,11 @@ class Pipe:
             self.close()
             raise ChannelClosedError from e
 
-    def read_jsons(self, *, blocking=True):  # noqa: PLR0912, C901 branches, complexity
+    def read_jsons(  # noqa: PLR0912, C901 branches, complexity
+        self,
+        *,
+        blocking: bool = True,
+    ) -> Sequence[BrowserResponse]:
         """
         Read from the pipe and return one or more jsons in a list.
 
@@ -78,7 +91,7 @@ class Pipe:
                 "Windows python version < 3.12 does not support non-blocking",
                 BlockWarning,
             )
-        jsons = []
+        jsons: list[BrowserResponse] = []
         try:
             if _with_block:
                 os.set_blocking(self._read_from_browser, blocking)
@@ -115,27 +128,27 @@ class Pipe:
                     _logger.exception("JSONError decoding message.")
         return jsons
 
-    def _unblock_fd(self, fd):
+    def _unblock_fd(self, fd: int) -> None:
         try:
             if _with_block:
                 os.set_blocking(fd, False)
         except BaseException:  # noqa: BLE001, S110 OS errors are not consistent, catch blind + pass
             pass
 
-    def _close_fd(self, fd):
+    def _close_fd(self, fd: int) -> None:
         try:
             os.close(fd)
         except BaseException:  # noqa: BLE001, S110 OS errors are not consistent, catch blind + pass
             pass
 
-    def _fake_bye(self):
+    def _fake_bye(self) -> None:
         self._unblock_fd(self._write_from_browser)
         try:
             os.write(self._write_from_browser, b"{bye}\n")
         except BaseException:  # noqa: BLE001, S110 OS errors are not consistent, catch blind + pass
             pass
 
-    def close(self):
+    def close(self) -> None:
         """Close the pipe."""
         if self.shutdown_lock.acquire(blocking=False):
             if platform.system() == "Windows":
