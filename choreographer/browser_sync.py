@@ -112,7 +112,7 @@ class BrowserSync(TargetSync):
             env=self._browser_impl.get_env(),
             **self._browser_impl.get_popen_args(),
         )
-        super().__init__("0", self)
+        super().__init__("0", self._broker)
         self._add_session(self._session_type("", self._broker))
 
     def __enter__(self) -> Self:

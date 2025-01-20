@@ -6,7 +6,7 @@ It includes helpers and constants for the Chrome Devtools Protocol.
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import MutableMapping
 from enum import Enum
 from typing import Any, NewType
 
@@ -113,8 +113,8 @@ def verify_params(obj):
         )
 
 
-BrowserResponse = NewType("BrowserResponse", Mapping[str, Any])
-BrowserCommand = NewType("BrowserCommand", Mapping[str, Any])
+BrowserResponse = NewType("BrowserResponse", MutableMapping[str, Any])
+BrowserCommand = NewType("BrowserCommand", MutableMapping[str, Any])
 
 MessageKey = NewType("MessageKey", tuple[str, int | None])
 

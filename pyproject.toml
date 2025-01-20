@@ -58,7 +58,7 @@ docs = [
 ]
 
 [tool.uv.sources]
- mkquixote = { path = "../mkquixote", editable = true }
+mkquixote = { path = "../mkquixote", editable = true }
 
 [tool.ruff.lint]
 select = ["ALL"]

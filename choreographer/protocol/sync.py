@@ -6,13 +6,14 @@ from typing import TYPE_CHECKING
 
 import logistro
 
-from choreographer._broker import BrokerSync
+from choreographer import protocol
+from choreographer._brokers import BrokerSync
 
 if TYPE_CHECKING:
     from collections.abc import MutableMapping
     from typing import Any
 
-    from choreographer import protocol
+    from ._interfaces_type import SessionInterface
 
 
 _logger = logistro.getLogger(__name__)
@@ -67,10 +68,12 @@ class SessionSync:
         """
         current_id = self.message_id
         self.message_id += 1
-        json_command = {
-            "id": current_id,
-            "method": command,
-        }
+        json_command = protocol.BrowserCommand(
+            {
+                "id": current_id,
+                "method": command,
+            },
+        )
 
         if self.session_id:
             json_command["sessionId"] = self.session_id
@@ -107,7 +110,7 @@ class TargetSync:
         self.broker = broker
 
         # States
-        self.sessions = {}
+        self.sessions: MutableMapping[str, SessionInterface] = {}
         self.target_id = target_id
         _logger.info(f"Created new target {target_id}.")
 
