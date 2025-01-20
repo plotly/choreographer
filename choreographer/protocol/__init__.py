@@ -10,10 +10,6 @@ from collections.abc import MutableMapping
 from enum import Enum
 from typing import Any, NewType, cast
 
-from . import sync
-
-__all__ = ["sync"]  # does this mean sync is the only export to someone?
-
 BrowserResponse = NewType("BrowserResponse", MutableMapping[str, Any])
 """The type for a response from the browser. Is really a `dict()`."""
 BrowserCommand = NewType("BrowserCommand", MutableMapping[str, Any])

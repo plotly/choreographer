@@ -8,12 +8,18 @@ as a building block for more featureful implementations.
 See the main README for a quickstart.
 """
 
+from .browser_async import (
+    Browser,
+    Tab,
+)
 from .browser_sync import (
     BrowserSync,
     TabSync,
 )
 
 __all__ = [
+    "Browser",
     "BrowserSync",
+    "Tab",
     "TabSync",
 ]
