@@ -24,6 +24,11 @@ class SessionSync:
     # A list of the types that are essential to use
     # with this class
 
+    session_id: str
+    """The id of the session given by the browser."""
+    message_id: int
+    """All messages are counted per session and this is the current message id."""
+
     def __init__(self, session_id: str, broker: BrokerSync) -> None:
         """
         Construct a session from the browser as an object.
@@ -39,7 +44,7 @@ class SessionSync:
         if not isinstance(session_id, str):
             raise TypeError("session_id must be a string")
         # Resources
-        self.broker = broker
+        self._broker = broker
 
         # State
         self.session_id = session_id
@@ -80,7 +85,7 @@ class SessionSync:
         _logger.debug(
             f"Sending {command} with {params} on session {self.session_id}",
         )
-        return self.broker.send_json(json_command)
+        return self._broker.send_json(json_command)
 
 
 class TargetSync:
@@ -92,6 +97,8 @@ class TargetSync:
 
     target_id: str
     """The browser's ID of the target."""
+    sessions: MutableMapping[str, SessionSync]
+    """A list of all the sessions for this target."""
 
     def __init__(self, target_id: str, broker: BrokerSync):
         """
@@ -105,10 +112,10 @@ class TargetSync:
         if not isinstance(target_id, str):
             raise TypeError("target_id must be string")
         # Resources
-        self.broker = broker
+        self._broker = broker
 
         # States
-        self.sessions: MutableMapping[str, SessionSync] = {}
+        self.sessions = {}
         self.target_id = target_id
         _logger.info(f"Created new target {target_id}.")
 

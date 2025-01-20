@@ -51,6 +51,19 @@ class Chromium:
     It also includes chromium-like browsers (chrome, edge, and brave).
     """
 
+    path: str | Path | None
+    """The path to the chromium executable."""
+    gpu_enabled: bool
+    """True if we should use the gpu. False by default for compatibility."""
+    headless: bool
+    """True if we should not show the browser, true by default."""
+    sandbox_enabled: bool
+    """True to enable the sandbox. False by default."""
+    skip_local: bool
+    """True if we want to avoid looking for our local download when searching path."""
+    tmp_dir: TmpDirectory
+    """A reference to a temporary directory object the chromium needs to store data."""
+
     @classmethod
     def logger_parser(
         cls,

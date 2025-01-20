@@ -15,9 +15,12 @@ from . import sync
 __all__ = ["sync"]  # does this mean sync is the only export to someone?
 
 BrowserResponse = NewType("BrowserResponse", MutableMapping[str, Any])
+"""The type for a response from the browser. Is really a `dict()`."""
 BrowserCommand = NewType("BrowserCommand", MutableMapping[str, Any])
+"""The type for a command to the browser. Is really a `dict()`."""
 
 MessageKey = NewType("MessageKey", tuple[str, int | None])
+"""The type for id'ing a message/response. It is `tuple(session_id, message_id)`."""
 
 
 class Ecode(Enum):

@@ -42,7 +42,9 @@ class BrowserSync(TargetSync):
     # with this class
 
     tabs: MutableMapping[str, TabSync]
+    """A mapping by target_id of all the targets which are open tabs."""
     targets: MutableMapping[str, TargetSync]
+    """A mapping by targeT_id of ALL the targets."""
     # Don't init instance attributes with mutables
 
     def _make_lock(self) -> None:
@@ -197,5 +199,11 @@ class BrowserSync(TargetSync):
 
     # wrap our broker for convenience
     def start_output_thread(self, **kwargs: Any) -> None:
-        """Start a separate thread that dumps all messages received to stdout."""
+        """
+        Start a separate thread that dumps all messages received to stdout.
+
+        Args:
+            kwargs: passed directly to print().
+
+        """
         self._broker.run_output_thread(**kwargs)

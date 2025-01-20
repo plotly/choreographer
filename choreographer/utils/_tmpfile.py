@@ -35,6 +35,13 @@ class TmpDirectory:
     not necessarily relying on OS functions.
     """
 
+    temp_dir: tempfile.TemporaryDirectory[str]
+    """A reference to the underlying python `TemporaryDirectory` implementation."""
+    path: Path
+    """The path to the temporary directory."""
+    exists: bool
+    """A flag to indicate if the directory still exists."""
+
     def __init__(self, path: str | None = None, *, sneak: bool = False):
         """
         Construct a wrapped `TemporaryDirectory`.

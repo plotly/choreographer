@@ -29,6 +29,13 @@ _logger = logistro.getLogger(__name__)
 class Pipe:
     """Defines an operating system pipe."""
 
+    from_external_to_choreo: int
+    """Consumers need this, it is the channel the browser uses to talk to choreo."""
+    from_choreo_to_external: int
+    """Consumers needs this, it is the channel choreo writes to the browser on."""
+    shutdown_lock: Lock
+    """Once this is locked, the pipe is closed and can't be reopened."""
+
     def __init__(self) -> None:
         """Construct a pipe using os functions."""
         # This is where pipe listens (from browser)
