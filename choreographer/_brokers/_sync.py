@@ -55,9 +55,9 @@ class BrokerSync:
                 while True:
                     responses = self._channel.read_jsons()
                     for response in responses:
-                        print(json.dumps(response, indent=4), **kwargs)
+                        print(json.dumps(response, indent=4), **kwargs)  # noqa: T201 print in the point
             except ChannelClosedError:
-                print("ChannelClosedError caught.", **kwargs)
+                print("ChannelClosedError caught.", **kwargs)  # noqa: T201 print is the point
 
         _logger.info("Starting thread to dump output to stdout.")
         Thread(target=run_print).start()

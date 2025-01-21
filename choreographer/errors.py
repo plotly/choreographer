@@ -1,5 +1,6 @@
 """A compilation of the errors available in choreographer."""
 
+from ._brokers._async import UnhandledMessageWarning
 from .browsers import (
     BrowserClosedError,
     BrowserFailedError,
@@ -23,4 +24,5 @@ __all__ = [
     "MessageTypeError",
     "MissingKeyError",
     "TmpDirWarning",
+    "UnhandledMessageWarning",
 ]

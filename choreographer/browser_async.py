@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import os
 import subprocess
+import warnings
 from asyncio import Lock
 from typing import TYPE_CHECKING
 
@@ -14,6 +15,7 @@ from ._brokers import Broker
 from .browsers import BrowserClosedError, BrowserFailedError, Chromium
 from .channels import ChannelClosedError, Pipe
 from .protocol.devtools_async import Session, Target
+from .utils import TmpDirWarning
 from .utils._kill import kill
 
 if TYPE_CHECKING:
@@ -47,6 +49,7 @@ class Browser(Target):
     targets: MutableMapping[str, Target]
     """A mapping by target_id of ALL the targets."""
     # Don't init instance attributes with mutables
+    _watch_dog_task: asyncio.Task[Any] | None = None
 
     def _make_lock(self) -> None:
         self._open_lock = Lock()
@@ -94,6 +97,8 @@ class Browser(Target):
         self.tabs = {}
         self.targets = {}
 
+        self._watchdog_healthy = True
+
         # Compose Resources
         self._channel = channel_cls()
         self._broker = self._broker_type(self, self._channel)
@@ -106,11 +111,10 @@ class Browser(Target):
             "browser_proc",
             parser=parser,
         )
-        # we do need something to indicate we're open TODO yeah an open lock
 
     async def open(self) -> None:
         """Open the browser."""
-        if not self._is_open():
+        if await self._is_open():
             raise RuntimeError("Can't re-open the browser")
 
         cli = self._browser_impl.get_cli()
@@ -127,11 +131,21 @@ class Browser(Target):
                 **args,
             )
 
-        # TODO How do we catch errors
         self.subprocess = await asyncio.to_thread(run)
 
         super().__init__("0", self._broker)
         self._add_session(self._session_type("", self._broker))
+
+        try:
+            self._watch_dog_task = asyncio.create_task(self._watchdog())
+            # Checkout for thread safety for above
+            self._broker.run_read_loop()
+            # await self.populate_targets() # TODO: NOT IMPLEMENTED # noqa
+        except (BrowserClosedError, BrowserFailedError, asyncio.CancelledError) as e:
+            raise BrowserFailedError(
+                "The browser seemed to close immediately after starting. "
+                "Perhaps adding debug_browser=True will help.",
+            ) from e
 
     async def __aenter__(self) -> Self:
         """Open browser as context to launch on entry and close on exit."""
@@ -139,7 +153,6 @@ class Browser(Target):
         return self
 
     # for use with `await Browser()`
-
     def __await__(self) -> Generator[Any, Any, None]:
         """If you await the `Browser()`, it will implicitly call `open()`."""
         return self.open().__await__()
@@ -149,7 +162,6 @@ class Browser(Target):
             return self.subprocess.poll() is None
         else:
             try:
-                # TODO: how do we catch errors?
                 await asyncio.to_thread(self.subprocess.wait, wait)
             except subprocess.TimeoutExpired:
                 return False
@@ -166,13 +178,11 @@ class Browser(Target):
         except ChannelClosedError:
             pass
 
-        # TODO how do we handle errors
         await asyncio.to_thread(self._channel.close)
 
         if await self._is_closed():
             return
 
-        # TODO how do we handle errors
         await asyncio.to_thread(kill, self.subprocess)
         if await self._is_closed(wait=4):
             return
@@ -197,6 +207,8 @@ class Browser(Target):
         _logger.info("Browser channel closed.")
         await asyncio.to_thread(self._browser_impl.clean)
         _logger.info("Browser implementation cleaned up.")
+        if self._watch_dog_task:
+            self._watch_dog_task.cancel()
 
     async def __aexit__(
         self,
@@ -206,6 +218,22 @@ class Browser(Target):
     ) -> None:  # None instead of False is fine, eases type checking
         """Close the browser."""
         await self.close()
+
+    async def _watchdog(self) -> None:
+        _logger.info("Starting watchdog")
+        await asyncio.to_thread(self.subprocess.wait)
+        if await self._is_closed():
+            return
+        self._watchdog_healthy = False
+        _logger.warning("Browser is being closed because chrom* closed")
+        await self.close()
+        await asyncio.sleep(1)
+        with warnings.catch_warnings():
+            # ignore warnings here because
+            # watchdog killing is last resort
+            # and can leaves stuff in weird state
+            warnings.filterwarnings("ignore", category=TmpDirWarning)
+            await asyncio.to_thread(self._browser_impl.clean)
 
     def _add_tab(self, tab: Tab) -> None:
         if not isinstance(tab, self._tab_type):

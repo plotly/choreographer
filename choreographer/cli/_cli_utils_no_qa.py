@@ -10,16 +10,17 @@ import time
 # ruff has line-level and file-level QA suppression
 # so lets give diagnose a separate file
 
-# ruff: noqa: PLR0915, C901, S603, BLE001, S607, PERF203, TRY002
+# ruff: noqa: PLR0915, C901, S603, BLE001, S607, PERF203, TRY002, T201
 
 # in order, exceptions are:
 # - function complexity (statements?)
 # - function complexity (algo measure)
 # - validate subprocess input arguments
 # - blind exception
-# - partial executable path
+# - partial executable path (bash not /bin/bash)
 # - performance overhead of try-except in loop
 # - make own exceptions
+# - no print
 
 
 def diagnose() -> None:

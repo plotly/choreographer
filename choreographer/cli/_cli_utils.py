@@ -81,8 +81,8 @@ def get_chrome_sync(
     )
     version_obj = browser_list["versions"][i]
     if verbose:
-        print(version_obj["version"])
-        print(version_obj["revision"])
+        print(version_obj["version"])  # noqa: T201 allow print in cli
+        print(version_obj["revision"])  # noqa: T201 allow print in cli
     chromium_sources = version_obj["downloads"]["chrome"]
     url = ""
     for src in chromium_sources:
@@ -175,4 +175,4 @@ def get_chrome_cli() -> None:
             "You must specify a platform: "
             f"linux64, win32, win64, mac-x64, mac-arm64, not {platform}",
         )
-    print(get_chrome_sync(arch=arch, i=i, path=path, verbose=verbose))
+    print(get_chrome_sync(arch=arch, i=i, path=path, verbose=verbose))  # noqa: T201 allow print in cli

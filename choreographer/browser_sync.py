@@ -99,7 +99,6 @@ class BrowserSync(TargetSync):
             "browser_proc",
             parser=parser,
         )
-        # we do need something to indicate we're open TODO yeah an open lock
 
     def open(self) -> None:
         """Open the browser."""

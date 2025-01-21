@@ -56,4 +56,4 @@ process.wait()
 # pipe isn't always closed when chrome closes
 # so we pretend to be chrome and send a bye instead
 # also, above depends on async/sync, platform, etc
-print("{bye}")
+print("{bye}")  # noqa: T201 we need print here
