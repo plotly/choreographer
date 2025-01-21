@@ -11,6 +11,8 @@ from typing import TYPE_CHECKING
 
 import logistro
 
+from choreographer import protocol
+
 from ._brokers import Broker
 from .browsers import BrowserClosedError, BrowserFailedError, Chromium
 from .channels import ChannelClosedError, Pipe
@@ -138,9 +140,8 @@ class Browser(Target):
 
         try:
             self._watch_dog_task = asyncio.create_task(self._watchdog())
-            # Checkout for thread safety for above
             self._broker.run_read_loop()
-            # await self.populate_targets() # TODO: NOT IMPLEMENTED # noqa
+            await self.populate_targets()
         except (BrowserClosedError, BrowserFailedError, asyncio.CancelledError) as e:
             raise BrowserFailedError(
                 "The browser seemed to close immediately after starting. "
@@ -153,13 +154,15 @@ class Browser(Target):
         return self
 
     # for use with `await Browser()`
-    def __await__(self) -> Generator[Any, Any, None]:
+    def __await__(self) -> Generator[Any, Any, Browser]:
         """If you await the `Browser()`, it will implicitly call `open()`."""
-        return self.open().__await__()
+        return self.__aenter__().__await__()
 
     async def _is_closed(self, wait: int | None = 0) -> bool:
         if wait == 0:
-            return self.subprocess.poll() is None
+            # poll returns None if its open
+            _is_open = self.subprocess.poll() is None
+            return not _is_open
         else:
             try:
                 await asyncio.to_thread(self.subprocess.wait, wait)
@@ -191,6 +194,9 @@ class Browser(Target):
 
     async def close(self) -> None:
         """Close the browser."""
+        if self._watch_dog_task:
+            _logger.debug("Cancelling watchdog.")
+            self._watch_dog_task.cancel()
         await self._broker.clean()
         _logger.info("Broker cleaned up.")
         if not self._release_lock():
@@ -207,8 +213,6 @@ class Browser(Target):
         _logger.info("Browser channel closed.")
         await asyncio.to_thread(self._browser_impl.clean)
         _logger.info("Browser implementation cleaned up.")
-        if self._watch_dog_task:
-            self._watch_dog_task.cancel()
 
     async def __aexit__(
         self,
@@ -222,10 +226,8 @@ class Browser(Target):
     async def _watchdog(self) -> None:
         _logger.info("Starting watchdog")
         await asyncio.to_thread(self.subprocess.wait)
-        if await self._is_closed():
-            return
-        self._watchdog_healthy = False
         _logger.warning("Browser is being closed because chrom* closed")
+        self._watch_dog_task = None
         await self.close()
         await asyncio.sleep(1)
         with warnings.catch_warnings():
@@ -250,3 +252,54 @@ class Browser(Target):
         if self.tabs.values():
             return next(iter(self.tabs.values()))
         return None
+
+    async def populate_targets(self) -> None:
+        """Solicit the actual browser for all targets to add to the browser object."""
+        if await self._is_closed():
+            raise BrowserClosedError("populate_targets() called on a closed browser")
+        response = await self.send_command("Target.getTargets")
+        if "error" in response:
+            raise RuntimeError("Could not get targets") from Exception(
+                response["error"],
+            )
+
+        for json_response in response["result"]["targetInfos"]:
+            if (
+                json_response["type"] == "page"
+                and json_response["targetId"] not in self.tabs
+            ):
+                target_id = json_response["targetId"]
+                new_tab = Tab(target_id, self._broker)
+                try:
+                    await new_tab.create_session()
+                except protocol.DevtoolsProtocolError as e:
+                    if e.code == protocol.Ecode.TARGET_NOT_FOUND:
+                        _logger.warning(
+                            f"Target {target_id} not found " "(could be closed before)",
+                        )
+                        continue
+                    else:
+                        raise
+                self._add_tab(new_tab)
+                _logger.debug(f"The target {target_id} was added")
+
+    async def create_session(self) -> Session:
+        """Create a browser session. Only in supported browsers, is experimental."""
+        if not self._is_open():
+            raise BrowserClosedError("create_session() called on a closed browser")
+        warnings.warn(  # noqa: B028
+            "Creating new sessions on Browser() only works with some "
+            "versions of Chrome, it is experimental.",
+            protocol.ExperimentalFeatureWarning,
+        )
+        response = await self.send_command("Target.attachToBrowserTarget")
+        if "error" in response:
+            raise RuntimeError(
+                "Could not create session",
+            ) from protocol.DevtoolsProtocolError(
+                response,
+            )
+        session_id = response["result"]["sessionId"]
+        new_session = Session(session_id, self._broker)
+        self._add_session(new_session)
+        return new_session

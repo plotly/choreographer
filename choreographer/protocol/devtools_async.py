@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import logistro
 
@@ -160,3 +160,50 @@ class Target:
             f"Sending {command} with {params} on session {session.session_id}",
         )
         return await session.send_command(command, params)
+
+    async def create_session(self) -> Session:
+        """Create a new session on this target."""
+        response = await self._broker._browser.send_command(  # noqa: SLF001 yeah we need the browser :-(
+            "Target.attachToTarget",
+            params={"targetId": self.target_id, "flatten": True},
+        )
+        if "error" in response:
+            raise RuntimeError(
+                "Could not create session",
+            ) from protocol.DevtoolsProtocolError(
+                response,
+            )
+        session_id = response["result"]["sessionId"]
+        new_session = Session(session_id, self._broker)
+        self._add_session(new_session)
+        return new_session
+
+    # async only
+    async def close_session(
+        self,
+        session_id: str,
+    ) -> protocol.BrowserResponse:
+        """
+        Close a session by session_id.
+
+        Args:
+            session_id: the session to close
+
+        """
+        if isinstance(session_id, Session):
+            session_id = session_id.session_id
+        response = await self._broker._browser.send_command(  # noqa: SLF001 we need browser
+            command="Target.detachFromTarget",
+            params={"sessionId": session_id},
+        )
+
+        self._remove_session(session_id)
+        if "error" in response:
+            raise RuntimeError(
+                "Could not close session",
+            ) from protocol.DevtoolsProtocolError(
+                response,
+            )
+        _logger.debug(f"The session {session_id} has been closed")
+        return cast(protocol.BrowserResponse, response)
+        # kinda hate, why do we need this again?
