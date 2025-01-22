@@ -17,8 +17,7 @@ from choreographer import errors
 # Are used to re-run tests under different conditions
 VERBOSITY_FOR_DEBUG = 3
 
-
-logistro.getLogger("choreographer").setLevel("ERROR")
+logistro.getLogger("choreographer").setLevel(1)
 
 
 @pytest.fixture(params=[True, False], ids=["enable_sandbox", ""])

@@ -88,7 +88,7 @@ class Session:
         if params:
             json_command["params"] = params
         _logger.debug(
-            f"Sending {command} with {params} on session {self.session_id}",
+            f"Cmd '{command}', params '{params}' on sessionId '{self.session_id}'",
         )
         _logger.debug2(f"In session.send_command for {json_command}")
         return await self._broker.write_json(json_command)
@@ -217,7 +217,7 @@ class Target:
             raise RuntimeError("Cannot send_command without at least one valid session")
         session = self.get_session()
         _logger.debug(
-            f"Sending {command} with {params} on session {session.session_id}",
+            f"Cmd '{command}', params '{params}' on sessionId '{self.session_id}'",
         )
         return await session.send_command(command, params)
 

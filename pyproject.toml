@@ -59,6 +59,7 @@ dev = [
 
 [tool.uv.sources]
 mkquixote = { path = "../mkquixote", editable = true }
+logistro = { path = "../logistro", editable = true }
 
 [tool.ruff.lint]
 select = ["ALL"]
@@ -92,13 +93,13 @@ ignore = [
 
 [tool.pytest.ini_options]
 asyncio_default_fixture_loop_scope = "function"
-log_cli = true
+log_cli = false
 
 [tool.poe.tasks]
 _test_proc = "pytest -W error -n auto -v -rfE --capture=fd tests/test_process.py"
 _test_fn = "pytest -W error -n auto -v -rfE --ignore=tests/test_process.py"
-_debug-test_proc = "pytest -W error -vvx -rA --capture=tee-sys tests/test_process.py"
-_debug-test_fn = "pytest -W error -vvvx -rA --capture=tee-sys --ignore=tests/test_process.py"
+_debug-test_proc = "pytest --log-level=1 -W error -vvx -rA --capture=fd tests/test_process.py"
+_debug-test_fn = "pytest --log-level=1 -W error -vvvx -rA --capture=fd --ignore=tests/test_process.py"
 
 # the capture on these is weird, the mechanics are weird, i forget exactly whats its doing
 [tool.poe.tasks.test]
