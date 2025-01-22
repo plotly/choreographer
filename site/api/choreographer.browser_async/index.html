@@ -10,13 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://github.com/plotly/choreographer/api/choreographer.browser_sync/">
+        <link rel="canonical" href="https://github.com/plotly/choreographer/api/choreographer.browser_async/">
       
       
-        <link rel="prev" href="../choreographer.errors/">
+        <link rel="prev" href="../choreographer/">
       
       
-        <link rel="next" href="../choreographer.browsers/">
+        <link rel="next" href="../choreographer.errors/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
@@ -24,7 +24,7 @@
     
     
       
-        <title>browser_sync - choreographer</title>
+        <title>browser_async - choreographer</title>
       
     
     
@@ -68,7 +68,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#module-browser_sync" class="md-skip">
+        <a href="#module-browser_async" class="md-skip">
           Skip to content
         </a>
       
@@ -104,7 +104,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              browser_sync
+              browser_async
             
           </span>
         </div>
@@ -331,48 +331,6 @@
                 
   
   
-  
-  
-    <li class="md-nav__item">
-      <a href="../choreographer.browser_async/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    browser_async
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../choreographer.errors/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    errors
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
     
   
   
@@ -389,7 +347,7 @@
           
   
   <span class="md-ellipsis">
-    browser_sync
+    browser_async
   </span>
   
 
@@ -400,7 +358,7 @@
         
   
   <span class="md-ellipsis">
-    browser_sync
+    browser_async
   </span>
   
 
@@ -432,13 +390,13 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#TabSync" class="md-nav__link">
+  <a href="#Tab" class="md-nav__link">
     <span class="md-ellipsis">
-      class TabSync()
+      class Tab()
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="class TabSync()">
+    <nav class="md-nav" aria-label="class Tab()">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -452,7 +410,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#TabSync-target_id" class="md-nav__link">
+  <a href="#Tab-target_id" class="md-nav__link">
     <span class="md-ellipsis">
       target_id
     </span>
@@ -461,7 +419,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#TabSync-sessions" class="md-nav__link">
+  <a href="#Tab-sessions" class="md-nav__link">
     <span class="md-ellipsis">
       sessions
     </span>
@@ -485,7 +443,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#TabSync-a__init__" class="md-nav__link">
+  <a href="#Tab-a__init__" class="md-nav__link">
     <span class="md-ellipsis">
       __init__(...)
     </span>
@@ -494,7 +452,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#TabSync-get_session" class="md-nav__link">
+  <a href="#Tab-get_session" class="md-nav__link">
     <span class="md-ellipsis">
       get_session(...)
     </span>
@@ -503,9 +461,63 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#TabSync-send_command" class="md-nav__link">
+  <a href="#Tab-send_command" class="md-nav__link">
     <span class="md-ellipsis">
       send_command(...)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#Tab-create_session" class="md-nav__link">
+    <span class="md-ellipsis">
+      create_session(...)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#Tab-close_session" class="md-nav__link">
+    <span class="md-ellipsis">
+      close_session(...)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#Tab-subscribe" class="md-nav__link">
+    <span class="md-ellipsis">
+      subscribe(...)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#Tab-unsubscribe" class="md-nav__link">
+    <span class="md-ellipsis">
+      unsubscribe(...)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#Tab-subscribe_once" class="md-nav__link">
+    <span class="md-ellipsis">
+      subscribe_once(...)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#Tab-close" class="md-nav__link">
+    <span class="md-ellipsis">
+      close(...)
     </span>
   </a>
   
@@ -522,13 +534,13 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#BrowserSync" class="md-nav__link">
+  <a href="#Browser" class="md-nav__link">
     <span class="md-ellipsis">
-      class BrowserSync()
+      class Browser()
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="class BrowserSync()">
+    <nav class="md-nav" aria-label="class Browser()">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -542,7 +554,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#BrowserSync-target_id" class="md-nav__link">
+  <a href="#Browser-target_id" class="md-nav__link">
     <span class="md-ellipsis">
       target_id
     </span>
@@ -551,7 +563,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#BrowserSync-sessions" class="md-nav__link">
+  <a href="#Browser-sessions" class="md-nav__link">
     <span class="md-ellipsis">
       sessions
     </span>
@@ -560,7 +572,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#BrowserSync-tabs" class="md-nav__link">
+  <a href="#Browser-tabs" class="md-nav__link">
     <span class="md-ellipsis">
       tabs
     </span>
@@ -569,7 +581,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#BrowserSync-targets" class="md-nav__link">
+  <a href="#Browser-targets" class="md-nav__link">
     <span class="md-ellipsis">
       targets
     </span>
@@ -593,7 +605,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#BrowserSync-a__init__" class="md-nav__link">
+  <a href="#Browser-a__init__" class="md-nav__link">
     <span class="md-ellipsis">
       __init__(...)
     </span>
@@ -602,7 +614,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#BrowserSync-get_session" class="md-nav__link">
+  <a href="#Browser-get_session" class="md-nav__link">
     <span class="md-ellipsis">
       get_session(...)
     </span>
@@ -611,7 +623,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#BrowserSync-send_command" class="md-nav__link">
+  <a href="#Browser-send_command" class="md-nav__link">
     <span class="md-ellipsis">
       send_command(...)
     </span>
@@ -620,7 +632,43 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#BrowserSync-open" class="md-nav__link">
+  <a href="#Browser-close_session" class="md-nav__link">
+    <span class="md-ellipsis">
+      close_session(...)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#Browser-subscribe" class="md-nav__link">
+    <span class="md-ellipsis">
+      subscribe(...)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#Browser-unsubscribe" class="md-nav__link">
+    <span class="md-ellipsis">
+      unsubscribe(...)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#Browser-subscribe_once" class="md-nav__link">
+    <span class="md-ellipsis">
+      subscribe_once(...)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#Browser-open" class="md-nav__link">
     <span class="md-ellipsis">
       open(...)
     </span>
@@ -629,7 +677,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#BrowserSync-close" class="md-nav__link">
+  <a href="#Browser-close" class="md-nav__link">
     <span class="md-ellipsis">
       close(...)
     </span>
@@ -638,7 +686,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#BrowserSync-get_tab" class="md-nav__link">
+  <a href="#Browser-get_tab" class="md-nav__link">
     <span class="md-ellipsis">
       get_tab(...)
     </span>
@@ -647,9 +695,36 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#BrowserSync-start_output_thread" class="md-nav__link">
+  <a href="#Browser-populate_targets" class="md-nav__link">
     <span class="md-ellipsis">
-      start_output_thread(...)
+      populate_targets(...)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#Browser-create_session" class="md-nav__link">
+    <span class="md-ellipsis">
+      create_session(...)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#Browser-create_tab" class="md-nav__link">
+    <span class="md-ellipsis">
+      create_tab(...)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#Browser-close_tab" class="md-nav__link">
+    <span class="md-ellipsis">
+      close_tab(...)
     </span>
   </a>
   
@@ -674,6 +749,48 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../choreographer.errors/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    errors
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../choreographer.browser_sync/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    browser_sync
+  </span>
+  
+
+      </a>
     </li>
   
 
@@ -1042,13 +1159,13 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#TabSync" class="md-nav__link">
+  <a href="#Tab" class="md-nav__link">
     <span class="md-ellipsis">
-      class TabSync()
+      class Tab()
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="class TabSync()">
+    <nav class="md-nav" aria-label="class Tab()">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1062,7 +1179,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#TabSync-target_id" class="md-nav__link">
+  <a href="#Tab-target_id" class="md-nav__link">
     <span class="md-ellipsis">
       target_id
     </span>
@@ -1071,7 +1188,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#TabSync-sessions" class="md-nav__link">
+  <a href="#Tab-sessions" class="md-nav__link">
     <span class="md-ellipsis">
       sessions
     </span>
@@ -1095,7 +1212,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#TabSync-a__init__" class="md-nav__link">
+  <a href="#Tab-a__init__" class="md-nav__link">
     <span class="md-ellipsis">
       __init__(...)
     </span>
@@ -1104,7 +1221,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#TabSync-get_session" class="md-nav__link">
+  <a href="#Tab-get_session" class="md-nav__link">
     <span class="md-ellipsis">
       get_session(...)
     </span>
@@ -1113,9 +1230,63 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#TabSync-send_command" class="md-nav__link">
+  <a href="#Tab-send_command" class="md-nav__link">
     <span class="md-ellipsis">
       send_command(...)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#Tab-create_session" class="md-nav__link">
+    <span class="md-ellipsis">
+      create_session(...)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#Tab-close_session" class="md-nav__link">
+    <span class="md-ellipsis">
+      close_session(...)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#Tab-subscribe" class="md-nav__link">
+    <span class="md-ellipsis">
+      subscribe(...)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#Tab-unsubscribe" class="md-nav__link">
+    <span class="md-ellipsis">
+      unsubscribe(...)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#Tab-subscribe_once" class="md-nav__link">
+    <span class="md-ellipsis">
+      subscribe_once(...)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#Tab-close" class="md-nav__link">
+    <span class="md-ellipsis">
+      close(...)
     </span>
   </a>
   
@@ -1132,13 +1303,13 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#BrowserSync" class="md-nav__link">
+  <a href="#Browser" class="md-nav__link">
     <span class="md-ellipsis">
-      class BrowserSync()
+      class Browser()
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="class BrowserSync()">
+    <nav class="md-nav" aria-label="class Browser()">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1152,7 +1323,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#BrowserSync-target_id" class="md-nav__link">
+  <a href="#Browser-target_id" class="md-nav__link">
     <span class="md-ellipsis">
       target_id
     </span>
@@ -1161,7 +1332,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#BrowserSync-sessions" class="md-nav__link">
+  <a href="#Browser-sessions" class="md-nav__link">
     <span class="md-ellipsis">
       sessions
     </span>
@@ -1170,7 +1341,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#BrowserSync-tabs" class="md-nav__link">
+  <a href="#Browser-tabs" class="md-nav__link">
     <span class="md-ellipsis">
       tabs
     </span>
@@ -1179,7 +1350,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#BrowserSync-targets" class="md-nav__link">
+  <a href="#Browser-targets" class="md-nav__link">
     <span class="md-ellipsis">
       targets
     </span>
@@ -1203,7 +1374,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#BrowserSync-a__init__" class="md-nav__link">
+  <a href="#Browser-a__init__" class="md-nav__link">
     <span class="md-ellipsis">
       __init__(...)
     </span>
@@ -1212,7 +1383,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#BrowserSync-get_session" class="md-nav__link">
+  <a href="#Browser-get_session" class="md-nav__link">
     <span class="md-ellipsis">
       get_session(...)
     </span>
@@ -1221,7 +1392,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#BrowserSync-send_command" class="md-nav__link">
+  <a href="#Browser-send_command" class="md-nav__link">
     <span class="md-ellipsis">
       send_command(...)
     </span>
@@ -1230,7 +1401,43 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#BrowserSync-open" class="md-nav__link">
+  <a href="#Browser-close_session" class="md-nav__link">
+    <span class="md-ellipsis">
+      close_session(...)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#Browser-subscribe" class="md-nav__link">
+    <span class="md-ellipsis">
+      subscribe(...)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#Browser-unsubscribe" class="md-nav__link">
+    <span class="md-ellipsis">
+      unsubscribe(...)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#Browser-subscribe_once" class="md-nav__link">
+    <span class="md-ellipsis">
+      subscribe_once(...)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#Browser-open" class="md-nav__link">
     <span class="md-ellipsis">
       open(...)
     </span>
@@ -1239,7 +1446,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#BrowserSync-close" class="md-nav__link">
+  <a href="#Browser-close" class="md-nav__link">
     <span class="md-ellipsis">
       close(...)
     </span>
@@ -1248,7 +1455,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#BrowserSync-get_tab" class="md-nav__link">
+  <a href="#Browser-get_tab" class="md-nav__link">
     <span class="md-ellipsis">
       get_tab(...)
     </span>
@@ -1257,9 +1464,36 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#BrowserSync-start_output_thread" class="md-nav__link">
+  <a href="#Browser-populate_targets" class="md-nav__link">
     <span class="md-ellipsis">
-      start_output_thread(...)
+      populate_targets(...)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#Browser-create_session" class="md-nav__link">
+    <span class="md-ellipsis">
+      create_session(...)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#Browser-create_tab" class="md-nav__link">
+    <span class="md-ellipsis">
+      create_tab(...)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#Browser-close_tab" class="md-nav__link">
+    <span class="md-ellipsis">
+      close_tab(...)
     </span>
   </a>
   
@@ -1296,28 +1530,28 @@
 
 
 <p><span class="quixote-small_note" translate="no">
-choreographer.browser_sync
+choreographer.browser_async
 </span></p>
-<h1 id="module-browser_sync">module: <code>browser_sync</code></h1>
+<h1 id="module-browser_async">module: <code>browser_async</code></h1>
 <div class="long-description text">
-<p>Provides the sync api: <code>BrowserSync</code>, <code>TabSync</code>.</p>
+<p>Provides the async api: <code>Browser</code>, <code>Tab</code>.</p>
 </div>
 <h2 id="classes">Classes</h2>
 <div class="individual-class">
-<h3 id="TabSync"><code>class TabSync(choreographer.protocol.devtools_sync.TargetSync):</code></h3>
+<h3 id="Tab"><code>class Tab(choreographer.protocol.devtools_async.Target):</code></h3>
 <div class="long-description text">
-<p>A wrapper for <code>TargetSync</code>, so user can use <code>TabSync</code>, not <code>TargetSync</code>.</p>
+<p>A wrapper for <code>Target</code>, so user can use <code>Tab</code>, not <code>Target</code>.</p>
 </div>
 <h4 id="attributes">attributes</h4>
 <div class="indent">
-<h5 id="TabSync-target_id"><code>target_id</code><small class="text" markdown> - The browser's ID of the target.</small></h5>
+<h5 id="Tab-target_id"><code>target_id</code><small class="text" markdown> - The browser's ID of the target.</small></h5>
 </div>
 <div class="indent">
-<h5 id="TabSync-sessions"><code>sessions</code><small class="text" markdown> - A list of all the sessions for this target.</small></h5>
+<h5 id="Tab-sessions"><code>sessions</code><small class="text" markdown> - A list of all the sessions for this target.</small></h5>
 </div>
 <h4 id="methods">methods</h4>
 <div class="indent">
-<h5 id="TabSync-a__init__"><code>__init__(self, target_id, broker)</code></h5>
+<h5 id="Tab-a__init__"><code>__init__(self, target_id, broker)</code></h5>
 <div class="long-description">
 <div class="text">
 <p>Create a target after one ahs been created by the browser.</p>
@@ -1336,7 +1570,7 @@ choreographer.browser_sync
 </div>
 </div>
 <div class="indent">
-<h5 id="TabSync-get_session"><code>get_session(self)</code></h5>
+<h5 id="Tab-get_session"><code>get_session(self)</code></h5>
 <div class="long-description">
 <div class="text">
 <p>Retrieve the first session of the target, if it exists.</p>
@@ -1344,7 +1578,7 @@ choreographer.browser_sync
 </div>
 </div>
 <div class="indent">
-<h5 id="TabSync-send_command"><code>send_command(self, command, params)</code></h5>
+<h5 id="Tab-send_command"><code>send_command(self, command, params)</code></h5>
 <div class="long-description">
 <div class="text">
 <p>Send a command to the first session in a target.</p>
@@ -1363,28 +1597,119 @@ choreographer.browser_sync
 </div>
 </div>
 </div>
+<div class="indent">
+<h5 id="Tab-create_session"><code>create_session(self)</code></h5>
+<div class="long-description">
+<div class="text">
+<p>Create a new session on this target.</p>
+</div>
+</div>
+</div>
+<div class="indent">
+<h5 id="Tab-close_session"><code>close_session(self, session_id)</code></h5>
+<div class="long-description">
+<div class="text">
+<p>Close a session by session_id.</p>
+</div>
+<p><span class="h7">arguments</span></p>
+<div class="indent">
+<div>
+<p><span class="code key" translate="no">session_id</span>
+<span class="text" markdown> -  the session to close</span></p>
+</div>
+</div>
+</div>
+</div>
+<div class="indent">
+<h5 id="Tab-subscribe"><code>subscribe(self, string, callback, repeating)</code></h5>
+<div class="long-description">
+<div class="text">
+<p>Subscribe to an event on the main session of this target.</p>
+</div>
+<p><span class="h7">arguments</span></p>
+<div class="indent">
+<div>
+<p><span class="code key" translate="no">string</span>
+<span class="text" markdown> -  the name of the event. Can use * wildcard at the end.</span></p>
+</div>
+<div>
+<p><span class="code key" translate="no">callback</span>
+<span class="text" markdown> -  the callback (which takes a message dict and returns nothing)</span></p>
+</div>
+<div>
+<p><span class="code key" translate="no">repeating</span>
+<span class="text" markdown> -  default True, should the callback execute more than once</span></p>
+</div>
+</div>
+</div>
+</div>
+<div class="indent">
+<h5 id="Tab-unsubscribe"><code>unsubscribe(self, string)</code></h5>
+<div class="long-description">
+<div class="text">
+<p>Remove a subscription.</p>
+</div>
+<p><span class="h7">arguments</span></p>
+<div class="indent">
+<div>
+<p><span class="code key" translate="no">string</span>
+<span class="text" markdown> -  the subscription to remove.</span></p>
+</div>
+</div>
+</div>
+</div>
+<div class="indent">
+<h5 id="Tab-subscribe_once"><code>subscribe_once(self, string)</code></h5>
+<div class="long-description">
+<div class="text">
+<p>Return a future for a browser event for the first session of this target.</p>
+<p>Generally python asyncio doesn't recommend futures.</p>
+<p>But in this case, one must call subscribe_once and await it later,
+generally because they must subscribe and then provoke the event.</p>
+</div>
+<p><span class="h7">arguments</span></p>
+<div class="indent">
+<div>
+<p><span class="code key" translate="no">string</span>
+<span class="text" markdown> -  the event to subscribe to</span></p>
+</div>
+</div>
+<p><span class="h7">returns</span></p>
+<div class="indent text">
+<p>A future to be awaited later, the complete event.</p>
+</div>
+</div>
+</div>
+<div class="indent">
+<h5 id="Tab-close"><code>close(self)</code></h5>
+<div class="long-description">
+<div class="text">
+<p>Close the tab.</p>
+</div>
+</div>
+</div>
 </div>
 <div class="individual-class">
-<h3 id="BrowserSync"><code>class BrowserSync(choreographer.protocol.devtools_sync.TargetSync):</code></h3>
+<h3 id="Browser"><code>class Browser(choreographer.protocol.devtools_async.Target):</code></h3>
 <div class="long-description text">
-<p><code>BrowserSync</code> is the sync implementation of <code>Browser</code>.</p>
+<p><code>Browser</code> is the async implementation of <code>Browser</code>.</p>
 </div>
 <h4 id="attributes_1">attributes</h4>
 <div class="indent">
-<h5 id="BrowserSync-target_id"><code>target_id</code><small class="text" markdown> - The browser's ID of the target.</small></h5>
+<h5 id="Browser-target_id"><code>target_id</code><small class="text" markdown> - The browser's ID of the target.</small></h5>
 </div>
 <div class="indent">
-<h5 id="BrowserSync-sessions"><code>sessions</code><small class="text" markdown> - A list of all the sessions for this target.</small></h5>
+<h5 id="Browser-sessions"><code>sessions</code><small class="text" markdown> - A list of all the sessions for this target.</small></h5>
 </div>
 <div class="indent">
-<h5 id="BrowserSync-tabs"><code>tabs</code><small class="text" markdown> - A mapping by target_id of all the targets which are open tabs.</small></h5>
+<h5 id="Browser-tabs"><code>tabs</code><small class="text" markdown> - A mapping by target_id of all the targets which are open tabs.</small></h5>
 </div>
 <div class="indent">
-<h5 id="BrowserSync-targets"><code>targets</code><small class="text" markdown> - A mapping by target_id of ALL the targets.</small></h5>
+<h5 id="Browser-targets"><code>targets</code><small class="text" markdown> - A mapping by target_id of ALL the targets.</small></h5>
 </div>
 <h4 id="methods_1">methods</h4>
 <div class="indent">
-<h5 id="BrowserSync-a__init__"><code>__init__(self, path, browser_cls, channel_cls, kwargs)</code></h5>
+<h5 id="Browser-a__init__"><code>__init__(self, path, browser_cls, channel_cls, kwargs)</code></h5>
 <div class="long-description">
 <div class="text">
 <p>Construct a new browser instance.</p>
@@ -1412,7 +1737,7 @@ headless=True/False, enable_gpu=True/False, etc.</span></p>
 </div>
 </div>
 <div class="indent">
-<h5 id="BrowserSync-get_session"><code>get_session(self)</code></h5>
+<h5 id="Browser-get_session"><code>get_session(self)</code></h5>
 <div class="long-description">
 <div class="text">
 <p>Retrieve the first session of the target, if it exists.</p>
@@ -1420,7 +1745,7 @@ headless=True/False, enable_gpu=True/False, etc.</span></p>
 </div>
 </div>
 <div class="indent">
-<h5 id="BrowserSync-send_command"><code>send_command(self, command, params)</code></h5>
+<h5 id="Browser-send_command"><code>send_command(self, command, params)</code></h5>
 <div class="long-description">
 <div class="text">
 <p>Send a command to the first session in a target.</p>
@@ -1440,7 +1765,82 @@ headless=True/False, enable_gpu=True/False, etc.</span></p>
 </div>
 </div>
 <div class="indent">
-<h5 id="BrowserSync-open"><code>open(self)</code></h5>
+<h5 id="Browser-close_session"><code>close_session(self, session_id)</code></h5>
+<div class="long-description">
+<div class="text">
+<p>Close a session by session_id.</p>
+</div>
+<p><span class="h7">arguments</span></p>
+<div class="indent">
+<div>
+<p><span class="code key" translate="no">session_id</span>
+<span class="text" markdown> -  the session to close</span></p>
+</div>
+</div>
+</div>
+</div>
+<div class="indent">
+<h5 id="Browser-subscribe"><code>subscribe(self, string, callback, repeating)</code></h5>
+<div class="long-description">
+<div class="text">
+<p>Subscribe to an event on the main session of this target.</p>
+</div>
+<p><span class="h7">arguments</span></p>
+<div class="indent">
+<div>
+<p><span class="code key" translate="no">string</span>
+<span class="text" markdown> -  the name of the event. Can use * wildcard at the end.</span></p>
+</div>
+<div>
+<p><span class="code key" translate="no">callback</span>
+<span class="text" markdown> -  the callback (which takes a message dict and returns nothing)</span></p>
+</div>
+<div>
+<p><span class="code key" translate="no">repeating</span>
+<span class="text" markdown> -  default True, should the callback execute more than once</span></p>
+</div>
+</div>
+</div>
+</div>
+<div class="indent">
+<h5 id="Browser-unsubscribe"><code>unsubscribe(self, string)</code></h5>
+<div class="long-description">
+<div class="text">
+<p>Remove a subscription.</p>
+</div>
+<p><span class="h7">arguments</span></p>
+<div class="indent">
+<div>
+<p><span class="code key" translate="no">string</span>
+<span class="text" markdown> -  the subscription to remove.</span></p>
+</div>
+</div>
+</div>
+</div>
+<div class="indent">
+<h5 id="Browser-subscribe_once"><code>subscribe_once(self, string)</code></h5>
+<div class="long-description">
+<div class="text">
+<p>Return a future for a browser event for the first session of this target.</p>
+<p>Generally python asyncio doesn't recommend futures.</p>
+<p>But in this case, one must call subscribe_once and await it later,
+generally because they must subscribe and then provoke the event.</p>
+</div>
+<p><span class="h7">arguments</span></p>
+<div class="indent">
+<div>
+<p><span class="code key" translate="no">string</span>
+<span class="text" markdown> -  the event to subscribe to</span></p>
+</div>
+</div>
+<p><span class="h7">returns</span></p>
+<div class="indent text">
+<p>A future to be awaited later, the complete event.</p>
+</div>
+</div>
+</div>
+<div class="indent">
+<h5 id="Browser-open"><code>open(self)</code></h5>
 <div class="long-description">
 <div class="text">
 <p>Open the browser.</p>
@@ -1448,7 +1848,7 @@ headless=True/False, enable_gpu=True/False, etc.</span></p>
 </div>
 </div>
 <div class="indent">
-<h5 id="BrowserSync-close"><code>close(self)</code></h5>
+<h5 id="Browser-close"><code>close(self)</code></h5>
 <div class="long-description">
 <div class="text">
 <p>Close the browser.</p>
@@ -1456,24 +1856,75 @@ headless=True/False, enable_gpu=True/False, etc.</span></p>
 </div>
 </div>
 <div class="indent">
-<h5 id="BrowserSync-get_tab"><code>get_tab(self)</code></h5>
+<h5 id="Browser-get_tab"><code>get_tab(self)</code></h5>
 <div class="long-description">
 <div class="text">
 <p>Get the first tab if there is one. Useful for default tabs.</p>
 </div>
+<p><span class="h7">returns</span></p>
+<div class="indent text">
+<p>A tab object.</p>
+</div>
 </div>
 </div>
 <div class="indent">
-<h5 id="BrowserSync-start_output_thread"><code>start_output_thread(self, kwargs)</code></h5>
+<h5 id="Browser-populate_targets"><code>populate_targets(self)</code></h5>
 <div class="long-description">
 <div class="text">
-<p>Start a separate thread that dumps all messages received to stdout.</p>
+<p>Solicit the actual browser for all targets to add to the browser object.</p>
+</div>
+</div>
+</div>
+<div class="indent">
+<h5 id="Browser-create_session"><code>create_session(self)</code></h5>
+<div class="long-description">
+<div class="text">
+<p>Create a browser session. Only in supported browsers, is experimental.</p>
+</div>
+<p><span class="h7">returns</span></p>
+<div class="indent text">
+<p>A session object.</p>
+</div>
+</div>
+</div>
+<div class="indent">
+<h5 id="Browser-create_tab"><code>create_tab(self, url, width, height)</code></h5>
+<div class="long-description">
+<div class="text">
+<p>Create a new tab.</p>
 </div>
 <p><span class="h7">arguments</span></p>
 <div class="indent">
 <div>
-<p><span class="code key" translate="no">kwargs</span>
-<span class="text" markdown> -  passed directly to print().</span></p>
+<p><span class="code key" translate="no">url</span>
+<span class="text" markdown> -  the url to navigate to, default ""</span></p>
+</div>
+<div>
+<p><span class="code key" translate="no">width</span>
+<span class="text" markdown> -  the width of the tab (headless only)</span></p>
+</div>
+<div>
+<p><span class="code key" translate="no">height</span>
+<span class="text" markdown> -  the height of the tab (headless only)</span></p>
+</div>
+</div>
+<p><span class="h7">returns</span></p>
+<div class="indent text">
+<p>a tab.</p>
+</div>
+</div>
+</div>
+<div class="indent">
+<h5 id="Browser-close_tab"><code>close_tab(self, target_id)</code></h5>
+<div class="long-description">
+<div class="text">
+<p>Close a tab by its id.</p>
+</div>
+<p><span class="h7">arguments</span></p>
+<div class="indent">
+<div>
+<p><span class="code key" translate="no">target_id</span>
+<span class="text" markdown> -  the targetId of the tab to close.</span></p>
 </div>
 </div>
 </div>
