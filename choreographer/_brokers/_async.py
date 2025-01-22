@@ -211,14 +211,11 @@ class Broker:
         self.futures[key] = future
         try:
             await asyncio.to_thread(self._channel.write_json, obj)
-        except:
-            future.cancel()
+        except BaseException as e:
+            future.set_exception(e)
             del self.futures[key]
             raise
-        try:
-            result = await future
-        except asyncio.CancelledError:
-            result = None
+        result = await future
         return result
 
     def _get_target_session_by_session_id(
