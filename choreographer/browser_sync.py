@@ -33,10 +33,6 @@ class TabSync(TargetSync):
 class BrowserSync(TargetSync):
     """`BrowserSync` is the sync implementation of `Browser`."""
 
-    _tab_type = TabSync
-    _session_type = SessionSync
-    _target_type = TargetSync
-    _broker_type = BrokerSync
     # A list of the types that are essential to use
     # with this class
 
@@ -88,7 +84,7 @@ class BrowserSync(TargetSync):
 
         # Compose Resources
         self._channel = channel_cls()
-        self._broker = self._broker_type(self, self._channel)
+        self._broker = BrokerSync(self, self._channel)
         self._browser_impl = browser_cls(self._channel, path, **kwargs)
         # if hasattr(browser_cls, "logger_parser"):
         #    parser = browser_cls.logger_parser # noqa: ERA001
@@ -111,7 +107,7 @@ class BrowserSync(TargetSync):
             **self._browser_impl.get_popen_args(),
         )
         super().__init__("0", self._broker)
-        self._add_session(self._session_type("", self._broker))
+        self._add_session(SessionSync("", self._broker))
 
     def __enter__(self) -> Self:
         """Open browser as context to launch on entry and close on exit."""
@@ -179,12 +175,12 @@ class BrowserSync(TargetSync):
         self.close()
 
     def _add_tab(self, tab: TabSync) -> None:
-        if not isinstance(tab, self._tab_type):
-            raise TypeError(f"tab must be an object of {self._tab_type}")
+        if not isinstance(tab, TabSync):
+            raise TypeError("tab must be an object of TabSync")
         self.tabs[tab.target_id] = tab
 
     def _remove_tab(self, target_id: str) -> None:
-        if isinstance(target_id, self._tab_type):
+        if isinstance(target_id, TabSync):
             target_id = target_id.target_id
         del self.tabs[target_id]
 

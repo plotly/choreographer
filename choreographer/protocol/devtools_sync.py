@@ -7,11 +7,12 @@ from typing import TYPE_CHECKING
 import logistro
 
 from choreographer import protocol
-from choreographer._brokers import BrokerSync
 
 if TYPE_CHECKING:
     from collections.abc import MutableMapping
     from typing import Any
+
+    from choreographer._brokers import BrokerSync
 
 
 _logger = logistro.getLogger(__name__)
@@ -19,10 +20,6 @@ _logger = logistro.getLogger(__name__)
 
 class SessionSync:
     """A session is a single conversation with a single target."""
-
-    _broker_type = BrokerSync
-    # A list of the types that are essential to use
-    # with this class
 
     session_id: str
     """The id of the session given by the browser."""
@@ -91,10 +88,6 @@ class SessionSync:
 class TargetSync:
     """A target like a browser, tab, or others. It sends commands. It has sessions."""
 
-    _session_type = SessionSync
-    _broker_type = BrokerSync
-    """Needs to know."""
-
     target_id: str
     """The browser's ID of the target."""
     sessions: MutableMapping[str, SessionSync]
@@ -120,12 +113,12 @@ class TargetSync:
         _logger.info(f"Created new target {target_id}.")
 
     def _add_session(self, session: SessionSync) -> None:
-        if not isinstance(session, self._session_type):
+        if not isinstance(session, SessionSync):
             raise TypeError("session must be a session type class")
         self.sessions[session.session_id] = session
 
     def _remove_session(self, session_id: str) -> None:
-        if isinstance(session_id, self._session_type):
+        if isinstance(session_id, SessionSync):
             session_id = session_id.session_id
         _ = self.sessions.pop(session_id, None)
 

@@ -2,28 +2,24 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 import logistro
 
 from choreographer import protocol
-from choreographer._brokers import Broker
 
 if TYPE_CHECKING:
     import asyncio
     from collections.abc import Callable, Coroutine, MutableMapping
     from typing import Any
 
+    from choreographer._brokers import Broker
 
 _logger = logistro.getLogger(__name__)
 
 
 class Session:
     """A session is a single conversation with a single target."""
-
-    _broker_type = Broker
-    # A list of the types that are essential to use
-    # with this class
 
     session_id: str
     """The id of the session given by the browser."""
@@ -64,7 +60,7 @@ class Session:
         self,
         command: str,
         params: MutableMapping[str, Any] | None = None,
-    ) -> Any:
+    ) -> protocol.BrowserResponse:
         """
         Send a devtools command on the session.
 
@@ -159,10 +155,6 @@ class Session:
 class Target:
     """A target like a browser, tab, or others. It sends commands. It has sessions."""
 
-    _session_type = Session
-    _broker_type = Broker
-    """Needs to know."""
-
     target_id: str
     """The browser's ID of the target."""
     sessions: MutableMapping[str, Session]
@@ -188,12 +180,12 @@ class Target:
         _logger.info(f"Created new target {target_id}.")
 
     def _add_session(self, session: Session) -> None:
-        if not isinstance(session, self._session_type):
+        if not isinstance(session, Session):
             raise TypeError("session must be a session type class")
         self.sessions[session.session_id] = session
 
     def _remove_session(self, session_id: str) -> None:
-        if isinstance(session_id, self._session_type):
+        if isinstance(session_id, Session):
             session_id = session_id.session_id
         _ = self.sessions.pop(session_id, None)
 
@@ -210,7 +202,7 @@ class Target:
         self,
         command: str,
         params: MutableMapping[str, Any] | None = None,
-    ) -> Any:
+    ) -> protocol.BrowserResponse:
         """
         Send a command to the first session in a target.
 
@@ -273,7 +265,7 @@ class Target:
                 response,
             )
         _logger.debug(f"The session {session_id} has been closed")
-        return cast(protocol.BrowserResponse, response)
+        return response
         # kinda hate, why do we need this again?
 
     def subscribe(

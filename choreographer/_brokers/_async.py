@@ -198,7 +198,7 @@ class Broker:
     async def write_json(
         self,
         obj: protocol.BrowserCommand,
-    ) -> Any:
+    ) -> protocol.BrowserResponse:
         _logger.debug2(f"In broker.write_json for {obj}")
         protocol.verify_params(obj)
         key = protocol.calculate_message_key(obj)
@@ -207,16 +207,15 @@ class Broker:
                 "Message strangely formatted and "
                 "choreographer couldn't figure it out why.",
             )
-        future = asyncio.get_running_loop().create_future()
+        loop = asyncio.get_running_loop()
+        future: asyncio.Future[protocol.BrowserResponse] = loop.create_future()
         self.futures[key] = future
         try:
             await asyncio.to_thread(self._channel.write_json, obj)
-        except BaseException as e:
+        except BaseException as e:  # noqa: BLE001
             future.set_exception(e)
             del self.futures[key]
-            raise
-        result = await future
-        return result
+        return await future
 
     def _get_target_session_by_session_id(
         self,

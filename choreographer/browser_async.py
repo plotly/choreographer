@@ -6,7 +6,7 @@ import asyncio
 import subprocess
 import warnings
 from asyncio import Lock
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 import logistro
 
@@ -41,13 +41,6 @@ class Tab(Target):
 
 class Browser(Target):
     """`Browser` is the async implementation of `Browser`."""
-
-    _tab_type = Tab
-    _session_type = Session
-    _target_type = Target
-    _broker_type = Broker
-    # A list of the types that are essential to use
-    # with this class
 
     tabs: MutableMapping[str, Tab]
     """A mapping by target_id of all the targets which are open tabs."""
@@ -106,7 +99,7 @@ class Browser(Target):
 
         # Compose Resources
         self._channel = channel_cls()
-        self._broker = self._broker_type(self, self._channel)
+        self._broker = Broker(self, self._channel)
         self._browser_impl = browser_cls(self._channel, path, **kwargs)
         # if hasattr(browser_cls, "logger_parser"):
         #    parser = browser_cls.logger_parser # noqa: ERA001
@@ -140,7 +133,7 @@ class Browser(Target):
         self.subprocess = await asyncio.to_thread(run)
 
         super().__init__("0", self._broker)
-        self._add_session(self._session_type("", self._broker))
+        self._add_session(Session("", self._broker))
 
         try:
             self._watch_dog_task = asyncio.create_task(self._watchdog())
@@ -243,12 +236,12 @@ class Browser(Target):
             await asyncio.to_thread(self._browser_impl.clean)
 
     def _add_tab(self, tab: Tab) -> None:
-        if not isinstance(tab, self._tab_type):
+        if not isinstance(tab, Tab):
             raise TypeError(f"tab must be an object of {self._tab_type}")
         self.tabs[tab.target_id] = tab
 
     def _remove_tab(self, target_id: str) -> None:
-        if isinstance(target_id, self._tab_type):
+        if isinstance(target_id, Tab):
             target_id = target_id.target_id
         del self.tabs[target_id]
 
@@ -385,4 +378,4 @@ class Browser(Target):
             ) from protocol.DevtoolsProtocolError(
                 response,
             )
-        return cast(protocol.BrowserResponse, response)
+        return response
