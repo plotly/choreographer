@@ -10,6 +10,7 @@ from choreographer import protocol
 from choreographer._brokers import Broker
 
 if TYPE_CHECKING:
+    import asyncio
     from collections.abc import Callable, Coroutine, MutableMapping
     from typing import Any
 
@@ -135,6 +136,24 @@ class Session:
                 "Cannot unsubscribe as string is not present in subscriptions",
             )
         del self.subscriptions[string]
+
+    def subscribe_once(self, string: str) -> asyncio.Future[Any]:
+        """
+        Return a future for a browser event.
+
+        Generally python asyncio doesn't recommend futures.
+
+        But in this case, one must call subscribe_once and await it later,
+        generally because they must subscribe and then provoke the event.
+
+        Args:
+            string: the event to subscribe to
+
+        Returns:
+            A future to be awaited later, the complete event.
+
+        """
+        return self._broker.new_subscription_future(self.session_id, string)
 
 
 class Target:
@@ -286,3 +305,22 @@ class Target:
         """
         session = self.get_session()
         session.unsubscribe(string)
+
+    def subscribe_once(self, string: str) -> asyncio.Future[Any]:
+        """
+        Return a future for a browser event for the first session of this target.
+
+        Generally python asyncio doesn't recommend futures.
+
+        But in this case, one must call subscribe_once and await it later,
+        generally because they must subscribe and then provoke the event.
+
+        Args:
+            string: the event to subscribe to
+
+        Returns:
+            A future to be awaited later, the complete event.
+
+        """
+        session = self.get_session()
+        return session.subscribe_once(string)

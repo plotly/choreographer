@@ -39,6 +39,15 @@ class Broker:
     futures: MutableMapping[protocol.MessageKey, asyncio.Future[Any]]
     """A mapping of all the futures for all sent commands."""
 
+    _subscriptions_futures: MutableMapping[
+        str,
+        MutableMapping[
+            str,
+            list[asyncio.Future[Any]],
+        ],
+    ]
+    """A mapping of session id: subscription: list[futures]"""
+
     def __init__(self, browser: Browser, channel: ChannelInterface) -> None:
         """
         Construct a broker for a synchronous arragenment w/ both ends.
@@ -56,6 +65,20 @@ class Broker:
         # if its a user task, can cancel
         self._current_read_task: asyncio.Task[Any] | None = None
         self.futures = {}
+        self._subscriptions_futures = {}
+
+    def new_subscription_future(
+        self,
+        session_id: str,
+        subscription: str,
+    ) -> asyncio.Future[Any]:
+        if session_id not in self._subscriptions_futures:
+            self._subscriptions_futures[session_id] = {}
+        if subscription not in self._subscriptions_futures[session_id]:
+            self._subscriptions_futures[session_id][subscription] = []
+        future = asyncio.get_running_loop().create_future()
+        self._subscriptions_futures[session_id][subscription].append(future)
+        return future
 
     async def clean(self) -> None:
         for future in self.futures.values():
@@ -63,6 +86,11 @@ class Broker:
                 future.cancel()
         if self._current_read_task and not self._current_read_task.done():
             self._current_read_task.cancel()
+        for session in self._subscriptions_futures.values():
+            for query in session.values():
+                for future in query:
+                    if not future.done():
+                        future.cancel()
         for task in self._background_tasks_cancellable:
             if not task.done():
                 task.cancel()
@@ -108,6 +136,22 @@ class Broker:
                         if not event_session:
                             _logger.error("Found an event that returned no session.")
                             continue
+
+                        session_futures = self._subscriptions_futures.get(
+                            event_session_id,
+                        )
+                        if session_futures:
+                            for query in session_futures:
+                                match = (
+                                    query.endswith("*")
+                                    and response["method"].startswith(query[:-1])
+                                ) or (response["method"] == query)
+                                if match:
+                                    for future in session_futures[query]:
+                                        if not future.done():
+                                            future.set_result(response)
+                                    session_futures[query] = []
+
                         for query in list(event_session.subscriptions):
                             match = (
                                 query.endswith("*")
