@@ -1,9 +1,11 @@
 import asyncio
 
+import logistro
 import pytest
 import pytest_asyncio
 
 import choreographer as choreo
+from choreographer import errors
 
 # PYTEST TIP:
 # set capture=no to let all debug leak through
@@ -14,6 +16,9 @@ import choreographer as choreo
 ##### Parameterized Arguments
 # Are used to re-run tests under different conditions
 VERBOSITY_FOR_DEBUG = 3
+
+
+logistro.getLogger("choreographer").setLevel("ERROR")
 
 
 @pytest.fixture(params=[True, False], ids=["enable_sandbox", ""])
@@ -31,16 +36,6 @@ def headless(request):
     return request.param
 
 
-@pytest.fixture(params=[True, False], ids=["debug", ""])
-def debug(request):
-    return request.param
-
-
-@pytest.fixture(params=[True, False], ids=["debug_browser", ""])
-def debug_browser(request):
-    return request.param
-
-
 # --headless is the default flag for most tests,
 # but you can set --no-headless if you want to watch
 def pytest_addoption(parser):
@@ -52,21 +47,19 @@ def pytest_addoption(parser):
 @pytest_asyncio.fixture(scope="function", loop_scope="function")
 async def browser(request):
     headless = request.config.getoption("--headless")
-    debug = request.config.get_verbosity() >= VERBOSITY_FOR_DEBUG
-    debug_browser = None if debug else False
     browser = await choreo.Browser(
         headless=headless,
-        debug=debug,
-        debug_browser=debug_browser,
     )
-    temp_dir = browser.tmp_dir
     yield browser
     try:
         await browser.close()
-    except choreo.browser.BrowserClosedError:
+    except errors.BrowserClosedError:
         pass
-    if temp_dir.exists:
-        raise RuntimeError(f"Temporary directory not deleted successfully: {temp_dir}")
+    if browser._browser_impl.tmp_dir.exists:  # noqa: SLF001
+        raise RuntimeError(
+            "Temporary directory not deleted successfully: "
+            f"{browser._browser_impl.tmp_dir.path}",  # noqa: SLF001
+        )
 
 
 # add a timeout if tests requests browser

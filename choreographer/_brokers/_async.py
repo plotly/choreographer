@@ -16,6 +16,7 @@ if TYPE_CHECKING:
 
     from choreographer.browser_async import Browser
     from choreographer.channels._interface_type import ChannelInterface
+    from choreographer.protocol.devtools_async import Session, Target
 
 
 _logger = logistro.getLogger(__name__)
@@ -50,37 +51,37 @@ class Broker:
         self._browser = browser
         self._channel = channel
         self._background_tasks: set[asyncio.Task[Any]] = set()
+        # if its a task you dont want canceled at close (like the close task)
+        self._background_tasks_cancellable: set[asyncio.Task[Any]] = set()
+        # if its a user task, can cancel
+        self._current_read_task: asyncio.Task[Any] | None = None
         self.futures = {}
 
-    def send_json(self, obj: protocol.BrowserCommand) -> protocol.MessageKey | None:
-        """
-        Send an object down the channel.
-
-        Args:
-            obj: An object to be serialized to json and written to the channel.
-
-        """
-        protocol.verify_params(obj)
-        key = protocol.calculate_message_key(obj)
-        self._channel.write_json(obj)
-        return key
-
     async def clean(self) -> None:
-        for key, future in self.futures.items():
+        for future in self.futures.values():
             if not future.done():
                 future.cancel()
-            del self.futures[key]
+        if self._current_read_task and not self._current_read_task.done():
+            self._current_read_task.cancel()
+        for task in self._background_tasks_cancellable:
+            if not task.done():
+                task.cancel()
 
-    def run_read_loop(self) -> None:  # noqa: C901 complexity
+    def run_read_loop(self) -> None:  # noqa: C901, PLR0915 complexity
         def check_error(result: asyncio.Future[Any]) -> None:
-            e = result.exception()
-            if e:
+            try:
+                e = result.exception()
+                if e:
+                    self._background_tasks.add(
+                        asyncio.create_task(self._browser.close()),
+                    )
+                    if not isinstance(e, asyncio.CancelledError):
+                        _logger.error(f"Error in run_read_loop: {e!s}")
+                        raise e
+            except asyncio.CancelledError:
                 self._background_tasks.add(asyncio.create_task(self._browser.close()))
-                if not isinstance(e, asyncio.CancelledError):
-                    _logger.error(f"Error in run_read_loop: {e!s}")
-                    raise e
 
-        async def read_loop() -> None:
+        async def read_loop() -> None:  # noqa: PLR0912, C901
             try:
                 responses = await asyncio.to_thread(
                     self._channel.read_jsons,
@@ -91,7 +92,39 @@ class Broker:
                     key = protocol.calculate_message_key(response)
                     if not key and error:
                         raise protocol.DevtoolsProtocolError(response)
-                    # aelif self.protocol.is_event(response):
+                    self._check_for_closed_session(response)
+                    # surrounding lines overlap in idea
+                    if protocol.is_event(response):
+                        event_session_id = response.get(
+                            "sessionId",
+                            "",
+                        )
+                        x = self._get_target_session_by_session_id(
+                            event_session_id,
+                        )
+                        if not x:
+                            continue
+                        _, event_session = x
+                        if not event_session:
+                            _logger.error("Found an event that returned no session.")
+                            continue
+                        for query in list(event_session.subscriptions):
+                            match = (
+                                query.endswith("*")
+                                and response["method"].startswith(query[:-1])
+                            ) or (response["method"] == query)
+                            _logger.debug(
+                                f"Checking subscription key: {query} "
+                                "against event method {response['method']}",
+                            )
+                            if match:
+                                t: asyncio.Task[Any] = asyncio.create_task(
+                                    event_session.subscriptions[query][0](response),
+                                )
+                                self._background_tasks_cancellable.add(t)
+                                if not event_session.subscriptions[query][1]:
+                                    event_session.unsubscribe(query)
+
                     elif key:
                         if key in self.futures:
                             _logger.debug(f"run_read_loop() found future for key {key}")
@@ -112,16 +145,17 @@ class Broker:
                 return
             read_task = asyncio.create_task(read_loop())
             read_task.add_done_callback(check_error)
-            self._background_tasks.add(read_task)
+            self._current_read_task = read_task
 
         read_task = asyncio.create_task(read_loop())
         read_task.add_done_callback(check_error)
-        self._background_tasks.add(read_task)
+        self._current_read_task = read_task
 
     async def write_json(
         self,
         obj: protocol.BrowserCommand,
-    ) -> asyncio.Future[Any]:
+    ) -> Any:
+        _logger.debug2(f"In broker.write_json for {obj}")
         protocol.verify_params(obj)
         key = protocol.calculate_message_key(obj)
         if not key:
@@ -137,4 +171,48 @@ class Broker:
             future.cancel()
             del self.futures[key]
             raise
-        return future
+        try:
+            result = await future
+        except asyncio.CancelledError:
+            result = None
+        return result
+
+    def _get_target_session_by_session_id(
+        self,
+        session_id: str,
+    ) -> tuple[Target, Session] | None:
+        if session_id == "":
+            return (self._browser, self._browser.sessions[session_id])
+        for tab in self._browser.tabs.values():
+            if session_id in tab.sessions:
+                return (tab, tab.sessions[session_id])
+        if session_id in self._browser.sessions:
+            return (self._browser, self._browser.sessions[session_id])
+        return None
+
+    def _check_for_closed_session(self, response: protocol.BrowserResponse) -> bool:
+        if "method" in response and response["method"] == "Target.detachedFromTarget":
+            session_closed = response["params"].get(
+                "sessionId",
+                "",
+            )
+            if session_closed == "":
+                return True
+
+            x = self._get_target_session_by_session_id(session_closed)
+            if x:
+                target_closed, _ = x
+            else:
+                return False
+
+            if target_closed:
+                target_closed._remove_session(session_closed)  # noqa: SLF001
+                _logger.debug(
+                    "Using intern subscription key: "
+                    "'Target.detachedFromTarget'. "
+                    f"Session {session_closed} was closed.",
+                )
+                return True
+            return False
+        else:
+            return False

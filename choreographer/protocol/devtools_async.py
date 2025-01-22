@@ -10,7 +10,7 @@ from choreographer import protocol
 from choreographer._brokers import Broker
 
 if TYPE_CHECKING:
-    from collections.abc import MutableMapping
+    from collections.abc import Callable, Coroutine, MutableMapping
     from typing import Any
 
 
@@ -28,6 +28,13 @@ class Session:
     """The id of the session given by the browser."""
     message_id: int
     """All messages are counted per session and this is the current message id."""
+    subscriptions: MutableMapping[
+        str,
+        tuple[
+            Callable[[protocol.BrowserResponse], Coroutine[Any, Any, Any]],
+            bool,
+        ],
+    ]
 
     def __init__(self, session_id: str, broker: Broker) -> None:
         """
@@ -50,6 +57,7 @@ class Session:
         self.session_id = session_id
         _logger.debug(f"New session: {session_id}")
         self.message_id = 0
+        self.subscriptions = {}
 
     async def send_command(
         self,
@@ -85,7 +93,48 @@ class Session:
         _logger.debug(
             f"Sending {command} with {params} on session {self.session_id}",
         )
+        _logger.debug2(f"In session.send_command for {json_command}")
         return await self._broker.write_json(json_command)
+
+    def subscribe(
+        self,
+        string: str,
+        callback: Callable[[protocol.BrowserResponse], Coroutine[Any, Any, Any]],
+        *,
+        repeating: bool = True,
+    ) -> None:
+        """
+        Subscribe to an event on this session.
+
+        Args:
+            string: the name of the event. Can use * wildcard at the end.
+            callback: the callback (which takes a message dict and returns nothing)
+            repeating: default True, should the callback execute more than once
+
+        """
+        if string in self.subscriptions:
+            raise ValueError(
+                "You are already subscribed to this string, "
+                "duplicate subscriptions are not allowed.",
+            )
+        else:
+            # so this should be per session
+            # and that means we need a list of all sessions
+            self.subscriptions[string] = (callback, repeating)
+
+    def unsubscribe(self, string: str) -> None:
+        """
+        Remove a subscription.
+
+        Args:
+            string: the subscription to remove.
+
+        """
+        if string not in self.subscriptions:
+            raise ValueError(
+                "Cannot unsubscribe as string is not present in subscriptions",
+            )
+        del self.subscriptions[string]
 
 
 class Target:
@@ -207,3 +256,33 @@ class Target:
         _logger.debug(f"The session {session_id} has been closed")
         return cast(protocol.BrowserResponse, response)
         # kinda hate, why do we need this again?
+
+    def subscribe(
+        self,
+        string: str,
+        callback: Callable[[protocol.BrowserResponse], Coroutine[Any, Any, Any]],
+        *,
+        repeating: bool = True,
+    ) -> None:
+        """
+        Subscribe to an event on the main session of this target.
+
+        Args:
+            string: the name of the event. Can use * wildcard at the end.
+            callback: the callback (which takes a message dict and returns nothing)
+            repeating: default True, should the callback execute more than once
+
+        """
+        session = self.get_session()
+        session.subscribe(string, callback, repeating=repeating)
+
+    def unsubscribe(self, string: str) -> None:
+        """
+        Remove a subscription.
+
+        Args:
+            string: the subscription to remove.
+
+        """
+        session = self.get_session()
+        session.unsubscribe(string)

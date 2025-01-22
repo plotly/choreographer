@@ -140,15 +140,16 @@ class TmpDirectory:
 
         return n_dirs, n_files, errors
 
-    def clean(self) -> None:
+    def clean(self) -> None:  # noqa: C901
         """Try several different ways to eliminate the temporary directory."""
         try:
             # no faith in this python implementation, always fails with windows
             # very unstable recently as well, lots new arguments in tempfile package
-            self.temp_dir.cleanup()
+            if hasattr(self, "temp_dir") and self.temp_dir:
+                self.temp_dir.cleanup()
             self.exists = False
-        except BaseException:
-            _logger.exception("TemporaryDirectory.cleanup() failed.")
+        except BaseException:  # noqa: BLE001 we try many ways to clean, this is the first one
+            _logger.info("TemporaryDirectory.cleanup() failed.")
 
         # bad typing but tough
         def remove_readonly(
@@ -171,11 +172,11 @@ class TmpDirectory:
             del self.temp_dir
         except FileNotFoundError:
             pass  # it worked!
-        except BaseException:
+        except BaseException:  # noqa: BLE001
             self._delete_manually(check_only=True)
             if not self.exists:
                 return
-            _logger.exception("shutil.rmtree() failed to delete temporary file.")
+            _logger.info("shutil.rmtree() failed to delete temporary file.")
 
             def extra_clean() -> None:
                 time.sleep(3)

@@ -3,11 +3,10 @@
 from __future__ import annotations
 
 import asyncio
-import os
 import subprocess
 import warnings
 from asyncio import Lock
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import logistro
 
@@ -34,6 +33,10 @@ _logger = logistro.getLogger(__name__)
 
 class Tab(Target):
     """A wrapper for `Target`, so user can use `Tab`, not `Target`."""
+
+    async def close(self) -> None:
+        """Close the tab."""
+        await self._broker._browser.close_tab(target_id=self.target_id)  # noqa: SLF001
 
 
 class Browser(Target):
@@ -105,14 +108,15 @@ class Browser(Target):
         self._channel = channel_cls()
         self._broker = self._broker_type(self, self._channel)
         self._browser_impl = browser_cls(self._channel, path, **kwargs)
-        if hasattr(browser_cls, "logger_parser"):
-            parser = browser_cls.logger_parser
-        else:
-            parser = None
-        self._logger_pipe, _ = logistro.getPipeLogger(
-            "browser_proc",
-            parser=parser,
-        )
+        # if hasattr(browser_cls, "logger_parser"):
+        #    parser = browser_cls.logger_parser # noqa: ERA001
+        # else
+        #    parser = Non # noqa: ERA001
+        # self._logger_pipe, _ = logistro.getPipeLogger(
+        #    "browser_proc",
+        #    parser=parser # noqa: ERA001,
+        # ) # BUG TODO REGRESSION
+        self._logger_pipe = subprocess.DEVNULL
 
     async def open(self) -> None:
         """Open the browser."""
@@ -207,7 +211,8 @@ class Browser(Target):
             _logger.info("browser._close() called successfully.")
         except ProcessLookupError:
             pass
-        os.close(self._logger_pipe)
+        # if self._logger_pipe:
+        #    os.close(self._logger_pipe) # noqa: ERA001 BUG TODO REGRESSION
         _logger.info("Logging pipe closed.")
         await asyncio.to_thread(self._channel.close)
         _logger.info("Browser channel closed.")
@@ -248,7 +253,13 @@ class Browser(Target):
         del self.tabs[target_id]
 
     def get_tab(self) -> Tab | None:
-        """Get the first tab if there is one. Useful for default tabs."""
+        """
+        Get the first tab if there is one. Useful for default tabs.
+
+        Returns:
+            A tab object.
+
+        """
         if self.tabs.values():
             return next(iter(self.tabs.values()))
         return None
@@ -284,8 +295,14 @@ class Browser(Target):
                 _logger.debug(f"The target {target_id} was added")
 
     async def create_session(self) -> Session:
-        """Create a browser session. Only in supported browsers, is experimental."""
-        if not self._is_open():
+        """
+        Create a browser session. Only in supported browsers, is experimental.
+
+        Returns:
+            A session object.
+
+        """
+        if await self._is_closed():
             raise BrowserClosedError("create_session() called on a closed browser")
         warnings.warn(  # noqa: B028
             "Creating new sessions on Browser() only works with some "
@@ -303,3 +320,69 @@ class Browser(Target):
         new_session = Session(session_id, self._broker)
         self._add_session(new_session)
         return new_session
+
+    async def create_tab(
+        self,
+        url: str = "",
+        width: int | None = None,
+        height: int | None = None,
+    ) -> Tab:
+        """
+        Create a new tab.
+
+        Args:
+            url: the url to navigate to, default ""
+            width: the width of the tab (headless only)
+            height: the height of the tab (headless only)
+
+        Returns:
+            a tab.
+
+        """
+        if await self._is_closed():
+            raise BrowserClosedError("create_tab() called on a closed browser.")
+        params: MutableMapping[str, Any] = {"url": url}
+        if width:
+            params["width"] = width
+        if height:
+            params["height"] = height
+
+        response = await self.send_command("Target.createTarget", params=params)
+        if "error" in response:
+            raise RuntimeError(
+                "Could not create tab",
+            ) from protocol.DevtoolsProtocolError(
+                response,
+            )
+        target_id = response["result"]["targetId"]
+        new_tab = Tab(target_id, self._broker)
+        self._add_tab(new_tab)
+        await new_tab.create_session()
+        return new_tab
+
+    async def close_tab(self, target_id: str) -> protocol.BrowserResponse:
+        """
+        Close a tab by its id.
+
+        Args:
+            target_id: the targetId of the tab to close.
+
+        """
+        if await self._is_closed():
+            raise BrowserClosedError("close_tab() called on a closed browser")
+        if isinstance(target_id, Target):
+            target_id = target_id.target_id
+        # NOTE: we don't need to manually remove sessions because
+        # sessions are intrinsically handled by events
+        response = await self.send_command(
+            command="Target.closeTarget",
+            params={"targetId": target_id},
+        )
+        self._remove_tab(target_id)
+        if "error" in response:
+            raise RuntimeError(
+                "Could not close tab",
+            ) from protocol.DevtoolsProtocolError(
+                response,
+            )
+        return cast(protocol.BrowserResponse, response)

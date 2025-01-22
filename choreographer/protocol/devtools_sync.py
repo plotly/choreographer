@@ -85,7 +85,7 @@ class SessionSync:
         _logger.debug(
             f"Sending {command} with {params} on session {self.session_id}",
         )
-        return self._broker.send_json(json_command)
+        return self._broker.write_json(json_command)
 
 
 class TargetSync:

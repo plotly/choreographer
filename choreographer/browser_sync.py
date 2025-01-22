@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 import subprocess
 from threading import Lock
 from typing import TYPE_CHECKING
@@ -91,14 +90,15 @@ class BrowserSync(TargetSync):
         self._channel = channel_cls()
         self._broker = self._broker_type(self, self._channel)
         self._browser_impl = browser_cls(self._channel, path, **kwargs)
-        if hasattr(browser_cls, "logger_parser"):
-            parser = browser_cls.logger_parser
-        else:
-            parser = None
-        self._logger_pipe, _ = logistro.getPipeLogger(
-            "browser_proc",
-            parser=parser,
-        )
+        # if hasattr(browser_cls, "logger_parser"):
+        #    parser = browser_cls.logger_parser # noqa: ERA001
+        # else: # noqa: ERA001
+        #    parser = None # noqa: ERA001
+        # self._logger_pipe, _ = logistro.getPipeLogger(
+        #    "browser_proc",
+        #    parser=parser, # noqa: ERA001
+        # ) # BUG TODO REGRESSION
+        self._logger_pipe = subprocess.DEVNULL
 
     def open(self) -> None:
         """Open the browser."""
@@ -162,7 +162,7 @@ class BrowserSync(TargetSync):
             _logger.info("browser._close() called successfully.")
         except ProcessLookupError:
             pass
-        os.close(self._logger_pipe)
+        # os.close(self._logger_pipe) # noqa: ERA001 bug regression
         _logger.info("Logging pipe closed.")
         self._channel.close()
         _logger.info("Browser channel closed.")

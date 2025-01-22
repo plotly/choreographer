@@ -8,17 +8,16 @@ import pytest
 from async_timeout import timeout
 
 import choreographer as choreo
+from choreographer import errors
 
-# ruff: noqa: PLR0913 (lots of parameters)
+# ruff: noqa: PLR0913, T201 (lots of parameters, prints)
 
 
 @pytest.mark.asyncio(loop_scope="function")
-async def test_context(capteesys, headless, debug, debug_browser, sandbox, gpu):
+async def test_context(capteesys, headless, sandbox, gpu):
     async with (
         choreo.Browser(
             headless=headless,
-            debug=debug,
-            debug_browser=None if debug_browser else False,
             enable_sandbox=sandbox,
             enable_gpu=gpu,
         ) as browser,
@@ -26,7 +25,6 @@ async def test_context(capteesys, headless, debug, debug_browser, sandbox, gpu):
     ):
         if sandbox and "ubuntu" in platform.version().lower():
             pytest.skip("Ubuntu doesn't support sandbox unless installed from snap.")
-        temp_dir = browser.tmp_dir
         response = await browser.send_command(command="Target.getTargets")
         assert "result" in response and "targetInfos" in response["result"]  # noqa: PT018 combined assert
         assert len(response["result"]["targetInfos"]) != 0
@@ -38,21 +36,18 @@ async def test_context(capteesys, headless, debug, debug_browser, sandbox, gpu):
     assert capteesys.readouterr().out == "\n", "stdout should be silent!"
     # let asyncio do some cleaning up if it wants, may prevent warnings
     await asyncio.sleep(0)
-    assert not temp_dir.exists
+    assert not browser._browser_impl.tmp_dir.exists  # noqa: SLF001
 
 
 @pytest.mark.asyncio(loop_scope="function")
-async def test_no_context(capteesys, headless, debug, debug_browser, sandbox, gpu):
+async def test_no_context(capteesys, headless, sandbox, gpu):
     browser = await choreo.Browser(
         headless=headless,
-        debug=debug,
-        debug_browser=None if debug_browser else False,
         enable_sandbox=sandbox,
         enable_gpu=gpu,
     )
     if sandbox and "ubuntu" in platform.version().lower():
         pytest.skip("Ubuntu doesn't support sandbox unless installed from snap.")
-    temp_dir = browser.tmp_dir
     try:
         async with timeout(pytest.default_timeout):
             response = await browser.send_command(command="Target.getTargets")
@@ -65,17 +60,15 @@ async def test_no_context(capteesys, headless, debug, debug_browser, sandbox, gp
     print()  # this make sure that capturing is working
     assert capteesys.readouterr().out == "\n", "stdout should be silent!"
     await asyncio.sleep(0)
-    assert not temp_dir.exists
+    assert not browser._browser_impl.tmp_dir.exists  # noqa: SLF001
 
 
 # Harass choreographer with a kill in this test to see if its clean in a way
 # tempdir may survive protected by chromium subprocess surviving the kill
 @pytest.mark.asyncio(loop_scope="function")
-async def test_watchdog(capteesys, headless, debug, debug_browser):
+async def test_watchdog(capteesys, headless):
     browser = await choreo.Browser(
         headless=headless,
-        debug=debug,
-        debug_browser=None if debug_browser else False,
     )
 
     if platform.system() == "Windows":
@@ -90,7 +83,7 @@ async def test_watchdog(capteesys, headless, debug, debug_browser):
     await asyncio.sleep(1.5)
 
     with pytest.raises(
-        (choreo.PipeClosedError, choreo.BrowserClosedError),
+        (errors.ChannelClosedError, errors.BrowserClosedError),
     ):
         await browser.send_command(command="Target.getTargets")
 

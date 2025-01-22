@@ -86,6 +86,8 @@ ignore = [
               "D", # ignore docstring errors
               "S101", # allow assert
               "INP001", # no need for __init__ in test directories
+              "T201", # if we're printing in tests, there is a reason
+              "ERA001"
             ]
 
 [tool.pytest.ini_options]

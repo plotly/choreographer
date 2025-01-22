@@ -62,7 +62,7 @@ class BrokerSync:
         _logger.info("Starting thread to dump output to stdout.")
         Thread(target=run_print).start()
 
-    def send_json(self, obj: protocol.BrowserCommand) -> protocol.MessageKey | None:
+    def write_json(self, obj: protocol.BrowserCommand) -> protocol.MessageKey | None:
         """
         Send an object down the channel.
 

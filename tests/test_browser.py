@@ -1,6 +1,8 @@
 import pytest
 
 import choreographer as choreo
+from choreographer import errors
+from choreographer.protocol import devtools_async
 
 # We no longer use live URLs to as not depend on the network
 
@@ -16,9 +18,9 @@ async def test_create_and_close_tab(browser):
 
 @pytest.mark.asyncio
 async def test_create_and_close_session(browser):
-    with pytest.warns(choreo.protocol.ExperimentalFeatureWarning):
+    with pytest.warns(errors.ExperimentalFeatureWarning):
         session = await browser.create_session()
-    assert isinstance(session, choreo.protocol.Session)
+    assert isinstance(session, devtools_async.Session)
     assert session.session_id in browser.sessions
     await browser.close_session(session)
     assert session.session_id not in browser.sessions
@@ -27,52 +29,64 @@ async def test_create_and_close_session(browser):
 # Along with testing, this could be repurposed as well to diagnose
 # This deserves some thought re. difference between write_json and send_command
 @pytest.mark.asyncio
-async def test_browser_write_json(browser):
+async def test_broker_write_json(browser):
     # Test valid request with correct id and method
-    response = await browser.write_json({"id": 0, "method": "Target.getTargets"})
+    response = await browser._broker.write_json(  # noqa: SLF001
+        {"id": 0, "method": "Target.getTargets"},
+    )
     assert "result" in response and "targetInfos" in response["result"]  # noqa: PT018 I like this assertion
 
     # Test invalid method name should return error
-    response = await browser.write_json({"id": 2, "method": "dkadklqwmd"})
+    response = await browser._broker.write_json(  # noqa: SLF001
+        {"id": 2, "method": "dkadklqwmd"},
+    )
     assert "error" in response
 
     # Test missing 'id' key
     with pytest.raises(
-        choreo.protocol.MissingKeyError,
+        errors.MissingKeyError,
     ):
-        await browser.write_json({"method": "Target.getTargets"})
+        await browser._broker.write_json(  # noqa: SLF001
+            {"method": "Target.getTargets"},
+        )
 
     # Test missing 'method' key
     with pytest.raises(
-        choreo.protocol.MissingKeyError,
+        errors.MissingKeyError,
     ):
-        await browser.write_json({"id": 1})
+        await browser._broker.write_json(  # noqa: SLF001
+            {"id": 1},
+        )
 
     # Test empty dictionary
     with pytest.raises(
-        choreo.protocol.MissingKeyError,
+        errors.MissingKeyError,
     ):
-        await browser.write_json({})
+        await browser._broker.write_json({})  # noqa: SLF001
 
     # Test invalid parameter in the message
     with pytest.raises(
         RuntimeError,
     ):
-        await browser.write_json(
+        await browser._broker.write_json(  # noqa: SLF001
             {"id": 0, "method": "Target.getTargets", "invalid_parameter": "kamksamdk"},
         )
 
     # Test int method should return error
     with pytest.raises(
-        choreo.protocol.MessageTypeError,
+        errors.MessageTypeError,
     ):
-        await browser.write_json({"id": 3, "method": 12345})
+        await browser._broker.write_json(  # noqa: SLF001
+            {"id": 3, "method": 12345},
+        )
 
     # Test non-integer id should return error
     with pytest.raises(
-        choreo.protocol.MessageTypeError,
+        errors.MessageTypeError,
     ):
-        await browser.write_json({"id": "string", "method": "Target.getTargets"})
+        await browser._broker.write_json(  # noqa: SLF001
+            {"id": "string", "method": "Target.getTargets"},
+        )
 
 
 @pytest.mark.asyncio
@@ -87,7 +101,7 @@ async def test_browser_send_command(browser):
 
     # Test int method should return error
     with pytest.raises(
-        choreo.protocol.MessageTypeError,
+        errors.MessageTypeError,
     ):
         await browser.send_command(command=12345)
 

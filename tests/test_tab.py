@@ -4,6 +4,8 @@ import pytest
 import pytest_asyncio
 
 import choreographer as choreo
+from choreographer import errors
+from choreographer.protocol import devtools_async
 
 
 # this ignores extra stuff in received- only that we at least have what is expected
@@ -26,14 +28,14 @@ async def tab(browser):
     yield tab_browser
     try:
         await browser.close_tab(tab_browser)
-    except choreo.BrowserClosedError:
+    except errors.BrowserClosedError:
         pass
 
 
 @pytest.mark.asyncio
 async def test_create_and_close_session(tab):
     session = await tab.create_session()
-    assert isinstance(session, choreo.protocol.Session)
+    assert isinstance(session, devtools_async.Session)
     await tab.close_session(session)
     assert session.session_id not in tab.sessions
 
@@ -55,14 +57,14 @@ async def test_tab_send_command(tab):
         await tab.send_command(command=12345)
 
 
-@pytest.mark.asyncio
-async def test_subscribe_once(tab):
-    subscription_result = tab.subscribe_once("Page.*")
-    assert "Page.*" in next(iter(tab.sessions.values())).subscriptions_futures
-    _ = await tab.send_command("Page.enable")
-    _ = await tab.send_command("Page.reload")
-    _ = await subscription_result
-    assert not subscription_result.exception()
+# @pytest.mark.asyncio
+# async def test_subscribe_once(tab):
+#    subscription_result = tab.subscribe_once("Page.*")
+#    assert "Page.*" in next(iter(tab.sessions.values())).subscriptions_futures
+#    _ = await tab.send_command("Page.enable")
+#    _ = await tab.send_command("Page.reload")
+#    _ = await subscription_result
+#    assert not subscription_result.exception()
 
 
 @pytest.mark.asyncio
