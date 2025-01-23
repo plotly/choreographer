@@ -196,11 +196,13 @@ class Chromium:
         if isinstance(self._channel, Pipe):
             cli.append("--remote-debugging-pipe")
             if platform.system() == "Windows":
-                w_handle = msvcrt.get_osfhandle(self._channel.from_choreo_to_external)  # type: ignore [attr-defined]
-                r_handle = msvcrt.get_osfhandle(self._channel.from_external_to_choreo)  # type: ignore [attr-defined]
+                # its gonna read on 3
+                # its gonna write on 4
+                r_handle = msvcrt.get_osfhandle(self._channel.from_choreo_to_external)  # type: ignore [attr-defined]
+                w_handle = msvcrt.get_osfhandle(self._channel.from_external_to_choreo)  # type: ignore [attr-defined]
                 _inheritable = True
-                os.set_handle_inheritable(w_handle, _inheritable)  # type: ignore [attr-defined]
                 os.set_handle_inheritable(r_handle, _inheritable)  # type: ignore [attr-defined]
+                os.set_handle_inheritable(w_handle, _inheritable)  # type: ignore [attr-defined]
                 cli += [
                     f"--remote-debugging-io-pipes={r_handle!s},{w_handle!s}",
                 ]

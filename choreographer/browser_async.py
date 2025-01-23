@@ -96,8 +96,6 @@ class Browser(Target):
         self.tabs = {}
         self.targets = {}
 
-        self._watchdog_healthy = True
-
         # Compose Resources
         self._channel = channel_cls()
         self._broker = Broker(self, self._channel)
