@@ -189,7 +189,8 @@ class TmpDirectory:
                 self._delete_manually()
 
             # Putting this into another thread doesn't really matter?
-            t = Thread(target=extra_clean)
-            t.start()
+            # t = Thread(target=extra_clean)
+            # t.start()
+            extra_clean()
             if self.path.exists():
                 _logger.warning("Temporary dictory couldn't be removed manually.")
