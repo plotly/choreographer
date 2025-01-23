@@ -217,7 +217,7 @@ class Target:
             raise RuntimeError("Cannot send_command without at least one valid session")
         session = self.get_session()
         _logger.debug(
-            f"Cmd '{command}', params '{params}' on sessionId '{self.session_id}'",
+            f"Cmd '{command}', params '{params}' on sessionId '{session.session_id}'",
         )
         return await session.send_command(command, params)
 
