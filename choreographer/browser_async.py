@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import os
 import subprocess
 import warnings
 from asyncio import Lock
@@ -101,15 +102,14 @@ class Browser(Target):
         self._channel = channel_cls()
         self._broker = Broker(self, self._channel)
         self._browser_impl = browser_cls(self._channel, path, **kwargs)
-        # if hasattr(browser_cls, "logger_parser"):
-        #    parser = browser_cls.logger_parser # noqa: ERA001
-        # else
-        #    parser = Non # noqa: ERA001
-        # self._logger_pipe, _ = logistro.getPipeLogger(
-        #    "browser_proc",
-        #    parser=parser # noqa: ERA001,
-        # ) # BUG TODO REGRESSION
-        self._logger_pipe = subprocess.DEVNULL
+        if hasattr(browser_cls, "logger_parser"):
+            parser = browser_cls.logger_parser
+        else:
+            parser = None
+        self._logger_pipe, _ = logistro.getPipeLogger(
+            "browser_proc",
+            parser=parser,
+        )
 
     async def open(self) -> None:
         """Open the browser."""
@@ -204,8 +204,8 @@ class Browser(Target):
             pass
         self._broker.clean()
         _logger.info("Broker cleaned up.")
-        # if self._logger_pipe:
-        #    os.close(self._logger_pipe) # noqa: ERA001 BUG TODO REGRESSION
+        if self._logger_pipe:
+            os.close(self._logger_pipe)
         _logger.info("Logging pipe closed.")
         self._channel.close()
         _logger.info("Browser channel closed.")
