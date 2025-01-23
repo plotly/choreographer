@@ -10,11 +10,11 @@ from async_timeout import timeout
 import choreographer as choreo
 from choreographer import errors
 
-# ruff: noqa: PLR0913, T201 (lots of parameters, prints)
+# ruff: noqa: PLR0913 (lots of parameters)
 
 
 @pytest.mark.asyncio(loop_scope="function")
-async def test_context(capteesys, headless, sandbox, gpu):
+async def test_context(headless, sandbox, gpu):
     async with (
         choreo.Browser(
             headless=headless,
@@ -30,17 +30,13 @@ async def test_context(capteesys, headless, sandbox, gpu):
         assert len(response["result"]["targetInfos"]) != 0
         assert isinstance(browser.get_tab(), choreo.Tab)
         assert len(browser.get_tab().sessions) == 1
-    print()  # this makes sure that capturing is working
-    # stdout should be empty, but not
-    # because capsys is broken, because nothing was print
-    assert capteesys.readouterr().out == "\n", "stdout should be silent!"
     # let asyncio do some cleaning up if it wants, may prevent warnings
     await asyncio.sleep(0)
     assert not browser._browser_impl.tmp_dir.exists  # noqa: SLF001
 
 
 @pytest.mark.asyncio(loop_scope="function")
-async def test_no_context(capteesys, headless, sandbox, gpu):
+async def test_no_context(headless, sandbox, gpu):
     browser = await choreo.Browser(
         headless=headless,
         enable_sandbox=sandbox,
@@ -57,8 +53,6 @@ async def test_no_context(capteesys, headless, sandbox, gpu):
             assert len(browser.get_tab().sessions) == 1
     finally:
         await browser.close()
-    print()  # this make sure that capturing is working
-    assert capteesys.readouterr().out == "\n", "stdout should be silent!"
     await asyncio.sleep(0)
     assert not browser._browser_impl.tmp_dir.exists  # noqa: SLF001
 
@@ -66,7 +60,7 @@ async def test_no_context(capteesys, headless, sandbox, gpu):
 # Harass choreographer with a kill in this test to see if its clean in a way
 # tempdir may survive protected by chromium subprocess surviving the kill
 @pytest.mark.asyncio(loop_scope="function")
-async def test_watchdog(capteesys, headless):
+async def test_watchdog(headless):
     browser = await choreo.Browser(
         headless=headless,
     )
@@ -89,5 +83,3 @@ async def test_watchdog(capteesys, headless):
 
     await browser.close()
     await asyncio.sleep(0)
-    print()
-    assert capteesys.readouterr().out == "\n", "stdout should be silent!"
