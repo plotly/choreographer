@@ -194,8 +194,6 @@ class Browser(Target):
         if self._watch_dog_task:
             _logger.debug("Cancelling watchdog.")
             self._watch_dog_task.cancel()
-        await self._broker.clean()
-        _logger.info("Broker cleaned up.")
         if not self._release_lock():
             return
         try:
@@ -204,6 +202,8 @@ class Browser(Target):
             _logger.info("browser._close() called successfully.")
         except ProcessLookupError:
             pass
+        self._broker.clean()
+        _logger.info("Broker cleaned up.")
         # if self._logger_pipe:
         #    os.close(self._logger_pipe) # noqa: ERA001 BUG TODO REGRESSION
         _logger.info("Logging pipe closed.")

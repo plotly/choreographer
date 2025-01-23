@@ -80,7 +80,7 @@ class Broker:
         self._subscriptions_futures[session_id][subscription].append(future)
         return future
 
-    async def clean(self) -> None:
+    def clean(self) -> None:
         for future in self.futures.values():
             if not future.done():
                 future.cancel()
