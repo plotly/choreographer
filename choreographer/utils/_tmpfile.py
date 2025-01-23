@@ -148,8 +148,8 @@ class TmpDirectory:
             if hasattr(self, "temp_dir") and self.temp_dir:
                 self.temp_dir.cleanup()
             self.exists = False
-        except BaseException:  # noqa: BLE001 we try many ways to clean, this is the first one
-            _logger.info("TemporaryDirectory.cleanup() failed.")
+        except BaseException as e:  # noqa: BLE001 we try many ways to clean, this is the first one
+            _logger.info(f"TemporaryDirectory.cleanup() failed. Error {e}")
 
         # bad typing but tough
         def remove_readonly(
@@ -172,17 +172,20 @@ class TmpDirectory:
             del self.temp_dir
         except FileNotFoundError:
             pass  # it worked!
-        except BaseException:  # noqa: BLE001
+        except BaseException as e:  # noqa: BLE001
             self._delete_manually(check_only=True)
             if not self.exists:
                 return
-            _logger.info("shutil.rmtree() failed to delete temporary file.")
+            _logger.info(f"shutil.rmtree() failed to delete temporary file. Error {e}")
 
             def extra_clean() -> None:
+                _logger.info("Extra manual clean waiting 3 seconds.")
                 time.sleep(3)
+                _logger.info("Extra manual clean executing.")
                 self._delete_manually()
 
+            # Putting this into another thread doesn't really matter?
             t = Thread(target=extra_clean)
-            t.run()
+            t.start()
             if self.path.exists():
                 _logger.warning("Temporary dictory couldn't be removed manually.")
