@@ -9,7 +9,6 @@ import tempfile
 import time
 import warnings
 from pathlib import Path
-from threading import Thread
 from typing import TYPE_CHECKING
 
 import logistro
@@ -186,13 +185,11 @@ class TmpDirectory:
 
             def extra_clean() -> None:
                 _logger.info("Extra manual clean waiting 3 seconds.")
-                time.sleep(3)
+                time.sleep(1)
                 _logger.info("Extra manual clean executing.")
                 self._delete_manually()
 
-            # Putting this into another thread doesn't really matter?
-            # t = Thread(target=extra_clean)
-            # t.start()
+            # testing doesn't look threads so I guess we'll block
             extra_clean()
             if self.path.exists():
                 _logger.warning("Temporary dictory couldn't be removed manually.")

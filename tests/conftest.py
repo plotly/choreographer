@@ -1,13 +1,11 @@
 import asyncio
+import logging
 
-import logistro
 import pytest
 import pytest_asyncio
 
 import choreographer as choreo
 from choreographer import errors
-
-logistro.getLogger("choreographer").setLevel(1)
 
 
 @pytest.fixture(params=[True, False], ids=["enable_sandbox", ""])
@@ -86,3 +84,17 @@ def pytest_runtest_setup(item: pytest.Item):
 def pytest_configure():
     # change this by command line TODO
     pytest.default_timeout = 5
+
+
+# pytest shuts down its capture before logging/threads finish
+@pytest.fixture(scope="session", autouse=True)
+def cleanup_logging_handlers(request):
+    capture = request.config.getoption("--capture") != "no"
+    try:
+        yield
+    finally:
+        if capture:
+            for handler in logging.root.handlers[:]:
+                handler.flush()
+                if isinstance(handler, logging.StreamHandler):
+                    logging.root.removeHandler(handler)
