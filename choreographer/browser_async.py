@@ -222,17 +222,17 @@ class Browser(Target):
         await self.close()
 
     async def _watchdog(self) -> None:
-        _logger.info("Starting watchdog")
-        await asyncio.to_thread(self.subprocess.wait)
-        _logger.warning("Browser is being closed because chrom* closed")
-        self._watch_dog_task = None
-        await self.close()
-        await asyncio.sleep(1)
         with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=TmpDirWarning)
+            _logger.info("Starting watchdog")
+            await asyncio.to_thread(self.subprocess.wait)
+            _logger.warning("Browser is being closed because chrom* closed")
+            self._watch_dog_task = None
+            await self.close()
+            await asyncio.sleep(1)
             # ignore warnings here because
             # watchdog killing is last resort
             # and can leaves stuff in weird state
-            warnings.filterwarnings("ignore", category=TmpDirWarning)
             await asyncio.to_thread(self._browser_impl.clean)
 
     def _add_tab(self, tab: Tab) -> None:
