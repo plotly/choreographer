@@ -102,16 +102,20 @@ class TmpDirectory:
             if not check_only:
                 for f in files:
                     fp = Path(root) / f
+                    _logger.debug2(f"Have file {fp}")
                     try:
                         fp.chmod(stat.S_IWUSR)
-                        fp.unlink()
+                        fp.unlink(missing_ok=True)
+                        _logger.debug2("Deleted")
                     except BaseException as e:  # noqa: BLE001 yes catch and report
                         errors.append((fp, e))
                 for d in dirs:
                     fp = Path(root) / d
+                    _logger.debug2(f"Have directory {fp}")
                     try:
                         fp.chmod(stat.S_IWUSR)
                         fp.rmdir()
+                        _logger.debug2("Deleted")
                     except BaseException as e:  # noqa: BLE001 yes catch and report
                         errors.append((fp, e))
 
