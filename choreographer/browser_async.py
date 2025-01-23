@@ -207,7 +207,7 @@ class Browser(Target):
         # if self._logger_pipe:
         #    os.close(self._logger_pipe) # noqa: ERA001 BUG TODO REGRESSION
         _logger.info("Logging pipe closed.")
-        await asyncio.to_thread(self._channel.close)
+        self._channel.close()
         _logger.info("Browser channel closed.")
         self._browser_impl.clean()  # threading this just seems to cause problems
         _logger.info("Browser implementation cleaned up.")

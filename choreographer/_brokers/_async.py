@@ -157,9 +157,9 @@ class Broker:
                                 query.endswith("*")
                                 and response["method"].startswith(query[:-1])
                             ) or (response["method"] == query)
-                            _logger.debug(
+                            _logger.debug2(
                                 f"Checking subscription key: {query} "
-                                "against event method {response['method']}",
+                                f"against event method {response['method']}",
                             )
                             if match:
                                 t: asyncio.Task[Any] = asyncio.create_task(

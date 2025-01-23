@@ -152,6 +152,7 @@ class TmpDirectory:
             if hasattr(self, "temp_dir") and self.temp_dir:
                 self.temp_dir.cleanup()
             self.exists = False
+            _logger.info("TemporaryDirectory.cleanup() worked.")
         except BaseException as e:  # noqa: BLE001 we try many ways to clean, this is the first one
             _logger.info(f"TemporaryDirectory.cleanup() failed. Error {e}")
 
@@ -174,8 +175,9 @@ class TmpDirectory:
                 shutil.rmtree(self.path, onerror=remove_readonly)
             self.exists = False
             del self.temp_dir
+            _logger.info("shutil.rmtree worked.")
         except FileNotFoundError:
-            pass  # it worked!
+            _logger.info("shutil.rmtree worked.")
         except BaseException as e:  # noqa: BLE001
             self._delete_manually(check_only=True)
             if not self.exists:
