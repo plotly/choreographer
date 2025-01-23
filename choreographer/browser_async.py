@@ -209,7 +209,7 @@ class Browser(Target):
         _logger.info("Logging pipe closed.")
         await asyncio.to_thread(self._channel.close)
         _logger.info("Browser channel closed.")
-        await asyncio.to_thread(self._browser_impl.clean)
+        self._browser_impl.clean()  # threading this just seems to cause problems
         _logger.info("Browser implementation cleaned up.")
 
     async def __aexit__(
