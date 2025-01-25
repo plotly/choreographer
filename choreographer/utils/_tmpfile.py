@@ -78,6 +78,7 @@ class TmpDirectory:
                 self.temp_dir = tempfile.TemporaryDirectory(**args)
 
         self.path = Path(self.temp_dir.name)
+        _logger.info(f"Temp directory created: {self.path}")
         self.exists = True
 
     def _delete_manually(  # noqa: C901, PLR0912
