@@ -70,6 +70,7 @@ class Pipe:
         if self.shutdown_lock.locked():
             raise ChannelClosedError
         encoded_message = wire.serialize(obj) + b"\0"
+        _logger.debug2(f"Writing: {encoded_message}")
         try:
             os.write(self._write_to_browser, encoded_message)
         except OSError as e:
@@ -111,6 +112,7 @@ class Pipe:
                 self._read_from_browser,
                 10000,
             )  # 10MB buffer, nbd, doesn't matter w/ this
+            _logger.debug2(f"Read: {raw_buffer}")
             if not raw_buffer or raw_buffer == b"{bye}\n":
                 # we seem to need {bye} even if chrome closes NOTE
                 raise ChannelClosedError
@@ -119,6 +121,7 @@ class Pipe:
                 if _with_block:
                     os.set_blocking(self._read_from_browser, True)
                 raw_buffer += os.read(self._read_from_browser, 10000)
+                _logger.debug2(f"Read: {raw_buffer}")
         except BlockingIOError:
             return jsons
         except OSError as e:
