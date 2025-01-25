@@ -81,18 +81,26 @@ class Broker:
         return future
 
     def clean(self) -> None:
+        _logger.debug("Cancelling message futures")
         for future in self.futures.values():
             if not future.done():
+                _logger.debug(f"Cancelling {future}")
                 future.cancel()
+        _logger.debug("Cancelling read task")
         if self._current_read_task and not self._current_read_task.done():
+            _logger.debug(f"Cancelling read: {self._current_read_task}")
             self._current_read_task.cancel()
+        _logger.debug("Cancelling subscription-futures")
         for session in self._subscriptions_futures.values():
             for query in session.values():
                 for future in query:
                     if not future.done():
+                        _logger.debug(f"Cancelling {future}")
                         future.cancel()
+        _logger.debug("Cancelling background tasks")
         for task in self._background_tasks_cancellable:
             if not task.done():
+                _logger.debug(f"Cancelling {task}")
                 task.cancel()
 
     def run_read_loop(self) -> None:  # noqa: C901, PLR0915 complexity
@@ -210,11 +218,13 @@ class Broker:
         loop = asyncio.get_running_loop()
         future: asyncio.Future[protocol.BrowserResponse] = loop.create_future()
         self.futures[key] = future
+        _logger.debug(f"Created future: {key} {future}")
         try:
             await asyncio.to_thread(self._channel.write_json, obj)
         except BaseException as e:  # noqa: BLE001
             future.set_exception(e)
             del self.futures[key]
+            _logger.debug(f"Future for {key} deleted.")
         return await future
 
     def _get_target_session_by_session_id(
