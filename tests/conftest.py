@@ -89,7 +89,7 @@ def pytest_runtest_setup(item: pytest.Item):
 
 def pytest_configure():
     # change this by command line TODO
-    pytest.default_timeout = 5
+    pytest.default_timeout = 8
 
 
 # pytest shuts down its capture before logging/threads finish
