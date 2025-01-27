@@ -28,7 +28,11 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://github.com/plotly/choreographer"
-Repository = "https://github.com/geopozo/logistro"
+Repository = "https://github.com/plotly/choreographer"
+
+[project.scripts]
+choreo_diagnose = "choreographer.cli._cli_utils_no_qa:diagnose"
+choreo_get_chrome = "choreographer.cli._cli_utils:get_chrome_cli"
 
 [dependency-groups]
 dev = [
@@ -37,7 +41,9 @@ dev = [
   "pytest-xdist",
   "async-timeout",
   "poethepoet>=0.31.1",
-  "numpy"
+  "numpy",
+  "mypy>=1.14.1",
+  "types-simplejson>=3.19.0.20241221",
 ]
 
 # uv doens't allow dependency groups to have separate python requirements
@@ -51,9 +57,8 @@ dev = [
 #    "mkdocs-material>=9.5.49",
 #]
 
-[project.scripts]
-choreo_diagnose = "choreographer._cli_utils_no_qa:diagnose"
-choreo_get_browser = "choreographer._cli_utils:get_browser_cli"
+[tool.uv.sources]
+mkquixote = { path = "../mkquixote", editable = true }
 
 [tool.ruff.lint]
 select = ["ALL"]
@@ -72,8 +77,8 @@ ignore = [
           "RET508", # Allow else if unnecessary because more readable
           "RUF012", # We don't do typing, so no typing
           "SIM105", # Too opionated (try-except-pass)
-          "T201", # no print, remove after logistro TODO
           "PT003", # scope="function" implied but I like readability
+          "G004", # fstrings in my logs
           ]
 
 [tool.ruff.lint.per-file-ignores]
@@ -81,31 +86,29 @@ ignore = [
               "D", # ignore docstring errors
               "S101", # allow assert
               "INP001", # no need for __init__ in test directories
+              "T201", # if we're printing in tests, there is a reason
+              "ERA001"
             ]
-
-# Format breaks this anyway
-# [tool.ruff.lint]
-# ignore = ["E701"]
 
 [tool.pytest.ini_options]
 asyncio_default_fixture_loop_scope = "function"
-log_cli = true
+log_cli = false
 
 [tool.poe.tasks]
-_test_proc = "pytest -W error -n auto -v -rfE --capture=fd tests/test_process.py"
-_test_fn = "pytest -W error -n auto -v -rfE --ignore=tests/test_process.py"
-_debug-test_proc = "pytest -W error -vvx -rA --capture=tee-sys tests/test_process.py"
-_debug-test_fn = "pytest -W error -vvvx -rA --capture=tee-sys --ignore=tests/test_process.py"
+test_proc = "pytest --log-level=1 -W error -n auto -v -rfE --capture=fd tests/test_process.py"
+test_fn = "pytest --log-level=1 -W error -n auto -v -rfE --capture=fd --ignore=tests/test_process.py"
+debug-test_proc = "pytest --log-level=1 -W error -vvvx -rA --show-capture=no --capture=no tests/test_process.py"
+debug-test_fn = "pytest --log-level=1 -W error -vvvx -rA --show-capture=no --capture=no --ignore=tests/test_process.py"
 
 # the capture on these is weird, the mechanics are weird, i forget exactly whats its doing
 [tool.poe.tasks.test]
-sequence = ["_test_proc", "_test_fn"]
+sequence = ["test_proc", "test_fn"]
 help = "Run all tests quickly"
 
 [tool.poe.tasks.debug-test]
-sequence = ["_debug-test_proc", "_debug-test_fn"]
+sequence = ["debug-test_proc", "debug-test_fn"]
 help = "Run test by test, slowly, quitting after first error"
 
 [tool.poe.tasks.filter-test]
-cmd = "pytest -W error -vvvx -rA --capture=tee-sys"
+cmd = "pytest --log-level=1 -W error -vvvx -rA --capture=no --show-capture=no"
 help = "Run any/all tests one by one with basic settings: can include filename and -k filters"

@@ -1,13 +1,20 @@
 import warnings
 
+import logistro
 import pytest
 import pytest_asyncio
 
 import choreographer as choreo
 
+# allows to create a browser pool for tests
+pytestmark = pytest.mark.asyncio(loop_scope="function")
+
+_logger = logistro.getLogger(__name__)
+
 
 @pytest_asyncio.fixture(scope="function", loop_scope="function")
 async def session(browser):
+    _logger.info("testing...")
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", choreo.protocol.ExperimentalFeatureWarning)
         session_browser = await browser.create_session()
@@ -17,6 +24,7 @@ async def session(browser):
 
 @pytest.mark.asyncio
 async def test_session_send_command(session):
+    _logger.info("testing...")
     # Test valid request with correct command
     response = await session.send_command(command="Target.getTargets")
     assert "result" in response and "targetInfos" in response["result"]  # noqa: PT018 I like this assertion

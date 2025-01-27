@@ -1,24 +1,25 @@
-"""choreographer is a browser controller for python."""
+"""
+choreographer is a browser controller for python.
 
-import choreographer._devtools_protocol_layer as protocol
+choreographer is natively async, so while there are two main entrypoints:
+classes `Browser` and `BrowserSync`, the sync version is very limited, functioning
+as a building block for more featureful implementations.
 
-from ._browser import Browser, BrowserClosedError, browser_which, get_browser_path
-from ._cli_utils import get_browser, get_browser_sync
-from ._pipe import BlockWarning, PipeClosedError
-from ._system_utils._tempfile import TempDirectory, TempDirWarning
-from ._tab import Tab
+See the main README for a quickstart.
+"""
+
+from .browser_async import (
+    Browser,
+    Tab,
+)
+from .browser_sync import (
+    BrowserSync,
+    TabSync,
+)
 
 __all__ = [
-    "BlockWarning",
     "Browser",
-    "BrowserClosedError",
-    "PipeClosedError",
+    "BrowserSync",
     "Tab",
-    "TempDirWarning",
-    "TempDirectory",
-    "browser_which",
-    "get_browser",
-    "get_browser_path",
-    "get_browser_sync",
-    "protocol",
+    "TabSync",
 ]

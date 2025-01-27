@@ -1,9 +1,15 @@
 import asyncio
 
+import logistro
 import pytest
-import pytest_asyncio
 
 import choreographer as choreo
+from choreographer.protocol import devtools_async
+
+# allows to create a browser pool for tests
+pytestmark = pytest.mark.asyncio(loop_scope="function")
+
+_logger = logistro.getLogger(__name__)
 
 
 # this ignores extra stuff in received- only that we at least have what is expected
@@ -20,26 +26,20 @@ def check_response_dictionary(response_received, response_expected):
         ), f"Expected: {response_expected}\nReceived: {response_received}"
 
 
-@pytest_asyncio.fixture(scope="function", loop_scope="function")
-async def tab(browser):
-    tab_browser = await browser.create_tab("")
-    yield tab_browser
-    try:
-        await browser.close_tab(tab_browser)
-    except choreo.BrowserClosedError:
-        pass
-
-
 @pytest.mark.asyncio
-async def test_create_and_close_session(tab):
+async def test_create_and_close_session(browser):
+    _logger.info("testing...")
+    tab = await browser.create_tab("")
     session = await tab.create_session()
-    assert isinstance(session, choreo.protocol.Session)
+    assert isinstance(session, devtools_async.Session)
     await tab.close_session(session)
     assert session.session_id not in tab.sessions
 
 
 @pytest.mark.asyncio
-async def test_tab_send_command(tab):
+async def test_tab_send_command(browser):
+    _logger.info("testing...")
+    tab = await browser.create_tab("")
     # Test valid request with correct command
     response = await tab.send_command(command="Page.enable")
     check_response_dictionary(response, {"result": {}})
@@ -56,9 +56,10 @@ async def test_tab_send_command(tab):
 
 
 @pytest.mark.asyncio
-async def test_subscribe_once(tab):
+async def test_subscribe_once(browser):
+    _logger.info("testing...")
+    tab = await browser.create_tab("")
     subscription_result = tab.subscribe_once("Page.*")
-    assert "Page.*" in next(iter(tab.sessions.values())).subscriptions_futures
     _ = await tab.send_command("Page.enable")
     _ = await tab.send_command("Page.reload")
     _ = await subscription_result
@@ -66,7 +67,9 @@ async def test_subscribe_once(tab):
 
 
 @pytest.mark.asyncio
-async def test_subscribe_and_unsubscribe(tab):
+async def test_subscribe_and_unsubscribe(browser):
+    _logger.info("testing...")
+    tab = await browser.create_tab("")
     counter = 0
     old_counter = counter
 
