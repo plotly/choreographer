@@ -106,6 +106,7 @@ class Chromium:
             NotImplementedError: Pipe is the only channel type it'll accept right now.
 
         """
+        _logger.info(f"Chromium init'ed with kwargs {kwargs}")
         self.path = path
         self.gpu_enabled = kwargs.pop("enable_gpu", False)
         self.headless = kwargs.pop("headless", True)
@@ -176,6 +177,13 @@ class Chromium:
                 str(self.path),
             ]
 
+        if not self.gpu_enabled:
+            cli.append("--disable-gpu")
+        if self.headless:
+            cli.append("--headless")
+        if not self.sandbox_enabled:
+            cli.append("--no-sandbox")
+
         cli.extend(
             [
                 "--disable-breakpad",
@@ -184,15 +192,10 @@ class Chromium:
                 f"--user-data-dir={self.tmp_dir.path}",
                 "--no-first-run",
                 "--enable-unsafe-swiftshader",
+                "--disable-dev-shm-usage",
+                "--disable-background-networking",
             ],
         )
-        if not self.gpu_enabled:
-            cli.append("--disable-gpu")
-        if self.headless:
-            cli.append("--headless")
-        if not self.sandbox_enabled:
-            cli.append("--no-sandbox")
-
         if isinstance(self._channel, Pipe):
             cli.append("--remote-debugging-pipe")
             if platform.system() == "Windows":

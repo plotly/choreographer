@@ -1,11 +1,14 @@
 import asyncio
 import logging
 
+import logistro
 import pytest
 import pytest_asyncio
 
 import choreographer as choreo
 from choreographer import errors
+
+_logger = logistro.getLogger(__name__)
 
 
 @pytest.fixture(params=[True, False], ids=["enable_sandbox", ""])
@@ -33,11 +36,13 @@ def pytest_addoption(parser):
 # browser fixture will supply a browser for you
 @pytest_asyncio.fixture(scope="function", loop_scope="function")
 async def browser(request):
+    _logger.info("Fixture building browser.")
     headless = request.config.getoption("--headless")
     browser = await choreo.Browser(
         headless=headless,
     )
     yield browser
+    _logger.info("Fixture closing browser.")
     try:
         await browser.close()
     except errors.BrowserClosedError:
@@ -57,6 +62,7 @@ async def browser(request):
 def pytest_runtest_setup(item: pytest.Item):
     yield
     if "browser" in item.funcargs:
+        _logger.info("Hook setting test timeout.")
         raw_test_fn = item.obj
         timeouts = [k for k in item.funcargs if k.startswith("timeout")]
         timeout = (
@@ -94,6 +100,7 @@ def cleanup_logging_handlers(request):
         yield
     finally:
         if capture:
+            _logger.info("Conftest cleaning up handlers.")
             for handler in logging.root.handlers[:]:
                 handler.flush()
                 if isinstance(handler, logging.StreamHandler):

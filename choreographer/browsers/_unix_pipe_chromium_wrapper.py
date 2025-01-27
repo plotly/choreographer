@@ -28,11 +28,18 @@ import sys
 from functools import partial
 from typing import TYPE_CHECKING
 
+import logistro
+
 if TYPE_CHECKING:
     from types import FrameType
 
+_logger = logistro.getLogger("chrome_wrapper")
+
 # we're a wrapper, the cli is everything that came after us
 cli = sys.argv[1:]
+
+print(f"wrapper CLI: {cli}", file=sys.stderr)  # noqa: T201 goes to pipe/logger anyway
+
 process = subprocess.Popen(cli, pass_fds=(3, 4))  # noqa: S603 untrusted input
 
 

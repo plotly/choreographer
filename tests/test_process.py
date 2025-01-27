@@ -4,6 +4,7 @@ import platform
 import signal
 import subprocess
 
+import logistro
 import pytest
 from async_timeout import timeout
 
@@ -12,9 +13,15 @@ from choreographer import errors
 
 # ruff: noqa: PLR0913 (lots of parameters)
 
+# allows to create a browser pool for tests
+pytestmark = pytest.mark.asyncio(loop_scope="function")
+
+_logger = logistro.getLogger(__name__)
+
 
 @pytest.mark.asyncio(loop_scope="function")
 async def test_context(headless, sandbox, gpu):
+    _logger.info("testing...")
     async with (
         choreo.Browser(
             headless=headless,
@@ -37,6 +44,7 @@ async def test_context(headless, sandbox, gpu):
 
 @pytest.mark.asyncio(loop_scope="function")
 async def test_no_context(headless, sandbox, gpu):
+    _logger.info("testing...")
     browser = await choreo.Browser(
         headless=headless,
         enable_sandbox=sandbox,
@@ -61,6 +69,7 @@ async def test_no_context(headless, sandbox, gpu):
 # tempdir may survive protected by chromium subprocess surviving the kill
 @pytest.mark.asyncio(loop_scope="function")
 async def test_watchdog(headless):
+    _logger.info("testing...")
     browser = await choreo.Browser(
         headless=headless,
     )

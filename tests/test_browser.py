@@ -1,3 +1,4 @@
+import logistro
 import pytest
 
 import choreographer as choreo
@@ -6,9 +7,15 @@ from choreographer.protocol import devtools_async
 
 # We no longer use live URLs to as not depend on the network
 
+# allows to create a browser pool for tests
+pytestmark = pytest.mark.asyncio(loop_scope="function")
+
+_logger = logistro.getLogger(__name__)
+
 
 @pytest.mark.asyncio
 async def test_create_and_close_tab(browser):
+    _logger.info("testing...")
     tab = await browser.create_tab("")
     assert isinstance(tab, choreo.Tab)
     assert tab.target_id in browser.tabs
@@ -18,6 +25,7 @@ async def test_create_and_close_tab(browser):
 
 @pytest.mark.asyncio
 async def test_create_and_close_session(browser):
+    _logger.info("testing...")
     with pytest.warns(errors.ExperimentalFeatureWarning):
         session = await browser.create_session()
     assert isinstance(session, devtools_async.Session)
@@ -30,6 +38,7 @@ async def test_create_and_close_session(browser):
 # This deserves some thought re. difference between write_json and send_command
 @pytest.mark.asyncio
 async def test_broker_write_json(browser):
+    _logger.info("testing...")
     # Test valid request with correct id and method
     response = await browser._broker.write_json(  # noqa: SLF001
         {"id": 0, "method": "Target.getTargets"},
@@ -91,6 +100,7 @@ async def test_broker_write_json(browser):
 
 @pytest.mark.asyncio
 async def test_browser_send_command(browser):
+    _logger.info("testing...")
     # Test valid request with correct command
     response = await browser.send_command(command="Target.getTargets")
     assert "result" in response and "targetInfos" in response["result"]  # noqa: PT018 I like this assertion
@@ -108,6 +118,7 @@ async def test_browser_send_command(browser):
 
 @pytest.mark.asyncio
 async def test_populate_targets(browser):
+    _logger.info("testing...")
     await browser.send_command(command="Target.createTarget", params={"url": ""})
     await browser.populate_targets()
     assert len(browser.tabs) >= 1
@@ -115,6 +126,7 @@ async def test_populate_targets(browser):
 
 @pytest.mark.asyncio
 async def test_get_tab(browser):
+    _logger.info("testing...")
     await browser.create_tab("")
     assert browser.get_tab() == next(iter(browser.tabs.values()))
     await browser.create_tab()
