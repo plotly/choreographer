@@ -56,7 +56,7 @@ async def test_tab_send_command(browser):
 
 
 @pytest.mark.asyncio
-async def test_subscribe_once(browser, timeout=15):
+async def test_subscribe_once(browser):
     _logger.info("testing...")
     tab = await browser.create_tab("")
     subscription_result = tab.subscribe_once("Page.*")
@@ -67,7 +67,7 @@ async def test_subscribe_once(browser, timeout=15):
 
 
 @pytest.mark.asyncio
-async def test_subscribe_and_unsubscribe(browser, timeout=15):
+async def test_subscribe_and_unsubscribe(browser):
     _logger.info("testing...")
     tab = await browser.create_tab("")
     counter = 0
