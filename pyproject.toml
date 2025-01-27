@@ -95,18 +95,18 @@ asyncio_default_fixture_loop_scope = "function"
 log_cli = false
 
 [tool.poe.tasks]
-_test_proc = "pytest --log-level=1 -W error -n auto -v -rfE --capture=fd tests/test_process.py"
-_test_fn = "pytest --log-level=1 -W error -n auto -v -rfE --capture=fd --ignore=tests/test_process.py"
-_debug-test_proc = "pytest --log-level=1 -W error -vvx -rA --show-capture=no --capture=no tests/test_process.py"
-_debug-test_fn = "pytest --log-level=1 -W error -vvvx -rA --show-capture=no --capture=no --ignore=tests/test_process.py"
+test_proc = "pytest --log-level=1 -W error -n auto -v -rfE --capture=fd tests/test_process.py"
+test_fn = "pytest --log-level=1 -W error -n auto -v -rfE --capture=fd --ignore=tests/test_process.py"
+debug-test_proc = "pytest --log-level=1 -W error -vvx -rA --show-capture=no --capture=no tests/test_process.py"
+debug-test_fn = "pytest --log-level=1 -W error -vvvx -rA --show-capture=no --capture=no --ignore=tests/test_process.py"
 
 # the capture on these is weird, the mechanics are weird, i forget exactly whats its doing
 [tool.poe.tasks.test]
-sequence = ["_test_proc", "_test_fn"]
+sequence = ["test_proc", "test_fn"]
 help = "Run all tests quickly"
 
 [tool.poe.tasks.debug-test]
-sequence = ["_debug-test_proc", "_debug-test_fn"]
+sequence = ["debug-test_proc", "debug-test_fn"]
 help = "Run test by test, slowly, quitting after first error"
 
 [tool.poe.tasks.filter-test]
