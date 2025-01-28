@@ -169,20 +169,23 @@ class Browser(Target):
 
     async def _close(self) -> None:
         if await self._is_closed():
+            _logger.debug("No _close(), already is closed")
             return
 
         try:
             await self.send_command("Browser.close")
         except (BrowserClosedError, BrowserFailedError):
+            _logger.debug("Browser is closed trying to send Browser.close")
             return
         except ChannelClosedError:
-            pass
+            _logger.debug("Can send browser.close on close channel")
 
         await asyncio.to_thread(self._channel.close)
 
         if await self._is_closed():
+            _logger.debug("Browser is closed after closing channel")
             return
-
+        _logger.info("Must kill browser.")
         await asyncio.to_thread(kill, self.subprocess)
         if await self._is_closed(wait=4):
             return
@@ -206,7 +209,7 @@ class Browser(Target):
         _logger.info("Broker cleaned up.")
         if self._logger_pipe:
             os.close(self._logger_pipe)
-        _logger.info("Logging pipe closed.")
+            _logger.info("Logging pipe closed.")
         self._channel.close()
         _logger.info("Browser channel closed.")
         self._browser_impl.clean()  # threading this just seems to cause problems
