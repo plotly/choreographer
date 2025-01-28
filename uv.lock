@@ -37,7 +37,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "logistro", specifier = ">=1.0.2" },
+    { name = "logistro", specifier = ">=1.0.7" },
     { name = "simplejson" },
 ]
 
@@ -91,11 +91,11 @@ wheels = [
 
 [[package]]
 name = "logistro"
-version = "1.0.6"
+version = "1.0.7"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/75/65/ee0112f9a4148fcc28c66a5fc217a8021bd5b714bcf20e0714a9062f2641/logistro-1.0.6.tar.gz", hash = "sha256:1d03eae42945f732f15878f0a9e438f6aee71976df2b9603ff3117cbbf970ecf", size = 7174 }
+sdist = { url = "https://files.pythonhosted.org/packages/ed/c1/1db814f21859552558a2d3ebb9fa80d09d322654af66e777b4bb7bace029/logistro-1.0.7.tar.gz", hash = "sha256:18ad7b8eaf9aec7f89371b2867e4498fb880e10ee90f05fc728b8a4800b9c1a2", size = 7152 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f0/b3/19f63644e91df41fa0b328d47f84342356c54a0a3278e2f7b3970924d534/logistro-1.0.6-py3-none-any.whl", hash = "sha256:675ce84ab180d15c5779e995e3c16f7697a511f239b3c919f869ea91c0ebe71c", size = 6607 },
+    { url = "https://files.pythonhosted.org/packages/48/3e/5d2f4f2a41fb8cabe3a6f772311f4996e43c80253f916f5455798428ba00/logistro-1.0.7-py3-none-any.whl", hash = "sha256:80a967e53d1efba41ed32769a5cfdc023a1bff646e2ad14dad6474781f920cda", size = 6601 },
 ]
 
 [[package]]
