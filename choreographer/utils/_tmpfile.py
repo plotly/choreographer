@@ -64,13 +64,13 @@ class TmpDirectory:
         else:  # is windows
             vinfo = sys.version_info[:3]
             if vinfo >= (3, 12):
-                self.temp_dir = tempfile.TemporaryDirectory(
+                self.temp_dir = tempfile.TemporaryDirectory(  # type: ignore [call-overload, unused-ignore]
                     delete=False,
                     ignore_cleanup_errors=True,
                     **args,
                 )
             elif vinfo >= (3, 10):
-                self.temp_dir = tempfile.TemporaryDirectory(
+                self.temp_dir = tempfile.TemporaryDirectory(  # type: ignore [call-overload, unused-ignore]
                     ignore_cleanup_errors=True,
                     **args,
                 )
@@ -170,7 +170,7 @@ class TmpDirectory:
 
         try:
             if self._with_onexc:
-                shutil.rmtree(self.path, onexc=remove_readonly)
+                shutil.rmtree(self.path, onexc=remove_readonly)  # type: ignore [call-arg, unused-ignore]
             else:
                 shutil.rmtree(self.path, onerror=remove_readonly)
             self.exists = False
