@@ -107,7 +107,11 @@ def diagnose() -> None:
         for exception in fail:
             try:
                 print(f"Error in: {exception[0]}")
-                traceback.print_exception(exception[1])
+                traceback.print_exception(
+                    type(exception[1]),
+                    exception[1],
+                    exception[1].__traceback__,
+                )
             except BaseException:
                 print("Couldn't print traceback for:")
                 print(str(exception))

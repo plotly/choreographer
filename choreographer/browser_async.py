@@ -24,7 +24,9 @@ if TYPE_CHECKING:
     from collections.abc import Generator, MutableMapping
     from pathlib import Path
     from types import TracebackType
-    from typing import Any, Self
+    from typing import Any
+
+    from typing_extensions import Self  # 3.9 needs this, could be from typing in 3.10
 
     from .browsers._interface_type import BrowserImplInterface
     from .channels._interface_type import ChannelInterface
