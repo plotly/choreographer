@@ -22,7 +22,7 @@ maintainers = [
   {name = "Andrew Pikul", email = "ajpikul@gmail.com"},
 ]
 dependencies = [
-  "logistro>=1.0.2",
+  "logistro>=1.0.7",
   "simplejson",
 ]
 
