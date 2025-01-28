@@ -189,7 +189,7 @@ class TmpDirectory:
                 tries = 5
                 while self.path.exists() and i < tries:
                     time.sleep(1)
-                    _logger.info("Extra manual clean executing.")
+                    _logger.info(f"Extra manual clean executing {i}.")
                     self._delete_manually()
                     i += 1
 
