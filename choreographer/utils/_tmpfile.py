@@ -185,10 +185,13 @@ class TmpDirectory:
             _logger.info(f"shutil.rmtree() failed to delete temporary file. Error {e}")
 
             def extra_clean() -> None:
-                _logger.info("Extra manual clean waiting 3 seconds.")
-                time.sleep(1)
-                _logger.info("Extra manual clean executing.")
-                self._delete_manually()
+                i = 0
+                tries = 5
+                while self.path.exists() and i < tries:
+                    time.sleep(1)
+                    _logger.info("Extra manual clean executing.")
+                    self._delete_manually()
+                    i += 1
 
             # testing doesn't look threads so I guess we'll block
             extra_clean()
