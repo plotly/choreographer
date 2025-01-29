@@ -193,7 +193,7 @@ class TmpDirectory:
                     _logger.info(f"Extra manual clean executing {i}.")
                     self._delete_manually(quiet=True)
                     i += 1
-                    time.sleep(2)
+                    time.sleep(10)
                 if self.path.exists():
                     self._delete_manually(quiet=False)
 

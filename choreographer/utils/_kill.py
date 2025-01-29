@@ -3,6 +3,10 @@ from __future__ import annotations
 import platform
 import subprocess
 
+import logistro
+
+_logger = logistro.getLogger(__name__)
+
 
 def kill(process: subprocess.Popen[bytes]) -> None:
     if platform.system() == "Windows":
@@ -13,5 +17,7 @@ def kill(process: subprocess.Popen[bytes]) -> None:
         )
     else:
         process.terminate()
+        _logger.info("Called terminate")
         if process.poll() is None:
+            _logger.info("Calling kill")
             process.kill()
