@@ -133,12 +133,14 @@ class BrowserSync(TargetSync):
         try:
             self.send_command("Browser.close")
         except (BrowserClosedError, BrowserFailedError):
+            _logger.debug("Browser is closed trying to send Browser.close")
             return
         except ChannelClosedError:
-            pass
+            _logger.debug("Can send browser.close on close channel")
 
         self._channel.close()
-        if self._is_closed():
+
+        if self._is_closed(wait=3):
             return
 
         # try kiling

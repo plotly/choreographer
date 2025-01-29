@@ -1,6 +1,5 @@
 import argparse
-
-# import asyncio
+import asyncio
 import platform
 import subprocess
 import sys
@@ -28,8 +27,7 @@ def diagnose() -> None:
 
     logistro.getLogger().setLevel("DEBUG")
 
-    # from choreographer import BrowserSync, Browser, browser_which
-    from choreographer import BrowserSync
+    from choreographer import Browser, BrowserSync
     from choreographer.browsers._chrome_constants import chrome_names
     from choreographer.utils._which import browser_which
 
@@ -85,15 +83,15 @@ def diagnose() -> None:
             fail.append(("Sync test headless", e))
         finally:
             print("Done with sync test headless".center(50, "*"))
-        # ruff: noqa: ERA001
-        # async def test_headless():
-        #    browser = await Browser(debug=True, debug_browser=True, headless=headless)
-        #    await asyncio.sleep(3)
-        #    await browser.close()
+
+        async def test_headless() -> None:
+            browser = await Browser(debug=True, debug_browser=True, headless=headless)
+            await asyncio.sleep(3)
+            await browser.close()
 
         try:
             print("Async Test Headless".center(50, "*"))
-        #    asyncio.run(test_headless())
+            asyncio.run(test_headless())
         except BaseException as e:
             fail.append(("Async test headless", e))
         finally:
