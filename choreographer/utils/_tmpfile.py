@@ -194,8 +194,8 @@ class TmpDirectory:
                     self._delete_manually(quiet=True)
                     i += 1
                     time.sleep(2)
-
-            self._delete_manually(quiet=False)
+                if self.path.exists():
+                    self._delete_manually(quiet=False)
 
             # testing doesn't look threads so I guess we'll block
             extra_clean()
