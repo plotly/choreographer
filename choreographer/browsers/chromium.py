@@ -212,6 +212,7 @@ class Chromium:
                 "--disable-print-preview",
                 "--disable-speech-api",
                 "--mute-audio",
+                "--single-process",
                 "--no-default-browser-check",
                 "--no-pings",
                 "--disable-features=Translate,BackForwardCache,AcceptCHFrame,MediaRouter,OptimizationHints,AudioServiceOutOfProcess,IsolateOrigins,site-per-process",
