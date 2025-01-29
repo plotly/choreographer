@@ -84,7 +84,7 @@ def diagnose() -> None:
         finally:
             print("Done with sync test headless".center(50, "*"))
 
-        async def test_headless():
+        async def test_headless() -> None:
             browser = await Browser(debug=True, debug_browser=True, headless=headless)
             await asyncio.sleep(3)
             await browser.close()
