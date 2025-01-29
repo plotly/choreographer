@@ -77,7 +77,7 @@ async def test_watchdog(headless):
     if platform.system() == "Windows":
         # Blocking process here because it ensures the kill will occur rn
         subprocess.call(  # noqa: S603, ASYNC221 sanitize input, blocking process
-            ["taskkill", "/F", "/T", "/PID", str(browser.subprocess.pid)],  # noqa: S607
+            ["taskkill", "/IM", "/F", "/T", "/PID", str(browser.subprocess.pid)],  # noqa: S607
             stderr=subprocess.DEVNULL,
             stdout=subprocess.DEVNULL,
         )
