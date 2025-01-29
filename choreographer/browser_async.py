@@ -179,7 +179,7 @@ class Browser(Target):
             return
         except ChannelClosedError:
             _logger.debug("Can send browser.close on close channel")
-
+        await asyncio.sleep(0.3)
         await asyncio.to_thread(self._channel.close)
 
         if await self._is_closed():
