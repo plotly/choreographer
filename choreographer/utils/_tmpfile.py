@@ -85,6 +85,7 @@ class TmpDirectory:
         self,
         *,
         check_only: bool = False,
+        quiet: bool = False,
     ) -> tuple[
         int,
         int,
@@ -133,11 +134,12 @@ class TmpDirectory:
             else:
                 self.exists = False
         elif errors:
-            warnings.warn(  # noqa: B028
-                "The temporary directory could not be deleted, "
-                f"execution will continue. errors: {errors}",
-                TmpDirWarning,
-            )
+            if not quiet:
+                warnings.warn(  # noqa: B028
+                    "The temporary directory could not be deleted, "
+                    f"execution will continue. errors: {errors}",
+                    TmpDirWarning,
+                )
             self.exists = True
         else:
             self.exists = False
@@ -186,12 +188,14 @@ class TmpDirectory:
 
             def extra_clean() -> None:
                 i = 0
-                tries = 5
+                tries = 4
                 while self.path.exists() and i < tries:
-                    time.sleep(1)
                     _logger.info(f"Extra manual clean executing {i}.")
-                    self._delete_manually()
+                    self._delete_manually(quiet=True)
                     i += 1
+                    time.sleep(2)
+                if self.path.exists():
+                    self._delete_manually(quiet=False)
 
             # testing doesn't look threads so I guess we'll block
             extra_clean()
