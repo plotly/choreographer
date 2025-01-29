@@ -188,12 +188,14 @@ class TmpDirectory:
 
             def extra_clean() -> None:
                 i = 0
-                tries = 5
+                tries = 4
                 while self.path.exists() and i < tries:
-                    time.sleep(2)
                     _logger.info(f"Extra manual clean executing {i}.")
-                    self._delete_manually()
+                    self._delete_manually(quiet=True)
                     i += 1
+                    time.sleep(2)
+
+            self._delete_manually(quiet=False)
 
             # testing doesn't look threads so I guess we'll block
             extra_clean()
