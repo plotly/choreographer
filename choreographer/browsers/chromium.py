@@ -195,7 +195,6 @@ class Chromium:
                 "--disable-dev-shm-usage",
                 "--disable-background-networking",
                 "--disable-background-timer-throttling",
-                "--disable-backgrounding-occluded-windows",
                 "--disable-component-update",
                 "--disable-default-apps",
                 "--disable-extensions",
