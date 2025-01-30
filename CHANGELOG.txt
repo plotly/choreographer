@@ -1,3 +1,3 @@
-v1.0.0a11
+v1.0.0
 - Increase wait for checking regular close
 - Decrease freeze for manual bad-close cleanup
