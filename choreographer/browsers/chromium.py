@@ -214,7 +214,8 @@ class Chromium:
                 "--mute-audio",
                 "--no-default-browser-check",
                 "--no-pings",
-                "--disable-features=Translate,BackForwardCache,AcceptCHFrame,MediaRouter,OptimizationHints,AudioServiceOutOfProcess,IsolateOrigins,site-per-process",
+                "--process-per-tab",
+                "--disable-features=Translate,BackForwardCache,AcceptCHFrame,MediaRouter,OptimizationHints,AudioServiceOutOfProcess,IsolateOrigins",
                 "--disable-web-security",
             ],
         )
