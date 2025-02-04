@@ -59,6 +59,7 @@ dev = [
 
 [tool.uv.sources]
 mkquixote = { path = "../mkquixote", editable = true }
+logistro = { path = "../logistro", editable = true }
 
 [tool.ruff.lint]
 select = ["ALL"]
