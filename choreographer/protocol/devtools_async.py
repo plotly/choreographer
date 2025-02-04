@@ -128,9 +128,7 @@ class Session:
 
         """
         if string not in self.subscriptions:
-            raise ValueError(
-                "Cannot unsubscribe as string is not present in subscriptions",
-            )
+            return
         del self.subscriptions[string]
 
     def subscribe_once(self, string: str) -> asyncio.Future[Any]:
