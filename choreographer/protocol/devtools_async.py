@@ -90,7 +90,6 @@ class Session:
         _logger.debug(
             f"Cmd '{command}', params '{params}' on sessionId '{self.session_id}'",
         )
-        _logger.debug2(f"In session.send_command for {json_command}")
         return await self._broker.write_json(json_command)
 
     def subscribe(
@@ -175,7 +174,7 @@ class Target:
         # States
         self.sessions = {}
         self.target_id = target_id
-        _logger.info(f"Created new target {target_id}.")
+        _logger.debug(f"Created new target {target_id}.")
 
     def _add_session(self, session: Session) -> None:
         if not isinstance(session, Session):
@@ -259,7 +258,7 @@ class Target:
             ) from protocol.DevtoolsProtocolError(
                 response,
             )
-        _logger.debug(f"The session {session_id} has been closed")
+        _logger.debug(f"The session {session_id} has been closed.")
         return response
         # kinda hate, why do we need this again?
 

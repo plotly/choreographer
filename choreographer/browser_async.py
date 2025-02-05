@@ -113,9 +113,9 @@ class Browser(Target):
 
     async def open(self) -> None:
         """Open the browser."""
+        _logger.info("Opening browser.")
         if await self._is_open():
             raise RuntimeError("Can't re-open the browser")
-
         cli = self._browser_impl.get_cli()
         stderr = self._logger_pipe
         env = self._browser_impl.get_env()
@@ -130,14 +130,18 @@ class Browser(Target):
                 **args,
             )
 
+        _logger.debug("Trying to open browser.")
         self.subprocess = await asyncio.to_thread(run)
 
         super().__init__("0", self._broker)
         self._add_session(Session("", self._broker))
 
         try:
+            _logger.debug("Starting watchdog")
             self._watch_dog_task = asyncio.create_task(self._watchdog())
+            _logger.debug("Running read loop")
             self._broker.run_read_loop()
+            _logger.debug("Populating Targets")
             await self.populate_targets()
         except (BrowserClosedError, BrowserFailedError, asyncio.CancelledError) as e:
             raise BrowserFailedError(
@@ -173,12 +177,13 @@ class Browser(Target):
             return
 
         try:
+            _logger.debug("Trying Browser.close")
             await self.send_command("Browser.close")
         except (BrowserClosedError, BrowserFailedError):
             _logger.debug("Browser is closed trying to send Browser.close")
             return
         except ChannelClosedError:
-            _logger.debug("Can send browser.close on close channel")
+            _logger.debug("Can't send Browser.close on close channel")
 
         await asyncio.to_thread(self._channel.close)
 
@@ -188,7 +193,7 @@ class Browser(Target):
         if await self._is_closed():
             _logger.debug("Browser is closed after closing channel")
             return
-        _logger.info("Must kill browser.")
+        _logger.warning("Resorting to unclean kill browser.")
         await asyncio.to_thread(kill, self.subprocess)
         if await self._is_closed(wait=4):
             return
@@ -197,26 +202,27 @@ class Browser(Target):
 
     async def close(self) -> None:
         """Close the browser."""
+        _logger.info("Closing browser.")
         if self._watch_dog_task:
             _logger.debug("Cancelling watchdog.")
             self._watch_dog_task.cancel()
         if not self._release_lock():
             return
         try:
-            _logger.info("Trying to close browser.")
+            _logger.debug("Starting browser close methods.")
             await self._close()
-            _logger.info("browser._close() called successfully.")
+            _logger.debug("Browser close methods finished.")
         except ProcessLookupError:
             pass
         self._broker.clean()
-        _logger.info("Broker cleaned up.")
+        _logger.debug("Broker cleaned up.")
         if self._logger_pipe:
             os.close(self._logger_pipe)
-            _logger.info("Logging pipe closed.")
+            _logger.debug("Logging pipe closed.")
         self._channel.close()
-        _logger.info("Browser channel closed.")
+        _logger.debug("Browser channel closed.")
         self._browser_impl.clean()  # threading this just seems to cause problems
-        _logger.info("Browser implementation cleaned up.")
+        _logger.debug("Browser implementation cleaned up.")
 
     async def __aexit__(
         self,
@@ -230,9 +236,9 @@ class Browser(Target):
     async def _watchdog(self) -> None:
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=TmpDirWarning)
-            _logger.info("Starting watchdog")
+            _logger.debug("Starting watchdog")
             await asyncio.to_thread(self.subprocess.wait)
-            _logger.warning("Browser is being closed because chrom* closed")
+            _logger.warning("Browser is being closed by watchdog.")
             self._watch_dog_task = None
             await self.close()
             await asyncio.sleep(1)

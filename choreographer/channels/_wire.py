@@ -39,7 +39,8 @@ def serialize(obj: Any) -> bytes:
         )
     except JSONDecodeError as e:
         raise JSONError from e
-    _logger.debug2(f"Serialized: {message}")
+    _logger.debug(f"Serialized: {message[:5]}...{message[-5:]}, size: {len(message)}")
+    _logger.debug2(f"Whole message: {message}")
     return message.encode("utf-8")
 
 

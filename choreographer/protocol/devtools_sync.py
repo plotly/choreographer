@@ -45,7 +45,7 @@ class SessionSync:
 
         # State
         self.session_id = session_id
-        _logger.debug(f"New session: {session_id}")
+        _logger.debug(f"New session: {session_id}.")
         self.message_id = 0
 
     def send_command(
@@ -110,7 +110,7 @@ class TargetSync:
         # States
         self.sessions = {}
         self.target_id = target_id
-        _logger.info(f"Created new target {target_id}.")
+        _logger.debug(f"Created new target {target_id}.")
 
     def _add_session(self, session: SessionSync) -> None:
         if not isinstance(session, SessionSync):
@@ -149,7 +149,4 @@ class TargetSync:
         if not self.sessions.values():
             raise RuntimeError("Cannot send_command without at least one valid session")
         session = self.get_session()
-        _logger.debug(
-            f"Sending {command} with {params} on session {session.session_id}",
-        )
         return session.send_command(command, params)

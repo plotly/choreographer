@@ -142,7 +142,7 @@ class Chromium:
                 "Browser not found. You can use get_chrome(), "
                 "please see documentation.",
             )
-        _logger.debug(f"Found path: {self.path}")
+        _logger.info(f"Found chromium path: {self.path}")
         self._channel = channel
         if not isinstance(channel, Pipe):
             raise NotImplementedError("Websocket style channels not implemented yet.")

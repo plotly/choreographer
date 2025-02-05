@@ -153,22 +153,22 @@ class BrowserSync(TargetSync):
     def close(self) -> None:
         """Close the browser."""
         self._broker.clean()
-        _logger.info("Broker cleaned up.")
+        _logger.debug("Broker cleaned up.")
         if not self._release_lock():
             return
         try:
-            _logger.info("Trying to close browser.")
+            _logger.debug("Trying to close browser.")
             self._close()
-            _logger.info("browser._close() called successfully.")
+            _logger.debug("browser._close() called successfully.")
         except ProcessLookupError:
             pass
         if self._logger_pipe:
             os.close(self._logger_pipe)
-        _logger.info("Logging pipe closed.")
+        _logger.debug("Logging pipe closed.")
         self._channel.close()
-        _logger.info("Browser channel closed.")
+        _logger.debug("Browser channel closed.")
         self._browser_impl.clean()
-        _logger.info("Browser implementation cleaned up.")
+        _logger.debug("Browser implementation cleaned up.")
 
     def __exit__(
         self,
