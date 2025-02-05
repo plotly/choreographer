@@ -67,6 +67,8 @@ class Broker:
         self.futures = {}
         self._subscriptions_futures = {}
 
+        self._write_lock = asyncio.Lock()
+
     def new_subscription_future(
         self,
         session_id: str,
@@ -240,7 +242,8 @@ class Broker:
         self.futures[key] = future
         _logger.debug(f"Created future: {key} {future}")
         try:
-            await asyncio.to_thread(self._channel.write_json, obj)
+            async with self._write_lock:
+                await asyncio.to_thread(self._channel.write_json, obj)
         except BaseException as e:  # noqa: BLE001
             future.set_exception(e)
             del self.futures[key]
