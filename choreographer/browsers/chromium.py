@@ -203,6 +203,7 @@ class Chromium:
                 "--disable-hang-monitor",
                 "--disable-popup-blocking",
                 "--disable-prompt-on-repost",
+                "--disable-ipc-flooding-protection",
                 "--disable-sync",
                 "--metrics-recording-only",
                 "--password-store=basic",
@@ -212,8 +213,9 @@ class Chromium:
                 "--disable-speech-api",
                 "--no-default-browser-check",
                 "--no-pings",
+                "--no-process-per-site",
                 "--process-per-tab",
-                "--disable-features=Translate,BackForwardCache,AcceptCHFrame,MediaRouter,OptimizationHints,AudioServiceOutOfProcess,IsolateOrigins",
+                "--disable-features=Translate,BackForwardCache,AcceptCHFrame,MediaRouter,OptimizationHints,AudioServiceOutOfProcess,IsolateOrigins,CalculateNativeWinOcclusion,site-per-process",
                 "--disable-web-security",
             ],
         )
