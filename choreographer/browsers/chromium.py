@@ -193,7 +193,8 @@ class Chromium:
                 "--no-first-run",
                 "--enable-unsafe-swiftshader",
                 "--disable-dev-shm-usage",
-                "--disable-background-networking",
+                "--disable-background-media-suspend",
+                "--disable-lazy-loading",
                 "--disable-background-timer-throttling",
                 "--disable-backgrounding-occluded-windows",
                 "--disable-renderer-backgrounding",
@@ -215,7 +216,7 @@ class Chromium:
                 "--no-pings",
                 "--no-process-per-site",
                 "--process-per-tab",
-                "--disable-features=Translate,BackForwardCache,AcceptCHFrame,MediaRouter,OptimizationHints,AudioServiceOutOfProcess,IsolateOrigins,CalculateNativeWinOcclusion,site-per-process",
+                "--disable-features=Translate,BackForwardCache,AcceptCHFrame,MediaRouter,OptimizationHints,AudioServiceOutOfProcess,IsolateOrigins,CalculateNativeWinOcclusion,site-per-process,IntensiveWakeUpThrottling,AllowAggressiveThrottlingWithWebSocket,OptOutZeroTimeoutTimersFromThrottling",
                 "--disable-web-security",
             ],
         )
