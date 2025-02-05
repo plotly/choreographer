@@ -44,6 +44,10 @@ def _is_exe(path: str | Path) -> bool:
 _logs_parser_regex = re.compile(r"\d*:\d*:\d*\/\d*\.\d*:")
 
 
+class ChromeNotFoundError(RuntimeError):
+    """Raise when browser path can't be determined."""
+
+
 class Chromium:
     """
     Chromium represents an implementation of the chromium browser.
@@ -134,7 +138,7 @@ class Chromium:
                     self.path = candidate
                     break
         if not self.path:
-            raise RuntimeError(
+            raise ChromeNotFoundError(
                 "Browser not found. You can use get_chrome(), "
                 "please see documentation.",
             )
