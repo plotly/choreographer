@@ -91,7 +91,7 @@ class Session:
             f"Cmd '{command}', param keys '{params.keys() if params else ''}', "
             f"sessionId '{self.session_id}'",
         )
-        _logger.debug2(f"Full params: {params.replace('%', '%%')}")
+        _logger.debug2(f"Full params: {str(params).replace('%', '%%')}")
         return await self._broker.write_json(json_command)
 
     def subscribe(
