@@ -71,12 +71,15 @@ class Pipe:
             raise ChannelClosedError
         encoded_message = wire.serialize(obj) + b"\0"
         _logger.debug(
-            f"Writing message {encoded_message[:5]}...{encoded_message[-5:]}, "
+            f"Writing message {encoded_message[:15]}...{encoded_message[-15:]}, "
             f"size: {len(encoded_message)}.",
         )
         _logger.debug2(f"Full Message: {encoded_message!r}")
         try:
             ret = os.write(self._write_to_browser, encoded_message)
+            _logger.debug(
+                f"***Wrote {ret}/{len(encoded_message)}***",
+            )
             if ret != len(encoded_message):
                 _logger.critical(
                     f"***Did not write entire message. {ret}/{len(encoded_message)}***",
@@ -85,7 +88,7 @@ class Pipe:
             self.close()
             raise ChannelClosedError from e
 
-    def read_jsons(  # noqa: PLR0912, C901 branches, complexity
+    def read_jsons(  # noqa: PLR0912, PLR0915, C901 branches, complexity
         self,
         *,
         blocking: bool = True,
@@ -115,13 +118,14 @@ class Pipe:
             self.close()
             raise ChannelClosedError from e
         try:
+            loop_count = 1
             raw_buffer = None  # if we fail in read, we already defined
             raw_buffer = os.read(
                 self._read_from_browser,
                 10000,
             )  # 10MB buffer, nbd, doesn't matter w/ this
             _logger.debug(
-                f"First read in loop: {raw_buffer[:5]}...{raw_buffer[-5:]}. "
+                f"First read in loop: {raw_buffer[:15]}...{raw_buffer[-15:]}. "
                 f"size: {len(raw_buffer)}.",
             )
             _logger.debug2(f"Whole buffer: {raw_buffer!r}")
@@ -132,15 +136,12 @@ class Pipe:
                 raise ChannelClosedError
             while raw_buffer[-1] != 0:
                 _logger.debug("Partial message from browser received.")
+                loop_count += 1
                 if _with_block:
                     os.set_blocking(self._read_from_browser, True)
                 raw_buffer += os.read(self._read_from_browser, 10000)
-                _logger.debug(
-                    f"Nth read in loop: {raw_buffer[:5]}...{raw_buffer[-5:]}. "
-                    f"size: {len(raw_buffer)}.",
-                )
-                _logger.debug2(f"Whole buffer: {raw_buffer!r}")
         except BlockingIOError:
+            _logger.debug("BlockingIOError")
             return jsons
         except OSError as e:
             _logger.debug("OSError")
@@ -148,6 +149,11 @@ class Pipe:
             if not raw_buffer or raw_buffer == b"{bye}\n":
                 raise ChannelClosedError from e
             # this could be hard to test as it is a real OS corner case
+        finally:
+            _logger.debug(
+                f"Total loops: {loop_count}, " f"Final size: {len(raw_buffer)}.",
+            )
+            _logger.debug2(f"Whole buffer: {raw_buffer!r}")
         decoded_buffer = raw_buffer.decode("utf-8")
         raw_messages = decoded_buffer.split("\0")
         _logger.debug(f"Received {len(raw_messages)} raw_messages.")
