@@ -79,8 +79,7 @@ class Pipe:
             ret = os.write(self._write_to_browser, encoded_message)
             if ret != len(encoded_message):
                 _logger.critical(
-                    "***Did not write entire message. "
-                    f"{ret}/{len(encoded_message)}***",
+                    f"***Did not write entire message. {ret}/{len(encoded_message)}***",
                 )
         except OSError as e:
             self.close()

@@ -127,13 +127,12 @@ class Broker:
                 self._channel.read_jsons,
                 blocking=True,
             )
-            _logger.debug("Channel read found {len(responses}} json objects.")
+            _logger.debug(f"Channel read found {len(responses)} json objects.")
             for response in responses:
                 error = protocol.get_error_from_result(response)
                 key = protocol.calculate_message_key(response)
                 if not key and error:
                     raise protocol.DevtoolsProtocolError(response)
-                _logger.debug(f"Have a response with key {key}")
 
                 # looks for event that we should handle internally
                 self._check_for_closed_session(response)
@@ -153,6 +152,10 @@ class Broker:
                     if not event_session:
                         _logger.error("Found an event that returned no session.")
                         continue
+                    _logger.debug(
+                        f"Received event {response['method']} for "
+                        f"{event_session_id} targeting {event_session}.",
+                    )
 
                     session_futures = self._subscriptions_futures.get(
                         event_session_id,
@@ -195,7 +198,7 @@ class Broker:
                                 event_session.unsubscribe(query)
 
                 elif key:
-                    _logger.debug2(f"Is message response for {key}")
+                    _logger.debug(f"Have a response with key {key}")
                     if key in self.futures:
                         _logger.debug(f"Found future for key {key}")
                         future = self.futures.pop(key)
