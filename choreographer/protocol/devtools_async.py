@@ -214,9 +214,6 @@ class Target:
         if not self.sessions.values():
             raise RuntimeError("Cannot send_command without at least one valid session")
         session = self.get_session()
-        _logger.debug(
-            f"Cmd '{command}', params '{params}' on sessionId '{session.session_id}'",
-        )
         return await session.send_command(command, params)
 
     async def create_session(self) -> Session:
