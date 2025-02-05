@@ -105,17 +105,19 @@ class Broker:
 
     def run_read_loop(self) -> None:  # noqa: C901, PLR0915 complexity
         def check_error(result: asyncio.Future[Any]) -> None:
-            try:
-                e = result.exception()
-                if e:
+            e = result.exception()
+            if e:
+                _logger.debug("Error in readloop. Will post a close() task.")
+                self._background_tasks.add(
+                    asyncio.create_task(self._browser.close()),
+                )
+                if not isinstance(e, asyncio.CancelledError):
+                    _logger.error("Error in run_read_loop.", exc_info=e)
+                    raise e
+                else:
                     self._background_tasks.add(
                         asyncio.create_task(self._browser.close()),
                     )
-                    if not isinstance(e, asyncio.CancelledError):
-                        _logger.error(f"Error in run_read_loop: {e!s}")
-                        raise e
-            except asyncio.CancelledError:
-                self._background_tasks.add(asyncio.create_task(self._browser.close()))
 
         async def read_loop() -> None:  # noqa: PLR0912, C901
             try:
