@@ -325,6 +325,8 @@ class Browser(Target):
         url: str = "",
         width: int | None = None,
         height: int | None = None,
+        *,
+        window: bool = False,
     ) -> Tab:
         """
         Create a new tab.
@@ -333,6 +335,7 @@ class Browser(Target):
             url: the url to navigate to, default ""
             width: the width of the tab (headless only)
             height: the height of the tab (headless only)
+            window: default False, if true, create new window, not tab
 
         Returns:
             a tab.
@@ -345,6 +348,8 @@ class Browser(Target):
             params["width"] = width
         if height:
             params["height"] = height
+        if window:
+            params["newWindow"] = True
 
         response = await self.send_command("Target.createTarget", params=params)
         if "error" in response:
