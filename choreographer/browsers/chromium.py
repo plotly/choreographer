@@ -114,7 +114,7 @@ class Chromium:
         self._tmp_dir_path = kwargs.pop("tmp_dir", None)
         if kwargs:
             raise RuntimeError(
-                "Chromium.get_cli() received " f"invalid args: {kwargs.keys()}",
+                f"Chromium.get_cli() received invalid args: {kwargs.keys()}",
             )
         self.skip_local = bool(
             "ubuntu" in platform.version().lower() and self.sandbox_enabled,

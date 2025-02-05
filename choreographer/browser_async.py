@@ -285,7 +285,7 @@ class Browser(Target):
                 except protocol.DevtoolsProtocolError as e:
                     if e.code == protocol.Ecode.TARGET_NOT_FOUND:
                         _logger.warning(
-                            f"Target {target_id} not found " "(could be closed before)",
+                            f"Target {target_id} not found (could be closed before)",
                         )
                         continue
                     else:
