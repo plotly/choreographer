@@ -115,9 +115,11 @@ class Broker:
                     asyncio.create_task(self._browser.close()),
                 )
                 if isinstance(e, channels.ChannelClosedError):
-                    _logger.debug("PipeClosedError caught", exc_info=e)
+                    _logger.debug("PipeClosedError caught")
+                    _logger.debug2("Full Error:", exc_info=e)
                 elif isinstance(e, asyncio.CancelledError):
-                    _logger.debug("CancelledError caught.", exc_info=e)
+                    _logger.debug("CancelledError caught.")
+                    _logger.debug2("Full Error:", exc_info=e)
                 else:
                     _logger.error("Error in run_read_loop.", exc_info=e)
                     raise e
