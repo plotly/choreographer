@@ -179,8 +179,11 @@ class TmpDirectory:
             del self.temp_dir
             _logger.info("shutil.rmtree worked.")
         except FileNotFoundError:
+            self.exists = False
+            del self.temp_dir
             _logger.info("shutil.rmtree worked.")
         except BaseException as e:  # noqa: BLE001
+            _logger.debug(f"Error during tmp file removal: {e!s}")
             self._delete_manually(check_only=True)
             if not self.exists:
                 return
