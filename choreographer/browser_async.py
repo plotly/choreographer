@@ -242,9 +242,6 @@ class Browser(Target):
             self._watch_dog_task = None
             await self.close()
             await asyncio.sleep(1)
-            # ignore warnings here because
-            # watchdog killing is last resort
-            # and can leaves stuff in weird state
             await asyncio.to_thread(self._browser_impl.clean)
 
     def _add_tab(self, tab: Tab) -> None:
