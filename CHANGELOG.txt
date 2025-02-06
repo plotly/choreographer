@@ -1,3 +1,7 @@
 v1.0.0
 - Increase wait for checking regular close
 - Decrease freeze for manual bad-close cleanup
+- Squash race condition
+- Improve parallelization by disabling site-per-process
+- Add option for whole new window with create_tab
+- General logging improvements
