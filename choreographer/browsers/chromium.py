@@ -247,7 +247,8 @@ class Chromium:
 
     def clean(self) -> None:
         """Clean up any leftovers form browser, like tmp files."""
-        self.tmp_dir.clean()
+        if hasattr(self, "tmp_dir"):
+            self.tmp_dir.clean()
 
     def __del__(self) -> None:
         """Delete the temporary file and run `clean()`."""
