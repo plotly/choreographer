@@ -24,28 +24,28 @@ jobs:
         timeout-minutes: 1
 
       - name: Install choreographer
-        run:  uv sync --all-extras
+        run:  uv sync --no-sources --all-extras
       - name: Install google-chrome-for-testing
-        run: uv run choreo_get_chrome
+        run: uv run --no-sources choreo_get_chrome
       - name: Diagnose
-        run:  uv run choreo_diagnose --no-run
+        run:  uv run --no-sources choreo_diagnose --no-run
         timeout-minutes: 1
 
       - name: Test
         if: ${{ ! runner.debug && matrix.os != 'ubuntu-latest' }}
-        run: uv run poe test
+        run: uv run --no-sources poe test
         timeout-minutes: 7
 
       - name: Test (Linux)
         if: ${{ ! runner.debug && matrix.os == 'ubuntu-latest' }}
-        run: xvfb-run uv run poe test
+        run: xvfb-run uv run --no-sources poe test
         timeout-minutes: 7
 
       - name: Test (Debug)
         if: runner.debug
-        run: uv run poe debug-test
+        run: uv run --no-sources poe debug-test
 
       - name: Test (Debug, Linux)
         if: ${{ runner.debug && matrix.os == 'ubuntu-latest' }}
-        run: xvfb-run uv run poe debug-test
+        run: xvfb-run uv run --no-sources poe debug-test
         timeout-minutes: 7
