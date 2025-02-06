@@ -133,6 +133,7 @@ class Pipe:
                 if raw_buffer:
                     _logger.debug(f"Received {raw_buffer}. is bye?")
                 # we seem to need {bye} even if chrome closes NOTE
+                self.close()
                 raise ChannelClosedError
             while raw_buffer[-1] != 0:
                 _logger.debug("Partial message from browser received.")
