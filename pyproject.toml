@@ -52,7 +52,7 @@ dev = [
 # and only resolve if explicitly asked for
 
 #docs = [
-#    "mkquixote @ git+ssh://git@github.com/geopozo/mkquixote",
+#    "mkquixote @ git+ssh://git@github.com/geopozo/mkquixote; python_version >= '3.11'",
 #    "mkdocs>=1.6.1",
 #    "mkdocs-material>=9.5.49",
 #]
