@@ -4,6 +4,7 @@ from ._brokers._async import UnhandledMessageWarning
 from .browsers import (
     BrowserClosedError,
     BrowserFailedError,
+    ChromeNotFoundError,
 )
 from .channels import BlockWarning, ChannelClosedError
 from .protocol import (
@@ -19,6 +20,7 @@ __all__ = [
     "BrowserClosedError",
     "BrowserFailedError",
     "ChannelClosedError",
+    "ChromeNotFoundError",
     "DevtoolsProtocolError",
     "ExperimentalFeatureWarning",
     "MessageTypeError",

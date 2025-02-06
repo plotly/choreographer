@@ -17,7 +17,7 @@ def kill(process: subprocess.Popen[bytes]) -> None:
         )
     else:
         process.terminate()
-        _logger.info("Called terminate")
+        _logger.debug("Called terminate (a light kill).")
         if process.poll() is None:
-            _logger.info("Calling kill")
+            _logger.debug("Calling kill (a heavy kill).")
             process.kill()

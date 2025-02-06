@@ -44,6 +44,10 @@ def _is_exe(path: str | Path) -> bool:
 _logs_parser_regex = re.compile(r"\d*:\d*:\d*\/\d*\.\d*:")
 
 
+class ChromeNotFoundError(RuntimeError):
+    """Raise when browser path can't be determined."""
+
+
 class Chromium:
     """
     Chromium represents an implementation of the chromium browser.
@@ -114,7 +118,7 @@ class Chromium:
         self._tmp_dir_path = kwargs.pop("tmp_dir", None)
         if kwargs:
             raise RuntimeError(
-                "Chromium.get_cli() received " f"invalid args: {kwargs.keys()}",
+                f"Chromium.get_cli() received invalid args: {kwargs.keys()}",
             )
         self.skip_local = bool(
             "ubuntu" in platform.version().lower() and self.sandbox_enabled,
@@ -134,11 +138,11 @@ class Chromium:
                     self.path = candidate
                     break
         if not self.path:
-            raise RuntimeError(
+            raise ChromeNotFoundError(
                 "Browser not found. You can use get_chrome(), "
                 "please see documentation.",
             )
-        _logger.debug(f"Found path: {self.path}")
+        _logger.info(f"Found chromium path: {self.path}")
         self._channel = channel
         if not isinstance(channel, Pipe):
             raise NotImplementedError("Websocket style channels not implemented yet.")
@@ -193,17 +197,18 @@ class Chromium:
                 "--no-first-run",
                 "--enable-unsafe-swiftshader",
                 "--disable-dev-shm-usage",
-                "--disable-background-networking",
+                "--disable-background-media-suspend",
+                "--disable-lazy-loading",
                 "--disable-background-timer-throttling",
                 "--disable-backgrounding-occluded-windows",
+                "--disable-renderer-backgrounding",
                 "--disable-component-update",
                 "--disable-default-apps",
                 "--disable-extensions",
                 "--disable-hang-monitor",
-                "--disable-ipc-flooding-protection",
                 "--disable-popup-blocking",
                 "--disable-prompt-on-repost",
-                "--disable-renderer-backgrounding",
+                "--disable-ipc-flooding-protection",
                 "--disable-sync",
                 "--metrics-recording-only",
                 "--password-store=basic",
@@ -211,10 +216,11 @@ class Chromium:
                 "--disable-domain-reliability",
                 "--disable-print-preview",
                 "--disable-speech-api",
-                "--mute-audio",
                 "--no-default-browser-check",
                 "--no-pings",
-                "--disable-features=Translate,BackForwardCache,AcceptCHFrame,MediaRouter,OptimizationHints,AudioServiceOutOfProcess,IsolateOrigins,site-per-process",
+                "--no-process-per-site",
+                "--process-per-tab",
+                "--disable-features=Translate,BackForwardCache,AcceptCHFrame,MediaRouter,OptimizationHints,AudioServiceOutOfProcess,IsolateOrigins,CalculateNativeWinOcclusion,site-per-process,IntensiveWakeUpThrottling,AllowAggressiveThrottlingWithWebSocket,OptOutZeroTimeoutTimersFromThrottling",
                 "--disable-web-security",
             ],
         )
@@ -241,7 +247,8 @@ class Chromium:
 
     def clean(self) -> None:
         """Clean up any leftovers form browser, like tmp files."""
-        self.tmp_dir.clean()
+        if hasattr(self, "tmp_dir"):
+            self.tmp_dir.clean()
 
     def __del__(self) -> None:
         """Delete the temporary file and run `clean()`."""

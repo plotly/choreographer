@@ -88,9 +88,10 @@ class Session:
         if params:
             json_command["params"] = params
         _logger.debug(
-            f"Cmd '{command}', params '{params}' on sessionId '{self.session_id}'",
+            f"Cmd '{command}', param keys '{params.keys() if params else ''}', "
+            f"sessionId '{self.session_id}'",
         )
-        _logger.debug2(f"In session.send_command for {json_command}")
+        _logger.debug2(f"Full params: {str(params).replace('%', '%%')}")
         return await self._broker.write_json(json_command)
 
     def subscribe(
@@ -128,9 +129,7 @@ class Session:
 
         """
         if string not in self.subscriptions:
-            raise ValueError(
-                "Cannot unsubscribe as string is not present in subscriptions",
-            )
+            return
         del self.subscriptions[string]
 
     def subscribe_once(self, string: str) -> asyncio.Future[Any]:
@@ -177,7 +176,7 @@ class Target:
         # States
         self.sessions = {}
         self.target_id = target_id
-        _logger.info(f"Created new target {target_id}.")
+        _logger.debug(f"Created new target {target_id}.")
 
     def _add_session(self, session: Session) -> None:
         if not isinstance(session, Session):
@@ -216,9 +215,6 @@ class Target:
         if not self.sessions.values():
             raise RuntimeError("Cannot send_command without at least one valid session")
         session = self.get_session()
-        _logger.debug(
-            f"Cmd '{command}', params '{params}' on sessionId '{session.session_id}'",
-        )
         return await session.send_command(command, params)
 
     async def create_session(self) -> Session:
@@ -264,7 +260,7 @@ class Target:
             ) from protocol.DevtoolsProtocolError(
                 response,
             )
-        _logger.debug(f"The session {session_id} has been closed")
+        _logger.debug(f"The session {session_id} has been closed.")
         return response
         # kinda hate, why do we need this again?
 

@@ -22,7 +22,7 @@ maintainers = [
   {name = "Andrew Pikul", email = "ajpikul@gmail.com"},
 ]
 dependencies = [
-  "logistro>=1.0.7",
+  "logistro>=1.0.9",
   "simplejson",
 ]
 
@@ -52,13 +52,14 @@ dev = [
 # and only resolve if explicitly asked for
 
 #docs = [
-#    "mkquixote @ git+ssh://git@github.com/geopozo/mkquixote",
+#    "mkquixote @ git+ssh://git@github.com/geopozo/mkquixote; python_version >= '3.11'",
 #    "mkdocs>=1.6.1",
 #    "mkdocs-material>=9.5.49",
 #]
 
 [tool.uv.sources]
 mkquixote = { path = "../mkquixote", editable = true }
+logistro = { path = "../logistro", editable = true }
 
 [tool.ruff.lint]
 select = ["ALL"]

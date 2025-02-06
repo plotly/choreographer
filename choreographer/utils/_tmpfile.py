@@ -78,7 +78,7 @@ class TmpDirectory:
                 self.temp_dir = tempfile.TemporaryDirectory(**args)
 
         self.path = Path(self.temp_dir.name)
-        _logger.info(f"Temp directory created: {self.path}")
+        _logger.info(f"Temp directory created: {self.path}.")
         self.exists = True
 
     def _delete_manually(  # noqa: C901, PLR0912
@@ -176,11 +176,16 @@ class TmpDirectory:
             else:
                 shutil.rmtree(self.path, onerror=remove_readonly)
             self.exists = False
-            del self.temp_dir
+            if hasattr(self, "temp_dir"):
+                del self.temp_dir
             _logger.info("shutil.rmtree worked.")
         except FileNotFoundError:
+            self.exists = False
+            if hasattr(self, "temp_dir"):
+                del self.temp_dir
             _logger.info("shutil.rmtree worked.")
         except BaseException as e:  # noqa: BLE001
+            _logger.debug("Error during tmp file removal.", exc_info=e)
             self._delete_manually(check_only=True)
             if not self.exists:
                 return

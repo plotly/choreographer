@@ -2,62 +2,62 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://github.com/plotly/choreographer/</loc>
-         <lastmod>2025-01-22</lastmod>
+         <lastmod>2025-02-06</lastmod>
     </url>
     <url>
          <loc>https://github.com/plotly/choreographer/api/choreographer/</loc>
-         <lastmod>2025-01-22</lastmod>
+         <lastmod>2025-02-06</lastmod>
     </url>
     <url>
          <loc>https://github.com/plotly/choreographer/api/choreographer/</loc>
-         <lastmod>2025-01-22</lastmod>
+         <lastmod>2025-02-06</lastmod>
     </url>
     <url>
          <loc>https://github.com/plotly/choreographer/api/choreographer.browser_async/</loc>
-         <lastmod>2025-01-22</lastmod>
+         <lastmod>2025-02-06</lastmod>
     </url>
     <url>
          <loc>https://github.com/plotly/choreographer/api/choreographer.errors/</loc>
-         <lastmod>2025-01-22</lastmod>
+         <lastmod>2025-02-06</lastmod>
     </url>
     <url>
          <loc>https://github.com/plotly/choreographer/api/choreographer.browser_sync/</loc>
-         <lastmod>2025-01-22</lastmod>
+         <lastmod>2025-02-06</lastmod>
     </url>
     <url>
          <loc>https://github.com/plotly/choreographer/api/choreographer.browsers/</loc>
-         <lastmod>2025-01-22</lastmod>
+         <lastmod>2025-02-06</lastmod>
     </url>
     <url>
          <loc>https://github.com/plotly/choreographer/api/choreographer.browsers.chromium/</loc>
-         <lastmod>2025-01-22</lastmod>
+         <lastmod>2025-02-06</lastmod>
     </url>
     <url>
          <loc>https://github.com/plotly/choreographer/api/choreographer.utils/</loc>
-         <lastmod>2025-01-22</lastmod>
+         <lastmod>2025-02-06</lastmod>
     </url>
     <url>
          <loc>https://github.com/plotly/choreographer/api/choreographer.cli/</loc>
-         <lastmod>2025-01-22</lastmod>
+         <lastmod>2025-02-06</lastmod>
     </url>
     <url>
          <loc>https://github.com/plotly/choreographer/api/choreographer.protocol/</loc>
-         <lastmod>2025-01-22</lastmod>
+         <lastmod>2025-02-06</lastmod>
     </url>
     <url>
          <loc>https://github.com/plotly/choreographer/api/choreographer.protocol.devtools_async/</loc>
-         <lastmod>2025-01-22</lastmod>
+         <lastmod>2025-02-06</lastmod>
     </url>
     <url>
          <loc>https://github.com/plotly/choreographer/api/choreographer.protocol.devtools_sync/</loc>
-         <lastmod>2025-01-22</lastmod>
+         <lastmod>2025-02-06</lastmod>
     </url>
     <url>
          <loc>https://github.com/plotly/choreographer/api/choreographer.channels/</loc>
-         <lastmod>2025-01-22</lastmod>
+         <lastmod>2025-02-06</lastmod>
     </url>
     <url>
          <loc>https://github.com/plotly/choreographer/api/choreographer.channels.pipe/</loc>
-         <lastmod>2025-01-22</lastmod>
+         <lastmod>2025-02-06</lastmod>
     </url>
 </urlset>
