@@ -1,3 +1,6 @@
+v1.0.1
+- Bugfix: Check for future cancellation before setting, improves error handling.
+- Improve error messages and add some type checking for user experience
 v1.0.0
 - Increase wait for checking regular close
 - Decrease freeze for manual bad-close cleanup
