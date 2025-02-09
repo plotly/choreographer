@@ -112,7 +112,10 @@ class Session:
 
         """
         if not isinstance(callback, Coroutine):
-            raise TypeError("Call back must be be `async def` type function.")
+            raise TypeError(
+                "Call back must be be `async def` type function, "
+                f"not {type(callback)}.",
+            )
         if string in self.subscriptions:
             raise ValueError(
                 "You are already subscribed to this string, "
