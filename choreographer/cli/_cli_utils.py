@@ -148,8 +148,8 @@ def get_chrome_cli() -> None:
         warnings.warn(  # noqa: B028
             "You are using `get_browser()` on Ubuntu."
             " Ubuntu is **very strict** about where binaries come from."
-            " You have to disable the sandbox with use_sandbox=False"
-            " when you initialize the browser OR you can install from Ubuntu's"
+            " While sandbox is already off by default, do not set"
+            " enable_sandbox to True OR you can install from Ubuntu's"
             " package manager.",
             UserWarning,
         )
