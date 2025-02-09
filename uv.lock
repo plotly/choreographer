@@ -37,7 +37,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "logistro", specifier = ">=1.0.9" },
+    { name = "logistro", editable = "../logistro" },
     { name = "simplejson" },
 ]
 
@@ -91,11 +91,16 @@ wheels = [
 
 [[package]]
 name = "logistro"
-version = "1.0.9"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/f3/4a/d0b4299f4b027245e1b4ff444e05e158f74843e573be900d03c77436d8b5/logistro-1.0.9.tar.gz", hash = "sha256:158e368d4927ec814959411c778536e42b0e305d6f22e67ecabc2763a8cd5401", size = 7520 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/eb/7e/0af328d4a99b956257558a56dfe9adb7fcd0ac2dd6f45aa969361ca8b3bc/logistro-1.0.9-py3-none-any.whl", hash = "sha256:02cdfaeabe24482e268fc3f7208f7aa0c007cf34a6ddc4d6e673bac826bf14a1", size = 6988 },
+source = { editable = "../logistro" }
+
+[package.metadata]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "mypy", specifier = ">=1.14.1" },
+    { name = "poethepoet", specifier = ">=0.31.1" },
+    { name = "pytest", specifier = ">=8.3.4" },
+    { name = "pytest-xdist" },
 ]
 
 [[package]]

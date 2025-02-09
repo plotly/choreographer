@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import inspect
 from typing import TYPE_CHECKING
 
 import logistro
@@ -110,6 +111,10 @@ class Session:
             repeating: default True, should the callback execute more than once
 
         """
+        if not inspect.iscoroutinefunction(callback):
+            raise TypeError(
+                "Call back must be be `async def` type function.",
+            )
         if string in self.subscriptions:
             raise ValueError(
                 "You are already subscribed to this string, "

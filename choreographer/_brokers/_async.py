@@ -126,7 +126,7 @@ class Broker:
                     _logger.error("Error in run_read_loop.", exc_info=e)
                     raise e
 
-        async def read_loop() -> None:  # noqa: PLR0912, C901
+        async def read_loop() -> None:  # noqa: PLR0912, PLR0915, C901
             responses = await asyncio.to_thread(
                 self._channel.read_jsons,
                 blocking=True,
@@ -210,7 +210,8 @@ class Broker:
                         raise protocol.DevtoolsProtocolError(response)
                     else:
                         raise RuntimeError(f"Couldn't find a future for key: {key}")
-                    future.set_result(response)
+                    if not future.done():
+                        future.set_result(response)
                 else:
                     warnings.warn(
                         f"Unhandled message type:{response!s}",
