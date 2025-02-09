@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Coroutine
 from typing import TYPE_CHECKING
 
 import logistro
@@ -10,7 +11,7 @@ from choreographer import protocol
 
 if TYPE_CHECKING:
     import asyncio
-    from collections.abc import Callable, Coroutine, MutableMapping
+    from collections.abc import Callable, MutableMapping
     from typing import Any
 
     from choreographer._brokers import Broker
@@ -110,6 +111,8 @@ class Session:
             repeating: default True, should the callback execute more than once
 
         """
+        if not isinstance(callback, Coroutine):
+            raise TypeError("Call back must be be `async def` type function.")
         if string in self.subscriptions:
             raise ValueError(
                 "You are already subscribed to this string, "
