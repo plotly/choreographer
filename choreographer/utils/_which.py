@@ -68,7 +68,7 @@ def browser_which(
     if (
         local_chrome.exists()
         and not skip_local
-        and local_chrome.name in executable_names
+        and local_chrome.stem in executable_names
     ):
         _logger.debug("Returning local chrome")
         return str(local_chrome)
