@@ -11,7 +11,7 @@ jobs:
       max-parallel: 2
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python_v: ['3.09', '3.10', '']
+        python_v: ['3.8', '3.9', '3.10', '']
         chrome_v: ['0', '-1']
     name: Build and Test
     runs-on: ${{ matrix.os }}
