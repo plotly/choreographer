@@ -12,7 +12,7 @@ enabled = true
 name = "choreographer"
 description = "Devtools Protocol implementation for chrome."
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.8"
 dynamic = ["version"]
 authors = [
   {name = "Andrew Pikul", email="ajpikul@gmail.com"},
@@ -22,7 +22,7 @@ maintainers = [
   {name = "Andrew Pikul", email = "ajpikul@gmail.com"},
 ]
 dependencies = [
-  "logistro>=1.0.9",
+  "logistro>=1.0.11",
   "simplejson",
 ]
 
@@ -40,10 +40,10 @@ dev = [
   "pytest-asyncio",
   "pytest-xdist",
   "async-timeout",
-  "poethepoet>=0.31.1",
   "numpy",
   "mypy>=1.14.1",
   "types-simplejson>=3.19.0.20241221",
+  "poethepoet>=0.30.0",
 ]
 
 # uv doens't allow dependency groups to have separate python requirements
@@ -58,8 +58,8 @@ dev = [
 #]
 
 [tool.uv.sources]
-mkquixote = { path = "../mkquixote", editable = true }
-logistro = { path = "../logistro", editable = true }
+#mkquixote = { path = "../mkquixote", editable = true }
+#logistro = { path = "../logistro", editable = true }
 
 [tool.ruff.lint]
 select = ["ALL"]

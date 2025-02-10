@@ -71,7 +71,7 @@ class Pipe:
             raise ChannelClosedError
         encoded_message = wire.serialize(obj) + b"\0"
         _logger.debug(
-            f"Writing message {encoded_message[:15]}...{encoded_message[-15:]}, "
+            f"Writing message {encoded_message[:15]!r}...{encoded_message[-15:]!r}, "
             f"size: {len(encoded_message)}.",
         )
         _logger.debug2(f"Full Message: {encoded_message!r}")
@@ -125,13 +125,13 @@ class Pipe:
                 10000,
             )  # 10MB buffer, nbd, doesn't matter w/ this
             _logger.debug(
-                f"First read in loop: {raw_buffer[:15]}...{raw_buffer[-15:]}. "
+                f"First read in loop: {raw_buffer[:15]!r}...{raw_buffer[-15:]!r}. "
                 f"size: {len(raw_buffer)}.",
             )
             _logger.debug2(f"Whole buffer: {raw_buffer!r}")
             if not raw_buffer or raw_buffer == b"{bye}\n":
                 if raw_buffer:
-                    _logger.debug(f"Received {raw_buffer}. is bye?")
+                    _logger.debug(f"Received {raw_buffer!r}. is bye?")
                 # we seem to need {bye} even if chrome closes NOTE
                 self.close()
                 raise ChannelClosedError
@@ -152,7 +152,8 @@ class Pipe:
             # this could be hard to test as it is a real OS corner case
         finally:
             _logger.debug(
-                f"Total loops: {loop_count}, " f"Final size: {len(raw_buffer)}.",
+                f"Total loops: {loop_count}, "
+                f"Final size: {len(raw_buffer) if raw_buffer else 0}.",
             )
             _logger.debug2(f"Whole buffer: {raw_buffer!r}")
         decoded_buffer = raw_buffer.decode("utf-8")

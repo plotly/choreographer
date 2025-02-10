@@ -131,7 +131,8 @@ class Browser(Target):
             )
 
         _logger.debug("Trying to open browser.")
-        self.subprocess = await asyncio.to_thread(run)
+        loop = asyncio.get_running_loop()
+        self.subprocess = await loop.run_in_executor(None, run)
 
         super().__init__("0", self._broker)
         self._add_session(Session("", self._broker))
@@ -166,7 +167,8 @@ class Browser(Target):
             return not _is_open
         else:
             try:
-                await asyncio.to_thread(self.subprocess.wait, wait)
+                loop = asyncio.get_running_loop()
+                await loop.run_in_executor(None, self.subprocess.wait, wait)
             except subprocess.TimeoutExpired:
                 return False
         return True
@@ -184,8 +186,8 @@ class Browser(Target):
             return
         except ChannelClosedError:
             _logger.debug("Can't send Browser.close on close channel")
-
-        await asyncio.to_thread(self._channel.close)
+        loop = asyncio.get_running_loop()
+        await loop.run_in_executor(None, self._channel.close)
 
         if await self._is_closed(wait=3):
             return
@@ -194,7 +196,8 @@ class Browser(Target):
             _logger.debug("Browser is closed after closing channel")
             return
         _logger.warning("Resorting to unclean kill browser.")
-        await asyncio.to_thread(kill, self.subprocess)
+        loop = asyncio.get_running_loop()
+        await loop.run_in_executor(None, kill, self.subprocess)
         if await self._is_closed(wait=4):
             return
         else:
@@ -237,12 +240,13 @@ class Browser(Target):
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=TmpDirWarning)
             _logger.debug("Starting watchdog")
-            await asyncio.to_thread(self.subprocess.wait)
+            loop = asyncio.get_running_loop()
+            await loop.run_in_executor(None, self.subprocess.wait)
             _logger.warning("Browser is being closed by watchdog.")
             self._watch_dog_task = None
             await self.close()
             await asyncio.sleep(1)
-            await asyncio.to_thread(self._browser_impl.clean)
+            await loop.run_in_executor(None, self._browser_impl.clean)
 
     def _add_tab(self, tab: Tab) -> None:
         if not isinstance(tab, Tab):
