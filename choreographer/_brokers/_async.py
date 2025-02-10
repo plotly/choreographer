@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import warnings
+from functools import partial
 from typing import TYPE_CHECKING
 
 import logistro
@@ -127,9 +128,11 @@ class Broker:
                     raise e
 
         async def read_loop() -> None:  # noqa: PLR0912, PLR0915, C901
-            responses = await asyncio.to_thread(
-                self._channel.read_jsons,
-                blocking=True,
+            loop = asyncio.get_running_loop()
+            fn = partial(self._channel.read_jsons, blocking=True)
+            responses = await loop.run_in_executor(
+                executor=None,
+                func=fn,
             )
             _logger.debug(f"Channel read found {len(responses)} json objects.")
             for response in responses:
@@ -244,7 +247,12 @@ class Broker:
         _logger.debug(f"Created future: {key} {future}")
         try:
             async with self._write_lock:
-                await asyncio.to_thread(self._channel.write_json, obj)
+                loop = asyncio.get_running_loop()
+                await loop.run_in_executor(
+                    None,
+                    self._channel.write_json,
+                    obj,
+                )
         except BaseException as e:  # noqa: BLE001
             future.set_exception(e)
             del self.futures[key]

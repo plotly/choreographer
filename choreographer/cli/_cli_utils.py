@@ -9,6 +9,7 @@ import sys
 import urllib.request
 import warnings
 import zipfile
+from functools import partial
 from pathlib import Path
 
 # SOON TODO this isn't the right download path, look at uv, use sysconfig
@@ -134,12 +135,11 @@ async def get_chrome(
         verbose: print out version found
 
     """
-    return await asyncio.to_thread(
-        get_chrome_sync,
-        arch=arch,
-        i=i,
-        path=path,
-        verbose=verbose,
+    loop = asyncio.get_running_loop()
+    fn = partial(get_chrome_sync, arch=arch, i=i, path=path, verbose=verbose)
+    return await loop.run_in_executor(
+        executor=None,
+        func=fn,
     )
 
 
