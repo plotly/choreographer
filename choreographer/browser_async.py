@@ -145,8 +145,8 @@ class Browser(Target):
             await self.populate_targets()
         except (BrowserClosedError, BrowserFailedError, asyncio.CancelledError) as e:
             raise BrowserFailedError(
-                "The browser seemed to close immediately after starting. "
-                "Perhaps adding debug_browser=True will help.",
+                "The browser seemed to close immediately after starting."
+                "You can set the `logging.Logger` level lower to see more output.",
             ) from e
 
     async def __aenter__(self) -> Self:

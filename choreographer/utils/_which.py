@@ -5,7 +5,11 @@ import platform
 import shutil
 from typing import TYPE_CHECKING
 
+import logistro
+
 from choreographer.cli._cli_utils import get_chrome_download_path
+
+_logger = logistro.getLogger()
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -53,18 +57,28 @@ def browser_which(
         skip_local: (default False) don't look for a choreo download of anything.
 
     """
+    _logger.debug(f"Looking for browser, skipping local? {skip_local}")
     path = None
 
     if isinstance(executable_names, str):
         executable_names = [executable_names]
 
     local_chrome = get_chrome_download_path()
+    _logger.debug(f"Local download path: {local_chrome}")
     if (
         local_chrome.exists()
         and not skip_local
-        and local_chrome.name in executable_names
+        and local_chrome.stem in executable_names
     ):
+        _logger.debug("Returning local chrome")
         return str(local_chrome)
+    else:
+        _logger.debug(f"Exists? {local_chrome.exists()}")
+        _logger.debug(f"Skip local? {skip_local}")
+        _logger.debug(
+            f"local name: {local_chrome.name} in exe names {executable_names}: "
+            f"{local_chrome.name in executable_names}",
+        )
 
     if platform.system() == "Windows":
         os.environ["NoDefaultCurrentDirectoryInExePath"] = "0"  # noqa: SIM112 var name set by windows
@@ -77,9 +91,7 @@ def browser_which(
         path = shutil.which(exe)
         if path and _is_exe(path):
             return path
-    # which didn't work
 
-    # hail mary
     return None
 
 

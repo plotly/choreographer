@@ -123,7 +123,9 @@ class Chromium:
             "ubuntu" in platform.version().lower() and self.sandbox_enabled,
         )
         if self.skip_local:
-            _logger.warning("Ubuntu + Sandbox won't work unless chrome from snap")
+            _logger.warning(
+                "Skipping local. Ubuntu + Sandbox require using package manager.",
+            )
 
         if not self.path:
             self.path = get_browser_path(
@@ -202,28 +204,18 @@ class Chromium:
                 "--disable-backgrounding-occluded-windows",
                 "--disable-renderer-backgrounding",
                 "--disable-component-update",
-                # "--disable-default-apps",
-                "--disable-extensions",
                 "--disable-hang-monitor",
-                # "--disable-popup-blocking",
-                # "--disable-prompt-on-repost",
+                "--disable-popup-blocking",
+                "--disable-prompt-on-repost",
                 "--disable-ipc-flooding-protection",
                 "--disable-sync",
                 "--metrics-recording-only",
                 "--password-store=basic",
                 "--use-mock-keychain",
-                "--disable-domain-reliability",
-                # "--disable-print-preview",
-                # "--disable-speech-api",
                 "--no-default-browser-check",
-                "--no-pings",
                 "--no-process-per-site",
-                # "--process-per-tab",
-                "--disable-features=Translate,AcceptCHFrame,MediaRouter,OptimizationHints,IsolateOrigins,CalculateNativeWinOcclusion,site-per-process,IntensiveWakeUpThrottling,OptOutZeroTimeoutTimersFromThrottling",
                 "--disable-web-security",
             ],
-            # other features BackForwardCache,AudioServiceOutOfProcess,,
-            # AllowAggressiveThrottlingWithWebSocket
         )
         if isinstance(self._channel, Pipe):
             cli.append("--remote-debugging-pipe")

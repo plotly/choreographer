@@ -101,7 +101,6 @@ test_fn = "pytest --log-level=1 -W error -n auto -v -rfE --capture=fd --ignore=t
 debug-test_proc = "pytest --log-level=1 -W error -vvvx -rA --show-capture=no --capture=no tests/test_process.py"
 debug-test_fn = "pytest --log-level=1 -W error -vvvx -rA --show-capture=no --capture=no --ignore=tests/test_process.py"
 
-# the capture on these is weird, the mechanics are weird, i forget exactly whats its doing
 [tool.poe.tasks.test]
 sequence = ["test_proc", "test_fn"]
 help = "Run all tests quickly"
