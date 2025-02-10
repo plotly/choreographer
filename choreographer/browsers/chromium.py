@@ -123,7 +123,9 @@ class Chromium:
             "ubuntu" in platform.version().lower() and self.sandbox_enabled,
         )
         if self.skip_local:
-            _logger.warning("Ubuntu + Sandbox won't work unless chrome from snap")
+            _logger.warning(
+                "Skipping local. Ubuntu + Sandbox require using package manager.",
+            )
 
         if not self.path:
             self.path = get_browser_path(
