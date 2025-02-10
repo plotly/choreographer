@@ -5,8 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping, Sequence
-    from typing import Any
+    from typing import Any, Mapping, Sequence
 
     from choreographer.protocol import BrowserResponse
 

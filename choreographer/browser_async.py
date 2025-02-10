@@ -21,10 +21,9 @@ from .utils import TmpDirWarning
 from .utils._kill import kill
 
 if TYPE_CHECKING:
-    from collections.abc import Generator, MutableMapping
     from pathlib import Path
     from types import TracebackType
-    from typing import Any
+    from typing import Any, Generator, MutableMapping
 
     from typing_extensions import Self  # 3.9 needs this, could be from typing in 3.10
 

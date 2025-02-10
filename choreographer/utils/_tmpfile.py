@@ -14,8 +14,7 @@ from typing import TYPE_CHECKING
 import logistro
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, MutableMapping, Sequence
-    from typing import Any
+    from typing import Any, Callable, MutableMapping, Sequence
 
 _logger = logistro.getLogger(__name__)
 

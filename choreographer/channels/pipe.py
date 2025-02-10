@@ -15,8 +15,7 @@ from . import _wire as wire
 from ._errors import BlockWarning, ChannelClosedError, JSONError
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping, Sequence
-    from typing import Any
+    from typing import Any, Mapping, Sequence
 
     from choreographer.protocol import BrowserResponse
 

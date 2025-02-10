@@ -11,8 +11,7 @@ from choreographer import protocol
 
 if TYPE_CHECKING:
     import asyncio
-    from collections.abc import Callable, Coroutine, MutableMapping
-    from typing import Any
+    from typing import Any, Callable, Coroutine, MutableMapping
 
     from choreographer._brokers import Broker
 

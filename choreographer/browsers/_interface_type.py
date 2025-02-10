@@ -5,9 +5,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping, MutableMapping, Sequence
     from pathlib import Path
-    from typing import Any
+    from typing import Any, Mapping, MutableMapping, Sequence
 
     from choreographer.channels._interface_type import ChannelInterface
 

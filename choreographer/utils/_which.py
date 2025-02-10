@@ -8,9 +8,8 @@ from typing import TYPE_CHECKING
 from choreographer.cli._cli_utils import get_chrome_download_path
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
     from pathlib import Path
-    from typing import Any
+    from typing import Any, Sequence
 
 
 def _is_exe(path: str | Path) -> bool:
