@@ -1,5 +1,7 @@
 v1.0.2
 - Fix syntax to make compatible with python 3.8
+- Remove lots of CLI commands
+- Improve logging
 v1.0.1
 - Bugfix: Check for future cancellation before setting, improves error handling.
 - Improve error messages and add some type checking for user experience
