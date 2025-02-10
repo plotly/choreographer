@@ -22,24 +22,24 @@ _logger = logistro.getLogger(__name__)
 @pytest.mark.asyncio(loop_scope="function")
 async def test_context(headless, sandbox, gpu):
     _logger.info("testing...")
-    async with (
-        choreo.Browser(
+    async with timeout(pytest.default_timeout):
+        async with choreo.Browser(
             headless=headless,
             enable_sandbox=sandbox,
             enable_gpu=gpu,
-        ) as browser,
-        timeout(pytest.default_timeout),
-    ):
-        if sandbox and "ubuntu" in platform.version().lower():
-            pytest.skip("Ubuntu doesn't support sandbox unless installed from snap.")
-        response = await browser.send_command(command="Target.getTargets")
-        assert "result" in response and "targetInfos" in response["result"]  # noqa: PT018 combined assert
-        assert len(response["result"]["targetInfos"]) != 0
-        assert isinstance(browser.get_tab(), choreo.Tab)
-        assert len(browser.get_tab().sessions) == 1
-    # let asyncio do some cleaning up if it wants, may prevent warnings
-    await asyncio.sleep(0)
-    assert not browser._browser_impl.tmp_dir.exists  # noqa: SLF001
+        ) as browser:
+            if sandbox and "ubuntu" in platform.version().lower():
+                pytest.skip(
+                    "Ubuntu doesn't support sandbox unless installed from snap.",
+                )
+            response = await browser.send_command(command="Target.getTargets")
+            assert "result" in response and "targetInfos" in response["result"]  # noqa: PT018 combined assert
+            assert len(response["result"]["targetInfos"]) != 0
+            assert isinstance(browser.get_tab(), choreo.Tab)
+            assert len(browser.get_tab().sessions) == 1
+        # let asyncio do some cleaning up if it wants, may prevent warnings
+        await asyncio.sleep(0)
+        assert not browser._browser_impl.tmp_dir.exists  # noqa: SLF001
 
 
 @pytest.mark.asyncio(loop_scope="function")

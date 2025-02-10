@@ -1,5 +1,5 @@
 try:
-    from datetime import UTC, datetime
+    from datetime import UTC, datetime  #  type: ignore [attr-defined]
 except ImportError:
     from datetime import datetime, timezone
 

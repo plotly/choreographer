@@ -59,7 +59,11 @@ async def browser(request):
 # a fixture can be used to specify the timeout: timeout=10
 # else it uses pytest.default_timeout
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
-def pytest_runtest_setup(item: pytest.Item):
+def pytest_runtest_setup(item):
+    # not even sure if this working
+    # typer doesn't like item: pytest.Item w/ funcargs
+    # but this is the recommended way
+    # some people say do trylast
     yield
     if "browser" in item.funcargs:
         _logger.info("Hook setting test timeout.")
