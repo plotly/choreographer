@@ -22,8 +22,7 @@ from ._chrome_constants import chrome_names, typical_chrome_paths
 
 if TYPE_CHECKING:
     import logging
-    from collections.abc import Mapping, MutableMapping, Sequence
-    from typing import Any
+    from typing import Any, Mapping, MutableMapping, Sequence
 
     from choreographer.channels._interface_type import ChannelInterface
 

@@ -12,8 +12,7 @@ from choreographer import channels, protocol
 # afrom choreographer.channels import ChannelClosedError
 
 if TYPE_CHECKING:
-    from collections.abc import MutableMapping
-    from typing import Any
+    from typing import Any, MutableMapping
 
     from choreographer.browser_async import Browser
     from choreographer.channels._interface_type import ChannelInterface
