@@ -212,7 +212,6 @@ class Chromium:
                 "--use-mock-keychain",
                 "--no-default-browser-check",
                 "--no-process-per-site",
-                "--disable-features=AcceptCHFrame,CalculateNativeWinOcclusion,site-per-process,IntensiveWakeUpThrottling,AllowAggressiveThrottlingWithWebSocket,OptOutZeroTimeoutTimersFromThrottling",
                 "--disable-web-security",
             ],
         )
