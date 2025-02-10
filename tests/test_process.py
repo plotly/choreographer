@@ -32,6 +32,12 @@ async def test_context(headless, sandbox, gpu):
                 pytest.skip(
                     "Ubuntu doesn't support sandbox unless installed from snap.",
                 )
+            elif sandbox:
+                _logger.info(
+                    "Not skipping sandbox: "
+                    f"Sandbox: {sandbox},"
+                    f"Version: {platform.version().lower()}",
+                )
             response = await browser.send_command(command="Target.getTargets")
             assert "result" in response and "targetInfos" in response["result"]  # noqa: PT018 combined assert
             assert len(response["result"]["targetInfos"]) != 0
