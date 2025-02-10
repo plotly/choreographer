@@ -72,6 +72,13 @@ def browser_which(
     ):
         _logger.debug("Returning local chrome")
         return str(local_chrome)
+    else:
+        _logger.debug(f"Exists? {local_chrome.exists()}")
+        _logger.debug(f"Skip local? {skip_local}")
+        _logger.debug(
+            f"local name: {local_chrome.name} in exe names {executable_names}: "
+            f"{local_chrome.name in executable_names}",
+        )
 
     if platform.system() == "Windows":
         os.environ["NoDefaultCurrentDirectoryInExePath"] = "0"  # noqa: SIM112 var name set by windows
