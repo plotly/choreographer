@@ -64,6 +64,7 @@ class Browser(Target):
         return False
 
     def _release_lock(self) -> bool:
+        """Return true if t was locked and released."""
         try:
             if self._open_lock.locked():
                 self._open_lock.release()
@@ -110,7 +111,7 @@ class Browser(Target):
             parser=parser,
         )
 
-    async def open(self) -> None:
+    async def open(self, *, second_try=False) -> None:
         """Open the browser."""
         _logger.info("Opening browser.")
         if await self._is_open():
@@ -132,22 +133,26 @@ class Browser(Target):
         _logger.debug("Trying to open browser.")
         loop = asyncio.get_running_loop()
         self.subprocess = await loop.run_in_executor(None, run)
-
-        super().__init__("0", self._broker)
-        self._add_session(Session("", self._broker))
+        if not second_try:
+            super().__init__("0", self._broker)
+            self._add_session(Session("", self._broker))
 
         try:
-            _logger.debug("Starting watchdog")
-            self._watch_dog_task = asyncio.create_task(self._watchdog())
             _logger.debug("Running read loop")
             self._broker.run_read_loop()
             _logger.debug("Populating Targets")
-            await self.populate_targets()
+            await asyncio.wait_for(self.populate_targets(), 3)
         except (BrowserClosedError, BrowserFailedError, asyncio.CancelledError) as e:
+            if not second_try:
+                self._release_lock()
+                await self.open(second_try=True)
+                return
             raise BrowserFailedError(
                 "The browser seemed to close immediately after starting."
                 "You can set the `logging.Logger` level lower to see more output.",
             ) from e
+        _logger.debug("Starting watchdog")
+        self._watch_dog_task = asyncio.create_task(self._watchdog())
 
     async def __aenter__(self) -> Self:
         """Open browser as context to launch on entry and close on exit."""
