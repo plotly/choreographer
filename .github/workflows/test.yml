@@ -26,7 +26,7 @@ jobs:
       - name: Install choreographer
         run:  uv sync --no-sources --all-extras
       - name: Install google-chrome-for-testing
-        run: uv run --no-sources choreo_get_chrome
+        run: uv run --no-sources choreo_get_chrome -v
       - name: Diagnose
         run:  uv run --no-sources choreo_diagnose --no-run
         timeout-minutes: 1

@@ -8,6 +8,9 @@ find = {namespaces = false}
 [tool.setuptools-git-versioning]
 enabled = true
 
+[tool.setuptools.package-data]
+kaleido = ['resources/latest_known_good_chrome.json']
+
 [project]
 name = "choreographer"
 description = "Devtools Protocol implementation for chrome."

@@ -145,8 +145,10 @@ class Browser(Target):
             await self.populate_targets()
         except (BrowserClosedError, BrowserFailedError, asyncio.CancelledError) as e:
             raise BrowserFailedError(
-                "The browser seemed to close immediately after starting."
+                "The browser seemed to close immediately after starting.",
                 "You can set the `logging.Logger` level lower to see more output.",
+                "You may try installed a known working copy of chrome from ",
+                "`$ choreo_get_chome`. It may be your copy auto-updated.",
             ) from e
 
     async def __aenter__(self) -> Self:

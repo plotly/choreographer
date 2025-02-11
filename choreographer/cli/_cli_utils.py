@@ -12,10 +12,15 @@ import zipfile
 from functools import partial
 from pathlib import Path
 
+import logistro
+
+_logger = logistro.getLogger(__name__)
+
 # SOON TODO this isn't the right download path, look at uv, use sysconfig
 _default_download_path = Path(__file__).resolve().parent / "browser_exe"
 
 _chrome_for_testing_url = "https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json"
+
 
 _platforms = ["linux64", "win32", "win64", "mac-x64", "mac-arm64"]
 
@@ -69,7 +74,7 @@ class _ZipFilePermissions(zipfile.ZipFile):
 
 def get_chrome_sync(
     arch: str = _chrome_platform_detected,
-    i: int = -1,
+    i: int | None = None,
     path: str | Path = _default_download_path,
     *,
     verbose: bool = False,
@@ -77,12 +82,22 @@ def get_chrome_sync(
     """Download chrome synchronously: see `get_chrome()`."""
     if isinstance(path, str):
         path = Path(path)
-    browser_list = json.loads(
-        urllib.request.urlopen(  # noqa: S310 audit url for schemes
-            _chrome_for_testing_url,
-        ).read(),
-    )
-    version_obj = browser_list["versions"][i]
+    if i:
+        _logger.info("Loading chrome from list")
+        browser_list = json.loads(
+            urllib.request.urlopen(  # noqa: S310 audit url for schemes
+                _chrome_for_testing_url,
+            ).read(),
+        )
+        version_obj = browser_list["versions"][i]
+    else:
+        _logger.info("Using last known good version of chrome")
+        with (
+            Path(__file__).resolve().parent.parent
+            / "resources"
+            / "last_known_good_chrome.json"
+        ).open() as f:
+            version_obj = json.load(f)
     if verbose:
         print(version_obj["version"])  # noqa: T201 allow print in cli
         print(version_obj["revision"])  # noqa: T201 allow print in cli
@@ -119,7 +134,7 @@ def get_chrome_sync(
 
 async def get_chrome(
     arch: str = _chrome_platform_detected,
-    i: int = -1,
+    i: int | None = None,
     path: str | Path = _default_download_path,
     *,
     verbose: bool = False,
@@ -153,17 +168,37 @@ def get_chrome_cli() -> None:
             " package manager.",
             UserWarning,
         )
-    parser = argparse.ArgumentParser(description="tool to help debug problems")
-    parser.add_argument("--i", "-i", type=int, dest="i")
-    parser.add_argument("--arch", dest="arch")
-    parser.add_argument("--path", dest="path")
+    parser = argparse.ArgumentParser(
+        description="Will download Chrome for testing. All arguments optional.",
+        parents=[logistro.parser],
+    )
+    parser.add_argument(
+        "--i",
+        "-i",
+        type=int,
+        dest="i",
+        help=(
+            "Google offers thousands of chrome versions for download. "
+            "'-i 0' is the oldest, '-i -1' is the newest: array syntax"
+        ),
+    )
+    parser.add_argument(
+        "--arch",
+        dest="arch",
+        help="linux64|win32|win64|mac-x64|mac-arm64",
+    )
+    parser.add_argument(
+        "--path",
+        dest="path",
+        help="Where to store the download.",
+    )
     parser.add_argument(
         "-v",
         "--verbose",
         dest="verbose",
         action="store_true",
+        help="Display found version number if using -i (to stdout)",
     )
-    parser.set_defaults(i=-1)
     parser.set_defaults(path=_default_download_path)
     parser.set_defaults(arch=_chrome_platform_detected)
     parser.set_defaults(verbose=False)
