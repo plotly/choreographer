@@ -169,17 +169,35 @@ def get_chrome_cli() -> None:
             UserWarning,
         )
     parser = argparse.ArgumentParser(
-        description="tool to help debug problems",
+        description="Will download Chrome for testing. All arguments optional.",
         parents=[logistro.parser],
     )
-    parser.add_argument("--i", "-i", type=int, dest="i")
-    parser.add_argument("--arch", dest="arch")
-    parser.add_argument("--path", dest="path")
+    parser.add_argument(
+        "--i",
+        "-i",
+        type=int,
+        dest="i",
+        help=(
+            "Google offers thousands of chrome versions for download. "
+            "'-i 0' is the oldest, '-i -1' is the newest: array syntax"
+        ),
+    )
+    parser.add_argument(
+        "--arch",
+        dest="arch",
+        help="linux64|win32|win64|mac-x64|mac-arm64",
+    )
+    parser.add_argument(
+        "--path",
+        dest="path",
+        help="Where to store the download.",
+    )
     parser.add_argument(
         "-v",
         "--verbose",
         dest="verbose",
         action="store_true",
+        help="Display found version number if using -i (to stdout)",
     )
     parser.set_defaults(path=_default_download_path)
     parser.set_defaults(arch=_chrome_platform_detected)
