@@ -1,9 +1,11 @@
-v1.0.3
+v1.0.4
 - Fix to fetch latest known chrome version, not latest version
-v1.0.2
+v1.0.3
 - Fix syntax to make compatible with python 3.8
 - Remove lots of CLI commands
 - Improve logging
+v1.0.2
+- no changes, noop
 v1.0.1
 - Bugfix: Check for future cancellation before setting, improves error handling.
 - Improve error messages and add some type checking for user experience
