@@ -11,6 +11,7 @@ chrome_names = [
     "Chrome.app",
     "Google Chrome",
     "Google Chrome.app",
+    "Google Chrome for Testing",
 ]
 chrome_names.extend(chromium_names)
 
