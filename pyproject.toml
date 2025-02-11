@@ -9,7 +9,7 @@ find = {namespaces = false}
 enabled = true
 
 [tool.setuptools.package-data]
-choreographer = ['resources/latest_known_good_chrome.json']
+choreographer = ['resources/last_known_good_chrome.json']
 
 [project]
 name = "choreographer"
