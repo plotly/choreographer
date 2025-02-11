@@ -9,7 +9,7 @@ find = {namespaces = false}
 enabled = true
 
 [tool.setuptools.package-data]
-kaleido = ['resources/latest_known_good_chrome.json']
+choreographer = ['resources/latest_known_good_chrome.json']
 
 [project]
 name = "choreographer"
