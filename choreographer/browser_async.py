@@ -144,12 +144,19 @@ class Browser(Target):
             await asyncio.wait_for(self.populate_targets(), 3)
         except (BrowserClosedError, BrowserFailedError, asyncio.CancelledError) as e:
             if not second_try:
-                self._release_lock()
+                _logger.warning(
+                    "Browser failed the first time, trying the second time.",
+                )
+                if not self._release_lock():
+                    _logger.warning("Browser hadn't locked up")
                 await self.open(second_try=True)
+                _logger.debug("Second opening seemed to work.")
                 return
             raise BrowserFailedError(
-                "The browser seemed to close immediately after starting."
+                "The browser seemed to close immediately after starting.",
                 "You can set the `logging.Logger` level lower to see more output.",
+                "You may try installed a known working copy of chrome from ",
+                "`$ choreo_get_chome`",
             ) from e
         _logger.debug("Starting watchdog")
         self._watch_dog_task = asyncio.create_task(self._watchdog())
