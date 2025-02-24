@@ -244,10 +244,11 @@ class Browser(Target):
     async def _watchdog(self) -> None:
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=TmpDirWarning)
-            _logger.debug("Starting watchdog")
+            _logger.debug("In watchdog")
             loop = asyncio.get_running_loop()
+            _logger.debug2("Running wait.")
             await loop.run_in_executor(None, self.subprocess.wait)
-            _logger.warning("Browser is being closed by watchdog.")
+            _logger.warning("Wait expired, Browser is being closed by watchdog.")
             self._watch_dog_task = None
             await self.close()
             await asyncio.sleep(1)
