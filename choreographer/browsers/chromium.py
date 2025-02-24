@@ -148,11 +148,23 @@ class Chromium:
         if not isinstance(channel, Pipe):
             raise NotImplementedError("Websocket style channels not implemented yet.")
 
+        self._is_isolated = "snap" in str(self.path)
+
         self.tmp_dir = TmpDirectory(
             path=self._tmp_dir_path,
-            sneak="snap" in str(self.path),
+            sneak=self._is_isolated,
         )
         _logger.info(f"Temporary directory at: {self.tmp_dir.path}")
+
+    def is_isolated(self) -> bool:
+        """
+        Return if /tmp directory is isolated by OS.
+
+        Returns:
+            bool indicating if /tmp is isolated.
+
+        """
+        return self._is_isolated
 
     def get_popen_args(self) -> Mapping[str, Any]:
         """Return the args needed to runc chromium with `subprocess.Popen()`."""

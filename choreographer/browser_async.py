@@ -110,6 +110,10 @@ class Browser(Target):
             parser=parser,
         )
 
+    def is_isolated(self) -> bool:
+        """Return if process is isolated."""
+        return self._browser_impl.is_isolated()
+
     async def open(self) -> None:
         """Open the browser."""
         _logger.info("Opening browser.")
