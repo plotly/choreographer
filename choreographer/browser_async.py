@@ -151,7 +151,7 @@ class Browser(Target):
             raise BrowserFailedError(
                 "The browser seemed to close immediately after starting.",
                 "You can set the `logging.Logger` level lower to see more output.",
-                "You may try installed a known working copy of chrome from ",
+                "You may try installing a known working copy of Chrome by running ",
                 "`$ choreo_get_chrome`. It may be your copy auto-updated.",
             ) from e
 
