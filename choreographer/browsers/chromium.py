@@ -100,10 +100,11 @@ class Chromium:
 
     def _verify_libs_exist(self, path: Path) -> bool:
         if platform.system() != "Linux":
+            msg = "You asked for ldd-fail but we're not on linux."
             if _args.ldd_fail:
-                _logger.warning("You asked for ldd-fail but its only for linux.")
+                _logger.warning(msg)
             else:
-                _logger.debug("You asked for ldd-fail but its only for linux.")
+                _logger.debug(msg)
             return True
         if not path.is_file():
             raise RuntimeError(f"Can't check dependencies of {path!s}")
@@ -117,24 +118,23 @@ class Chromium:
                 check=False,
             )
         except BaseException as e:
+            msg = "ldd failed in a strange way."
             if _args.ldd_fail:
-                _logger.exception("ldd failed in a strange way.")
+                _logger.exception(msg)
                 raise
             else:
-                _logger.warning(f"ldd failed in a strange way: {e}")
+                _logger.warning(msg + f" {e}")  # noqa: G003 + in log
         if p.returncode != 0:
+            msg = "Non-zero exit from ldd."
             if _args.ldd_fail:
-                raise RuntimeError(
-                    f"The ldd process didn't work. {p.stderr.encode()}",
-                )
-            _logger.warning("Non-zero exit code from ldd: {p.stderr.encode()}")
+                raise RuntimeError(msg + f" {p.stderr.encode()}")
+            _logger.warning(msg + f" {p.stderr.encode()}")  # noqa: G003 + in log
             return False
         if b"not found" in p.stdout:
+            msg = "Found deps missing in chrome"
             if _args.ldd_fail:
-                raise RuntimeError(
-                    f"Found deps missing in chrome. {p.stdout.encode()}",
-                )
-            _logger.debug(f"Found deps missing in chrome: {p.stdout.encode()}")
+                raise RuntimeError(msg + f" {p.stdout.encode()}")
+            _logger.debug(msg + f" {p.stdout.encode()}")  # noqa: G003 + in log
             return False
         return True
 
