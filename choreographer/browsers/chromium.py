@@ -43,7 +43,7 @@ _parser.add_argument(
     help="Will cause to fail if not right deps.",
 )
 
-args = _parser.parse_args()
+_args = _parser.parse_args()
 
 
 def _is_exe(path: str | Path) -> bool:
@@ -97,6 +97,50 @@ class Chromium:
         record.msg = _logs_parser_regex.sub("", record.msg)
         # we just eliminate their stamp, we dont' extract it
         return True
+
+    def _verify_libs_exist(self, path: Path) -> bool:
+        if platform.system() != "Linux":
+            if _args.ldd_fail:
+                _logger.warning("You asked for ldd-fail but its only for linux.")
+            else:
+                _logger.debug("You asked for ldd-fail but its only for linux.")
+            return True
+        if not path.is_file():
+            raise RuntimeError(f"Can't check dependencies of {path!s}")
+        else:
+            cmd = ["ldd", str(path)]
+        try:
+            p = subprocess.run(  # noqa: S603, validating run with variables
+                *cmd,
+                capture_output=True,
+                timeout=5,
+                check=False,
+            )
+        except BaseException as e:
+            if _args.ldd_fail:
+                _logger.exception("ldd failed in a strange way.")
+                raise
+            else:
+                _logger.warning(f"ldd failed in a strange way: {e}")
+        if p.returncode != 0:
+            if _args.ldd_fail:
+                raise RuntimeError(
+                    f"The ldd process didn't work. {p.stderr.encode()}",
+                )
+            _logger.warning("Non-zero exit code from ldd: {p.stderr.encode()}")
+            return False
+        if b"not found" in p.stdout:
+            if _args.ldd_fail:
+                raise RuntimeError(
+                    f"Found deps missing in chrome. {p.stdout.encode()}",
+                )
+            _logger.debug(f"Found deps missing in chrome: {p.stdout.encode()}")
+            return False
+        return True
+
+        # lets do the call with ldd
+        # lets look for not found
+        # lets crash or return a bool
 
     def __init__(
         self,
