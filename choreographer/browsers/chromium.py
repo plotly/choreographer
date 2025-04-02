@@ -138,10 +138,6 @@ class Chromium:
             return False
         return True
 
-        # lets do the call with ldd
-        # lets look for not found
-        # lets crash or return a bool
-
     def __init__(
         self,
         channel: ChannelInterface,
