@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import os
 import platform
 import re
@@ -31,6 +32,18 @@ _chromium_wrapper_path = (
 )
 
 _logger = logistro.getLogger(__name__)
+
+_parser = argparse.ArgumentParser(add_help=False)
+
+_parser.add_argument(
+    "--ldd-fail",
+    action="store_true",
+    dest="ldd_fail",
+    default=False,
+    help="Will cause to fail if not right deps.",
+)
+
+args = _parser.parse_args()
 
 
 def _is_exe(path: str | Path) -> bool:
