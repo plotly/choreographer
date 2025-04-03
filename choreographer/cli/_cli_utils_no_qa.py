@@ -50,11 +50,14 @@ def diagnose() -> None:
         print("No browser, found can't check for deps.")
     else:
         b = Browser()
+        b._browser_impl.pre_open()
         cli = b._browser_impl.get_cli()
+        env = b._browser_impl.get_env()
+        b._browser_impl.clean()
+        del b
         print("cli:")
         for arg in cli:
             print(arg)
-        env = b._browser_impl.get_env()
         print("env:")
         for k, v in env.items():
             print(f"{k}:{v}")
