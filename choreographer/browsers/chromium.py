@@ -43,6 +43,14 @@ _parser.add_argument(
     help="Will cause to fail if not right deps.",
 )
 
+_parser.add_argument(
+    "--force-packaged-deps",
+    action="store-true",
+    dest="force_local_deps",
+    default=False,
+    help="Will force us to try local deps.",
+)
+
 _args = _parser.parse_known_args()
 
 
