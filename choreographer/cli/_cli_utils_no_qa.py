@@ -9,7 +9,7 @@ import time
 # ruff has line-level and file-level QA suppression
 # so lets give diagnose a separate file
 
-# ruff: noqa: PLR0915, C901, S603, BLE001, S607, PERF203, TRY002, T201
+# ruff: noqa: PLR0915, C901, S603, BLE001, S607, PERF203, TRY002, T201, PLR0912, SLF001
 
 # in order, exceptions are:
 # - function complexity (statements?)
@@ -23,10 +23,6 @@ import time
 
 
 def diagnose() -> None:
-    import logistro
-
-    logistro.getLogger().setLevel("DEBUG")
-
     from choreographer import Browser, BrowserSync
     from choreographer.browsers._chrome_constants import chrome_names
     from choreographer.utils._which import browser_which
@@ -36,7 +32,7 @@ def diagnose() -> None:
     parser.add_argument("--show", dest="headless", action="store_false")
     parser.set_defaults(run=True)
     parser.set_defaults(headless=True)
-    args = parser.parse_args()
+    args, _ = parser.parse_known_args()
     run = args.run
     headless = args.headless
     fail = []
