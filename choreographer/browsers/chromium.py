@@ -46,7 +46,7 @@ _g.add_argument(
 _g.add_argument(
     "--force-packaged-deps",
     action="store-true",
-    dest="force_local_deps",
+    dest="force_deps",
     default=False,
     help="Will force us to try local deps.",
 )
@@ -108,36 +108,30 @@ class Chromium:
 
     def _verify_libs_exist(self, path: Path) -> bool:
         if platform.system() != "Linux":
-            msg = "You asked for ldd-fail but we're not on linux."
             if _args.ldd_fail:
-                _logger.warning(msg)
-            else:
-                _logger.debug(msg)
+                _logger.warning("You asked for ldd-fail but we're not on linux.")
+            if _args.force_deps:
+                _logger.warning("You asked for packages deps but we're not on linux.")
             return True
+        if _args.force_deps:
+            return False
         if not path.is_file():
             raise RuntimeError(f"Can't check dependencies of {path!s}")
-        else:
-            cmd = ["ldd", str(path)]
         try:
             p = subprocess.run(  # noqa: S603, validating run with variables
-                *cmd,
+                "ldd",  # noqa: S607 path is all we have
+                str(path),
                 capture_output=True,
                 timeout=5,
-                check=False,
+                check=True,
             )
         except BaseException as e:
-            msg = "ldd failed in a strange way."
+            msg = "ldd failed."
             if _args.ldd_fail:
                 _logger.exception(msg)
                 raise
             else:
-                _logger.warning(msg + f" {e}")  # noqa: G003 + in log
-        if p.returncode != 0:
-            msg = "Non-zero exit from ldd."
-            if _args.ldd_fail:
-                raise RuntimeError(msg + f" {p.stderr.encode()}")
-            _logger.warning(msg + f" {p.stderr.encode()}")  # noqa: G003 + in log
-            return False
+                _logger.warning(msg + f" e: {e}, stderr: {p.stderr.encode()}")  # noqa: G003 + in log
         if b"not found" in p.stdout:
             msg = "Found deps missing in chrome"
             if _args.ldd_fail:
