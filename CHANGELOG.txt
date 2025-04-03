@@ -1,3 +1,8 @@
+v1.0.6
+- Package in chromium deps and use them if ldd shows they're needed
+- Add env var LDD_FAIL and flag --ldd_fail to always fail if deps needed
+- Add env var FORCED_PACKAGED_DEPS and flag --forced-packaged-deps to do as read
+- Fix some API bugs in choreo_diagnose
 v1.0.5
 - Add Browser.is_isolated() returning if /tmp is sandboxed
 v1.0.4
