@@ -108,7 +108,7 @@ class Chromium:
         # we just eliminate their stamp, we dont' extract it
         return True
 
-    def _need_libs(self, path: Path) -> bool:
+    def _need_libs(self) -> bool:
         if platform.system() != "Linux":
             if _args.ldd_fail:
                 _logger.warning("You asked for ldd-fail but we're not on linux.")
@@ -117,12 +117,12 @@ class Chromium:
             return False
         if _args.force_deps:
             return True
-        if not path.is_file():
-            raise RuntimeError(f"Can't check dependencies of {path!s}")
+        if not self.path.is_file():
+            raise RuntimeError(f"Can't check dependencies of {self.path!s}")
         try:
             p = subprocess.run(  # noqa: S603, validating run with variables
                 "ldd",  # noqa: S607 path is all we have
-                str(path),
+                str(self.path),
                 capture_output=True,
                 timeout=5,
                 check=True,
@@ -306,10 +306,12 @@ class Chromium:
 
     def get_env(self) -> MutableMapping[str, str]:
         """Return the env needed for chromium."""
-        _logger.debug("Returning env: same env, no modification.")
         env = os.environ.copy()
-        if self._need_libs(self.path):
+        if self._need_libs():
             env["LD_LIBRARY_PATH"] = str(_packaged_chromium_libs)
+            _logger.debug(
+                f"Added LD_LIBRARY_PATH={_packaged_chromium_libs!s} to env vars.",
+            )
         return env
 
     def clean(self) -> None:
