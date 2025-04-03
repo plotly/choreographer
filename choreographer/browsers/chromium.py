@@ -43,7 +43,7 @@ _parser.add_argument(
     help="Will cause to fail if not right deps.",
 )
 
-_args = _parser.parse_args()
+_args = _parser.parse_known_args()
 
 
 def _is_exe(path: str | Path) -> bool:
