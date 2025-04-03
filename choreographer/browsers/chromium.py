@@ -106,15 +106,15 @@ class Chromium:
         # we just eliminate their stamp, we dont' extract it
         return True
 
-    def _verify_libs_exist(self, path: Path) -> bool:
+    def _need_libs(self, path: Path) -> bool:
         if platform.system() != "Linux":
             if _args.ldd_fail:
                 _logger.warning("You asked for ldd-fail but we're not on linux.")
             if _args.force_deps:
                 _logger.warning("You asked for packages deps but we're not on linux.")
-            return True
-        if _args.force_deps:
             return False
+        if _args.force_deps:
+            return True
         if not path.is_file():
             raise RuntimeError(f"Can't check dependencies of {path!s}")
         try:
@@ -132,13 +132,14 @@ class Chromium:
                 raise
             else:
                 _logger.warning(msg + f" e: {e}, stderr: {p.stderr.encode()}")  # noqa: G003 + in log
+                return True
         if b"not found" in p.stdout:
             msg = "Found deps missing in chrome"
             if _args.ldd_fail:
                 raise RuntimeError(msg + f" {p.stdout.encode()}")
             _logger.debug(msg + f" {p.stdout.encode()}")  # noqa: G003 + in log
-            return False
-        return True
+            return True
+        return False
 
     def __init__(
         self,
@@ -199,6 +200,7 @@ class Chromium:
                 "please see documentation.",
             )
         _logger.info(f"Found chromium path: {self.path}")
+
         self._channel = channel
         if not isinstance(channel, Pipe):
             raise NotImplementedError("Websocket style channels not implemented yet.")
