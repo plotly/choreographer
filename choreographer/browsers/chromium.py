@@ -117,6 +117,7 @@ class Chromium:
             return False
         if _args.force_deps:
             return True
+        p = None
         try:
             p = subprocess.run(  # noqa: S603, validating run with variables
                 "ldd",  # noqa: S607 path is all we have
@@ -131,7 +132,11 @@ class Chromium:
                 _logger.exception(msg)
                 raise
             else:
-                _logger.warning(msg + f" e: {e}, stderr: {p.stderr.encode()}")  # noqa: G003 + in log
+                stderr = p.stderr.encode() if p and p.stderr else None
+                _logger.warning(
+                    msg  # noqa: G003 + in log
+                    + f" e: {e}, stderr: {stderr}",
+                )
                 return True
         if b"not found" in p.stdout:
             msg = "Found deps missing in chrome"
