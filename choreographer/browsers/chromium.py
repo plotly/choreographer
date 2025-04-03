@@ -53,7 +53,7 @@ _g.add_argument(
     help="Will force us to try local deps.",
 )
 
-_args = _parser.parse_known_args()
+_args, _ = _parser.parse_known_args()
 
 
 def _is_exe(path: str | Path) -> bool:
