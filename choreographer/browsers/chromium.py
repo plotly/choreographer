@@ -219,6 +219,8 @@ class Chromium:
 
         self._is_isolated = "snap" in str(self.path)
 
+    def pre_open(self) -> None:
+        """Prepare browser for opening."""
         self.tmp_dir = TmpDirectory(
             path=self._tmp_dir_path,
             sneak=self._is_isolated,
