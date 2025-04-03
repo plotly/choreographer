@@ -150,6 +150,7 @@ class Chromium:
                 raise RuntimeError(msg + f" {p.stdout.encode()}")
             _logger.debug(msg + f" {p.stdout.encode()}")  # noqa: G003 + in log
             return True
+        _logger.debug("No problems found with dependencies")
         return False
 
     def __init__(
