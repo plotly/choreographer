@@ -101,14 +101,6 @@ class Browser(Target):
         self._channel = channel_cls()
         self._broker = Broker(self, self._channel)
         self._browser_impl = browser_cls(self._channel, path, **kwargs)
-        if hasattr(browser_cls, "logger_parser"):
-            parser = browser_cls.logger_parser
-        else:
-            parser = None
-        self._logger_pipe, _ = logistro.getPipeLogger(
-            "browser_proc",
-            parser=parser,
-        )
 
     def is_isolated(self) -> bool:
         """Return if process is isolated."""
@@ -121,6 +113,15 @@ class Browser(Target):
             raise RuntimeError("Can't re-open the browser")
 
         # asyncio's equiv doesn't work in all situations
+        if hasattr(self._browser_impl, "logger_parser"):
+            parser = self._browser_impl.logger_parser
+        else:
+            parser = None
+        self._logger_pipe, _ = logistro.getPipeLogger(
+            "browser_proc",
+            parser=parser,
+        )
+
         def run() -> subprocess.Popen[bytes]:
             self._browser_impl.pre_open()
             cli = self._browser_impl.get_cli()
