@@ -119,14 +119,14 @@ class Browser(Target):
         _logger.info("Opening browser.")
         if await self._is_open():
             raise RuntimeError("Can't re-open the browser")
-        cli = self._browser_impl.get_cli()
-        stderr = self._logger_pipe
-        env = self._browser_impl.get_env()
-        args = self._browser_impl.get_popen_args()
 
         # asyncio's equiv doesn't work in all situations
         def run() -> subprocess.Popen[bytes]:
             self._browser_impl.pre_open()
+            cli = self._browser_impl.get_cli()
+            stderr = self._logger_pipe
+            env = self._browser_impl.get_env()
+            args = self._browser_impl.get_popen_args()
             return subprocess.Popen(  # noqa: S603
                 cli,
                 stderr=stderr,
