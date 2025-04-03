@@ -117,8 +117,6 @@ class Chromium:
             return False
         if _args.force_deps:
             return True
-        if not self.path.is_file():
-            raise RuntimeError(f"Can't check dependencies of {self.path!s}")
         try:
             p = subprocess.run(  # noqa: S603, validating run with variables
                 "ldd",  # noqa: S607 path is all we have
