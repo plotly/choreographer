@@ -41,7 +41,7 @@ _g.add_argument(
     "--ldd-fail",
     action="store_true",
     dest="ldd_fail",
-    default=False,
+    default="LDD_FAIL" in os.environ,
     help="Will cause to fail if not right deps.",
 )
 
@@ -49,7 +49,7 @@ _g.add_argument(
     "--force-packaged-deps",
     action="store_true",
     dest="force_deps",
-    default=False,
+    default="FORCE_PACKAGED_DEPS" in os.environ,
     help="Will force us to try local deps.",
 )
 
