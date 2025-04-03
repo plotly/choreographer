@@ -34,8 +34,8 @@ _chromium_wrapper_path = (
 _logger = logistro.getLogger(__name__)
 
 _parser = argparse.ArgumentParser(add_help=False)
-
-_parser.add_argument(
+_g = _parser.add_mutually_exclusive_group()
+_g.add_argument(
     "--ldd-fail",
     action="store_true",
     dest="ldd_fail",
@@ -43,7 +43,7 @@ _parser.add_argument(
     help="Will cause to fail if not right deps.",
 )
 
-_parser.add_argument(
+_g.add_argument(
     "--force-packaged-deps",
     action="store-true",
     dest="force_local_deps",
