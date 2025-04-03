@@ -26,7 +26,7 @@ jobs:
 
       - name: Install Dependencies
         if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: apt-get update && apt-get install xvfb
+        run: sudo apt-get update && sudo apt-get install xvfb
         timeout-minutes: 1
 
       - name: Install choreographer
