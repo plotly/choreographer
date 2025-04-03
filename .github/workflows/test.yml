@@ -7,6 +7,8 @@ on:
       - v*
 jobs:
   test-all:
+    env:
+      FORCE_PACKAGED_DEPS: 1
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
