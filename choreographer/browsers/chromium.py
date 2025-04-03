@@ -109,16 +109,20 @@ class Chromium:
         return True
 
     def _need_libs(self) -> bool:
+        _logger.debug("Checking for libs needed.")
         if platform.system() != "Linux":
+            _logger.debug("We're not in linux, so no need for check.")
             if _args.ldd_fail:
                 _logger.warning("You asked for ldd-fail but we're not on linux.")
             if _args.force_deps:
                 _logger.warning("You asked for packages deps but we're not on linux.")
             return False
         if _args.force_deps:
+            _logger.debug("Force using packaged deps.")
             return True
         p = None
         try:
+            _logger.debug(f"Trying ldd {self.path}")
             p = subprocess.run(  # noqa: S603, validating run with variables
                 "ldd",  # noqa: S607 path is all we have
                 str(self.path),
