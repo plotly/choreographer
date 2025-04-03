@@ -10,6 +10,7 @@ import time
 # so lets give diagnose a separate file
 
 # ruff: noqa: PLR0915, C901, S603, BLE001, S607, PERF203, TRY002, T201, PLR0912, SLF001
+# ruff: noqa: F401, ERA001 # temporary, sync
 
 # in order, exceptions are:
 # - function complexity (statements?)
