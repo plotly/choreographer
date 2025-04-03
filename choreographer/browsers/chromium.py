@@ -47,7 +47,7 @@ _g.add_argument(
 
 _g.add_argument(
     "--force-packaged-deps",
-    action="store-true",
+    action="store_true",
     dest="force_deps",
     default=False,
     help="Will force us to try local deps.",
