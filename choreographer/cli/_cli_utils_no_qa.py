@@ -43,7 +43,21 @@ def diagnose() -> None:
     print(platform.version())
     print(platform.uname())
     print("BROWSER:".center(50, "*"))
-    print(browser_which(chrome_names))
+    browser_path = browser_which(chrome_names)
+    print(browser_path)
+    print("BROWSER_INIT_CHECK (DEPS)".center(50, "*"))
+    if not browser_path:
+        print("No browser, found can't check for deps.")
+    else:
+        b = Browser()
+        cli = b._browser_impl.get_cli()
+        print("cli:")
+        for arg in cli:
+            print(arg)
+        env = b._browser_impl.get_env()
+        print("env:")
+        for k, v in env.items():
+            print(f"{k}:{v}")
     print("VERSION INFO:".center(50, "*"))
     try:
         print("PIP:".center(25, "*"))
