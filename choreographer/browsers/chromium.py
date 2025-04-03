@@ -31,6 +31,8 @@ _chromium_wrapper_path = (
     Path(__file__).resolve().parent / "_unix_pipe_chromium_wrapper.py"
 )
 
+_packaged_chromium_libs = Path(__file__).resolve().parent / "packaged_chromium_libs"
+
 _logger = logistro.getLogger(__name__)
 
 _parser = argparse.ArgumentParser(add_help=False)
@@ -305,7 +307,10 @@ class Chromium:
     def get_env(self) -> MutableMapping[str, str]:
         """Return the env needed for chromium."""
         _logger.debug("Returning env: same env, no modification.")
-        return os.environ.copy()
+        env = os.environ.copy()
+        if self._need_libs(self.path):
+            env["LD_LIBRARY_PATH"] = str(_packaged_chromium_libs)
+        return env
 
     def clean(self) -> None:
         """Clean up any leftovers form browser, like tmp files."""
