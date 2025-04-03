@@ -124,8 +124,10 @@ class Chromium:
         try:
             _logger.debug(f"Trying ldd {self.path}")
             p = subprocess.run(  # noqa: S603, validating run with variables
-                "ldd",  # noqa: S607 path is all we have
-                str(self.path),
+                [  # noqa: S607 path is all we have
+                    "ldd",
+                    str(self.path),
+                ],
                 capture_output=True,
                 timeout=5,
                 check=True,
