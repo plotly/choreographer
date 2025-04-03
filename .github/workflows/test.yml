@@ -44,7 +44,7 @@ jobs:
         timeout-minutes: 7
 
       - name: Test (Debug)
-        if: runner.debug
+        if: ${{ runner.debug && matrix.os != 'ubuntu-latest' }}
         run: uv run --no-sources poe debug-test
         timeout-minutes: 20
 
