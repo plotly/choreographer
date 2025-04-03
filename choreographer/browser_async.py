@@ -126,6 +126,7 @@ class Browser(Target):
 
         # asyncio's equiv doesn't work in all situations
         def run() -> subprocess.Popen[bytes]:
+            self._browser_impl.pre_open()
             return subprocess.Popen(  # noqa: S603
                 cli,
                 stderr=stderr,
