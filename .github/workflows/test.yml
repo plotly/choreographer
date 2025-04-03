@@ -12,11 +12,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        include:
-          - os: ubuntu-latest
-            container: debian:bookworm-slim
     runs-on: ${{ matrix.os }}
-    container: ${{ matrix.container || '' }}
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v4
