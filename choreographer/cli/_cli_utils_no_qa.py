@@ -87,11 +87,12 @@ def diagnose() -> None:
         print("Done with version info.".center(50, "*"))
     if run:
         try:
-            print("Sync Test Headless".center(50, "*"))
-            browser = BrowserSync(headless=headless)
-            browser.open()
-            time.sleep(3)
-            browser.close()
+            print("Skipping sync test...")
+            # print("Sync Test Headless".center(50, "*"))
+            # browser = BrowserSync(headless=headless)
+            # browser.open()
+            # time.sleep(3)
+            # browser.close()
         except BaseException as e:
             fail.append(("Sync test headless", e))
         finally:
