@@ -113,7 +113,7 @@ class Chromium:
             _logger.debug(
                 "If we have to skip local, we probably can't use ldd either.",
             )
-            return False
+            return True
         _logger.debug("Checking for libs needed.")
         if platform.system() != "Linux":
             _logger.debug("We're not in linux, so no need for check.")
@@ -328,7 +328,7 @@ class Chromium:
             original = env.get("LD_LIBRARY_PATH", "")
             env["LD_LIBRARY_PATH"] = f"{_packaged_chromium_libs!s}:{original}"
             _logger.debug(
-                f"Added LD_LIBRARY_PATH={_packaged_chromium_libs!s} to env vars.",
+                f"Added LD_LIBRARY_PATH={env['LD_LIBRARY_PATH']!s} to env vars.",
             )
         return env
 
