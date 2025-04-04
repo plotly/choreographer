@@ -101,14 +101,6 @@ class Browser(Target):
         self._channel = channel_cls()
         self._broker = Broker(self, self._channel)
         self._browser_impl = browser_cls(self._channel, path, **kwargs)
-        if hasattr(browser_cls, "logger_parser"):
-            parser = browser_cls.logger_parser
-        else:
-            parser = None
-        self._logger_pipe, _ = logistro.getPipeLogger(
-            "browser_proc",
-            parser=parser,
-        )
 
     def is_isolated(self) -> bool:
         """Return if process is isolated."""
@@ -119,13 +111,23 @@ class Browser(Target):
         _logger.info("Opening browser.")
         if await self._is_open():
             raise RuntimeError("Can't re-open the browser")
-        cli = self._browser_impl.get_cli()
-        stderr = self._logger_pipe
-        env = self._browser_impl.get_env()
-        args = self._browser_impl.get_popen_args()
 
         # asyncio's equiv doesn't work in all situations
+        if hasattr(self._browser_impl, "logger_parser"):
+            parser = self._browser_impl.logger_parser
+        else:
+            parser = None
+        self._logger_pipe, _ = logistro.getPipeLogger(
+            "browser_proc",
+            parser=parser,
+        )
+
         def run() -> subprocess.Popen[bytes]:
+            self._browser_impl.pre_open()
+            cli = self._browser_impl.get_cli()
+            stderr = self._logger_pipe
+            env = self._browser_impl.get_env()
+            args = self._browser_impl.get_popen_args()
             return subprocess.Popen(  # noqa: S603
                 cli,
                 stderr=stderr,
@@ -151,8 +153,8 @@ class Browser(Target):
             raise BrowserFailedError(
                 "The browser seemed to close immediately after starting.",
                 "You can set the `logging.Logger` level lower to see more output.",
-                "You may try installed a known working copy of chrome from ",
-                "`$ choreo_get_chome`. It may be your copy auto-updated.",
+                "You may try installing a known working copy of Chrome by running ",
+                "`$ choreo_get_chrome`. It may be your copy auto-updated.",
             ) from e
 
     async def __aenter__(self) -> Self:

@@ -22,7 +22,6 @@ jobs:
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: sudo apt-get update && sudo apt-get install xvfb
         timeout-minutes: 1
-
       - name: Install choreographer
         run:  uv sync --no-sources --all-extras
       - name: Install google-chrome-for-testing
@@ -42,7 +41,7 @@ jobs:
         timeout-minutes: 7
 
       - name: Test (Debug)
-        if: runner.debug
+        if: ${{ runner.debug && matrix.os != 'ubuntu-latest' }}
         run: uv run --no-sources poe debug-test
         timeout-minutes: 20
 

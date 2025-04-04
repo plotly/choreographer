@@ -95,7 +95,7 @@ def browser_which(
     return None
 
 
-def get_browser_path(*args: Any, **kwargs: Any) -> str | None:  # noqa: D417: don't pass args explicitly
+def get_browser_path(*args: Any, **kwargs: Any) -> str | None:  # noqa: D417, don't pass args explicitly
     """
     Call `browser_which()` but check for user override first.
 

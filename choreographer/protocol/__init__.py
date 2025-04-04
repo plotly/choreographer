@@ -172,7 +172,7 @@ def get_target_id_from_result(response: BrowserResponse) -> str | None:
 
     """
     if "result" in response and "targetId" in response["result"]:
-        return cast(str, response["result"]["targetId"])
+        return cast("str", response["result"]["targetId"])
     else:
         return None
 
@@ -186,7 +186,7 @@ def get_session_id_from_result(response: BrowserResponse) -> str | None:
 
     """
     if "result" in response and "sessionId" in response["result"]:
-        return cast(str, response["result"]["sessionId"])
+        return cast("str", response["result"]["sessionId"])
     else:
         return None
 
@@ -200,6 +200,6 @@ def get_error_from_result(response: BrowserResponse) -> str | None:
 
     """
     if "error" in response:
-        return cast(str, response["error"])
+        return cast("str", response["error"])
     else:
         return None

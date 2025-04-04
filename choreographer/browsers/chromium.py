@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import os
 import platform
 import re
@@ -30,7 +31,29 @@ _chromium_wrapper_path = (
     Path(__file__).resolve().parent / "_unix_pipe_chromium_wrapper.py"
 )
 
+_packaged_chromium_libs = Path(__file__).resolve().parent / "packaged_chromium_libs"
+
 _logger = logistro.getLogger(__name__)
+
+_parser = argparse.ArgumentParser(add_help=False)
+_g = _parser.add_mutually_exclusive_group()
+_g.add_argument(
+    "--ldd-fail",
+    action="store_true",
+    dest="ldd_fail",
+    default="LDD_FAIL" in os.environ,
+    help="Will cause to fail if not right deps.",
+)
+
+_g.add_argument(
+    "--force-packaged-deps",
+    action="store_true",
+    dest="force_deps",
+    default="FORCE_PACKAGED_DEPS" in os.environ,
+    help="Will force us to try local deps.",
+)
+
+_args, _ = _parser.parse_known_args()
 
 
 def _is_exe(path: str | Path) -> bool:
@@ -84,6 +107,61 @@ class Chromium:
         record.msg = _logs_parser_regex.sub("", record.msg)
         # we just eliminate their stamp, we dont' extract it
         return True
+
+    def _need_libs(self) -> bool:  # noqa: C901 complexity
+        if self.skip_local:
+            _logger.debug(
+                "If we HAVE to skip local.",
+            )
+            if _args.force_deps:
+                _logger.warning(
+                    "We can NOT force deps in these security conditions, "
+                    "we must use locals.",
+                )
+            return False
+        _logger.debug("Checking for libs needed.")
+        if platform.system() != "Linux":
+            _logger.debug("We're not in linux, so no need for check.")
+            if _args.ldd_fail:
+                _logger.warning("You asked for ldd-fail but we're not on linux.")
+            if _args.force_deps:
+                _logger.warning("You asked for packages deps but we're not on linux.")
+            return False
+        if _args.force_deps:
+            _logger.debug("Force using packaged deps.")
+            return True
+        p = None
+        try:
+            _logger.debug(f"Trying ldd {self.path}")
+            p = subprocess.run(  # noqa: S603, validating run with variables
+                [  # noqa: S607 path is all we have
+                    "ldd",
+                    str(self.path),
+                ],
+                capture_output=True,
+                timeout=5,
+                check=True,
+            )
+        except BaseException as e:
+            msg = "ldd failed."
+            if _args.ldd_fail:
+                _logger.exception(msg)
+                raise
+            else:
+                stderr = p.stderr.decode() if p and p.stderr else None
+                _logger.warning(
+                    msg  # noqa: G003 + in log
+                    + f" e: {e}, stderr: {stderr}",
+                )
+                return True
+        if b"not found" in p.stdout:
+            msg = "Found deps missing in chrome"
+            if _args.ldd_fail:
+                raise RuntimeError(msg + f" {p.stdout.decode()}")
+            _logger.debug(msg + f" {p.stdout.decode()}")  # noqa: G003 + in log
+            return True
+        _logger.debug("No problems found with dependencies")
+        return False
 
     def __init__(
         self,
@@ -144,12 +222,15 @@ class Chromium:
                 "please see documentation.",
             )
         _logger.info(f"Found chromium path: {self.path}")
+
         self._channel = channel
         if not isinstance(channel, Pipe):
             raise NotImplementedError("Websocket style channels not implemented yet.")
 
         self._is_isolated = "snap" in str(self.path)
 
+    def pre_open(self) -> None:
+        """Prepare browser for opening."""
         self.tmp_dir = TmpDirectory(
             path=self._tmp_dir_path,
             sneak=self._is_isolated,
@@ -247,8 +328,14 @@ class Chromium:
 
     def get_env(self) -> MutableMapping[str, str]:
         """Return the env needed for chromium."""
-        _logger.debug("Returning env: same env, no modification.")
-        return os.environ.copy()
+        env = os.environ.copy()
+        if self._need_libs():
+            original = env.get("LD_LIBRARY_PATH", "")
+            env["LD_LIBRARY_PATH"] = f"{_packaged_chromium_libs!s}:{original}"
+            _logger.debug(
+                f"Added LD_LIBRARY_PATH={env['LD_LIBRARY_PATH']!s} to env vars.",
+            )
+        return env
 
     def clean(self) -> None:
         """Clean up any leftovers form browser, like tmp files."""

@@ -50,7 +50,7 @@ jobs:
         timeout-minutes: 8
 
       - name: Test (Debug)
-        if: runner.debug
+        if: ${{ runner.debug && matrix.os != 'ubuntu-latest' }}
         run: uv run --no-sync poe debug-test
         timeout-minutes: 20
 

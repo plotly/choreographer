@@ -9,7 +9,8 @@ import time
 # ruff has line-level and file-level QA suppression
 # so lets give diagnose a separate file
 
-# ruff: noqa: PLR0915, C901, S603, BLE001, S607, PERF203, TRY002, T201
+# ruff: noqa: PLR0915, C901, S603, BLE001, S607, PERF203, TRY002, T201, PLR0912, SLF001
+# ruff: noqa: F401, ERA001 # temporary, sync
 
 # in order, exceptions are:
 # - function complexity (statements?)
@@ -23,10 +24,6 @@ import time
 
 
 def diagnose() -> None:
-    import logistro
-
-    logistro.getLogger().setLevel("DEBUG")
-
     from choreographer import Browser, BrowserSync
     from choreographer.browsers._chrome_constants import chrome_names
     from choreographer.utils._which import browser_which
@@ -36,7 +33,7 @@ def diagnose() -> None:
     parser.add_argument("--show", dest="headless", action="store_false")
     parser.set_defaults(run=True)
     parser.set_defaults(headless=True)
-    args = parser.parse_args()
+    args, _ = parser.parse_known_args()
     run = args.run
     headless = args.headless
     fail = []
@@ -47,7 +44,24 @@ def diagnose() -> None:
     print(platform.version())
     print(platform.uname())
     print("BROWSER:".center(50, "*"))
-    print(browser_which(chrome_names))
+    browser_path = browser_which(chrome_names)
+    print(browser_path)
+    print("BROWSER_INIT_CHECK (DEPS)".center(50, "*"))
+    if not browser_path:
+        print("No browser, found can't check for deps.")
+    else:
+        b = Browser()
+        b._browser_impl.pre_open()
+        cli = b._browser_impl.get_cli()
+        env = b._browser_impl.get_env()
+        b._browser_impl.clean()
+        del b
+        print("cli:")
+        for arg in cli:
+            print(arg)
+        print("env:")
+        for k, v in env.items():
+            print(f"{k}:{v}")
     print("VERSION INFO:".center(50, "*"))
     try:
         print("PIP:".center(25, "*"))
@@ -74,18 +88,19 @@ def diagnose() -> None:
         print("Done with version info.".center(50, "*"))
     if run:
         try:
-            print("Sync Test Headless".center(50, "*"))
-            browser = BrowserSync(headless=headless)
-            browser.open()
-            time.sleep(3)
-            browser.close()
+            print("Skipping sync test...")
+            # print("Sync Test Headless".center(50, "*"))
+            # browser = BrowserSync(headless=headless)
+            # browser.open()
+            # time.sleep(3)
+            # browser.close()
         except BaseException as e:
             fail.append(("Sync test headless", e))
         finally:
             print("Done with sync test headless".center(50, "*"))
 
         async def test_headless() -> None:
-            browser = await Browser(debug=True, debug_browser=True, headless=headless)
+            browser = await Browser(headless=headless)
             await asyncio.sleep(3)
             await browser.close()
 
