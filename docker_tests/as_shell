@@ -1,0 +1,16 @@
+export LIBS="\
+        libnss3 libnssutil3 libsmime3 libnspr4 libplc4 libplds4 \
+        libatk-1.0 libatk-bridge-2.0 libcups libXcomposite libXdamage libXext libXfixes libXrandr \
+        libgbm libxkbcommon libpango-1.0 libcairo libasound libatspi \
+        libXrender libdrm libwayland-server libavahi-common libavahi-client \
+        libthai libfribidi libpixman-1 libxcb-shm libxcb-render"
+for lib in $LIBS; do
+        matches=$(ldconfig -p | grep "$lib" | awk '{print $NF}' | sort -u);
+        if [ -z "$matches" ]; then
+            echo "Error: Could not find shared object for $lib";
+        fi;
+        echo "$matches" | while read path; do
+                echo "Copying $path"
+                cp --parents -v "$path" ./libs/
+        done
+done
