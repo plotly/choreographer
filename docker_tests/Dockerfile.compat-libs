@@ -1,0 +1,25 @@
+FROM ubuntu:18.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y \
+    libnss3 libnspr4 \
+    libatk1.0-0 libatk-bridge2.0-0 \
+    libcups2 libxcomposite1 libxdamage1 libxext6 libxfixes3 libxrandr2 \
+    libgbm1 libxkbcommon0 \
+    libpango-1.0-0 libcairo2 \
+    libasound2 libatspi2.0-0 \
+    && apt-get clean
+
+RUN mkdir -p /workspace/libs
+
+RUN set -ex && \
+    for lib in \
+      libnss3.so libnssutil3.so libsmime3.so libnspr4.so \
+      libatk-1.0.so.0 libatk-bridge-2.0.so.0 libcups.so.2 \
+      libXcomposite.so.1 libXdamage.so.1 libXext.so.6 libXfixes.so.3 libXrandr.so.2 \
+      libgbm.so.1 libxkbcommon.so.0 libpango-1.0.so.0 libcairo.so.2 \
+      libasound.so.2 libatspi.so.0; do \
+        find /lib /usr/lib /lib/x86_64-linux-gnu /usr/lib/x86_64-linux-gnu -name "$lib" \
+        -exec cp --parents -v {} /workspace/libs/ \; || true; \
+    done
