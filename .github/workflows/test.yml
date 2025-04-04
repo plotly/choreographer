@@ -22,7 +22,7 @@ jobs:
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: sudo apt-get update && sudo apt-get install xvfb
         timeout-minutes: 1
-      - run: echo $LD_LIBRARY_PATH
+      - run: echo $LD_LIBRARY_PATH && ls $LD_LIBRARY_PATH
       - name: Install choreographer
         run:  uv sync --no-sources --all-extras
       - name: Install google-chrome-for-testing
