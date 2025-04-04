@@ -108,12 +108,17 @@ class Chromium:
         # we just eliminate their stamp, we dont' extract it
         return True
 
-    def _need_libs(self) -> bool:
+    def _need_libs(self) -> bool:  # noqa: C901 complexity
         if self.skip_local:
             _logger.debug(
-                "If we have to skip local, we probably can't use ldd either.",
+                "If we HAVE to skip local.",
             )
-            return True
+            if _args.force_deps:
+                _logger.warning(
+                    "We can NOT force deps in these security conditions, "
+                    "we must use locals.",
+                )
+            return False
         _logger.debug("Checking for libs needed.")
         if platform.system() != "Linux":
             _logger.debug("We're not in linux, so no need for check.")
