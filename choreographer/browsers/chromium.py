@@ -138,7 +138,7 @@ class Chromium:
                 _logger.exception(msg)
                 raise
             else:
-                stderr = p.stderr.encode() if p and p.stderr else None
+                stderr = p.stderr.decode() if p and p.stderr else None
                 _logger.warning(
                     msg  # noqa: G003 + in log
                     + f" e: {e}, stderr: {stderr}",
@@ -147,8 +147,8 @@ class Chromium:
         if b"not found" in p.stdout:
             msg = "Found deps missing in chrome"
             if _args.ldd_fail:
-                raise RuntimeError(msg + f" {p.stdout.encode()}")
-            _logger.debug(msg + f" {p.stdout.encode()}")  # noqa: G003 + in log
+                raise RuntimeError(msg + f" {p.stdout.decode()}")
+            _logger.debug(msg + f" {p.stdout.decode()}")  # noqa: G003 + in log
             return True
         _logger.debug("No problems found with dependencies")
         return False
