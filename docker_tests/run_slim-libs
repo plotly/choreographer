@@ -1,3 +1,0 @@
-docker create --name slim-tmp slim-libs
-docker cp slim-tmp:/workspace/libs ./slim-libs
-docker rm slim-tmp

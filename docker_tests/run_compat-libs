@@ -1,5 +1,0 @@
-# 1. Build the image
-docker build -t compat-libs .
-
-# 2. Run the container and extract libs to ./libs
-docker run --rm -v "$PWD/libs:/workspace/libs" compat-libs
