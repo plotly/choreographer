@@ -109,6 +109,11 @@ class Chromium:
         return True
 
     def _need_libs(self) -> bool:
+        if self.skip_local:
+            _logger.debug(
+                "If we have to skip local, we probably can't use ldd either.",
+            )
+            return False
         _logger.debug("Checking for libs needed.")
         if platform.system() != "Linux":
             _logger.debug("We're not in linux, so no need for check.")
