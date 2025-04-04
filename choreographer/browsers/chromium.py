@@ -331,7 +331,7 @@ class Chromium:
         env = os.environ.copy()
         if self._need_libs():
             original = env.get("LD_LIBRARY_PATH", "")
-            env["LD_LIBRARY_PATH"] = f"{original}:{_packaged_chromium_libs!s}"
+            env["LD_LIBRARY_PATH"] = f"{_packaged_chromium_libs!s}:{original}"
             _logger.debug(
                 f"Added LD_LIBRARY_PATH={env['LD_LIBRARY_PATH']!s} to env vars.",
             )
