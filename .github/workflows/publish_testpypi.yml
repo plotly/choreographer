@@ -8,8 +8,6 @@ on:
       - v*
 jobs:
   super-test:
-    env:
-      FORCE_PACKAGED_DEPS: 1
     strategy:
       max-parallel: 2
       matrix:
