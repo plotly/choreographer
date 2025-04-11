@@ -1,3 +1,4 @@
+- Moved some verbose logging to DEBUG2 from debug
 v1.0.6
 - Package in chromium deps and use them if ldd shows they're needed
 - Add env var LDD_FAIL and flag --ldd_fail to always fail if deps needed
