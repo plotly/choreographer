@@ -77,7 +77,7 @@ def diagnose() -> None:
         print("GIT:".center(25, "*"))
         print(
             subprocess.check_output(
-                ["git", "describe", "--all", "--tags", "--long", "--always"],
+                ["git", "describe", "--tags", "--long", "--always"],
             ).decode(),
         )
     except BaseException as e:
