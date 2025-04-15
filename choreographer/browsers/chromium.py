@@ -196,6 +196,7 @@ class Chromium:
             path=self._tmp_dir_path,
             sneak=self._is_isolated,
         )
+        self.missing_libs = self._verify_libs()
         _logger.info(f"Temporary directory at: {self.tmp_dir.path}")
 
     def is_isolated(self) -> bool:

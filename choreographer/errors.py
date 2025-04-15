@@ -3,6 +3,7 @@
 from ._brokers._async import UnhandledMessageWarning
 from .browsers import (
     BrowserClosedError,
+    BrowserDepsError,
     BrowserFailedError,
     ChromeNotFoundError,
 )
@@ -18,6 +19,7 @@ from .utils import TmpDirWarning
 __all__ = [
     "BlockWarning",
     "BrowserClosedError",
+    "BrowserDepsError",
     "BrowserFailedError",
     "ChannelClosedError",
     "ChromeNotFoundError",
