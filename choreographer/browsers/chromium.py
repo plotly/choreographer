@@ -158,7 +158,7 @@ class Chromium:
             msg = "Found deps missing in chrome"
             if _args.ldd_fail:
                 raise RuntimeError(msg + f" {p.stdout.decode()}")
-            _logger.debug(msg + f" {p.stdout.decode()}")  # noqa: G003 + in log
+            _logger.debug2(msg + f" {p.stdout.decode()}")
             return True
         _logger.debug("No problems found with dependencies")
         return False
