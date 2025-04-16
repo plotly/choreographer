@@ -1,6 +1,7 @@
 v1.0.7
 - Revert ldd strategy to one of docs instead of injecting deps
 - Moved some verbose logging to DEBUG2 from debug
+- Make default download path public
 v1.0.6
 - Package in chromium deps and use them if ldd shows they're needed
 - Add env var LDD_FAIL and flag --ldd_fail to always fail if deps needed
