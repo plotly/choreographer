@@ -87,16 +87,17 @@ class Chromium:
         # we just eliminate their stamp, we dont' extract it
         return True
 
-    def _verify_libs(self) -> bool:
+    def _libs_ok(self) -> bool:
+        """Return true if libs ok."""
         if self.skip_local:
             _logger.debug(
                 "If we HAVE to skip local.",
             )
-            return False
+            return True
         _logger.debug("Checking for libs needed.")
         if platform.system() != "Linux":
             _logger.debug("We're not in linux, so no need for check.")
-            return False
+            return True
         p = None
         try:
             _logger.debug(f"Trying ldd {self.path}")
@@ -116,13 +117,13 @@ class Chromium:
                 msg  # noqa: G003 + in log
                 + f" e: {e}, stderr: {stderr}",
             )
-            return True
+            return False
         if b"not found" in p.stdout:
             msg = "Found deps missing in chrome"
             _logger.debug2(msg + f" {p.stdout.decode()}")
-            return True
+            return False
         _logger.debug("No problems found with dependencies")
-        return False
+        return True
 
     def __init__(
         self,
@@ -196,7 +197,7 @@ class Chromium:
             path=self._tmp_dir_path,
             sneak=self._is_isolated,
         )
-        self.missing_libs = self._verify_libs()
+        self.missing_libs = not self._libs_ok()
         _logger.info(f"Temporary directory at: {self.tmp_dir.path}")
 
     def is_isolated(self) -> bool:
