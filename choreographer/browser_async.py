@@ -14,7 +14,7 @@ import logistro
 from choreographer import protocol
 
 from ._brokers import Broker
-from .browsers import BrowserClosedError, BrowserFailedError, Chromium
+from .browsers import BrowserClosedError, BrowserDepsError, BrowserFailedError, Chromium
 from .channels import ChannelClosedError, Pipe
 from .protocol.devtools_async import Session, Target
 from .utils import TmpDirWarning
@@ -150,6 +150,11 @@ class Browser(Target):
             _logger.debug("Populating Targets")
             await self.populate_targets()
         except (BrowserClosedError, BrowserFailedError, asyncio.CancelledError) as e:
+            if (
+                hasattr(self._browser_impl, "missing_libs")
+                and self._browser_impl.missing_libs
+            ):
+                raise BrowserDepsError from e
             raise BrowserFailedError(
                 "The browser seemed to close immediately after starting.",
                 "You can set the `logging.Logger` level lower to see more output.",

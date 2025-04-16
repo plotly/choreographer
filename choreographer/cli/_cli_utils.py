@@ -14,10 +14,9 @@ from pathlib import Path
 
 import logistro
 
-_logger = logistro.getLogger(__name__)
+from choreographer.cli.defaults import default_download_path
 
-# SOON TODO this isn't the right download path, look at uv, use sysconfig
-_default_download_path = Path(__file__).resolve().parent / "browser_exe"
+_logger = logistro.getLogger(__name__)
 
 _chrome_for_testing_url = "https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json"
 
@@ -37,11 +36,11 @@ elif platform.system() == "Darwin":
 _default_exe_path = Path()
 if platform.system().startswith("Linux"):
     _default_exe_path = (
-        _default_download_path / f"chrome-{_chrome_platform_detected}" / "chrome"
+        default_download_path / f"chrome-{_chrome_platform_detected}" / "chrome"
     )
 elif platform.system().startswith("Darwin"):
     _default_exe_path = (
-        _default_download_path
+        default_download_path
         / f"chrome-{_chrome_platform_detected}"
         / "Google Chrome for Testing.app"
         / "Contents"
@@ -50,7 +49,7 @@ elif platform.system().startswith("Darwin"):
     )
 elif platform.system().startswith("Win"):
     _default_exe_path = (
-        _default_download_path / f"chrome-{_chrome_platform_detected}" / "chrome.exe"
+        default_download_path / f"chrome-{_chrome_platform_detected}" / "chrome.exe"
     )
 
 
@@ -75,7 +74,7 @@ class _ZipFilePermissions(zipfile.ZipFile):
 def get_chrome_sync(
     arch: str = _chrome_platform_detected,
     i: int | None = None,
-    path: str | Path = _default_download_path,
+    path: str | Path = default_download_path,
     *,
     verbose: bool = False,
 ) -> Path | str:
@@ -135,7 +134,7 @@ def get_chrome_sync(
 async def get_chrome(
     arch: str = _chrome_platform_detected,
     i: int | None = None,
-    path: str | Path = _default_download_path,
+    path: str | Path = default_download_path,
     *,
     verbose: bool = False,
 ) -> Path | str:
@@ -199,7 +198,7 @@ def get_chrome_cli() -> None:
         action="store_true",
         help="Display found version number if using -i (to stdout)",
     )
-    parser.set_defaults(path=_default_download_path)
+    parser.set_defaults(path=default_download_path)
     parser.set_defaults(arch=_chrome_platform_detected)
     parser.set_defaults(verbose=False)
     parsed = parser.parse_args()
