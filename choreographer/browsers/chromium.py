@@ -113,7 +113,9 @@ class Chromium:
         except Exception as e:  # noqa: BLE001
             msg = "ldd failed."
             stderr = p.stderr.decode() if p and p.stderr else None
-            _logger.warning(
+            # Log failure as INFO rather than WARNING so that it's hidden by default,
+            # since browser may succeed even if ldd fails
+            _logger.info(
                 msg  # noqa: G003 + in log
                 + f" e: {e}, stderr: {stderr}",
             )
