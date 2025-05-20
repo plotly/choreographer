@@ -55,9 +55,6 @@ class Browser(Target):
         self._open_lock = Lock()
 
     async def _is_open(self) -> bool:
-        # Did we acquire the lock? If so, return true, we locked open.
-        # If we are open, we did not lock open.
-        # fuck, go through this again
         if self._open_lock.locked():
             return True
         await self._open_lock.acquire()
