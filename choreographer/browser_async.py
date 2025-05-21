@@ -54,7 +54,7 @@ class Browser(Target):
     def _make_lock(self) -> None:
         self._open_lock = Lock()
 
-    async def _is_open(self) -> bool:
+    async def _is_open(self) -> bool:  # this has side effects
         if self._open_lock.locked():
             return True
         await self._open_lock.acquire()
