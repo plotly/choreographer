@@ -1,3 +1,5 @@
+v1.0.8
+- Lower default logging verbosity
 v1.0.7
 - Revert ldd strategy to one of docs instead of injecting deps
 - Moved some verbose logging to DEBUG2 from debug
