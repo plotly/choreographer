@@ -156,7 +156,8 @@ class Browser(Target):
                 "The browser seemed to close immediately after starting.",
                 "You can set the `logging.Logger` level lower to see more output.",
                 "You may try installing a known working copy of Chrome by running ",
-                "`$ choreo_get_chrome`. It may be your copy auto-updated.",
+                "`$ choreo_get_chrome`. It may be your copy auto-updated and ",
+                "restarted.",
             ) from e
 
     async def __aenter__(self) -> Self:
