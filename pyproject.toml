@@ -26,7 +26,7 @@ maintainers = [
 ]
 dependencies = [
   "logistro>=1.0.11",
-  "simplejson",
+  "simplejson>=3.19.3",
 ]
 
 [project.urls]
