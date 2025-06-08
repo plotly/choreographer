@@ -1,3 +1,6 @@
+v1.0.9
+- Serializer now accepts unsigned ints
+- Serializer better differentiates between pd/xr
 v1.0.8
 - Lower default logging verbosity
 v1.0.7
