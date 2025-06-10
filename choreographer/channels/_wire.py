@@ -17,13 +17,16 @@ _logger = logistro.getLogger(__name__)
 class MultiEncoder(simplejson.JSONEncoder):
     """Special json encoder for numpy types."""
 
-    def default(self, obj: Any) -> Any:
-        if hasattr(obj, "dtype") and obj.dtype.kind == "i" and obj.shape == ():
+    def default(self, obj):
+        if hasattr(obj, "dtype") and obj.dtype.kind in ("i", "u") and obj.shape == ():
             return int(obj)
         elif hasattr(obj, "dtype") and obj.dtype.kind == "f" and obj.shape == ():
             return float(obj)
         elif hasattr(obj, "dtype") and obj.shape != ():
-            return obj.tolist()
+            if hasattr(obj, "values") and hasattr(obj.values, "tolist"):
+                return obj.values.tolist()
+            if hasattr(obj, "tolist"):
+                return obj.tolist()
         elif hasattr(obj, "isoformat"):
             return obj.isoformat()
         return simplejson.JSONEncoder.default(self, obj)
