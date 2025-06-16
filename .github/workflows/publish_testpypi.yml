@@ -11,7 +11,7 @@ jobs:
     strategy:
       max-parallel: 2
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest, ubuntu-24.04-arm]
         python_v: ['3.8', '3.9', '3.10', '']
         # chrome_v: ['-1']
     name: Build and Test

@@ -9,7 +9,7 @@ jobs:
   test-all:
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest, ubuntu-24.04-arm]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
