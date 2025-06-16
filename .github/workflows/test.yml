@@ -17,11 +17,15 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version-file: "pyproject.toml"
-
       - name: Install Dependencies
-        if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: sudo apt-get update && sudo apt-get install xvfb
-        timeout-minutes: 1
+        if: ${{ startsWith(matrix.os, 'ubuntu-') }}
+        run: >
+          sudo apt-get update &&
+          sudo apt-get install xvfb
+          libnss3 libatk-bridge2.0-0 libcups2 libxcomposite1 libxdamage1
+          libxfixes3 libxrandr2 libgbm1 libxkbcommon0 libpango-1.0-0
+          libcairo2 libasound2
+        timeout-minutes: 3
       - name: Install choreographer
         run:  uv sync --no-sources --all-extras
       - name: Install google-chrome-for-testing
