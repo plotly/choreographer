@@ -29,7 +29,7 @@ jobs:
           libcairo2
         timeout-minutes: 3
       - name: Install Chrome on Ubuntu-Arm
-        if: ${{ startsWith(matrix.os, 'ubuntu-24.04-arm') }}
+        if: ${{ matrix.os == 'ubuntu-24.04-arm' }}
         run: sudo apt-get install chromium-browser:w
         timeout-minutes: 3
       # must actually checkout for version determination
@@ -46,6 +46,7 @@ jobs:
           run --no-sync --with setuptools-git-versioning
           setuptools-git-versioning)-py3-none-any.whl
       - run: uv run --no-sync choreo_get_chrome -v #--i ${{ matrix.chrome_v }}
+        if: ${{ matrix.os != 'ubuntu-24.04-arm' }}
       - name: Diagnose
         run:  uv run --no-sync choreo_diagnose --no-run
       - name: Test
