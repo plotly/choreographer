@@ -17,7 +17,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version-file: "pyproject.toml"
-      - name: Install Dependencies
+      - name: Install Dependencies on Ubuntu
         if: ${{ startsWith(matrix.os, 'ubuntu-') }}
         run: >
           sudo apt-get update &&
@@ -25,6 +25,10 @@ jobs:
           libnss3 libatk-bridge2.0-0 libcups2 libxcomposite1 libxdamage1
           libxfixes3 libxrandr2 libgbm1 libxkbcommon0 libpango-1.0-0
           libcairo2
+        timeout-minutes: 3
+      - name: Install Chrome on Ubuntu-Arm
+        if: ${{ startsWith(matrix.os, 'ubuntu-24.04-arm') }}
+        run: sudo apt-get install chromium-browser
         timeout-minutes: 3
       - name: Install choreographer
         run:  uv sync --no-sources --all-extras
