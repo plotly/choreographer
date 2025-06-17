@@ -27,13 +27,15 @@ jobs:
           libcairo2
         timeout-minutes: 3
       - name: Install Chrome on Ubuntu-Arm
-        if: ${{ matrix.os == 'ubuntu-24.04-arm' }}
+        if: ${{ startsWith(matrix.os, 'ubuntu-') }}
+        #if: ${{ matrix.os == 'ubuntu-24.04-arm' }}
         run: sudo apt-get install chromium-browser
         timeout-minutes: 3
       - name: Install choreographer
         run:  uv sync --no-sources --all-extras
       - name: Install google-chrome-for-testing
-        if: ${{ matrix.os != 'ubuntu-24.04-arm' }}
+        if: ${{ ! startsWith(matrix.os, 'ubuntu-') }}
+#        if: ${{ matrix.os != 'ubuntu-24.04-arm' }}
         run: uv run --no-sources choreo_get_chrome -v
       - name: Diagnose
         run:  uv run --no-sources choreo_diagnose --no-run
