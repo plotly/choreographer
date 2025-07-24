@@ -173,20 +173,20 @@ class Pipe:
         try:
             if _with_block:
                 os.set_blocking(fd, False)
-        except BaseException:  # noqa: BLE001, S110 OS errors are not consistent, catch blind + pass
+        except Exception:  # noqa: BLE001, S110 OS errors are not consistent, catch blind + pass
             pass
 
     def _close_fd(self, fd: int) -> None:
         try:
             os.close(fd)
-        except BaseException:  # noqa: BLE001, S110 OS errors are not consistent, catch blind + pass
+        except Exception:  # noqa: BLE001, S110 OS errors are not consistent, catch blind + pass
             pass
 
     def _fake_bye(self) -> None:
         self._unblock_fd(self._write_from_browser)
         try:
             os.write(self._write_from_browser, b"{bye}\n")
-        except BaseException:  # noqa: BLE001, S110 OS errors are not consistent, catch blind + pass
+        except Exception:  # noqa: BLE001, S110 OS errors are not consistent, catch blind + pass
             pass
 
     def close(self) -> None:

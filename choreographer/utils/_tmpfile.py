@@ -107,7 +107,7 @@ class TmpDirectory:
                         fp.chmod(stat.S_IWUSR)
                         fp.unlink(missing_ok=True)
                         _logger.debug2("Deleted")
-                    except BaseException as e:  # noqa: BLE001 yes catch and report
+                    except Exception as e:  # noqa: BLE001 yes catch and report
                         errors.append((fp, e))
                 for d in dirs:
                     fp = Path(root) / d
@@ -116,7 +116,7 @@ class TmpDirectory:
                         fp.chmod(stat.S_IWUSR)
                         fp.rmdir()
                         _logger.debug2("Deleted")
-                    except BaseException as e:  # noqa: BLE001 yes catch and report
+                    except Exception as e:  # noqa: BLE001 yes catch and report
                         errors.append((fp, e))
 
             # clean up directory
@@ -124,7 +124,7 @@ class TmpDirectory:
             try:
                 self.path.chmod(stat.S_IWUSR)
                 self.path.rmdir()
-            except BaseException as e:  # noqa: BLE001 yes catch and report
+            except Exception as e:  # noqa: BLE001 yes catch and report
                 errors.append((self.path, e))
 
         if check_only:
@@ -154,7 +154,7 @@ class TmpDirectory:
                 self.temp_dir.cleanup()
             self.exists = False
             _logger.info("TemporaryDirectory.cleanup() worked.")
-        except BaseException as e:  # noqa: BLE001 we try many ways to clean, this is the first one
+        except Exception as e:  # noqa: BLE001 we try many ways to clean, this is the first one
             _logger.info(f"TemporaryDirectory.cleanup() failed. Error {e}")
 
         # bad typing but tough
@@ -183,7 +183,7 @@ class TmpDirectory:
             if hasattr(self, "temp_dir"):
                 del self.temp_dir
             _logger.info("shutil.rmtree worked.")
-        except BaseException as e:  # noqa: BLE001
+        except Exception as e:  # noqa: BLE001
             _logger.debug("Error during tmp file removal.", exc_info=e)
             self._delete_manually(check_only=True)
             if not self.exists:

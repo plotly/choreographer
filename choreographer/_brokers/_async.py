@@ -252,7 +252,7 @@ class Broker:
                     self._channel.write_json,
                     obj,
                 )
-        except BaseException as e:  # noqa: BLE001
+        except Exception as e:  # noqa: BLE001
             future.set_exception(e)
             del self.futures[key]
             _logger.debug(f"Future for {key} deleted.")
