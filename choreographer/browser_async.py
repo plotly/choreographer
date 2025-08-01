@@ -32,6 +32,8 @@ if TYPE_CHECKING:
 
 _logger = logistro.getLogger(__name__)
 
+# Since I added locks to pipes, do we need locks here?
+
 
 class Tab(Target):
     """A wrapper for `Target`, so user can use `Tab`, not `Target`."""
@@ -145,6 +147,8 @@ class Browser(Target):
         try:
             _logger.debug("Starting watchdog")
             self._watch_dog_task = asyncio.create_task(self._watchdog())
+            _logger.debug("Opening channel.")
+            self._channel.open()  # should this and below be in a broker run
             _logger.debug("Running read loop")
             self._broker.run_read_loop()
             _logger.debug("Populating Targets")
@@ -199,6 +203,8 @@ class Browser(Target):
         except ChannelClosedError:
             _logger.debug("Can't send Browser.close on close channel")
         loop = asyncio.get_running_loop()
+
+        # why in another thread?
         await loop.run_in_executor(None, self._channel.close)
 
         if await self._is_closed(wait=3):

@@ -34,3 +34,9 @@ class ChannelInterface(Protocol):
 
     def close(self) -> None:
         """Close the channel."""
+
+    def open(self) -> None:
+        """Open the channel."""
+
+    def is_ready(self) -> bool:
+        """Return true if comm channel is active."""
