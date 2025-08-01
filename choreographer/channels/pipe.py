@@ -75,7 +75,7 @@ class Pipe:
         We only use locks here for indications, we never actually lock,
         because the broker is in charge of all async/parallel stuff.
         """
-        if not self.shutdown_lock.acquire(blocking=False):
+        if not self._open_lock.acquire(blocking=False):
             raise RuntimeError("Cannot open same pipe twice.")
 
     def write_json(self, obj: Mapping[str, Any]) -> None:
