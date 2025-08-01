@@ -177,6 +177,8 @@ class Browser(Target):
         return self.__aenter__().__await__()
 
     async def _is_closed(self, wait: int | None = 0) -> bool:
+        if not hasattr(self, "subprocess"):
+            return True
         if wait == 0:
             # poll returns None if its open
             _is_open = self.subprocess.poll() is None
