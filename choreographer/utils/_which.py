@@ -25,8 +25,8 @@ def _is_exe(path: str | Path) -> bool:
 
 def _which_from_windows_reg() -> str | None:
     try:
-        import re
-        import winreg
+        import re  # noqa: PLC0415 specific to win
+        import winreg  # noqa: PLC0415 specific to win
 
         command = winreg.QueryValueEx(  # type: ignore [attr-defined]
             winreg.OpenKey(  # type: ignore [attr-defined]
@@ -38,7 +38,7 @@ def _which_from_windows_reg() -> str | None:
             "",
         )[0]
         exe = re.search('"(.*?)"', command).group(1)  # type: ignore [union-attr]
-    except BaseException:  # noqa: BLE001 don't care why, best effort search
+    except Exception:  # noqa: BLE001 don't care why, best effort search
         return None
 
     return exe
