@@ -1,3 +1,4 @@
+- Add locks and errors for commands called on closed browsers.
 v1.1.1
 - Fix bad module access
 v1.1.0
