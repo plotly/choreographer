@@ -23,6 +23,8 @@ _with_block = bool(sys.version_info[:3] >= (3, 12) or platform.system() != "Wind
 
 _logger = logistro.getLogger(__name__)
 
+# should be closing my ends from the start?
+
 
 # if we're a pipe we expect these public attributes
 class Pipe:
@@ -57,6 +59,24 @@ class Pipe:
 
         # this is just a convenience to prevent multiple shutdowns
         self.shutdown_lock = Lock()  # should be private
+        self._open_lock = Lock()  # should be private
+
+    def is_ready(self) -> bool:
+        """Return true if pipe open."""
+        return not self.shutdown_lock.locked() and self._open_lock.locked()
+
+    def open(self) -> None:
+        """
+        Open the channel.
+
+        In a sense, __init__ creates the pipe. The OS opens it.
+        Here we're just marking it open for use, that said.
+
+        We only use locks here for indications, we never actually lock,
+        because the broker is in charge of all async/parallel stuff.
+        """
+        if not self.shutdown_lock.acquire(blocking=False):
+            raise RuntimeError("Cannot open same pipe twice.")
 
     def write_json(self, obj: Mapping[str, Any]) -> None:
         """
@@ -66,8 +86,11 @@ class Pipe:
             obj: any python object that serializes to json.
 
         """
-        if self.shutdown_lock.locked():
-            raise ChannelClosedError
+        if not self.is_ready():
+            raise ChannelClosedError(
+                "The communication channel was either never "
+                "opened or closed. Was .open() or .close() called?",
+            )
         encoded_message = wire.serialize(obj) + b"\0"
         _logger.debug(
             f"Writing message {encoded_message[:15]!r}...{encoded_message[-15:]!r}, "
@@ -102,8 +125,11 @@ class Pipe:
             A list of jsons.
 
         """
-        if self.shutdown_lock.locked():
-            raise ChannelClosedError
+        if not self.is_ready():
+            raise ChannelClosedError(
+                "The communication channel was either never "
+                "opened or closed. Was .open() or .close() called?",
+            )
         if not _with_block and not blocking:
             warnings.warn(  # noqa: B028
                 "Windows python version < 3.12 does not support non-blocking",
