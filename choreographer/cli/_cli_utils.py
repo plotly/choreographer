@@ -34,6 +34,7 @@ elif platform.system() == "Darwin":
     _chrome_platform_detected = "mac-" + _arch_detected + _arch_size_detected
 
 _default_exe_path = Path()
+
 if platform.system().startswith("Linux"):
     _default_exe_path = (
         default_download_path / f"chrome-{_chrome_platform_detected}" / "chrome"
@@ -106,6 +107,12 @@ def get_chrome_sync(
         if src["platform"] == arch:
             url = src["url"]
             break
+    else:
+        raise RuntimeError(
+            f"You must specify an arch, one of: {', '.join(_platforms)}. "
+            f"{arch} is not supported.",
+        )
+
     if not path.exists():
         path.mkdir(parents=True)
     filename = path / "chrome.zip"
@@ -208,7 +215,7 @@ def get_chrome_cli() -> None:
     verbose = parsed.verbose
     if not arch or arch not in _platforms:
         raise RuntimeError(
-            "You must specify a platform: "
-            f"linux64, win32, win64, mac-x64, mac-arm64, not {platform}",
+            f"You must specify an arch, one of: {', '.join(_platforms)}. "
+            f"{arch} is not supported. You can use cli flag --arch ARCH.",
         )
     print(get_chrome_sync(arch=arch, i=i, path=path, verbose=verbose))  # noqa: T201 allow print in cli
