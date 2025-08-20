@@ -15,6 +15,7 @@ choreographer = ['resources/last_known_good_chrome.json']
 name = "choreographer"
 description = "Devtools Protocol implementation for chrome."
 readme = "README.md"
+license = "MIT"
 requires-python = ">=3.8"
 dynamic = ["version"]
 authors = [
