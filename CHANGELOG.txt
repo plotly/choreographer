@@ -1,3 +1,5 @@
+v1.0.10
+- Simple typing fixes
 v1.0.9
 - Serializer now accepts unsigned ints
 - Serializer better differentiates between pd/xr
