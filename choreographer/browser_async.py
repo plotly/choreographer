@@ -244,9 +244,10 @@ class Browser(Target):
         type_: type[BaseException] | None,
         value: BaseException | None,
         traceback: TracebackType | None,
-    ) -> None:  # None instead of False is fine, eases type checking
+    ) -> bool | None:
         """Close the browser."""
         await self.close()
+        return None
 
     async def _watchdog(self) -> None:
         with warnings.catch_warnings():
