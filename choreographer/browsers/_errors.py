@@ -9,7 +9,7 @@ class BrowserFailedError(RuntimeError):
 class BrowserDepsError(BrowserFailedError):
     """An error for when the browser is closed because of missing libs."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         msg = (
             "It seems like you are running a slim version of your "
             "operating system and are missing some common dependencies. "
