@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import platform
+import re
 import shutil
 from typing import TYPE_CHECKING
 
@@ -25,8 +26,7 @@ def _is_exe(path: str | Path) -> bool:
 
 def _which_from_windows_reg() -> str | None:
     try:
-        import re
-        import winreg
+        import winreg  # noqa: PLC0415 don't import if not windows pls
 
         command = winreg.QueryValueEx(  # type: ignore [attr-defined]
             winreg.OpenKey(  # type: ignore [attr-defined]
