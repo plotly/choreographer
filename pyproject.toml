@@ -16,6 +16,7 @@ name = "choreographer"
 description = "Devtools Protocol implementation for chrome."
 readme = "README.md"
 requires-python = ">=3.8"
+license = { "file" = "LICENSE.md" }
 dynamic = ["version"]
 authors = [
   {name = "Andrew Pikul", email="ajpikul@gmail.com"},
@@ -28,9 +29,6 @@ dependencies = [
   "logistro>=1.0.11",
   "simplejson>=3.19.3",
 ]
-
-[metadata]
-classifiers = "License :: OSI Approved :: MIT License"
 
 [project.urls]
 Homepage = "https://github.com/plotly/choreographer"
