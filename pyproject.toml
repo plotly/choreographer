@@ -29,8 +29,7 @@ dependencies = [
   "simplejson>=3.19.3",
 ]
 
-[metadata]
-classifiers = "License :: OSI Approved :: MIT License"
+classifiers = ["License :: OSI Approved :: MIT License"]
 
 [project.urls]
 Homepage = "https://github.com/plotly/choreographer"
