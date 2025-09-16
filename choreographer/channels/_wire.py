@@ -9,9 +9,17 @@ from simplejson.errors import JSONDecodeError
 from ._errors import JSONError
 
 if TYPE_CHECKING:
+    from json import JSONEncoder
     from typing import Any
 
 _logger = logistro.getLogger(__name__)
+
+_custom_encoder: type[JSONEncoder | simplejson.JSONEncoder] | None = None
+
+
+def register_custom_encoder(e: type[JSONEncoder | simplejson.JSONEncoder]) -> None:
+    global _custom_encoder  # noqa: PLW0603 what other choice do we have
+    _custom_encoder = e
 
 
 class MultiEncoder(simplejson.JSONEncoder):
@@ -34,12 +42,14 @@ class MultiEncoder(simplejson.JSONEncoder):
 
 
 def serialize(obj: Any) -> bytes:
+    # type note: typer is saying simplejson doesn't take JSONEncoder-
+    # their API compatible.
     try:
         message = simplejson.dumps(
             obj,
             ensure_ascii=False,
             ignore_nan=True,
-            cls=MultiEncoder,
+            cls=_custom_encoder or MultiEncoder,  # type: ignore[arg-type]
         )
     except JSONDecodeError as e:
         raise JSONError from e
