@@ -11,6 +11,7 @@ import time
 
 # ruff: noqa: PLR0915, C901, S603, BLE001, S607, PERF203, TRY002, T201, PLR0912, SLF001
 # ruff: noqa: F401, ERA001 # temporary, sync
+# ruff: noqa: PLC0415 - import at time of file
 
 # in order, exceptions are:
 # - function complexity (statements?)
