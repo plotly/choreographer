@@ -1,3 +1,5 @@
+v1.1.1
+- Fix bad module access
 v1.1.0
 v1.1.0rc1
 - Force custom json encoder to use stdlib json pkg

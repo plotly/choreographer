@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 import logistro
 import simplejson
+from simplejson import errors as sjerrors
 
 from ._errors import JSONError
 
@@ -16,7 +17,7 @@ _logger = logistro.getLogger(__name__)
 _custom_encoder: type[json.JSONEncoder] | None = None
 
 
-def register_custom_encoder(e: type[json.JSONEncoder]) -> None:
+def register_custom_encoder(e: type[json.JSONEncoder] | None) -> None:
     global _custom_encoder  # noqa: PLW0603 what other choice do we have
     _custom_encoder = e
 
@@ -62,5 +63,5 @@ def serialize(obj: Any) -> bytes:
 def deserialize(message: str) -> Any:
     try:
         return simplejson.loads(message)
-    except simplejson.errors.JSONDecodeError as e:
+    except sjerrors.JSONDecodeError as e:
         raise JSONError from e
