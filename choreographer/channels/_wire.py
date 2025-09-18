@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 import logistro
 import simplejson
+from simplejson import errors as sjerrors
 
 from ._errors import JSONError
 
@@ -62,5 +63,5 @@ def serialize(obj: Any) -> bytes:
 def deserialize(message: str) -> Any:
     try:
         return simplejson.loads(message)
-    except simplejson.errors.JSONDecodeError as e:
+    except sjerrors.JSONDecodeError as e:
         raise JSONError from e
