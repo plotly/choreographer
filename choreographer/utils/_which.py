@@ -4,7 +4,7 @@ import os
 import platform
 import re
 import shutil
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 import logistro
 
@@ -24,14 +24,15 @@ def _is_exe(path: str | Path) -> bool:
         return False
 
 
-def _which_from_windows_reg() -> str | None:
+def _which_from_windows_reg(exe: Literal["chrome", "msedge"]) -> str | None:
+    key = "ChromeHTML" if exe == "chrome" else "MSEdgeHTM"
     try:
         import winreg  # noqa: PLC0415 don't import if not windows pls
 
         command = winreg.QueryValueEx(  # type: ignore [attr-defined]
             winreg.OpenKey(  # type: ignore [attr-defined]
                 winreg.HKEY_CLASSES_ROOT,  # type: ignore [attr-defined]
-                "ChromeHTML\\shell\\open\\command",
+                f"{key}\\shell\\open\\command",
                 0,
                 winreg.KEY_READ,  # type: ignore [attr-defined]
             ),
@@ -84,8 +85,8 @@ def browser_which(
         os.environ["NoDefaultCurrentDirectoryInExePath"] = "0"  # noqa: SIM112 var name set by windows
 
     for exe in executable_names:
-        if platform.system() == "Windows" and exe == "chrome":
-            path = _which_from_windows_reg()
+        if platform.system() == "Windows" and exe in {"chrome", "msedge"}:
+            path = _which_from_windows_reg(exe)
         if path and _is_exe(path):
             return path
         path = shutil.which(exe)

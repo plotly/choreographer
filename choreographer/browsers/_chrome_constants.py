@@ -17,10 +17,12 @@ chrome_names.extend(chromium_names)
 
 typical_chrome_paths = None
 if platform.system() == "Windows":
+    chrome_names.append("msedge")
     typical_chrome_paths = [
         r"c:\Program Files\Google\Chrome\Application\chrome.exe",
         f"c:\\Users\\{os.environ.get('USER', 'default')}\\AppData\\"
         "Local\\Google\\Chrome\\Application\\chrome.exe",
+        r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
     ]
 elif platform.system() == "Linux":
     typical_chrome_paths = [
