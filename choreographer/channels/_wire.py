@@ -16,7 +16,7 @@ _logger = logistro.getLogger(__name__)
 _custom_encoder: type[json.JSONEncoder] | None = None
 
 
-def register_custom_encoder(e: type[json.JSONEncoder]) -> None:
+def register_custom_encoder(e: type[json.JSONEncoder] | None) -> None:
     global _custom_encoder  # noqa: PLW0603 what other choice do we have
     _custom_encoder = e
 
