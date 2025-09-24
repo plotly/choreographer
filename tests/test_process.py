@@ -20,10 +20,11 @@ _logger = logistro.getLogger(__name__)
 
 
 @pytest.mark.asyncio(loop_scope="function")
-async def test_context(headless, sandbox, gpu):
+async def test_context(browser_path, headless, sandbox, gpu):
     _logger.info("testing...")
     async with timeout(pytest.default_timeout):
         async with choreo.Browser(
+            path=browser_path,
             headless=headless,
             enable_sandbox=sandbox,
             enable_gpu=gpu,
@@ -50,9 +51,10 @@ async def test_context(headless, sandbox, gpu):
 
 
 @pytest.mark.asyncio(loop_scope="function")
-async def test_no_context(headless, sandbox, gpu):
+async def test_no_context(browser_path, headless, sandbox, gpu):
     _logger.info("testing...")
     browser = await choreo.Browser(
+        path=browser_path,
         headless=headless,
         enable_sandbox=sandbox,
         enable_gpu=gpu,
@@ -76,9 +78,10 @@ async def test_no_context(headless, sandbox, gpu):
 # Harass choreographer with a kill in this test to see if its clean in a way
 # tempdir may survive protected by chromium subprocess surviving the kill
 @pytest.mark.asyncio(loop_scope="function")
-async def test_watchdog(headless):
+async def test_watchdog(browser_path, headless):
     _logger.info("testing...")
     browser = await choreo.Browser(
+        path=browser_path,
         headless=headless,
     )
 

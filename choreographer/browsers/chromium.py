@@ -42,6 +42,20 @@ def _is_exe(path: str | Path) -> bool:
         return False
 
 
+def _find_chrome(*, skip_local: bool) -> str | None:
+    path = get_browser_path(
+        executable_names=chrome_names,
+        skip_local=skip_local,
+    )
+    if not path and typical_chrome_paths:
+        # do typical chrome paths
+        for candidate in typical_chrome_paths:
+            if _is_exe(candidate):
+                path = candidate
+                break
+    return path
+
+
 _logs_parser_regex = re.compile(r"\d*:\d*:\d*\/\d*\.\d*:")
 
 
@@ -170,16 +184,7 @@ class Chromium:
             )
 
         if not self.path:
-            self.path = get_browser_path(
-                executable_names=chrome_names,
-                skip_local=self.skip_local,
-            )
-        if not self.path and typical_chrome_paths:
-            # do typical chrome paths
-            for candidate in typical_chrome_paths:
-                if _is_exe(candidate):
-                    self.path = candidate
-                    break
+            self.path = _find_chrome(skip_local=self.skip_local)
         if not self.path:
             raise ChromeNotFoundError(
                 "Browser not found. You can use get_chrome(), "
