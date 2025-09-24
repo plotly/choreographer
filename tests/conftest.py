@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from pathlib import Path
 
 import logistro
 import pytest
@@ -7,6 +8,8 @@ import pytest_asyncio
 
 import choreographer as choreo
 from choreographer import errors
+from choreographer.browsers.chromium import _find_chrome
+from choreographer.utils._which import browser_which
 
 _logger = logistro.getLogger(__name__)
 
@@ -33,12 +36,36 @@ def pytest_addoption(parser):
     parser.addoption("--no-headless", dest="headless", action="store_false")
 
 
+def collect_local_browsers():
+    browsers = {}
+    if chrome := _find_chrome(skip_local=False):
+        name = Path(chrome).stem
+        if "chrome" in name.lower():
+            browsers[None] = name
+        else:
+            browsers[chrome] = name
+    if edge := browser_which(["msedge"], skip_local=False):
+        browsers[edge] = Path(edge).stem
+    if browsers:
+        return list(browsers.keys()), list(browsers.values())
+    return [None], [""]
+
+
+_browser_paths, _browser_names = collect_local_browsers()
+
+
+@pytest.fixture(params=_browser_paths, ids=_browser_names)
+def browser_path(request):
+    return request.param
+
+
 # browser fixture will supply a browser for you
 @pytest_asyncio.fixture(scope="function", loop_scope="function")
-async def browser(request):
+async def browser(request, browser_path):
     _logger.info("Fixture building browser.")
     headless = request.config.getoption("--headless")
     browser = await choreo.Browser(
+        path=browser_path,
         headless=headless,
     )
     yield browser
