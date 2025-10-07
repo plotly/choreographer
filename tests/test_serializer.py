@@ -59,13 +59,13 @@ async def test_de_serialize():
     _logger.info("testing...")
     message = wire.serialize(data)
     assert message == expected_message
-    obj = wire.deserialize(str(message))
+    obj = wire.deserialize(message.decode())
     assert len(obj) == len(converted_type)
     for o, t in zip(obj, converted_type):
         assert isinstance(o, t)
     message_np = wire.serialize(np.array(data))
     assert message_np == expected_message
-    obj_np = wire.deserialize(str(message_np))
+    obj_np = wire.deserialize(message_np.decode())
     assert len(obj_np) == len(converted_type)
     for o, t in zip(obj_np, converted_type):
         assert isinstance(o, t)
