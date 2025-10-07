@@ -26,19 +26,19 @@ class MultiEncoder(simplejson.JSONEncoder):
     """Special json encoder for numpy types."""
 
     # docs say subclassing inferior, just pass this method as a kward
-    def default(self, obj: Any) -> Any:
-        if hasattr(obj, "dtype") and obj.dtype.kind in ("i", "u") and obj.shape == ():
-            return int(obj)
-        elif hasattr(obj, "dtype") and obj.dtype.kind == "f" and obj.shape == ():
-            return float(obj)
-        elif hasattr(obj, "dtype") and obj.shape != ():
-            if hasattr(obj, "values") and hasattr(obj.values, "tolist"):
-                return obj.values.tolist()
-            if hasattr(obj, "tolist"):
-                return obj.tolist()
-        elif hasattr(obj, "isoformat"):
-            return obj.isoformat()
-        return simplejson.JSONEncoder.default(self, obj)
+    def default(self, o: Any) -> Any:
+        if hasattr(o, "dtype") and o.dtype.kind in ("i", "u") and o.shape == ():
+            return int(o)
+        elif hasattr(o, "dtype") and o.dtype.kind == "f" and o.shape == ():
+            return float(o)
+        elif hasattr(o, "dtype") and o.shape != ():
+            if hasattr(o, "values") and hasattr(o.values, "tolist"):
+                return o.values.tolist()
+            if hasattr(o, "tolist"):
+                return o.tolist()
+        elif hasattr(o, "isoformat"):
+            return o.isoformat()
+        return simplejson.JSONEncoder.default(self, o)
 
 
 def serialize(obj: Any) -> bytes:

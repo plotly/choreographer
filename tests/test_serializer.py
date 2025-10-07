@@ -10,11 +10,10 @@ except ImportError:
 import json
 from typing import TYPE_CHECKING
 
+import choreographer.channels._wire as wire
 import logistro
 import numpy as np
 import pytest
-
-import choreographer.channels._wire as wire
 from choreographer.channels import register_custom_encoder
 
 if TYPE_CHECKING:
@@ -35,10 +34,16 @@ _logger = logistro.getLogger(__name__)
 
 async def test_custom_encoder():
     class NonsenseEncoder(json.JSONEncoder):
-        def iterencode(self, _obj: Any) -> Any:
+        def iterencode(
+            self,
+            o: Any,
+            _one_shot: bool = False,  # noqa: FBT001, FBT002
+        ) -> Any:
+            _ = o
             yield "Test Passed."
 
-        def encode(self, _obj: Any) -> Any:
+        def encode(self, o: Any) -> Any:
+            _ = o
             return "Test Passed."
 
     register_custom_encoder(NonsenseEncoder)
@@ -54,13 +59,13 @@ async def test_de_serialize():
     _logger.info("testing...")
     message = wire.serialize(data)
     assert message == expected_message
-    obj = wire.deserialize(message)
+    obj = wire.deserialize(str(message))
     assert len(obj) == len(converted_type)
     for o, t in zip(obj, converted_type):
         assert isinstance(o, t)
     message_np = wire.serialize(np.array(data))
     assert message_np == expected_message
-    obj_np = wire.deserialize(message_np)
+    obj_np = wire.deserialize(str(message_np))
     assert len(obj_np) == len(converted_type)
     for o, t in zip(obj_np, converted_type):
         assert isinstance(o, t)

@@ -124,7 +124,7 @@ class Browser(Target):
             parser=parser,
         )
 
-        def run() -> subprocess.Popen[bytes]:
+        def run() -> subprocess.Popen[bytes] | subprocess.Popen[str]:  # depends on args
             self._browser_impl.pre_open()
             cli = self._browser_impl.get_cli()
             stderr = self._logger_pipe
@@ -156,7 +156,7 @@ class Browser(Target):
         except (BrowserClosedError, BrowserFailedError, asyncio.CancelledError) as e:
             if (
                 hasattr(self._browser_impl, "missing_libs")
-                and self._browser_impl.missing_libs
+                and self._browser_impl.missing_libs  # type: ignore[reportAttributeAccessIssue]
             ):
                 raise BrowserDepsError from e
             raise BrowserFailedError(

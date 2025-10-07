@@ -125,6 +125,7 @@ class Pipe:
             A list of jsons.
 
         """
+        jsons: list[BrowserResponse] = []
         if not self.is_ready():
             raise ChannelClosedError(
                 "The communication channel was either never "
@@ -135,16 +136,15 @@ class Pipe:
                 "Windows python version < 3.12 does not support non-blocking",
                 BlockWarning,
             )
-        jsons: list[BrowserResponse] = []
         try:
             if _with_block:
                 os.set_blocking(self._read_from_browser, blocking)
         except OSError as e:
             self.close()
             raise ChannelClosedError from e
+        raw_buffer = None  # if we fail in read, we already defined
+        loop_count = 1
         try:
-            loop_count = 1
-            raw_buffer = None  # if we fail in read, we already defined
             raw_buffer = os.read(
                 self._read_from_browser,
                 10000,
@@ -181,6 +181,8 @@ class Pipe:
                 f"Final size: {len(raw_buffer) if raw_buffer else 0}.",
             )
             _logger.debug2(f"Whole buffer: {raw_buffer!r}")
+        if raw_buffer is None:
+            return jsons
         decoded_buffer = raw_buffer.decode("utf-8")
         raw_messages = decoded_buffer.split("\0")
         _logger.debug(f"Received {len(raw_messages)} raw_messages.")

@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
+    import logging
     from pathlib import Path
     from typing import Any, Mapping, MutableMapping, Sequence
 
@@ -14,7 +15,17 @@ if TYPE_CHECKING:
 class BrowserImplInterface(Protocol):
     """Defines the basic interface of a channel."""
 
-    # I guess we need to include __init__?
+    @classmethod
+    def logger_parser(
+        cls,
+        record: logging.LogRecord,
+        _old: MutableMapping[str, Any],
+    ) -> bool: ...
+
+    # This method will be used as the `filter()` method on the `logging.Filter()`
+    # attached to all incoming logs from the browser process.
+    # The log will be entirely ignored if return is False.
+
     def __init__(
         self,
         channel: ChannelInterface,

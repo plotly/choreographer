@@ -8,7 +8,7 @@ import logistro
 _logger = logistro.getLogger(__name__)
 
 
-def kill(process: subprocess.Popen[bytes]) -> None:
+def kill(process: subprocess.Popen[bytes] | subprocess.Popen[str]) -> None:
     if platform.system() == "Windows":
         subprocess.call(  # noqa: S603, false positive, input fine
             ["taskkill", "/F", "/T", "/PID", str(process.pid)],  # noqa: S607 windows full path...
