@@ -48,6 +48,7 @@ dev = [
   "mypy>=1.14.1",
   "types-simplejson>=3.19.0.20241221",
   "poethepoet>=0.30.0",
+  "pyright>=1.1.406",
 ]
 
 # uv doens't allow dependency groups to have separate python requirements
@@ -64,6 +65,9 @@ dev = [
 [tool.uv.sources]
 #mkquixote = { path = "../mkquixote", editable = true }
 #logistro = { path = "../logistro", editable = true }
+
+[tool.ruff]
+src = ["choreographer"]
 
 [tool.ruff.lint]
 select = ["ALL"]
@@ -116,3 +120,8 @@ help = "Run test by test, slowly, quitting after first error"
 [tool.poe.tasks.filter-test]
 cmd = "pytest --log-level=1 -W error -vvvx -rA --capture=no --show-capture=no"
 help = "Run any/all tests one by one with basic settings: can include filename and -k filters"
+
+[tool.pyright]
+venvPath = "."
+venv = ".venv"
+include = ["choreographer", "tests"]

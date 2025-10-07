@@ -15,22 +15,35 @@ class ChannelInterface(Protocol):
 
     # Not sure I like the obj type
     def write_json(self, obj: Mapping[str, Any]) -> None:
-        """
-        Accept an object and send it doesnt the channel serialized.
-
-        Args:
-            obj: the object to send to the browser.
-
-        """
+        ...
+        # """
+        # Accept an object and send it doesnt the channel serialized.
+        #
+        # Args:
+        #   obj: the object to send to the browser.
+        #
+        # """
 
     def read_jsons(self, *, blocking: bool = True) -> Sequence[BrowserResponse]:
-        """
-        Read all available jsons in the channel and returns a list of complete ones.
-
-        Args:
-            blocking: should this method block on read or return immediately.
-
-        """
+        ...
+        # """
+        # Read all available jsons in the channel and returns a list of complete ones.
+        #
+        # Args:
+        #   blocking: should this method block on read or return immediately.
+        # """
 
     def close(self) -> None:
-        """Close the channel."""
+        ...
+        # """Close the channel."""
+
+    def open(self) -> None:
+        ...
+        # """Open the channel."""
+
+    def is_ready(self) -> bool:
+        ...
+        # """Return true if comm channel is active."""
+
+
+# Can't docstring protocols! EW!

@@ -1,3 +1,6 @@
+v1.1.2
+- Appease stricter typer
+- Add lock to mark channel open and is_ready function that checks open and close
 v1.1.1
 - Fix bad module access
 v1.1.0

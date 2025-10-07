@@ -38,7 +38,7 @@ def _which_from_windows_reg() -> str | None:
             "",
         )[0]
         exe = re.search('"(.*?)"', command).group(1)  # type: ignore [union-attr]
-    except BaseException:  # noqa: BLE001 don't care why, best effort search
+    except Exception:  # noqa: BLE001 don't care why, best effort search
         return None
 
     return exe
@@ -65,7 +65,7 @@ def browser_which(
 
     local_chrome = get_chrome_download_path()
     _logger.debug(f"Local download path: {local_chrome}")
-    if (
+    if local_chrome is not None and (
         local_chrome.exists()
         and not skip_local
         and local_chrome.stem in executable_names
@@ -73,12 +73,15 @@ def browser_which(
         _logger.debug("Returning local chrome")
         return str(local_chrome)
     else:
-        _logger.debug(f"Exists? {local_chrome.exists()}")
+        if not local_chrome:
+            _logger.debug("Couldn't calculate local_chrome return path.")
+        else:
+            _logger.debug(f"Exists? {local_chrome.exists()}")
+            _logger.debug(
+                f"local name: {local_chrome.name} in exe names {executable_names}: "
+                f"{local_chrome.name in executable_names}",
+            )
         _logger.debug(f"Skip local? {skip_local}")
-        _logger.debug(
-            f"local name: {local_chrome.name} in exe names {executable_names}: "
-            f"{local_chrome.name in executable_names}",
-        )
 
     if platform.system() == "Windows":
         os.environ["NoDefaultCurrentDirectoryInExePath"] = "0"  # noqa: SIM112 var name set by windows

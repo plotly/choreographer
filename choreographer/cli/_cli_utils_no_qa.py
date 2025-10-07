@@ -10,6 +10,7 @@ import time
 # so lets give diagnose a separate file
 
 # ruff: noqa: PLR0915, C901, S603, BLE001, S607, PERF203, TRY002, T201, PLR0912, SLF001
+# ruff: noqa: PLC0415
 # ruff: noqa: F401, ERA001 # temporary, sync
 # ruff: noqa: PLC0415 - import at time of file
 
@@ -67,12 +68,12 @@ def diagnose() -> None:
     try:
         print("PIP:".center(25, "*"))
         print(subprocess.check_output([sys.executable, "-m", "pip", "freeze"]).decode())
-    except BaseException as e:
+    except Exception as e:
         print(f"Error w/ pip: {e}")
     try:
         print("UV:".center(25, "*"))
         print(subprocess.check_output(["uv", "pip", "freeze"]).decode())
-    except BaseException as e:
+    except Exception as e:
         print(f"Error w/ uv: {e}")
     try:
         print("GIT:".center(25, "*"))
@@ -81,7 +82,7 @@ def diagnose() -> None:
                 ["git", "describe", "--tags", "--long", "--always"],
             ).decode(),
         )
-    except BaseException as e:
+    except Exception as e:
         print(f"Error w/ git: {e}")
     finally:
         print(sys.version)
@@ -95,7 +96,7 @@ def diagnose() -> None:
             # browser.open()
             # time.sleep(3)
             # browser.close()
-        except BaseException as e:
+        except Exception as e:
             fail.append(("Sync test headless", e))
         finally:
             print("Done with sync test headless".center(50, "*"))
@@ -108,7 +109,7 @@ def diagnose() -> None:
         try:
             print("Async Test Headless".center(50, "*"))
             asyncio.run(test_headless())
-        except BaseException as e:
+        except Exception as e:
             fail.append(("Async test headless", e))
         finally:
             print("Done with async test headless".center(50, "*"))
@@ -126,8 +127,8 @@ def diagnose() -> None:
                     exception[1],
                     exception[1].__traceback__,
                 )
-            except BaseException:
+            except Exception:
                 print("Couldn't print traceback for:")
                 print(str(exception))
-        raise BaseException("There was an exception, see above.")
+        raise Exception("There was an exception, see above.")
     print("Thank you! Please share these results with us!")

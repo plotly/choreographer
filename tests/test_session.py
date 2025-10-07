@@ -3,8 +3,7 @@ import warnings
 import logistro
 import pytest
 import pytest_asyncio
-
-import choreographer as choreo
+from choreographer import errors
 
 # allows to create a browser pool for tests
 pytestmark = pytest.mark.asyncio(loop_scope="function")
@@ -16,7 +15,7 @@ _logger = logistro.getLogger(__name__)
 async def session(browser):
     _logger.info("testing...")
     with warnings.catch_warnings():
-        warnings.simplefilter("ignore", choreo.protocol.ExperimentalFeatureWarning)
+        warnings.simplefilter("ignore", errors.ExperimentalFeatureWarning)
         session_browser = await browser.create_session()
     yield session_browser
     await browser.close_session(session_browser)
@@ -35,6 +34,6 @@ async def test_session_send_command(session):
 
     # Test int method should return error
     with pytest.raises(
-        choreo.protocol.MessageTypeError,
+        errors.MessageTypeError,
     ):
         await session.send_command(command=12345)

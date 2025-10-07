@@ -6,44 +6,42 @@ but can be used for other purposes as well.
 
 ## Wait—I Thought This Was Kaleido?
 
-[Kaleido][kaleido] is a cross-platform library for generating static images of plots.
-The original implementation included a custom build of Chrome,
-which has proven very difficult to maintain.
-In contrast,
-this package uses the Chrome binary on the user's machine
-in the same way as testing tools like [Puppeteer][puppeteer];
-the next step is to re-implement Kaleido as a layer on top of it.
+[Kaleido][kaleido] is a cross-platform library for generating static images of
+plots. The original implementation included a custom build of Chrome, which has
+proven very difficult to maintain. In contrast, this package uses the Chrome
+binary on the user's machine in the same way as testing tools like
+[Puppeteer][puppeteer]; the next step is to re-implement Kaleido as a layer on
+top of it.
 
 ## Status
 
-choreographer is a work in progress:
-only Chrome-ish browsers are supported at the moment,
-though we hope to add others.
-(Pull requests are greatly appreciated.)
+choreographer is a work in progress: only Chrome-ish browsers are supported at
+the moment, though we hope to add others. (Pull requests are greatly
+appreciated.)
 
-Note that we strongly recommend using async/await with this package,
-but it is not absolutely required.
-The synchronous functions in this package are intended as building blocks
-for other asynchronous strategies that Python may favor over async/await in the future.
+Note that we strongly recommend using async/await with this package, but it is
+not absolutely required. The synchronous functions in this package are intended
+as building blocks for other asynchronous strategies that Python may favor over
+async/await in the future.
 
 ## Testing
 
 ### Process Control Tests
 
-- Verbose: `pytest -W error -n auto -vvv -rA --capture=tee-sys tests/test_process.py`
-- Quiet:`pytest -W error -n auto -v -rFe --capture=fd tests/test_process.py`
+- Verbose: `pytest -W error -vvv tests/test_process.py`
+- Quiet:`pytest -W error -v tests/test_process.py`
 
 ### Browser Interaction Tests
 
-- Verbose: `pytest --debug -n auto -W error -vvv -rA --capture=tee-sys --ignore=tests/test_process.py`
-- Quiet :`pytest -W error -n auto -v -rFe --capture=fd --ignore=tests/test_process.py`
+- Verbose: `pytest --debug -W error -vvv --ignore=tests/test_process.py`
+- Quiet :`pytest -W error -v --ignore=tests/test_process.py`
 
-You can also add "--no-headless" to these if you want to see the browser pop up.
+You can also add "--no-headless" if you want to see the browser pop up.
 
 ### Writing Tests
 
-- Put async and sync tests in different files. Add `_sync.py` to synchronous tests.
-- For process tests, use the same decorators/fixtures like `test_process.py` file.
+- Separate async and sync test files. Add `_sync.py` to synchronous tests.
+- For process tests, copy the fixtures in `test_process.py` file.
 - For API tests, use `test_placeholder.py` as the minimum template.
 
 ## Help Wanted
@@ -61,7 +59,7 @@ To get started:
 
 Save the following code to `example.py` and run with Python.
 
-```
+```python
 import asyncio
 import choreographer as choreo
 
@@ -88,8 +86,9 @@ Step by step, this example:
     the default is no display.
 1. Wait three seconds for the browser to be created.
 1. Create another tab.
-    (Note that users can't rearrange programmatically-generated tabs using the mouse,
-    but that's OK: we're not trying to replace testing tools like [Puppeteer][puppeteer].)
+    (Note that users can't rearrange programmatically-generated tabs using the
+    mouse, but that's OK: we're not trying to replace testing tools like
+    [Puppeteer][puppeteer].)
 1. Sleep again.
 1. Runs the example function.
 
@@ -126,7 +125,7 @@ Try adding the following to the example shown above:
 
 You can use this library without `asyncio`,
 
-```
+```python
 my_browser = choreo.Browser() # blocking until open
 ```
 

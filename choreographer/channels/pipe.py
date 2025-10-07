@@ -23,6 +23,8 @@ _with_block = bool(sys.version_info[:3] >= (3, 12) or platform.system() != "Wind
 
 _logger = logistro.getLogger(__name__)
 
+# should be closing my ends from the start?
+
 
 # if we're a pipe we expect these public attributes
 class Pipe:
@@ -57,6 +59,24 @@ class Pipe:
 
         # this is just a convenience to prevent multiple shutdowns
         self.shutdown_lock = Lock()  # should be private
+        self._open_lock = Lock()  # should be private
+
+    def is_ready(self) -> bool:
+        """Return true if pipe open."""
+        return not self.shutdown_lock.locked() and self._open_lock.locked()
+
+    def open(self) -> None:
+        """
+        Open the channel.
+
+        In a sense, __init__ creates the pipe. The OS opens it.
+        Here we're just marking it open for use, that said.
+
+        We only use locks here for indications, we never actually lock,
+        because the broker is in charge of all async/parallel stuff.
+        """
+        if not self._open_lock.acquire(blocking=False):
+            raise RuntimeError("Cannot open same pipe twice.")
 
     def write_json(self, obj: Mapping[str, Any]) -> None:
         """
@@ -66,8 +86,11 @@ class Pipe:
             obj: any python object that serializes to json.
 
         """
-        if self.shutdown_lock.locked():
-            raise ChannelClosedError
+        if not self.is_ready():
+            raise ChannelClosedError(
+                "The communication channel was either never "
+                "opened or closed. Was .open() or .close() called?",
+            )
         encoded_message = wire.serialize(obj) + b"\0"
         _logger.debug(
             f"Writing message {encoded_message[:15]!r}...{encoded_message[-15:]!r}, "
@@ -102,23 +125,26 @@ class Pipe:
             A list of jsons.
 
         """
-        if self.shutdown_lock.locked():
-            raise ChannelClosedError
+        jsons: list[BrowserResponse] = []
+        if not self.is_ready():
+            raise ChannelClosedError(
+                "The communication channel was either never "
+                "opened or closed. Was .open() or .close() called?",
+            )
         if not _with_block and not blocking:
             warnings.warn(  # noqa: B028
                 "Windows python version < 3.12 does not support non-blocking",
                 BlockWarning,
             )
-        jsons: list[BrowserResponse] = []
         try:
             if _with_block:
                 os.set_blocking(self._read_from_browser, blocking)
         except OSError as e:
             self.close()
             raise ChannelClosedError from e
+        raw_buffer = None  # if we fail in read, we already defined
+        loop_count = 1
         try:
-            loop_count = 1
-            raw_buffer = None  # if we fail in read, we already defined
             raw_buffer = os.read(
                 self._read_from_browser,
                 10000,
@@ -155,6 +181,8 @@ class Pipe:
                 f"Final size: {len(raw_buffer) if raw_buffer else 0}.",
             )
             _logger.debug2(f"Whole buffer: {raw_buffer!r}")
+        if raw_buffer is None:
+            return jsons
         decoded_buffer = raw_buffer.decode("utf-8")
         raw_messages = decoded_buffer.split("\0")
         _logger.debug(f"Received {len(raw_messages)} raw_messages.")
@@ -173,20 +201,20 @@ class Pipe:
         try:
             if _with_block:
                 os.set_blocking(fd, False)
-        except BaseException:  # noqa: BLE001, S110 OS errors are not consistent, catch blind + pass
+        except Exception:  # noqa: BLE001, S110 OS errors are not consistent, catch blind + pass
             pass
 
     def _close_fd(self, fd: int) -> None:
         try:
             os.close(fd)
-        except BaseException:  # noqa: BLE001, S110 OS errors are not consistent, catch blind + pass
+        except Exception:  # noqa: BLE001, S110 OS errors are not consistent, catch blind + pass
             pass
 
     def _fake_bye(self) -> None:
         self._unblock_fd(self._write_from_browser)
         try:
             os.write(self._write_from_browser, b"{bye}\n")
-        except BaseException:  # noqa: BLE001, S110 OS errors are not consistent, catch blind + pass
+        except Exception:  # noqa: BLE001, S110 OS errors are not consistent, catch blind + pass
             pass
 
     def close(self) -> None:
