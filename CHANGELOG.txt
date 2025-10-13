@@ -1,3 +1,13 @@
+v1.1.2
+- Appease stricter typer
+- Add lock to mark channel open and is_ready function that checks open and close
+v1.1.1
+- Fix bad module access
+v1.1.0
+v1.1.0rc1
+- Force custom json encoder to use stdlib json pkg
+v1.1.0rc0
+- Add option to register a custom json encoder
 v1.0.10
 - Simple typing fixes
 v1.0.9

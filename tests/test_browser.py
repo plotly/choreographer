@@ -1,7 +1,6 @@
+import choreographer as choreo
 import logistro
 import pytest
-
-import choreographer as choreo
 from choreographer import errors
 from choreographer.protocol import devtools_async
 

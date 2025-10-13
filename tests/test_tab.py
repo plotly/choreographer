@@ -2,8 +2,7 @@ import asyncio
 
 import logistro
 import pytest
-
-import choreographer as choreo
+from choreographer import errors
 from choreographer.protocol import devtools_async
 
 # allows to create a browser pool for tests
@@ -16,7 +15,7 @@ _logger = logistro.getLogger(__name__)
 def check_response_dictionary(response_received, response_expected):
     for k, v in response_expected.items():
         if isinstance(v, dict):
-            check_response_dictionary(v, response_expected[k])
+            check_response_dictionary(v, v)
         assert (
             response_received.get(
                 k,
@@ -50,7 +49,7 @@ async def test_tab_send_command(browser):
 
     # Test int method should return error
     with pytest.raises(
-        choreo.protocol.MessageTypeError,
+        errors.MessageTypeError,
     ):
         await tab.send_command(command=12345)
 

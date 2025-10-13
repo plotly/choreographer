@@ -2,11 +2,10 @@ import asyncio
 import logging
 from pathlib import Path
 
+import choreographer as choreo
 import logistro
 import pytest
 import pytest_asyncio
-
-import choreographer as choreo
 from choreographer import errors
 from choreographer.browsers.chromium import _find_chrome
 from choreographer.utils._which import browser_which
@@ -74,10 +73,13 @@ async def browser(request, browser_path):
         await browser.close()
     except errors.BrowserClosedError:
         pass
-    if browser._browser_impl.tmp_dir.exists:  # noqa: SLF001
+    if (
+        hasattr(browser._browser_impl, "tmp_dir")  # noqa: SLF001
+        and browser._browser_impl.tmp_dir.exists  # type: ignore[reportAttributeAccessIssue] # noqa: SLF001
+    ):
         raise RuntimeError(
             "Temporary directory not deleted successfully: "
-            f"{browser._browser_impl.tmp_dir.path}",  # noqa: SLF001
+            f"{browser._browser_impl.tmp_dir.path}",  # type: ignore[reportAttributeAccessIssue] # noqa: SLF001
         )
 
 
@@ -97,7 +99,7 @@ def pytest_runtest_setup(item):
         raw_test_fn = item.obj
         timeouts = [k for k in item.funcargs if k.startswith("timeout")]
         timeout = (
-            item.funcargs[timeouts[-1]] if len(timeouts) else pytest.default_timeout
+            item.funcargs[timeouts[-1]] if timeouts else pytest.default_timeout  # type: ignore[reportAttributeAccessIssue]
         )
         if (
             item.get_closest_marker("asyncio") and timeout
@@ -120,7 +122,7 @@ def pytest_runtest_setup(item):
 
 def pytest_configure():
     # change this by command line TODO
-    pytest.default_timeout = 20
+    pytest.default_timeout = 20  # type: ignore[reportAttributeAccessIssue]
 
 
 # pytest shuts down its capture before logging/threads finish

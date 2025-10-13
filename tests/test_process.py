@@ -4,14 +4,11 @@ import platform
 import signal
 import subprocess
 
+import choreographer as choreo
 import logistro
 import pytest
 from async_timeout import timeout
-
-import choreographer as choreo
 from choreographer import errors
-
-# ruff: noqa: PLR0913 (lots of parameters)
 
 # allows to create a browser pool for tests
 pytestmark = pytest.mark.asyncio(loop_scope="function")
@@ -22,7 +19,7 @@ _logger = logistro.getLogger(__name__)
 @pytest.mark.asyncio(loop_scope="function")
 async def test_context(browser_path, headless, sandbox, gpu):
     _logger.info("testing...")
-    async with timeout(pytest.default_timeout):
+    async with timeout(pytest.default_timeout):  # type: ignore[reportAttributeAccessIssue]
         async with choreo.Browser(
             path=browser_path,
             headless=headless,
@@ -44,10 +41,13 @@ async def test_context(browser_path, headless, sandbox, gpu):
             if len(response["result"]["targetInfos"]) == 0:
                 await browser.create_tab()
             assert isinstance(browser.get_tab(), choreo.Tab)
-            assert len(browser.get_tab().sessions) == 1
+            tab = browser.get_tab()
+            assert tab is not None
+            assert len(tab.sessions) == 1
         # let asyncio do some cleaning up if it wants, may prevent warnings
         await asyncio.sleep(0)
-        assert not browser._browser_impl.tmp_dir.exists  # noqa: SLF001
+        if hasattr(browser._browser_impl, "tmp_dir"):  # noqa: SLF001
+            assert not browser._browser_impl.tmp_dir.exists  # type: ignore[reportAttributeAccessIssue] # noqa: SLF001
 
 
 @pytest.mark.asyncio(loop_scope="function")
@@ -62,17 +62,20 @@ async def test_no_context(browser_path, headless, sandbox, gpu):
     if sandbox and "ubuntu" in platform.version().lower():
         pytest.skip("Ubuntu doesn't support sandbox unless installed from snap.")
     try:
-        async with timeout(pytest.default_timeout):
+        async with timeout(pytest.default_timeout):  # type: ignore[reportAttributeAccessIssue]
             response = await browser.send_command(command="Target.getTargets")
             assert "result" in response and "targetInfos" in response["result"]  # noqa: PT018 combined assert
             if len(response["result"]["targetInfos"]) == 0:
                 await browser.create_tab()
             assert isinstance(browser.get_tab(), choreo.Tab)
-            assert len(browser.get_tab().sessions) == 1
+            tab = browser.get_tab()
+            assert tab is not None
+            assert len(tab.sessions) == 1
     finally:
         await browser.close()
     await asyncio.sleep(0)
-    assert not browser._browser_impl.tmp_dir.exists  # noqa: SLF001
+    if hasattr(browser._browser_impl, "tmp_dir"):  # noqa: SLF001
+        assert not browser._browser_impl.tmp_dir.exists  # type: ignore[reportAttributeAccessIssue] # noqa: SLF001
 
 
 # Harass choreographer with a kill in this test to see if its clean in a way

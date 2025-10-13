@@ -1,5 +1,5 @@
 class BlockWarning(UserWarning):
-    """A warning for when block modification operatins used on incompatible OS."""
+    """A warning for when block modification operations used on incompatible OS."""
 
 
 class ChannelClosedError(IOError):

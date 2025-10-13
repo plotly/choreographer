@@ -90,15 +90,19 @@ class Chromium:
         _old: MutableMapping[str, Any],
     ) -> bool:
         """
-        Parse (via `logging.Filter.parse()`) data from browser stderr for logging.
+        Remove chromium timestamp from chromium's logs.
+
+        This method will be used as the `filter()` method on the `logging.Filter()`
+        attached to all incoming logs from the browser process.
 
         Args:
             record: the `logging.LogRecord` object to read/modify
             _old: data that was already stripped out.
 
         """
+        # replace the chromium timestamp because we do our own
         record.msg = _logs_parser_regex.sub("", record.msg)
-        # we just eliminate their stamp, we dont' extract it
+
         return True
 
     def _libs_ok(self) -> bool:
