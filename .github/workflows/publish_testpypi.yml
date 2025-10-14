@@ -9,15 +9,17 @@ on:
 jobs:
   super-test:
     strategy:
-      max-parallel: 2
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python_v: ['3.8', '3.10', '3.12', '3.13']
+        python_v: ['3.8', '3.9', '3.10', '3.12', '3.13', '3.14', '3.14t']
         # chrome_v: ['-1']
     name: Build and Test
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
       - uses: astral-sh/setup-uv@v5
       - name: Install Dependencies
         if: ${{ matrix.os == 'ubuntu-latest' }}
