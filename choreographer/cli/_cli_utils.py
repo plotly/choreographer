@@ -20,22 +20,31 @@ _logger = logistro.getLogger(__name__)
 
 _chrome_for_testing_url = "https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json"
 
+supported_platform_strings = ["linux64", "win32", "win64", "mac-x64", "mac-arm64"]
 
-_platforms = ["linux64", "win32", "win64", "mac-x64", "mac-arm64"]
 
-_arch_size_detected = "64" if sys.maxsize > 2**32 else "32"
-_arch_detected = "arm" if platform.processor() == "arm" else "x"
+def get_google_supported_platform_string() -> tuple[str, str, str, str]:
+    arch_size_detected = "64" if sys.maxsize > 2**32 else "32"
+    arch_detected = "arm" if platform.processor() == "arm" else "x"
 
-_chrome_platform_detected: str | None = None
-if platform.system() == "Windows":
-    _chrome_platform_detected = "win" + _arch_size_detected
-elif platform.system() == "Linux":
-    _chrome_platform_detected = "linux" + _arch_size_detected
-elif platform.system() == "Darwin":
-    _chrome_platform_detected = "mac-" + _arch_detected + _arch_size_detected
+    chrome_platform_detected: str | None = None
+    if platform.system() == "Windows":
+        chrome_platform_detected = "win" + arch_size_detected
+    elif platform.system() == "Linux":
+        chrome_platform_detected = "linux" + arch_size_detected
+    elif platform.system() == "Darwin":
+        chrome_platform_detected = "mac-" + arch_detected + arch_size_detected
+
+    platform_string = ""
+    if chrome_platform_detected in supported_platform_strings:
+        platform_string = chrome_platform_detected
+
+    return platform_string, arch_size_detected, platform.processor(), platform.system()
 
 
 def get_chrome_download_path() -> Path | None:
+    _chrome_platform_detected, _, _, _ = get_google_supported_platform_string()
+
     if not _chrome_platform_detected:
         return None
 
@@ -77,7 +86,7 @@ class _ZipFilePermissions(zipfile.ZipFile):
 
 
 def get_chrome_sync(  # noqa: PLR0912, C901
-    arch: str | None = _chrome_platform_detected,
+    arch: str | None = None,
     i: int | None = None,
     path: str | Path = default_download_path,
     *,
@@ -85,7 +94,15 @@ def get_chrome_sync(  # noqa: PLR0912, C901
 ) -> Path | str:
     """Download chrome synchronously: see `get_chrome()`."""
     if not arch:
-        raise RuntimeError("Couldn't detect your platform you must specify it.")
+        arch, _, _, _ = get_google_supported_platform_string()
+
+    if not arch:
+        raise RuntimeError(
+            "You must specify an arch, one of: "
+            f"{', '.join(supported_platform_strings)}. "
+            f"Detected {arch} is not supported.",
+        )
+
     if isinstance(path, str):
         path = Path(path)
     if i:
@@ -115,7 +132,8 @@ def get_chrome_sync(  # noqa: PLR0912, C901
             break
     else:
         raise RuntimeError(
-            f"You must specify an arch, one of: {', '.join(_platforms)}. "
+            "You must specify an arch, one of: "
+            f"{', '.join(supported_platform_strings)}. "
             f"{arch} is not supported.",
         )
 
@@ -146,7 +164,7 @@ def get_chrome_sync(  # noqa: PLR0912, C901
 
 
 async def get_chrome(
-    arch: str | None = _chrome_platform_detected,
+    arch: str | None = None,
     i: int | None = None,
     path: str | Path = default_download_path,
     *,
@@ -177,7 +195,7 @@ def get_chrome_cli() -> None:
             "You are using `get_browser()` on Ubuntu."
             " Ubuntu is **very strict** about where binaries come from."
             " While sandbox is already off by default, do not set"
-            " enable_sandbox to True OR you can install from Ubuntu's"
+            " enable_sandbox to True OR you must install from Ubuntu's"
             " package manager.",
             UserWarning,
         )
@@ -213,16 +231,11 @@ def get_chrome_cli() -> None:
         help="Display found version number if using -i (to stdout)",
     )
     parser.set_defaults(path=default_download_path)
-    parser.set_defaults(arch=_chrome_platform_detected)
+    parser.set_defaults(arch=None)
     parser.set_defaults(verbose=False)
     parsed = parser.parse_args()
     i = parsed.i
     arch = parsed.arch
     path = Path(parsed.path)
     verbose = parsed.verbose
-    if not arch or arch not in _platforms:
-        raise RuntimeError(
-            f"You must specify an arch, one of: {', '.join(_platforms)}. "
-            f"{arch} is not supported. You can use cli flag --arch ARCH.",
-        )
     print(get_chrome_sync(arch=arch, i=i, path=path, verbose=verbose))  # noqa: T201 allow print in cli
