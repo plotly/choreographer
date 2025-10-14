@@ -41,7 +41,8 @@ choreo_get_chrome = "choreographer.cli._cli_utils:get_chrome_cli"
 [dependency-groups]
 dev = [
   "pytest",
-  "pytest-asyncio",
+  "pytest-asyncio; python_version < '3.14'",
+  "pytest-asyncio>=1.2.0; python_version >= '3.14'",
   "pytest-xdist",
   "async-timeout",
   "numpy",
