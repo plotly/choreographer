@@ -4,6 +4,8 @@ choreographer allows remote control of browsers from Python.
 It was created to support image generation from browser-based charting tools,
 but can be used for other purposes as well.
 
+choreographer is available [PyPI](https://pypi.org/project/choreographer) and [github](https://github.com/plotly/choreographer).
+
 ## Wait—I Thought This Was Kaleido?
 
 [Kaleido][kaleido] is a cross-platform library for generating static images of

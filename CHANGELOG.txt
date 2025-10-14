@@ -1,4 +1,5 @@
 v1.2.0
+- Delete zipfile after downloading
 - Upgrade logistro to reduce sideeffects
 - Look for several chromium variants in all OSes by default
 v1.1.2

@@ -144,6 +144,7 @@ def get_chrome_sync(  # noqa: PLR0912, C901
         shutil.copyfileobj(response, out_file)
     with _ZipFilePermissions(filename, "r") as zip_ref:
         zip_ref.extractall(path)
+    filename.unlink()
 
     if arch.startswith("linux"):
         exe_name = path / f"chrome-{arch}" / "chrome"
