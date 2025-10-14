@@ -92,8 +92,9 @@ else:  # assume mac, or system == "Darwin"
     typical_vivaldi_paths = ("/Applications/Vivaldi.app/Contents/MacOS/Vivaldi",)
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class BrowserInfo:
+    __slots__ = ("exe_names", "ms_prog_id", "typical_paths")
     exe_names: tuple[str, ...]
     ms_prog_id: str
     typical_paths: tuple[str, ...]
