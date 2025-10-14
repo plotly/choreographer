@@ -4,7 +4,7 @@ choreographer allows remote control of browsers from Python.
 It was created to support image generation from browser-based charting tools,
 but can be used for other purposes as well.
 
-Choreographer is available [PyPI](https://pypi.org/project/choreographer) and [github](https://github.com/plotly/choreographer).
+choreographer is available [PyPI](https://pypi.org/project/choreographer) and [github](https://github.com/plotly/choreographer).
 
 ## Wait—I Thought This Was Kaleido?
 
