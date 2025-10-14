@@ -65,25 +65,21 @@ def browser_which(
     if isinstance(executable_names, str):
         executable_names = [executable_names]
 
-    local_chrome = get_chrome_download_path()
-    _logger.debug(f"Local download path: {local_chrome}")
-    if local_chrome is not None and (
-        local_chrome.exists()
-        and not skip_local
-        and local_chrome.stem in executable_names
-    ):
-        _logger.debug("Returning local chrome")
-        return str(local_chrome)
+    if skip_local:
+        _logger.debug("Skipping searching for local download of chrome.")
     else:
-        if not local_chrome:
-            _logger.debug("Couldn't calculate local_chrome return path.")
+        local_chrome = get_chrome_download_path()
+        _logger.debug(f"Looking for at local chrome download path: {local_chrome}")
+        if local_chrome is not None and local_chrome.exists():
+            if local_chrome.stem not in executable_names:
+                _logger.debug(
+                    "Not returning local chrome because we're not looking for chrome.",
+                )
+            else:
+                _logger.debug("Returning local chrome.")
+                return str(local_chrome)
         else:
-            _logger.debug(f"Exists? {local_chrome.exists()}")
-            _logger.debug(
-                f"local name: {local_chrome.name} in exe names {executable_names}: "
-                f"{local_chrome.name in executable_names}",
-            )
-        _logger.debug(f"Skip local? {skip_local}")
+            _logger.debug(f"Local chrome not found at path: {local_chrome}.")
 
     if platform.system() == "Windows":
         os.environ["NoDefaultCurrentDirectoryInExePath"] = "0"  # noqa: SIM112 var name set by windows
