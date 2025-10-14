@@ -18,7 +18,7 @@ if platform.system() == "Windows":
 from choreographer.channels import Pipe
 from choreographer.utils import TmpDirectory, get_browser_path
 
-from ._chrome_constants import chrome_names, typical_chrome_paths
+from ._chrome_constants import chromium_based_browsers
 
 if TYPE_CHECKING:
     import logging
@@ -40,6 +40,23 @@ def _is_exe(path: str | Path) -> bool:
         return os.access(path, os.X_OK)
     except:  # noqa: E722 bare except ok, weird errors, best effort.
         return False
+
+
+def _find_a_chromium_based_browser(*, skip_local: bool) -> str | None:
+    for name, browser_data in chromium_based_browsers.items():
+        _logger.debug(f"Looking for a {name} browser.")
+        path = get_browser_path(
+            executable_names=browser_data.exe_names,
+            skip_local=skip_local,
+            ms_prog_id=browser_data.ms_prog_id,
+        )
+        if not path:
+            for candidate in browser_data.typical_paths:
+                if _is_exe(candidate):
+                    path = candidate
+                    break
+        return path
+    return None
 
 
 _logs_parser_regex = re.compile(r"\d*:\d*:\d*\/\d*\.\d*:")
@@ -168,22 +185,14 @@ class Chromium:
         self.skip_local = bool(
             "ubuntu" in platform.version().lower() and self.sandbox_enabled,
         )
+
         if self.skip_local:
             _logger.warning(
-                "Skipping local. Ubuntu + Sandbox require using package manager.",
+                "Forced skipping local. Ubuntu sandbox requires package manager.",
             )
 
         if not self.path:
-            self.path = get_browser_path(
-                executable_names=chrome_names,
-                skip_local=self.skip_local,
-            )
-        if not self.path and typical_chrome_paths:
-            # do typical chrome paths
-            for candidate in typical_chrome_paths:
-                if _is_exe(candidate):
-                    self.path = candidate
-                    break
+            self.path = _find_a_chromium_based_browser(skip_local=self.skip_local)
         if not self.path:
             raise ChromeNotFoundError(
                 "Browser not found. You can use get_chrome(), "
