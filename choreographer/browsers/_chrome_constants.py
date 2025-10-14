@@ -94,7 +94,7 @@ else:  # assume mac, or system == "Darwin"
 
 @dataclass(frozen=True, slots=True)
 class BrowserInfo:
-    exe_name: tuple[str, ...]
+    exe_names: tuple[str, ...]
     ms_prog_id: str
     typical_paths: tuple[str, ...]
 

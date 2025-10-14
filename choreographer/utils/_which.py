@@ -4,7 +4,7 @@ import os
 import platform
 import re
 import shutil
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING
 
 import logistro
 
@@ -24,8 +24,7 @@ def _is_exe(path: str | Path) -> bool:
         return False
 
 
-def _which_from_windows_reg(exe: Literal["chrome", "msedge"]) -> str | None:
-    key = "ChromeHTML" if exe == "chrome" else "MSEdgeHTM"
+def _which_from_windows_reg(key: str) -> str | None:
     try:
         import winreg  # noqa: PLC0415 don't import if not windows pls
 
@@ -49,6 +48,7 @@ def browser_which(
     executable_names: Sequence[str],
     *,
     skip_local: bool = False,
+    ms_prog_id: str | None = None,
 ) -> str | None:
     """
     Look for and return first name found in PATH.
@@ -56,6 +56,7 @@ def browser_which(
     Args:
         executable_names: the list of names to look for
         skip_local: (default False) don't look for a choreo download of anything.
+        ms_prog_id: A windows registry ID string to lookup program paths
 
     """
     _logger.debug(f"Looking for browser, skipping local? {skip_local}")
@@ -86,12 +87,14 @@ def browser_which(
 
     if platform.system() == "Windows":
         os.environ["NoDefaultCurrentDirectoryInExePath"] = "0"  # noqa: SIM112 var name set by windows
+        if (
+            ms_prog_id
+            and (path := _which_from_windows_reg(ms_prog_id))
+            and _is_exe(path)
+        ):
+            return path
 
     for exe in executable_names:
-        if platform.system() == "Windows" and exe in {"chrome", "msedge"}:
-            path = _which_from_windows_reg(exe)
-        if path and _is_exe(path):
-            return path
         path = shutil.which(exe)
         if path and _is_exe(path):
             return path
