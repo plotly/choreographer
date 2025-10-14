@@ -1,3 +1,5 @@
+v1.2.0
+- Upgrade logistro to reduce sideeffects
 - Look for several chromium variants in all OSes by default
 v1.1.2
 - Appease stricter typer
