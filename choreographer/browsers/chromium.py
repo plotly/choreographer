@@ -55,7 +55,8 @@ def _find_a_chromium_based_browser(*, skip_local: bool) -> str | None:
                 if _is_exe(candidate):
                     path = candidate
                     break
-        return path
+        if path:
+            return path
     return None
 
 
