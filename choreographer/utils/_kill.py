@@ -14,10 +14,13 @@ def kill(process: subprocess.Popen[bytes] | subprocess.Popen[str]) -> None:
             ["taskkill", "/F", "/T", "/PID", str(process.pid)],  # noqa: S607 windows full path...
             stderr=subprocess.DEVNULL,
             stdout=subprocess.DEVNULL,
+            timeout=3,
         )
     else:
         process.terminate()
         _logger.debug("Called terminate (a light kill).")
-        if process.poll() is None:
+        try:
+            process.wait(timeout=3)
+        except subprocess.TimeoutExpired:
             _logger.debug("Calling kill (a heavy kill).")
             process.kill()
