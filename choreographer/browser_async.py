@@ -17,7 +17,7 @@ from ._brokers import Broker
 from .browsers import BrowserClosedError, BrowserDepsError, BrowserFailedError, Chromium
 from .channels import ChannelClosedError, Pipe
 from .protocol.devtools_async import Session, Target
-from .utils import TmpDirWarning
+from .utils import TmpDirWarning, _manual_thread_pool
 from .utils._kill import kill
 
 if TYPE_CHECKING:
@@ -95,6 +95,11 @@ class Browser(Target):
 
         """
         _logger.debug("Attempting to open new browser.")
+
+        self._check_closed_executor = _manual_thread_pool.ManualThreadExecutor(
+            max_workers=3,
+            name="checking_close",
+        )
         self._make_lock()
         self.tabs = {}
         self.targets = {}
@@ -152,6 +157,7 @@ class Browser(Target):
             _logger.debug("Running read loop")
             self._broker.run_read_loop()
             _logger.debug("Populating Targets")
+            await asyncio.sleep(0)  # let watchdog start
             await self.populate_targets()
         except (BrowserClosedError, BrowserFailedError, asyncio.CancelledError) as e:
             if (
@@ -186,11 +192,18 @@ class Browser(Target):
         else:
             try:
                 loop = asyncio.get_running_loop()
-                await loop.run_in_executor(None, self.subprocess.wait, wait)
+
+                await loop.run_in_executor(
+                    self._check_closed_executor,
+                    self.subprocess.wait,
+                    wait,
+                )
             except subprocess.TimeoutExpired:
                 return False
         return True
 
+    # we encapsulate a portion of close that relates solely to browser shutdown
+    # that's _close(), but close() handles everything around it
     async def _close(self) -> None:
         if await self._is_closed():
             _logger.debug("No _close(), already is closed")
@@ -204,10 +217,8 @@ class Browser(Target):
             return
         except ChannelClosedError:
             _logger.debug("Can't send Browser.close on close channel")
-        loop = asyncio.get_running_loop()
 
-        # why in another thread?
-        await loop.run_in_executor(None, self._channel.close)
+        self._channel.close()
 
         if await self._is_closed(wait=3):
             return
@@ -216,8 +227,8 @@ class Browser(Target):
             _logger.debug("Browser is closed after closing channel")
             return
         _logger.warning("Resorting to unclean kill browser.")
-        loop = asyncio.get_running_loop()
-        await loop.run_in_executor(None, kill, self.subprocess)
+
+        kill(self.subprocess)
         if await self._is_closed(wait=4):
             return
         else:
@@ -238,14 +249,17 @@ class Browser(Target):
         except ProcessLookupError:
             pass
         self._broker.clean()
+
         _logger.debug("Broker cleaned up.")
         if self._logger_pipe:
-            os.close(self._logger_pipe)
+            os.close(self._logger_pipe)  # subprocess has it open anyway
+            # could have closed this copy immediately
             _logger.debug("Logging pipe closed.")
-        self._channel.close()
+        self._channel.close()  # was not blocky when comment written
         _logger.debug("Browser channel closed.")
-        self._browser_impl.clean()  # threading this just seems to cause problems
+        self._browser_impl.clean()  # os blocky/hangy across networks
         _logger.debug("Browser implementation cleaned up.")
+        self._check_closed_executor.shutdown(wait=False, cancel_futures=True)
 
     async def __aexit__(
         self,
@@ -258,17 +272,35 @@ class Browser(Target):
         return None
 
     async def _watchdog(self) -> None:
-        with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", category=TmpDirWarning)
-            _logger.debug("In watchdog")
-            loop = asyncio.get_running_loop()
-            _logger.debug2("Running wait.")
-            await loop.run_in_executor(None, self.subprocess.wait)
-            _logger.warning("Wait expired, Browser is being closed by watchdog.")
-            self._watch_dog_task = None
-            await self.close()
-            await asyncio.sleep(1)
-            await loop.run_in_executor(None, self._browser_impl.clean)
+        _executor = _manual_thread_pool.ManualThreadExecutor(
+            max_workers=1,
+            name="watchdog_wait",
+        )
+        try:
+            with warnings.catch_warnings():
+                warnings.filterwarnings("ignore", category=TmpDirWarning)
+                _logger.debug("In watchdog")
+                loop = asyncio.get_running_loop()
+                _logger.debug2("Running wait.")
+                await loop.run_in_executor(
+                    _executor,
+                    self.subprocess.wait,
+                )
+
+                _logger.warning("Wait expired, Browser is being closed by watchdog.")
+                self._watch_dog_task = (
+                    None  # no need for close to cancel, we're going to finish soon
+                )
+                await self.close()
+                await asyncio.sleep(1)
+                await loop.run_in_executor(
+                    _executor,
+                    self._browser_impl.clean,
+                )  # this is a backup
+
+        finally:
+            _executor.shutdown(wait=False, cancel_futures=True)
+            _logger.debug("Watchdog full shutdown (in finally:)")
 
     def _add_tab(self, tab: Tab) -> None:
         if not isinstance(tab, Tab):

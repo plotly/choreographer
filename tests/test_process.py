@@ -94,7 +94,7 @@ async def test_watchdog(headless):
         )
     else:
         os.kill(browser.subprocess.pid, signal.SIGKILL)
-    await asyncio.sleep(1.5)
+    await asyncio.sleep(0.5)
 
     with pytest.raises(
         (errors.ChannelClosedError, errors.BrowserClosedError),
