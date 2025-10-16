@@ -244,6 +244,7 @@ class Browser(Target):
         except ProcessLookupError:
             pass
         self._broker.clean()
+
         _logger.debug("Broker cleaned up.")
         if self._logger_pipe:
             os.close(self._logger_pipe)  # subprocess has it open anyway
@@ -275,7 +276,10 @@ class Browser(Target):
                 _logger.debug("In watchdog")
                 loop = asyncio.get_running_loop()
                 _logger.debug2("Running wait.")
-                await loop.run_in_executor(_executor, self.subprocess.wait)
+                await loop.run_in_executor(
+                    _executor,
+                    self.subprocess.wait,
+                )
 
                 _logger.warning("Wait expired, Browser is being closed by watchdog.")
                 self._watch_dog_task = (
@@ -291,6 +295,7 @@ class Browser(Target):
                 # and more likely if we're using watchdog
         finally:
             _executor.shutdown(wait=False, cancel_futures=True)
+            _logger.debug("Watchdog full shutdown (in finally:)")
 
     def _add_tab(self, tab: Tab) -> None:
         if not isinstance(tab, Tab):

@@ -70,8 +70,8 @@ class Broker:
 
         self._write_lock = asyncio.Lock()
         self._executor = _manual_thread_pool.ManualThreadExecutor(
-            max_workers=3,
-            name="read_thread",
+            max_workers=2,
+            name="readwrite_thread",
         )
 
     def new_subscription_future(
@@ -112,7 +112,7 @@ class Broker:
             if not task.done():
                 _logger.debug2(f"Cancelling {task}")
                 task.cancel()
-        self._executor.shutdown(wait=False, cancel_futures=True)
+        self._executor.shutdown(wait=True, cancel_futures=True)
 
     def run_read_loop(self) -> None:  # noqa: C901, PLR0915 complexity
         def check_read_loop_error(result: asyncio.Future[Any]) -> None:
@@ -251,13 +251,16 @@ class Broker:
         self.futures[key] = future
         _logger.debug(f"Created future: {key} {future}")
         try:
-            async with self._write_lock:
+            async with self._write_lock:  # this should be a queue not a lock
                 loop = asyncio.get_running_loop()
                 await loop.run_in_executor(
                     self._executor,
                     self._channel.write_json,
                     obj,
                 )
+        except _manual_thread_pool.ExecutorClosedError as e:
+            future.cancel()  # just eat it, its never getting fulfilled.
+            raise channels.ChannelClosedError("Executor is closed.") from e
         except Exception as e:  # noqa: BLE001
             future.set_exception(e)
             del self.futures[key]
