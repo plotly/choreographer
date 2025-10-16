@@ -157,6 +157,7 @@ class Browser(Target):
             _logger.debug("Running read loop")
             self._broker.run_read_loop()
             _logger.debug("Populating Targets")
+            await asyncio.sleep(0)  # let watchdog start
             await self.populate_targets()
         except (BrowserClosedError, BrowserFailedError, asyncio.CancelledError) as e:
             if (
