@@ -5,6 +5,8 @@ import subprocess
 import sys
 import time
 
+import logistro
+
 # diagnose function is too weird and ruff guts it
 # ruff has line-level and file-level QA suppression
 # so lets give diagnose a separate file
@@ -26,11 +28,15 @@ import time
 
 
 def diagnose() -> None:
+    logistro.getLogger().setLevel(6)
+    logistro.getLogger().error("Test")
     from choreographer import Browser, BrowserSync
-    from choreographer.browsers._chrome_constants import chrome_names
-    from choreographer.utils._which import browser_which
+    from choreographer.browsers.chromium import _find_a_chromium_based_browser
 
-    parser = argparse.ArgumentParser(description="tool to help debug problems")
+    parser = argparse.ArgumentParser(
+        description="tool to help debug problems",
+        parents=[logistro.parser],
+    )
     parser.add_argument("--no-run", dest="run", action="store_false")
     parser.add_argument("--show", dest="headless", action="store_false")
     parser.set_defaults(run=True)
@@ -46,7 +52,7 @@ def diagnose() -> None:
     print(platform.version())
     print(platform.uname())
     print("BROWSER:".center(50, "*"))
-    browser_path = browser_which(chrome_names)
+    browser_path = _find_a_chromium_based_browser(skip_local=True)
     print(browser_path)
     print("BROWSER_INIT_CHECK (DEPS)".center(50, "*"))
     if not browser_path:
