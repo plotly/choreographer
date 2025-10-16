@@ -17,7 +17,7 @@ from ._brokers import Broker
 from .browsers import BrowserClosedError, BrowserDepsError, BrowserFailedError, Chromium
 from .channels import ChannelClosedError, Pipe
 from .protocol.devtools_async import Session, Target
-from .utils import TmpDirWarning
+from .utils import TmpDirWarning, _manual_thread_pool
 from .utils._kill import kill
 
 if TYPE_CHECKING:
@@ -265,24 +265,32 @@ class Browser(Target):
         return None
 
     async def _watchdog(self) -> None:
-        with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", category=TmpDirWarning)
-            _logger.debug("In watchdog")
-            loop = asyncio.get_running_loop()
-            _logger.debug2("Running wait.")
-            await loop.run_in_executor(None, self.subprocess.wait)  # DANGEROUS
-            _logger.warning("Wait expired, Browser is being closed by watchdog.")
-            self._watch_dog_task = (
-                None  # no need for close to cancel, we're going to finish soon
-            )
-            await self.close()
-            await asyncio.sleep(1)
-            await loop.run_in_executor(
-                None,
-                self._browser_impl.clean,
-            )  # this is a backup,
-            # close should do this, but failure possible
-            # and more likely if we're using watchdog
+        _executor = _manual_thread_pool.ManualThreadExecutor(
+            max_workers=1,
+            name="watchdog_wait",
+        )
+        try:
+            with warnings.catch_warnings():
+                warnings.filterwarnings("ignore", category=TmpDirWarning)
+                _logger.debug("In watchdog")
+                loop = asyncio.get_running_loop()
+                _logger.debug2("Running wait.")
+                await loop.run_in_executor(_executor, self.subprocess.wait)
+
+                _logger.warning("Wait expired, Browser is being closed by watchdog.")
+                self._watch_dog_task = (
+                    None  # no need for close to cancel, we're going to finish soon
+                )
+                await self.close()
+                await asyncio.sleep(1)
+                await loop.run_in_executor(
+                    None,
+                    self._browser_impl.clean,
+                )  # this is a backup,
+                # close should do this, but failure possible
+                # and more likely if we're using watchdog
+        finally:
+            _executor.shutdown(wait=False, cancel_futures=True)
 
     def _add_tab(self, tab: Tab) -> None:
         if not isinstance(tab, Tab):
