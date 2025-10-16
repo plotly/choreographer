@@ -42,7 +42,11 @@ def _is_exe(path: str | Path) -> bool:
         return False
 
 
-def _find_a_chromium_based_browser(*, skip_local: bool) -> str | None:
+def _find_a_chromium_based_browser(
+    *,
+    skip_local: bool,
+    skip_typical: bool = False,
+) -> str | None:
     for name, browser_data in chromium_based_browsers.items():
         _logger.debug(f"Looking for a {name} browser.")
         path = get_browser_path(
@@ -50,7 +54,7 @@ def _find_a_chromium_based_browser(*, skip_local: bool) -> str | None:
             skip_local=skip_local,
             ms_prog_id=browser_data.ms_prog_id,
         )
-        if not path:
+        if not path and not skip_typical:
             for candidate in browser_data.typical_paths:
                 if _is_exe(candidate):
                     path = candidate
