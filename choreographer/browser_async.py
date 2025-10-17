@@ -229,7 +229,7 @@ class Browser(Target):
         _logger.warning("Resorting to unclean kill browser.")
 
         kill(self.subprocess)
-        if await self._is_closed(wait=4):
+        if await self._is_closed(wait=6):
             return
         else:
             raise RuntimeError("Couldn't close or kill browser subprocess")
