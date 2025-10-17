@@ -32,6 +32,7 @@ def diagnose() -> None:
     logistro.getLogger().error("Test")
     from choreographer import Browser, BrowserSync
     from choreographer.browsers.chromium import _find_a_chromium_based_browser
+    from choreographer.utils._which import browser_which
 
     parser = argparse.ArgumentParser(
         description="tool to help debug problems",
@@ -52,6 +53,10 @@ def diagnose() -> None:
     print(platform.version())
     print(platform.uname())
     print("BROWSER:".center(50, "*"))
+    try:
+        print("Found local: {browser_which(verify_local=True)}")
+    except RuntimeError:
+        print("Didn't find local.")
     browser_path = _find_a_chromium_based_browser(skip_local=True)
     print(browser_path)
     print("BROWSER_INIT_CHECK (DEPS)".center(50, "*"))

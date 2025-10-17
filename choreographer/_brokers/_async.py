@@ -116,6 +116,9 @@ class Broker:
 
     def run_read_loop(self) -> None:  # noqa: C901, PLR0915 complexity
         def check_read_loop_error(result: asyncio.Future[Any]) -> None:
+            if result.cancelled():
+                _logger.debug("Readloop cancelled")
+                return
             e = result.exception()
             if e:
                 _logger.debug("Error in readloop. Will post a close() task.")
