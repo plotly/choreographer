@@ -217,6 +217,8 @@ class Browser(Target):
             return
         except ChannelClosedError:
             _logger.debug("Can't send Browser.close on close channel")
+        except asyncio.CancelledError:
+            _logger.debug("Close was cancelled, _broker must be shutting down.")
 
         self._channel.close()
 
