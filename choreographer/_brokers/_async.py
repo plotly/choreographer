@@ -261,7 +261,7 @@ class Broker:
                     self._channel.write_json,
                     obj,
                 )
-        except _manual_thread_pool.ExecutorClosedError as e:
+        except (_manual_thread_pool.ExecutorClosedError, asyncio.CancelledError) as e:
             if not future.cancel() or not future.cancelled():
                 await future  # it wasn't canceled, so listen to it before raising
             raise channels.ChannelClosedError("Executor is closed.") from e

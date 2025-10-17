@@ -200,6 +200,8 @@ class Browser(Target):
                 )
             except subprocess.TimeoutExpired:
                 return False
+            except asyncio.CancelledError:
+                return True
         return True
 
     # we encapsulate a portion of close that relates solely to browser shutdown
@@ -299,7 +301,8 @@ class Browser(Target):
                     _executor,
                     self._browser_impl.clean,
                 )  # this is a backup
-
+        except asyncio.CancelledError:
+            pass
         finally:
             _executor.shutdown(wait=False, cancel_futures=True)
             _logger.debug("Watchdog full shutdown (in finally:)")
