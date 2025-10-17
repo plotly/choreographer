@@ -262,13 +262,14 @@ class Broker:
                     obj,
                 )
         except _manual_thread_pool.ExecutorClosedError as e:
-            if not future.cancel() or future.cancelled():
+            if not future.cancel() or not future.cancelled():
                 await future  # it wasn't canceled, so listen to it before raising
             raise channels.ChannelClosedError("Executor is closed.") from e
         except Exception as e:  # noqa: BLE001
             future.set_exception(e)
             del self.futures[key]
             _logger.debug(f"Future for {key} deleted.")
+
         return await future
 
     def _get_target_session_by_session_id(
