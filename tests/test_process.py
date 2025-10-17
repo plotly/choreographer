@@ -19,22 +19,22 @@ _logger = logistro.getLogger(__name__)
 @pytest.mark.asyncio(loop_scope="function")
 async def test_context(headless, sandbox, gpu):
     _logger.info("testing...")
+    if sandbox and "ubuntu" in platform.version().lower():
+        pytest.skip(
+            "Ubuntu doesn't support sandbox unless installed from snap.",
+        )
+    elif sandbox:
+        _logger.info(
+            "Not skipping sandbox: "
+            f"Sandbox: {sandbox},"
+            f"Version: {platform.version().lower()}",
+        )
     async with timeout(pytest.default_timeout):  # type: ignore[reportAttributeAccessIssue]
         async with choreo.Browser(
             headless=headless,
             enable_sandbox=sandbox,
             enable_gpu=gpu,
         ) as browser:
-            if sandbox and "ubuntu" in platform.version().lower():
-                pytest.skip(
-                    "Ubuntu doesn't support sandbox unless installed from snap.",
-                )
-            elif sandbox:
-                _logger.info(
-                    "Not skipping sandbox: "
-                    f"Sandbox: {sandbox},"
-                    f"Version: {platform.version().lower()}",
-                )
             response = await browser.send_command(command="Target.getTargets")
             assert "result" in response and "targetInfos" in response["result"]  # noqa: PT018 combined assert
             if len(response["result"]["targetInfos"]) == 0:
@@ -52,13 +52,13 @@ async def test_context(headless, sandbox, gpu):
 @pytest.mark.asyncio(loop_scope="function")
 async def test_no_context(headless, sandbox, gpu):
     _logger.info("testing...")
+    if sandbox and "ubuntu" in platform.version().lower():
+        pytest.skip("Ubuntu doesn't support sandbox unless installed from snap.")
     browser = await choreo.Browser(
         headless=headless,
         enable_sandbox=sandbox,
         enable_gpu=gpu,
     )
-    if sandbox and "ubuntu" in platform.version().lower():
-        pytest.skip("Ubuntu doesn't support sandbox unless installed from snap.")
     try:
         async with timeout(pytest.default_timeout):  # type: ignore[reportAttributeAccessIssue]
             response = await browser.send_command(command="Target.getTargets")
