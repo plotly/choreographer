@@ -2,8 +2,8 @@ v1.2.0
 - Delete zipfile after downloading
 - Upgrade logistro to reduce sideeffects
 - Look for several chromium variants in all OSes by default
-- Replace ThreadpoolExecutor w/ manually managed to allow use of
-  of process control within atexit.
+- Replace ThreadpoolExecutor w/ manually managed pool, allowing use of
+  `.close()` within `atexit`.
 v1.1.2
 - Appease stricter typer
 - Add lock to mark channel open and is_ready function that checks open and close
