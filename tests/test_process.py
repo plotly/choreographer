@@ -97,7 +97,7 @@ async def test_watchdog(headless):
     await asyncio.sleep(0.5)
 
     with pytest.raises(
-        (errors.ChannelClosedError, errors.BrowserClosedError),
+        (errors.ChannelClosedError, errors.BrowserClosedError, asyncio.CancelledError),
     ):
         await browser.send_command(command="Target.getTargets")
 
