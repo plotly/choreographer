@@ -1,3 +1,5 @@
+v1.2.1
+- Use custom ThreadpoolExecutor for all browser-related actions
 v1.2.0
 - Delete zipfile after downloading
 - Upgrade logistro to reduce sideeffects
