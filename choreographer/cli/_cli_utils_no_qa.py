@@ -53,7 +53,7 @@ def diagnose() -> None:
     print(platform.uname())
     print("BROWSER:".center(50, "*"))
     try:
-        print("Found local: {browser_which(verify_local=True)}")
+        print(f"Found local: {browser_which([], verify_local=True)}")
     except RuntimeError:
         print("Didn't find local.")
     browser_path = _find_a_chromium_based_browser(skip_local=True)
