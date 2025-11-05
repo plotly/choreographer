@@ -202,9 +202,9 @@ class Chromium:
             self.path = Chromium.find_browser(skip_local=self.skip_local)
         if not self.path:
             raise ChromeNotFoundError(
-                "Browser not found. You can use get_chrome(), "
-                "please see documentation. Local copy ignored: "
-                f"{self.skip_local}",
+                "Browser not found. You can use get_chrome() or "
+                "choreo_get_chrome from bash. please see documentation. "
+                f"Local copy ignored: {self.skip_local}.",
             )
         _logger.info(f"Found chromium path: {self.path}")
 
