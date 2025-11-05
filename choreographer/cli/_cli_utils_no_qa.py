@@ -28,8 +28,7 @@ import logistro
 
 
 def diagnose() -> None:
-    logistro.getLogger().setLevel(6)
-    logistro.getLogger().error("Test")
+    logistro.betterConfig(level=1)
     from choreographer import Browser, BrowserSync
     from choreographer.browsers.chromium import _find_a_chromium_based_browser
     from choreographer.utils._which import browser_which
