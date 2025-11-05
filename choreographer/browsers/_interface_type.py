@@ -15,6 +15,20 @@ if TYPE_CHECKING:
 class BrowserImplInterface(Protocol):
     """Defines the basic interface of a channel."""
 
+    path: str | Path | None
+    """The OS path to the operating system."""
+
+    @classmethod
+    def find_browser(
+        cls,
+        *,
+        skip_local: bool,
+        skip_typical: bool = False,
+    ) -> str | None: ...
+
+    ### Tries to find a working copy of itself, using our OS methods
+    ### as well as its own methods. See the Chromium implementation.
+
     @classmethod
     def logger_parser(
         cls,

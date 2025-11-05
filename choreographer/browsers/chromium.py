@@ -69,7 +69,7 @@ class Chromium:
     tmp_dir: TmpDirectory
     """A reference to a temporary directory object the chromium needs to store data."""
 
-    @classmethod  # not actually part of the protocol
+    @classmethod
     def find_browser(
         cls,
         *,
