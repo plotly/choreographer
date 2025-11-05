@@ -30,7 +30,7 @@ import logistro
 def diagnose() -> None:
     logistro.betterConfig(level=1)
     from choreographer import Browser, BrowserSync
-    from choreographer.browsers.chromium import _find_a_chromium_based_browser
+    from choreographer.browsers.chromium import Chromium
     from choreographer.utils._which import browser_which
 
     parser = argparse.ArgumentParser(
@@ -57,7 +57,7 @@ def diagnose() -> None:
         print(f"Found local: {browser_which([], verify_local=True)}")
     except RuntimeError:
         print("Didn't find local.")
-    browser_path = _find_a_chromium_based_browser(skip_local=True)
+    browser_path = Chromium.find_browser(skip_local=True)
     print(browser_path)
     print("*".center(50, "*"))
     print("BROWSER_INIT_CHECK (DEPS)".center(50, "*"))
