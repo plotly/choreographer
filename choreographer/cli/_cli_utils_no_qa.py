@@ -66,14 +66,18 @@ def diagnose() -> None:
         b._browser_impl.pre_open()
         cli = b._browser_impl.get_cli()
         env = b._browser_impl.get_env()
+        args = b._browser_impl.get_popen_args()
         b._browser_impl.clean()
         del b
-        print("cli:")
+        print("*** cli:")
         for arg in cli:
-            print(arg)
-        print("env:")
+            print(" " * 8 + str(arg))
+        print("*** env:")
         for k, v in env.items():
-            print(f"{k}:{v}")
+            print(" " * 8 + f"{k}:{v}")
+        print("*** Popen args:")
+        for k, v in args.items():
+            print(" " * 8 + f"{k}:{v}")
     print("VERSION INFO:".center(50, "*"))
     try:
         print("PIP:".center(25, "*"))
