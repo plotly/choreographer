@@ -13,3 +13,5 @@ worthless
 - [ ] Test against multiple docker containers
 - [ ] Do browser-rolling tests
 - [ ] Do documentation
+- [ ] Browser Open/Close Status/PipeCheck status should happen at broker level
+  - [ ] Broker should probably be opening browser and running watchdog...
