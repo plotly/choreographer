@@ -1,3 +1,5 @@
+- Add argument to Session/Target send_command with_perf to return
+  timing information about browser write/read.
 v1.2.0
 - Delete zipfile after downloading
 - Upgrade logistro to reduce sideeffects
