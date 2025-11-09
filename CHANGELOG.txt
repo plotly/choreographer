@@ -1,3 +1,4 @@
+- Remove site directory
 v1.2.0
 - Delete zipfile after downloading
 - Upgrade logistro to reduce sideeffects
