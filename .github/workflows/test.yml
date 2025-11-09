@@ -23,7 +23,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install xvfb
         timeout-minutes: 1
       - name: Install choreographer
-        run:  uv sync --no-sources --all-extras
+        run:  uv sync --no-sources --all-extras --locked
       - name: Install google-chrome-for-testing
         run: uv run --no-sources choreo_get_chrome -v
       - name: Diagnose
