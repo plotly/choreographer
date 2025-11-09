@@ -107,6 +107,7 @@ ignore = [
 [tool.pytest.ini_options]
 asyncio_default_fixture_loop_scope = "function"
 log_cli = false
+importmode = "append"
 
 [tool.poe.tasks]
 test_proc = "pytest --log-level=1 -W error -n auto -v -rfE --capture=fd tests/test_process.py"
