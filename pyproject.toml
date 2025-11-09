@@ -2,8 +2,11 @@
 requires = ["setuptools>=65.0.0", "wheel", "setuptools-git-versioning"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools.packages]
-find = {namespaces = true}
+[tool.setuptools]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+namespaces = false
 
 [tool.setuptools-git-versioning]
 enabled = true
@@ -69,7 +72,7 @@ dev = [
 #logistro = { path = "../logistro", editable = true }
 
 [tool.ruff]
-src = ["choreographer"]
+src = ["src"]
 
 [tool.ruff.lint]
 select = ["ALL"]
@@ -126,4 +129,4 @@ help = "Run any/all tests one by one with basic settings: can include filename a
 [tool.pyright]
 venvPath = "."
 venv = ".venv"
-include = ["choreographer", "tests"]
+include = ["src", "tests"]
