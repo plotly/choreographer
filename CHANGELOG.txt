@@ -1,3 +1,4 @@
+- Remove site directory
 - Improve error messaging
 - Organize functions internally
 - Improve choreo_diagnose
