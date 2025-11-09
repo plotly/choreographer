@@ -1,4 +1,9 @@
 - Remove site directory
+- Improve error messaging
+- Organize functions internally
+- Improve choreo_diagnose
+- Add Roadmap
+- Bump logistro dependency
 v1.2.0
 - Delete zipfile after downloading
 - Upgrade logistro to reduce sideeffects
