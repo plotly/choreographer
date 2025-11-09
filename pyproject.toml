@@ -72,7 +72,7 @@ dev = [
 #logistro = { path = "../logistro", editable = true }
 
 [tool.ruff]
-src = ["choreographer"]
+src = ["src"]
 
 [tool.ruff.lint]
 select = ["ALL"]
@@ -129,4 +129,4 @@ help = "Run any/all tests one by one with basic settings: can include filename a
 [tool.pyright]
 venvPath = "."
 venv = ".venv"
-include = ["choreographer", "tests"]
+include = ["src", "tests"]
