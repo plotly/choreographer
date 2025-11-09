@@ -11,9 +11,12 @@ See the main README for a quickstart.
 import os
 
 if os.getenv("CHOREO_ENABLE_DEBUG") == 1:
+    import sys
+
     import logistro
 
-    logistro.betterConfig()
+    logistro.betterConfig(level=1)
+    print("DEBUG MODE!", file=sys.stderr)  # noqa: T201
 
 from .browser_async import (
     Browser,
