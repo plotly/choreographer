@@ -40,6 +40,8 @@ def test_canary():
         pytest.skip("Okay, no need to test for local.")
     _r = chromium.Chromium.find_browser(skip_local=False, skip_typical=True)
     print(sys.path, file=sys.stderr)
+    print(f"found {_r}", file=sys.stderr)
+    print(f"download path: {get_chrome_download_path()}", file=sys.stderr)
     assert _r
     assert Path(_r) == get_chrome_download_path()
     # if _r != get_chrome_download_path():
