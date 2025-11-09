@@ -31,7 +31,7 @@ jobs:
       - run: uv python pin ${{ matrix.python_v }}
         if: ${{ matrix.python_v != '' }}
       # don't modify sync file! messes up version!
-      - run: uv sync --all-extras --frozen # does order matter?
+      - run: uv sync --all-extras --locked --no-sources
       - run: uv build
       - name: Reinstall from wheel
         run: >
