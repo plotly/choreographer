@@ -10,7 +10,7 @@ See the main README for a quickstart.
 
 import os
 
-if os.getenv("CHOREO_ENABLE_DEBUG") == 1:
+if os.getenv("CHOREO_ENABLE_DEBUG"):
     import sys
 
     import logistro
