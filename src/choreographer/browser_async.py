@@ -46,6 +46,9 @@ class Tab(Target):
 class Browser(Target):
     """`Browser` is the async implementation of `Browser`."""
 
+    subprocess: subprocess.Popen[bytes] | subprocess.Popen[str]
+    """A reference to the `Popen` object."""
+
     tabs: MutableMapping[str, Tab]
     """A mapping by target_id of all the targets which are open tabs."""
     targets: MutableMapping[str, Target]
@@ -96,7 +99,7 @@ class Browser(Target):
         """
         _logger.debug("Attempting to open new browser.")
 
-        self._check_closed_executor = _manual_thread_pool.ManualThreadExecutor(
+        self._process_executor = _manual_thread_pool.ManualThreadExecutor(
             max_workers=3,
             name="checking_close",
         )
@@ -144,7 +147,10 @@ class Browser(Target):
 
         _logger.debug("Trying to open browser.")
         loop = asyncio.get_running_loop()
-        self.subprocess = await loop.run_in_executor(None, run)
+        self.subprocess = await loop.run_in_executor(
+            self._process_executor,
+            run,
+        )
 
         super().__init__("0", self._broker)
         self._add_session(Session("", self._broker))
@@ -198,7 +204,7 @@ class Browser(Target):
                 loop = asyncio.get_running_loop()
 
                 await loop.run_in_executor(
-                    self._check_closed_executor,
+                    self._process_executor,
                     self.subprocess.wait,
                     wait,
                 )
@@ -250,6 +256,8 @@ class Browser(Target):
             self._watch_dog_task.cancel()
         if not self._release_lock():
             return
+        # it can never be mid open here, because all of these must
+        # run on the same thread. Do not push open or close to threads.
         try:
             _logger.debug("Starting browser close methods.")
             await self._close()
@@ -267,7 +275,7 @@ class Browser(Target):
         _logger.debug("Browser channel closed.")
         self._browser_impl.clean()  # os blocky/hangy across networks
         _logger.debug("Browser implementation cleaned up.")
-        self._check_closed_executor.shutdown(wait=False, cancel_futures=True)
+        self._process_executor.shutdown(wait=False, cancel_futures=True)
 
     async def __aexit__(
         self,

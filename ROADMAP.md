@@ -3,11 +3,10 @@
 - [ ] Working on better diagnostic information
   - [ ] Explain to user when their system has security restrictions
 - [ ] Eliminate synchronous API: it's unused, hard to maintain, and nearly
-worthless
+      worthless
 - [ ] Diagnose function should collect a JSON and then print that
 - [ ] Allow user to build and send their own JSONS
   - [ ] Get serialization out of the lock
-- [ ]
 - [ ] Support Firefox
 - [ ] Support LadyBird (!)
 - [ ] Test against multiple docker containers
