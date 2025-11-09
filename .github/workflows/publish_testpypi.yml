@@ -31,7 +31,7 @@ jobs:
       - run: uv python pin ${{ matrix.python_v }}
         if: ${{ matrix.python_v != '' }}
       # don't modify sync file! messes up version!
-      - run: uv sync --all-extras --frozen # does order matter?
+      - run: uv sync --all-extras --locked --no-sources
       - run: uv build
       - name: Reinstall from wheel
         run: >
@@ -64,7 +64,7 @@ jobs:
   testpypi-publish:
     name: Upload release to TestPyPI
     needs: super-test
-    if: always() && !cancelled() && !failure()
+    if: ${{ !cancelled() && !failure() && github.event_name == 'push' }}
     runs-on: ubuntu-latest
     environment:
       name: testpypi

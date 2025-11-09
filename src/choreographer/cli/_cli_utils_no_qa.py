@@ -4,6 +4,7 @@ import platform
 import subprocess
 import sys
 import time
+from pathlib import Path
 
 import logistro
 
@@ -54,7 +55,11 @@ def diagnose() -> None:
     print("*".center(50, "*"))
     print("BROWSER:".center(50, "*"))
     try:
-        print(f"Found local: {browser_which([], verify_local=True)}")
+        local_path = browser_which([], verify_local=True)
+        if local_path and not Path(local_path).exists():
+            print(f"Local doesn't exist at {local_path}")
+        else:
+            print(f"Found local: {browser_which([], verify_local=True)}")
     except RuntimeError:
         print("Didn't find local.")
     browser_path = Chromium.find_browser(skip_local=True)
