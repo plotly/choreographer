@@ -64,7 +64,7 @@ jobs:
   testpypi-publish:
     name: Upload release to TestPyPI
     needs: super-test
-    if: always() && !cancelled() && !failure()
+    if: ${{ !cancelled() && !failure() && github.event_name == 'push' }}
     runs-on: ubuntu-latest
     environment:
       name: testpypi
