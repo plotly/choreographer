@@ -173,7 +173,7 @@ class Browser(Target):
                 ""
                 "It may be your browser auto-updated and will now work upon "
                 "restart. The browser we tried to start is located at "
-                "{self._browser_impl.path}.",
+                f"{self._browser_impl.path}.",
             ) from e
 
     async def __aenter__(self) -> Self:
