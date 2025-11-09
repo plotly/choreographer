@@ -8,6 +8,13 @@ as a building block for more featureful implementations.
 See the main README for a quickstart.
 """
 
+import os
+
+if os.getenv("CHOREO_ENABLE_DEBUG") == 1:
+    import logistro
+
+    logistro.betterConfig()
+
 from .browser_async import (
     Browser,
     Tab,
