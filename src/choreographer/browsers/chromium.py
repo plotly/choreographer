@@ -42,28 +42,6 @@ def _is_exe(path: str | Path) -> bool:
         return False
 
 
-def _find_a_chromium_based_browser(
-    *,
-    skip_local: bool,
-    skip_typical: bool = False,
-) -> str | None:
-    for name, browser_data in chromium_based_browsers.items():
-        _logger.debug(f"Looking for a {name} browser.")
-        path = get_browser_path(
-            executable_names=browser_data.exe_names,
-            skip_local=skip_local,
-            ms_prog_id=browser_data.ms_prog_id,
-        )
-        if not path and not skip_typical:
-            for candidate in browser_data.typical_paths:
-                if _is_exe(candidate):
-                    path = candidate
-                    break
-        if path:
-            return path
-    return None
-
-
 _logs_parser_regex = re.compile(r"\d*:\d*:\d*\/\d*\.\d*:")
 
 
@@ -90,6 +68,30 @@ class Chromium:
     """True if we want to avoid looking for our local download when searching path."""
     tmp_dir: TmpDirectory
     """A reference to a temporary directory object the chromium needs to store data."""
+
+    @classmethod
+    def find_browser(
+        cls,
+        *,
+        skip_local: bool,
+        skip_typical: bool = False,
+    ) -> str | None:
+        """Find a chromium based browser."""
+        for name, browser_data in chromium_based_browsers.items():
+            _logger.debug(f"Looking for a {name} browser.")
+            path = get_browser_path(
+                executable_names=browser_data.exe_names,
+                skip_local=skip_local,
+                ms_prog_id=browser_data.ms_prog_id,
+            )
+            if not path and not skip_typical:
+                for candidate in browser_data.typical_paths:
+                    if _is_exe(candidate):
+                        path = candidate
+                        break
+            if path:
+                return path
+        return None
 
     @classmethod
     def logger_parser(
@@ -197,11 +199,12 @@ class Chromium:
             )
 
         if not self.path:
-            self.path = _find_a_chromium_based_browser(skip_local=self.skip_local)
+            self.path = Chromium.find_browser(skip_local=self.skip_local)
         if not self.path:
             raise ChromeNotFoundError(
-                "Browser not found. You can use get_chrome(), "
-                "please see documentation.",
+                "Browser not found. You can use get_chrome() or "
+                "choreo_get_chrome from bash. please see documentation. "
+                f"Local copy ignored: {self.skip_local}.",
             )
         _logger.info(f"Found chromium path: {self.path}")
 

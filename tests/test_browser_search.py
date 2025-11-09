@@ -4,7 +4,7 @@ import stat
 from pathlib import Path
 
 import pytest
-from choreographer.browsers.chromium import _find_a_chromium_based_browser
+from choreographer.browsers import chromium
 
 
 def test_internal(tmp_path):
@@ -23,7 +23,7 @@ def test_internal(tmp_path):
         paths.append(p)
 
     for _p, _n in zip(paths, names):
-        _r = _find_a_chromium_based_browser(skip_local=True, skip_typical=True)
+        _r = chromium.Chromium.find_browser(skip_local=True, skip_typical=True)
         assert _r
         assert Path(_r).stem == _n
         _p.unlink()

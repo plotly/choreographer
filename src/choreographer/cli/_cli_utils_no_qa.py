@@ -28,10 +28,9 @@ import logistro
 
 
 def diagnose() -> None:
-    logistro.getLogger().setLevel(6)
-    logistro.getLogger().error("Test")
+    logistro.betterConfig(level=1)
     from choreographer import Browser, BrowserSync
-    from choreographer.browsers.chromium import _find_a_chromium_based_browser
+    from choreographer.browsers.chromium import Chromium
     from choreographer.utils._which import browser_which
 
     parser = argparse.ArgumentParser(
@@ -52,13 +51,15 @@ def diagnose() -> None:
     print(platform.release())
     print(platform.version())
     print(platform.uname())
+    print("*".center(50, "*"))
     print("BROWSER:".center(50, "*"))
     try:
-        print("Found local: {browser_which(verify_local=True)}")
+        print(f"Found local: {browser_which([], verify_local=True)}")
     except RuntimeError:
         print("Didn't find local.")
-    browser_path = _find_a_chromium_based_browser(skip_local=True)
+    browser_path = Chromium.find_browser(skip_local=True)
     print(browser_path)
+    print("*".center(50, "*"))
     print("BROWSER_INIT_CHECK (DEPS)".center(50, "*"))
     if not browser_path:
         print("No browser, found can't check for deps.")
@@ -66,28 +67,36 @@ def diagnose() -> None:
         b = Browser()
         b._browser_impl.pre_open()
         cli = b._browser_impl.get_cli()
-        env = b._browser_impl.get_env()
+        env = b._browser_impl.get_env()  # noqa: F841
+        args = b._browser_impl.get_popen_args()
         b._browser_impl.clean()
         del b
-        print("cli:")
+        print("*** cli:")
         for arg in cli:
-            print(arg)
-        print("env:")
-        for k, v in env.items():
-            print(f"{k}:{v}")
+            print(" " * 8 + str(arg))
+
+        # potential security issue
+        # print("*** env:")
+        # for k, v in env.items():
+        #     print(" " * 8 + f"{k}:{v}")
+
+        print("*** Popen args:")
+        for k, v in args.items():
+            print(" " * 8 + f"{k}:{v}")
+    print("*".center(50, "*"))
     print("VERSION INFO:".center(50, "*"))
     try:
-        print("PIP:".center(25, "*"))
+        print("pip:".center(25, "*"))
         print(subprocess.check_output([sys.executable, "-m", "pip", "freeze"]).decode())
     except Exception as e:
         print(f"Error w/ pip: {e}")
     try:
-        print("UV:".center(25, "*"))
+        print("uv:".center(25, "*"))
         print(subprocess.check_output(["uv", "pip", "freeze"]).decode())
     except Exception as e:
         print(f"Error w/ uv: {e}")
     try:
-        print("GIT:".center(25, "*"))
+        print("git:".center(25, "*"))
         print(
             subprocess.check_output(
                 ["git", "describe", "--tags", "--long", "--always"],
@@ -99,18 +108,10 @@ def diagnose() -> None:
         print(sys.version)
         print(sys.version_info)
         print("Done with version info.".center(50, "*"))
+
     if run:
-        try:
-            print("Skipping sync test...")
-            # print("Sync Test Headless".center(50, "*"))
-            # browser = BrowserSync(headless=headless)
-            # browser.open()
-            # time.sleep(3)
-            # browser.close()
-        except Exception as e:
-            fail.append(("Sync test headless", e))
-        finally:
-            print("Done with sync test headless".center(50, "*"))
+        print("*".center(50, "*"))
+        print("Actual Run Tests".center(50, "*"))
 
         async def test_headless() -> None:
             browser = await Browser(headless=headless)
@@ -141,5 +142,7 @@ def diagnose() -> None:
             except Exception:
                 print("Couldn't print traceback for:")
                 print(str(exception))
-        raise Exception("There was an exception, see above.")
+        raise Exception(
+            "There was an exception during full async run, see above.",
+        )
     print("Thank you! Please share these results with us!")
