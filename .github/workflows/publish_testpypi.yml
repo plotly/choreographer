@@ -32,6 +32,8 @@ jobs:
         if: ${{ matrix.python_v != '' }}
       # don't modify sync file! messes up version!
       - run: uv sync --all-extras --locked --no-sources
+      - run: git status
+      - run: git diff --quiet HEAD || { echo "Working tree dirty"; exit 1; }
       - run: uv build
       - name: Reinstall from wheel
         run: >
