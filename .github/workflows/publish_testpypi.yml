@@ -82,7 +82,7 @@ jobs:
         with:
           python-version-file: "pyproject.toml"
       - run: git checkout ${{ github.ref_name }}
-      - run: uv sync --frozen --all-extras
+      - run: uv sync --locked --all-extras --no-sources
       - run: uv build
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
