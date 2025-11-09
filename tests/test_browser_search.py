@@ -1,10 +1,13 @@
 import os
 import platform
 import stat
+import sys
 from pathlib import Path
 
 import pytest
+
 from choreographer.browsers import chromium
+from choreographer.cli._cli_utils import get_chrome_download_path
 
 
 def test_internal(tmp_path):
@@ -29,3 +32,16 @@ def test_internal(tmp_path):
         _p.unlink()
 
     os.environ["PATH"] = _o
+
+
+def test_canary():
+    # This ensures we are finding the local install
+    if os.getenv("TEST_SYSTEM_BROWSER"):
+        pytest.skip("Okay, no need to test for local.")
+    _r = chromium.Chromium.find_browser(skip_local=False, skip_typical=True)
+    print(sys.path, file=sys.stderr)
+    print(f"found {_r}", file=sys.stderr)
+    print(f"download path: {get_chrome_download_path()}", file=sys.stderr)
+    assert _r
+    assert Path(_r) == get_chrome_download_path()
+    # if _r != get_chrome_download_path():
