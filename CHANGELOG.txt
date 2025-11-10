@@ -1,5 +1,18 @@
 - Add argument to Session/Target send_command with_perf to return
   timing information about browser write/read.
+v1.2.1
+- Use custom threadpool for functions that could be running during shutdown:
+  Python's stdlib threadpool isn't available during interpreter shutdown, nor
+  `atexit`- so they cannot be started or shutdown during `atexit`, or relied
+  upon at all. We use a custom threadpool during `Browser.close()` so that it
+  can be leveraged during atexit, and now we use it during `Browser.open()`
+  since certain use patterns have that function running during shutdown.
+- Remove site directory
+- Improve error messaging
+- Organize functions internally
+- Improve choreo_diagnose
+- Add Roadmap
+- Bump logistro dependency
 v1.2.0
 - Delete zipfile after downloading
 - Upgrade logistro to reduce sideeffects
