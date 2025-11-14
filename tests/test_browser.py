@@ -1,6 +1,9 @@
-import choreographer as choreo
+import asyncio
+
 import logistro
 import pytest
+
+import choreographer as choreo
 from choreographer import errors
 from choreographer.protocol import devtools_async
 
@@ -113,6 +116,39 @@ async def test_browser_send_command(browser):
         errors.MessageTypeError,
     ):
         await browser.send_command(command=12345)
+
+
+@pytest.mark.asyncio
+async def test_browser_send_command_with_perf(browser):
+    _logger.info("testing...")
+    perfs = []
+
+    # Run multiple commands and collect perf data
+    for _ in range(3):
+        response, perf = await browser.send_command(
+            command="Target.getTargets",
+            with_perf=True,
+        )
+        assert "result" in response and "targetInfos" in response["result"]  # noqa: PT018 I like this assertion
+
+        # Validate perf is a tuple of 3 floats
+        assert isinstance(perf, tuple)
+        assert all(isinstance(t, float) for t in perf)
+
+        # Validate timing makes sense (write_start <= write_end <= read_end)
+        write_start, write_end, read_end = perf
+        assert write_start <= write_end <= read_end
+
+        perfs.append(perf)
+        await asyncio.sleep(0.1)
+
+    # Verify each perf tuple is distinct and sequential
+    for i in range(len(perfs) - 1):
+        _, _, prev_read_end = perfs[i]
+        next_write_start, _, _ = perfs[i + 1]
+
+        # Next command should start after previous command ended
+        assert prev_read_end <= next_write_start, "Commands should be sequential"
 
 
 @pytest.mark.asyncio

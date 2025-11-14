@@ -2,6 +2,7 @@ import asyncio
 
 import logistro
 import pytest
+
 from choreographer import errors
 from choreographer.protocol import devtools_async
 
@@ -80,7 +81,7 @@ async def test_subscribe_and_unsubscribe(browser):
     assert "Page.*" in next(iter(tab.sessions.values())).subscriptions
     await tab.send_command("Page.enable")
     await tab.send_command("Page.reload")
-    await asyncio.sleep(0.5)
+    await asyncio.sleep(0.15)
     assert counter > old_counter
 
     tab.unsubscribe("Page.*")

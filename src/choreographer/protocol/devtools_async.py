@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import inspect
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, overload
 
 import logistro
 
@@ -11,7 +11,7 @@ from choreographer import protocol
 
 if TYPE_CHECKING:
     import asyncio
-    from typing import Any, Callable, Coroutine, MutableMapping
+    from typing import Any, Callable, Coroutine, Literal, MutableMapping
 
     from choreographer._brokers import Broker
 
@@ -56,11 +56,34 @@ class Session:
         self.message_id = 0
         self.subscriptions = {}
 
+    @overload
     async def send_command(
         self,
         command: str,
         params: MutableMapping[str, Any] | None = None,
-    ) -> protocol.BrowserResponse:
+        *,
+        with_perf: Literal[False] = False,
+    ) -> protocol.BrowserResponse: ...
+
+    @overload
+    async def send_command(
+        self,
+        command: str,
+        params: MutableMapping[str, Any] | None = None,
+        *,
+        with_perf: Literal[True],
+    ) -> tuple[protocol.BrowserResponse, tuple[float, float, float]]: ...
+
+    async def send_command(
+        self,
+        command: str,
+        params: MutableMapping[str, Any] | None = None,
+        *,
+        with_perf: bool = False,
+    ) -> (
+        tuple[protocol.BrowserResponse, tuple[float, float, float]]
+        | protocol.BrowserResponse
+    ):
         """
         Send a devtools command on the session.
 
@@ -69,9 +92,12 @@ class Session:
         Args:
             command: devtools command to send
             params: the parameters to send
+            with_perf (bool): Return the optional tuple.
 
         Returns:
             A message key (session, message id) tuple or None
+            (Optional) A tuple[float, float, float] representing
+            perf_counters() for write start, end, and read end.
 
         """
         current_id = self.message_id
@@ -92,6 +118,11 @@ class Session:
             f"sessionId '{self.session_id}'",
         )
         _logger.debug2(f"Full params: {str(params).replace('%', '%%')}")
+        if with_perf:
+            return (
+                await self._broker.write_json(json_command),
+                self._broker.get_perf(json_command),
+            )
         return await self._broker.write_json(json_command)
 
     def subscribe(
@@ -201,11 +232,34 @@ class Target:
         session = next(iter(self.sessions.values()))
         return session
 
+    @overload
     async def send_command(
         self,
         command: str,
         params: MutableMapping[str, Any] | None = None,
-    ) -> protocol.BrowserResponse:
+        *,
+        with_perf: Literal[False] = False,
+    ) -> protocol.BrowserResponse: ...
+
+    @overload
+    async def send_command(
+        self,
+        command: str,
+        params: MutableMapping[str, Any] | None = None,
+        *,
+        with_perf: Literal[True],
+    ) -> tuple[protocol.BrowserResponse, tuple[float, float, float]]: ...
+
+    async def send_command(
+        self,
+        command: str,
+        params: MutableMapping[str, Any] | None = None,
+        *,
+        with_perf: bool = False,
+    ) -> (
+        protocol.BrowserResponse
+        | tuple[protocol.BrowserResponse, tuple[float, float, float]]
+    ):
         """
         Send a command to the first session in a target.
 
@@ -214,12 +268,13 @@ class Target:
         Args:
             command: devtools command to send
             params: the parameters to send
+            with_perf (bool): Also return perf tuple
 
         """
         if not self.sessions.values():
             raise RuntimeError("Cannot send_command without at least one valid session")
         session = self.get_session()
-        return await session.send_command(command, params)
+        return await session.send_command(command, params, with_perf=with_perf)
 
     async def create_session(self) -> Session:
         """Create a new session on this target."""
