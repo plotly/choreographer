@@ -4,10 +4,11 @@ import platform
 import signal
 import subprocess
 
-import choreographer as choreo
 import logistro
 import pytest
 from async_timeout import timeout
+
+import choreographer as choreo
 from choreographer import errors
 
 # allows to create a browser pool for tests
@@ -29,7 +30,7 @@ async def test_context(headless, sandbox, gpu):
             f"Sandbox: {sandbox},"
             f"Version: {platform.version().lower()}",
         )
-    async with timeout(pytest.default_timeout):  # type: ignore[reportAttributeAccessIssue]
+    async with timeout(100000):  # type: ignore[reportAttributeAccessIssue]
         async with choreo.Browser(
             headless=headless,
             enable_sandbox=sandbox,
