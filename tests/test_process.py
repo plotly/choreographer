@@ -30,7 +30,7 @@ async def test_context(headless, sandbox, gpu):
             f"Sandbox: {sandbox},"
             f"Version: {platform.version().lower()}",
         )
-    async with timeout(100000):  # type: ignore[reportAttributeAccessIssue]
+    async with timeout(pytest.default_timeout):  # type: ignore[reportAttributeAccessIssue]
         async with choreo.Browser(
             headless=headless,
             enable_sandbox=sandbox,

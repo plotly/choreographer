@@ -30,7 +30,8 @@ if TYPE_CHECKING:
     from .browsers._interface_type import BrowserImplInterface
     from .channels._interface_type import ChannelInterface
 
-MAX_POPULATE_LOOPS = 6  # how many times to check for tab, race condition
+_N = MAX_POPULATE_LOOPS = 20
+
 
 _logger = logistro.getLogger(__name__)
 
@@ -169,7 +170,7 @@ class Browser(Target):
             while not self.get_tab():
                 _logger.debug("Populating Targets")
                 await self.populate_targets()
-                await asyncio.sleep(0.05 * counter)
+                await asyncio.sleep(0.1)
                 counter += 1
                 if counter == MAX_POPULATE_LOOPS:
                     break
