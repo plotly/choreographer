@@ -13,7 +13,6 @@ from functools import partial
 from pathlib import Path
 
 import logistro
-from platformdirs import PlatformDirs
 
 from choreographer.cli.defaults import default_download_path
 
@@ -49,12 +48,7 @@ def get_chrome_download_path() -> Path | None:
     if not _chrome_platform_detected:
         return None
 
-    _default_exe_path = (
-        Path(
-            PlatformDirs("choreographer", "plotly").user_data_dir,
-        )
-        / "deps"
-    )
+    _default_exe_path = default_download_path
     _default_exe_path.mkdir(parents=True, exist_ok=True)
 
     if platform.system().startswith("Linux"):
