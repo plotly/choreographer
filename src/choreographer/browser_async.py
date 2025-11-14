@@ -30,7 +30,7 @@ if TYPE_CHECKING:
     from .browsers._interface_type import BrowserImplInterface
     from .channels._interface_type import ChannelInterface
 
-MAX_POPULATE_LOOPS = 3  # how many times to check for tab, race condition
+MAX_POPULATE_LOOPS = 6  # how many times to check for tab, race condition
 
 _logger = logistro.getLogger(__name__)
 
