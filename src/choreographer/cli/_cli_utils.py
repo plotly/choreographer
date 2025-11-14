@@ -23,7 +23,7 @@ _chrome_for_testing_url = "https://googlechromelabs.github.io/chrome-for-testing
 supported_platform_strings = ["linux64", "win32", "win64", "mac-x64", "mac-arm64"]
 
 
-def get_google_supported_platform_string() -> tuple[str, str, str, str]:
+def get_google_supported_platform_string() -> str | None:
     arch_size_detected = "64" if sys.maxsize > 2**32 else "32"
     arch_detected = "arm" if platform.processor() == "arm" else "x"
 
@@ -39,11 +39,11 @@ def get_google_supported_platform_string() -> tuple[str, str, str, str]:
     if chrome_platform_detected in supported_platform_strings:
         platform_string = chrome_platform_detected
 
-    return platform_string, arch_size_detected, platform.processor(), platform.system()
+    return platform_string
 
 
 def get_chrome_download_path() -> Path | None:
-    _chrome_platform_detected, _, _, _ = get_google_supported_platform_string()
+    _chrome_platform_detected = get_google_supported_platform_string()
 
     if not _chrome_platform_detected:
         return None
@@ -85,17 +85,19 @@ class _ZipFilePermissions(zipfile.ZipFile):
         return path
 
 
-def get_chrome_sync(  # noqa: PLR0912, C901
+def get_chrome_sync(  # noqa: C901, PLR0912
     arch: str | None = None,
     i: int | None = None,
     path: str | Path = default_download_path,
     *,
     verbose: bool = False,
+    force: bool = False,
 ) -> Path | str:
     """Download chrome synchronously: see `get_chrome()`."""
-    if not arch:
-        arch, _, _, _ = get_google_supported_platform_string()
+    if isinstance(path, str):
+        path = Path(path)
 
+    arch = arch or get_google_supported_platform_string()
     if not arch:
         raise RuntimeError(
             "You must specify an arch, one of: "
@@ -103,8 +105,6 @@ def get_chrome_sync(  # noqa: PLR0912, C901
             f"Detected {arch} is not supported.",
         )
 
-    if isinstance(path, str):
-        path = Path(path)
     if i:
         _logger.info("Loading chrome from list")
         browser_list = json.loads(
@@ -115,17 +115,16 @@ def get_chrome_sync(  # noqa: PLR0912, C901
         version_obj = browser_list["versions"][i]
     else:
         _logger.info("Using last known good version of chrome")
-        with (
-            Path(__file__).resolve().parent.parent
-            / "resources"
-            / "last_known_good_chrome.json"
-        ).open() as f:
-            version_obj = json.load(f)
-    if verbose:
-        print(version_obj["version"])  # noqa: T201 allow print in cli
-        print(version_obj["revision"])  # noqa: T201 allow print in cli
+        version_obj = json.loads(
+            (
+                Path(__file__).resolve().parent.parent
+                / "resources"
+                / "last_known_good_chrome.json"
+            ).read_text(),
+        )
+    version_string = f"{version_obj['version']}\n{version_obj['revision']}"
     chromium_sources = version_obj["downloads"]["chrome"]
-    url = ""
+
     for src in chromium_sources:
         if src["platform"] == arch:
             url = src["url"]
@@ -137,19 +136,16 @@ def get_chrome_sync(  # noqa: PLR0912, C901
             f"{arch} is not supported.",
         )
 
-    if not path.exists():
-        path.mkdir(parents=True)
-    filename = path / "chrome.zip"
-    with urllib.request.urlopen(url) as response, filename.open("wb") as out_file:  # noqa: S310 audit url
-        shutil.copyfileobj(response, out_file)
-    with _ZipFilePermissions(filename, "r") as zip_ref:
-        zip_ref.extractall(path)
-    filename.unlink()
+    if verbose:
+        print(version_string)  # noqa: T201 allow print in cli
+    version_tag = path / "version_tag.txt"
+
+    path.mkdir(parents=True, exist_ok=True)
 
     if arch.startswith("linux"):
-        exe_name = path / f"chrome-{arch}" / "chrome"
+        exe_path = path / f"chrome-{arch}" / "chrome"
     elif arch.startswith("mac"):
-        exe_name = (
+        exe_path = (
             path
             / f"chrome-{arch}"
             / "Google Chrome for Testing.app"
@@ -158,10 +154,33 @@ def get_chrome_sync(  # noqa: PLR0912, C901
             / "Google Chrome for Testing"
         )
     elif arch.startswith("win"):
-        exe_name = path / f"chrome-{arch}" / "chrome.exe"
+        exe_path = path / f"chrome-{arch}" / "chrome.exe"
     else:
         raise RuntimeError("Couldn't calculate exe_name, unsupported architecture.")
-    return exe_name
+
+    if (
+        exe_path.exists()
+        and version_tag.is_file()
+        and version_tag.read_text() == version_string
+        and not force
+    ):
+        return exe_path
+    else:
+        if exe_path.exists():  # delete it
+            shutil.rmtree(exe_path)
+        if version_tag.exists():  # delete it
+            version_tag.unlink()
+
+    # Download
+    zip_path = path / "chrome.zip"
+    with urllib.request.urlopen(url) as response, zip_path.open("wb") as out_file:  # noqa: S310 audit url
+        shutil.copyfileobj(response, out_file)
+    with _ZipFilePermissions(zip_path, "r") as zip_ref:
+        zip_ref.extractall(path)
+    zip_path.unlink()
+    version_tag.write_text(version_string)
+
+    return exe_path
 
 
 async def get_chrome(
