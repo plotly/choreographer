@@ -114,20 +114,23 @@ def get_chrome_sync(  # noqa: C901, PLR0912
 
     if i:
         _logger.info("Loading chrome from list")
+        raw_json = urllib.request.urlopen(  # noqa: S310 audit url for schemes
+            _chrome_for_testing_url,
+        ).read()
         browser_list = json.loads(
-            urllib.request.urlopen(  # noqa: S310 audit url for schemes
-                _chrome_for_testing_url,
-            ).read(),
+            raw_json,
         )
         version_obj = browser_list["versions"][i]
+        raw_json = json.dumps(version_obj)
     else:
         _logger.info("Using last known good version of chrome")
+        raw_json = (
+            Path(__file__).resolve().parent.parent
+            / "resources"
+            / "last_known_good_chrome.json"
+        ).read_text()
         version_obj = json.loads(
-            (
-                Path(__file__).resolve().parent.parent
-                / "resources"
-                / "last_known_good_chrome.json"
-            ).read_text(),
+            raw_json,
         )
     version_string = f"{version_obj['version']}\n{version_obj['revision']}"
     chromium_sources = version_obj["downloads"]["chrome"]
@@ -144,7 +147,7 @@ def get_chrome_sync(  # noqa: C901, PLR0912
         )
 
     if verbose:
-        print(version_string)  # noqa: T201 allow print in cli
+        print(raw_json)  # noqa: T201 allow print in cli
     version_tag = path / "version_tag.txt"
 
     path.mkdir(parents=True, exist_ok=True)
