@@ -1,6 +1,6 @@
 import io
 import zipfile
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -39,19 +39,16 @@ def test_get_chrome_sync_download_behavior(
 
     # Mock the URL download
     def create_mock_zip_response():
-        mock_response = MagicMock()
         # Create a fresh zip buffer each time
         zip_buffer = io.BytesIO()
         with zipfile.ZipFile(zip_buffer, "w") as zf:
             zf.writestr("chrome-linux64/chrome", "newly downloaded chrome")
         zip_buffer.seek(0)
-        mock_response.read.return_value = zip_buffer.read()
-        mock_response.__enter__ = MagicMock(return_value=mock_response)
-        mock_response.__exit__ = MagicMock(return_value=False)
-        return mock_response
+        # Return BytesIO directly - it already has all file-like methods needed
+        return zip_buffer
 
     # Patch json.load to return our mock data (avoid broad Path.read_text patch)
-    with patch("json.load", return_value=mock_last_known_good_json), patch(
+    with patch("json.loads", return_value=mock_last_known_good_json), patch(
         "urllib.request.urlopen",
         side_effect=lambda url: create_mock_zip_response(),  # noqa: ARG005
     ):
