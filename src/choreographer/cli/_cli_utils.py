@@ -174,7 +174,11 @@ def get_chrome_sync(  # noqa: C901, PLR0912
         return exe_path
     else:
         if exe_path.exists():  # delete it
-            shutil.rmtree(exe_path)
+            if exe_path.is_dir():
+                shutil.rmtree(exe_path)
+            else:
+                exe_path.unlink()
+            # It really should always be a dir but in testing we fake it
         if version_tag.exists():  # delete it
             version_tag.unlink()
 
