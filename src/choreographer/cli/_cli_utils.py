@@ -189,6 +189,7 @@ async def get_chrome(
     path: str | Path = default_download_path,
     *,
     verbose: bool = False,
+    force: bool = False,
 ) -> Path | str:
     """
     Download google chrome from google-chrome-for-testing server.
@@ -199,10 +200,18 @@ async def get_chrome(
            still in the testing directory.
         path: where to download it too (the folder).
         verbose: print out version found
+        force: download chrome again even if already present at that version
 
     """
     loop = asyncio.get_running_loop()
-    fn = partial(get_chrome_sync, arch=arch, i=i, path=path, verbose=verbose)
+    fn = partial(
+        get_chrome_sync,
+        arch=arch,
+        i=i,
+        path=path,
+        verbose=verbose,
+        force=force,
+    )
     return await loop.run_in_executor(
         executor=None,
         func=fn,
@@ -250,6 +259,14 @@ def get_chrome_cli() -> None:
         action="store_true",
         help="Display found version number if using -i (to stdout)",
     )
+    parser.add_argument(
+        "-f",
+        "--force",
+        dest="force",
+        action="store_true",
+        default=False,
+        help="Force download even if already present.",
+    )
     parser.set_defaults(path=default_download_path)
     parser.set_defaults(arch=None)
     parser.set_defaults(verbose=False)
@@ -257,5 +274,6 @@ def get_chrome_cli() -> None:
     i = parsed.i
     arch = parsed.arch
     path = Path(parsed.path)
+    force = parsed.force
     verbose = parsed.verbose
-    print(get_chrome_sync(arch=arch, i=i, path=path, verbose=verbose))  # noqa: T201 allow print in cli
+    print(get_chrome_sync(arch=arch, i=i, path=path, verbose=verbose, force=force))  # noqa: T201 allow print in cli
