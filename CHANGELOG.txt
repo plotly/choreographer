@@ -1,3 +1,5 @@
+- Change chrome download path to use XDG cache dir
+- Don't download chrome if we already have that version: add force argument
 v1.2.1
 - Use custom threadpool for functions that could be running during shutdown:
   Python's stdlib threadpool isn't available during interpreter shutdown, nor
