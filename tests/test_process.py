@@ -4,10 +4,11 @@ import platform
 import signal
 import subprocess
 
-import choreographer as choreo
 import logistro
 import pytest
 from async_timeout import timeout
+
+import choreographer as choreo
 from choreographer import errors
 
 # allows to create a browser pool for tests
