@@ -1,6 +1,6 @@
 """Contains implementations of browsers that choreographer can open."""
 
-from ._errors import BrowserClosedError, BrowserDepsError, BrowserFailedError
+from ._errors import BrowserClosedError, BrowserFailedError
 from .chromium import ChromeNotFoundError, Chromium
 
 __all__ = [
