@@ -6,6 +6,7 @@ class BrowserFailedError(RuntimeError):
     """An error for when the browser fails to launch."""
 
 
+# not currently used but keeping copy + not breaking API
 class BrowserDepsError(BrowserFailedError):
     """An error for when the browser is closed because of missing libs."""
 

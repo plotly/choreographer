@@ -23,7 +23,7 @@ _chrome_for_testing_url = "https://googlechromelabs.github.io/chrome-for-testing
 supported_platform_strings = ["linux64", "win32", "win64", "mac-x64", "mac-arm64"]
 
 
-def get_google_supported_platform_string() -> tuple[str, str, str, str]:
+def get_google_supported_platform_string() -> str | None:
     arch_size_detected = "64" if sys.maxsize > 2**32 else "32"
     arch_detected = "arm" if platform.processor() == "arm" else "x"
 
@@ -39,16 +39,17 @@ def get_google_supported_platform_string() -> tuple[str, str, str, str]:
     if chrome_platform_detected in supported_platform_strings:
         platform_string = chrome_platform_detected
 
-    return platform_string, arch_size_detected, platform.processor(), platform.system()
+    return platform_string
 
 
 def get_chrome_download_path() -> Path | None:
-    _chrome_platform_detected, _, _, _ = get_google_supported_platform_string()
+    _chrome_platform_detected = get_google_supported_platform_string()
 
     if not _chrome_platform_detected:
         return None
 
-    _default_exe_path = Path()
+    _default_exe_path = default_download_path
+    _default_exe_path.mkdir(parents=True, exist_ok=True)
 
     if platform.system().startswith("Linux"):
         _default_exe_path = (
@@ -85,17 +86,19 @@ class _ZipFilePermissions(zipfile.ZipFile):
         return path
 
 
-def get_chrome_sync(  # noqa: PLR0912, C901
+def get_chrome_sync(  # noqa: C901, PLR0912
     arch: str | None = None,
     i: int | None = None,
     path: str | Path = default_download_path,
     *,
     verbose: bool = False,
+    force: bool = False,
 ) -> Path | str:
     """Download chrome synchronously: see `get_chrome()`."""
-    if not arch:
-        arch, _, _, _ = get_google_supported_platform_string()
+    if isinstance(path, str):
+        path = Path(path)
 
+    arch = arch or get_google_supported_platform_string()
     if not arch:
         raise RuntimeError(
             "You must specify an arch, one of: "
@@ -103,29 +106,29 @@ def get_chrome_sync(  # noqa: PLR0912, C901
             f"Detected {arch} is not supported.",
         )
 
-    if isinstance(path, str):
-        path = Path(path)
     if i:
         _logger.info("Loading chrome from list")
+        raw_json = urllib.request.urlopen(  # noqa: S310 audit url for schemes
+            _chrome_for_testing_url,
+        ).read()
         browser_list = json.loads(
-            urllib.request.urlopen(  # noqa: S310 audit url for schemes
-                _chrome_for_testing_url,
-            ).read(),
+            raw_json,
         )
         version_obj = browser_list["versions"][i]
+        raw_json = json.dumps(version_obj)
     else:
         _logger.info("Using last known good version of chrome")
-        with (
+        raw_json = (
             Path(__file__).resolve().parent.parent
             / "resources"
             / "last_known_good_chrome.json"
-        ).open() as f:
-            version_obj = json.load(f)
-    if verbose:
-        print(version_obj["version"])  # noqa: T201 allow print in cli
-        print(version_obj["revision"])  # noqa: T201 allow print in cli
+        ).read_text()
+        version_obj = json.loads(
+            raw_json,
+        )
+    version_string = f"{version_obj['version']}\n{version_obj['revision']}"
     chromium_sources = version_obj["downloads"]["chrome"]
-    url = ""
+
     for src in chromium_sources:
         if src["platform"] == arch:
             url = src["url"]
@@ -137,19 +140,16 @@ def get_chrome_sync(  # noqa: PLR0912, C901
             f"{arch} is not supported.",
         )
 
-    if not path.exists():
-        path.mkdir(parents=True)
-    filename = path / "chrome.zip"
-    with urllib.request.urlopen(url) as response, filename.open("wb") as out_file:  # noqa: S310 audit url
-        shutil.copyfileobj(response, out_file)
-    with _ZipFilePermissions(filename, "r") as zip_ref:
-        zip_ref.extractall(path)
-    filename.unlink()
+    if verbose:
+        print(raw_json)  # noqa: T201 allow print in cli
+    version_tag = path / "version_tag.txt"
+
+    path.mkdir(parents=True, exist_ok=True)
 
     if arch.startswith("linux"):
-        exe_name = path / f"chrome-{arch}" / "chrome"
+        exe_path = path / f"chrome-{arch}" / "chrome"
     elif arch.startswith("mac"):
-        exe_name = (
+        exe_path = (
             path
             / f"chrome-{arch}"
             / "Google Chrome for Testing.app"
@@ -158,10 +158,37 @@ def get_chrome_sync(  # noqa: PLR0912, C901
             / "Google Chrome for Testing"
         )
     elif arch.startswith("win"):
-        exe_name = path / f"chrome-{arch}" / "chrome.exe"
+        exe_path = path / f"chrome-{arch}" / "chrome.exe"
     else:
         raise RuntimeError("Couldn't calculate exe_name, unsupported architecture.")
-    return exe_name
+
+    if (
+        exe_path.exists()
+        and version_tag.is_file()
+        and version_tag.read_text() == version_string
+        and not force
+    ):
+        return exe_path
+    else:
+        if exe_path.exists():  # delete it
+            if exe_path.is_dir():
+                shutil.rmtree(exe_path)
+            else:
+                exe_path.unlink()
+            # It really should always be a dir but in testing we fake it
+        if version_tag.exists():  # delete it
+            version_tag.unlink()
+
+    # Download
+    zip_path = path / "chrome.zip"
+    with urllib.request.urlopen(url) as response, zip_path.open("wb") as out_file:  # noqa: S310 audit url
+        shutil.copyfileobj(response, out_file)
+    with _ZipFilePermissions(zip_path, "r") as zip_ref:
+        zip_ref.extractall(path)
+    zip_path.unlink()
+    version_tag.write_text(version_string)
+
+    return exe_path
 
 
 async def get_chrome(
@@ -170,6 +197,7 @@ async def get_chrome(
     path: str | Path = default_download_path,
     *,
     verbose: bool = False,
+    force: bool = False,
 ) -> Path | str:
     """
     Download google chrome from google-chrome-for-testing server.
@@ -180,10 +208,18 @@ async def get_chrome(
            still in the testing directory.
         path: where to download it too (the folder).
         verbose: print out version found
+        force: download chrome again even if already present at that version
 
     """
     loop = asyncio.get_running_loop()
-    fn = partial(get_chrome_sync, arch=arch, i=i, path=path, verbose=verbose)
+    fn = partial(
+        get_chrome_sync,
+        arch=arch,
+        i=i,
+        path=path,
+        verbose=verbose,
+        force=force,
+    )
     return await loop.run_in_executor(
         executor=None,
         func=fn,
@@ -231,6 +267,14 @@ def get_chrome_cli() -> None:
         action="store_true",
         help="Display found version number if using -i (to stdout)",
     )
+    parser.add_argument(
+        "-f",
+        "--force",
+        dest="force",
+        action="store_true",
+        default=False,
+        help="Force download even if already present.",
+    )
     parser.set_defaults(path=default_download_path)
     parser.set_defaults(arch=None)
     parser.set_defaults(verbose=False)
@@ -238,5 +282,6 @@ def get_chrome_cli() -> None:
     i = parsed.i
     arch = parsed.arch
     path = Path(parsed.path)
+    force = parsed.force
     verbose = parsed.verbose
-    print(get_chrome_sync(arch=arch, i=i, path=path, verbose=verbose))  # noqa: T201 allow print in cli
+    print(get_chrome_sync(arch=arch, i=i, path=path, verbose=verbose, force=force))  # noqa: T201 allow print in cli

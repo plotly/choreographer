@@ -1,5 +1,13 @@
 - Add argument to Session/Target send_command with_perf to return
   timing information about browser write/read.
+- Update default chrome from 135.0.7011.0/1418433 to 144.0.7527.0/1544685
+- Fix: New chrome takes longer/doesn't populate targets right away, so add a
+  retry loop to populate targets
+- Alter `get_chrome` verbose to print whole JSON
+- Change chrome download path to use XDG cache dir
+- Don't download chrome if we already have that version: add force argument
+- Remove unused system inspection code
+- Add a set of helper functions to await for tab loading and send javascript
 v1.2.1
 - Use custom threadpool for functions that could be running during shutdown:
   Python's stdlib threadpool isn't available during interpreter shutdown, nor

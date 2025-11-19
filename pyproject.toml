@@ -30,6 +30,7 @@ maintainers = [
 ]
 dependencies = [
   "logistro>=2.0.1",
+  "platformdirs>=4.3.6",
   "simplejson>=3.19.3",
 ]
 
@@ -110,8 +111,9 @@ asyncio_default_fixture_loop_scope = "function"
 log_cli = false
 addopts = "--import-mode=append"
 
+# tell poe to use the env we give it, otherwise it detects uv and overrides flags
 [tool.poe]
-executor.type = "virtualenv"
+executor.type = "simple"
 
 [tool.poe.tasks]
 test_proc = "pytest --log-level=1 -W error -n auto -v -rfE --capture=fd tests/test_process.py"
@@ -124,10 +126,12 @@ sequence = ["test_proc", "test_fn"]
 help = "Run all tests quickly"
 
 [tool.poe.tasks.debug-test]
+env = { CHOREO_ENABLE_DEBUG="1" }
 sequence = ["debug-test_proc", "debug-test_fn"]
 help = "Run test by test, slowly, quitting after first error"
 
 [tool.poe.tasks.filter-test]
+env = { CHOREO_ENABLE_DEBUG="1" }
 cmd = "pytest --log-level=1 -W error -vvvx -rA --capture=no --show-capture=no"
 help = "Run any/all tests one by one with basic settings: can include filename and -k filters"
 
