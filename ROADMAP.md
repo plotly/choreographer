@@ -1,5 +1,8 @@
 # Roadmap
 
+- [ ] Fix up browser deps error (eliminate in-package analysis)
+- [ ] Switch to process group and kill that to catch all chromium children
+- [ ] Add helpers for running javascript
 - [ ] Working on better diagnostic information
   - [ ] Explain to user when their system has security restrictions
 - [ ] Eliminate synchronous API: it's unused, hard to maintain, and nearly
@@ -15,4 +18,3 @@
 - [ ] Do documentation
 - [ ] Browser Open/Close Status/PipeCheck status should happen at broker level
   - [ ] Broker should probably be opening browser and running watchdog...
-- [ ] Add a connect only for websockets

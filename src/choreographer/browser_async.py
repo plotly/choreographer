@@ -30,6 +30,9 @@ if TYPE_CHECKING:
     from .browsers._interface_type import BrowserImplInterface
     from .channels._interface_type import ChannelInterface
 
+_N = MAX_POPULATE_LOOPS = 20
+
+
 _logger = logistro.getLogger(__name__)
 
 # Since I added locks to pipes, do we need locks here?
@@ -162,9 +165,15 @@ class Browser(Target):
             self._channel.open()  # should this and below be in a broker run
             _logger.debug("Running read loop")
             self._broker.run_read_loop()
-            _logger.debug("Populating Targets")
-            await asyncio.sleep(0)  # let watchdog start
-            await self.populate_targets()
+            await asyncio.sleep(0)  # let watchdog start before populate
+            counter = 0
+            while not self.get_tab():
+                _logger.debug("Populating Targets")
+                await self.populate_targets()
+                await asyncio.sleep(0.1)
+                counter += 1
+                if counter == MAX_POPULATE_LOOPS:
+                    break
         except (BrowserClosedError, BrowserFailedError, asyncio.CancelledError) as e:
             raise BrowserFailedError(
                 "The browser seemed to close immediately after starting.",
@@ -345,7 +354,6 @@ class Browser(Target):
             raise RuntimeError("Could not get targets") from Exception(
                 response["error"],
             )
-
         for json_response in response["result"]["targetInfos"]:
             if (
                 json_response["type"] == "page"
