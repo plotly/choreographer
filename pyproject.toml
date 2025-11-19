@@ -44,10 +44,6 @@ choreo_get_chrome = "choreographer.cli._cli_utils:get_chrome_cli"
 
 [dependency-groups]
 dev = [
-  "pytest",
-  "pytest-asyncio; python_version < '3.14'",
-  "pytest-asyncio>=1.2.0; python_version >= '3.14'",
-  "pytest-xdist",
   "async-timeout",
   "numpy; python_version < '3.11'",
   "numpy>=2.3.3; python_version >= '3.11'",
@@ -55,6 +51,10 @@ dev = [
   "types-simplejson>=3.19.0.20241221",
   "poethepoet>=0.30.0",
   "pyright>=1.1.406",
+  "pytest",
+  "pytest-asyncio; python_version < '3.14'",
+  "pytest-asyncio>=1.2.0; python_version >= '3.14'",
+  "pytest-xdist",
 ]
 
 # uv doens't allow dependency groups to have separate python requirements
@@ -106,6 +106,7 @@ ignore = [
             ]
 
 [tool.pytest.ini_options]
+asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 log_cli = false
 addopts = "--import-mode=append"
