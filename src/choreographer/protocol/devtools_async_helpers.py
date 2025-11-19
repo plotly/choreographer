@@ -29,7 +29,7 @@ async def create_and_wait(
         The created Tab
 
     """
-    tab = await asyncio.wait_for(browser.create_tab(url), timeout=timeout)
+    tab = await browser.create_tab(url)
     temp_session = await tab.create_session()
 
     try:
@@ -77,7 +77,9 @@ async def navigate_and_wait(
         try:
 
             async def _freezers():
+                # If no resolve, will freeze
                 await temp_session.send_command("Page.navigate", params={"url": url})
+                # Can freeze if resolve bad
                 await load_future
 
             await asyncio.wait_for(_freezers(), timeout=timeout)

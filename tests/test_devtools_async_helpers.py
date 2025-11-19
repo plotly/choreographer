@@ -14,6 +14,11 @@ pytestmark = pytest.mark.asyncio(loop_scope="function")
 _logger = logistro.getLogger(__name__)
 
 
+# Errata: don't use data urls, whether or not they load is variable
+# depends on how long chrome has been open for, how they were entered,
+# etc
+
+
 @pytest.mark.asyncio
 async def test_create_and_wait(browser):
     """Test create_and_wait with both valid data URL and blank URL."""
@@ -23,8 +28,7 @@ async def test_create_and_wait(browser):
     initial_tab_count = len(browser.tabs)
 
     # Create a simple HTML page as a data URL
-    html_content = "<html><body><h1>Test Page</h1></body></html>"
-    data_url = f"data:text/html,{html_content}"
+    data_url = "chrome://version"
 
     # Test 1: Create tab with data URL - should succeed
     tab1 = await create_and_wait(browser, url=data_url, timeout=5.0)
@@ -33,7 +37,7 @@ async def test_create_and_wait(browser):
     # Verify the page loaded correctly using execute_js_and_wait
     result = await execute_js_and_wait(tab1, "window.location.href", timeout=5.0)
     location = result["result"]["result"]["value"]
-    assert location.startswith("data:text/html")
+    assert location.startswith(data_url)
 
     # Test 2: Create tab without URL - should succeed (blank page)
     tab2 = await create_and_wait(browser, url="", timeout=5.0)
@@ -45,7 +49,7 @@ async def test_create_and_wait(browser):
 
     # Test 3: Create tab with bad URL that won't load - should timeout
     with pytest.raises(asyncio.TimeoutError):
-        await create_and_wait(browser, url="http://192.0.2.1:9999", timeout=1.0)
+        await create_and_wait(browser, url="http://192.0.2.1:9999", timeout=0.5)
 
 
 @pytest.mark.asyncio
@@ -54,6 +58,10 @@ async def test_navigate_and_wait(browser):
     _logger.info("testing navigate_and_wait...")
     # Create two blank tabs first
     tab = await browser.create_tab("")
+
+    # navigating to dataurls seems to be fine right now,
+    # but if one day you have an error here,
+    # change to the strategy above
 
     # Create a data URL with identifiable content
     html_content1 = "<html><body><h1>Navigation Test 1</h1></body></html>"
@@ -81,4 +89,4 @@ async def test_navigate_and_wait(browser):
     assert location.startswith("data:text/html")
     # Test 3: Navigate to bad URL that won't load - should timeout
     with pytest.raises(asyncio.TimeoutError):
-        await navigate_and_wait(tab, url="http://192.0.2.1:9999", timeout=1.0)
+        await navigate_and_wait(tab, url="http://192.0.2.1:9999", timeout=0.5)
