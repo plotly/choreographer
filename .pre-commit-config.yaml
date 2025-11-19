@@ -66,7 +66,7 @@ repos:
         language: python
         additional_dependencies: ["./gitlint-core[trusted-deps]"]
         entry: gitlint
-        args: [--staged, --msg-filename]
+        args: [--staged, -c, "general.ignore=B6,T3", --msg-filename]
         stages: [commit-msg]
   - repo: https://github.com/crate-ci/typos
     rev: v1

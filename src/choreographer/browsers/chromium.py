@@ -115,46 +115,6 @@ class Chromium:
 
         return True
 
-    def _libs_ok(self) -> bool:
-        """Return true if libs ok."""
-        if self.skip_local:
-            _logger.debug(
-                "If we HAVE to skip local.",
-            )
-            return True
-        _logger.debug("Checking for libs needed.")
-        if platform.system() != "Linux":
-            _logger.debug("We're not in linux, so no need for check.")
-            return True
-        p = None
-        try:
-            _logger.debug(f"Trying ldd {self.path}")
-            p = subprocess.run(  # noqa: S603, validating run with variables
-                [  # noqa: S607 path is all we have
-                    "ldd",
-                    str(self.path),
-                ],
-                capture_output=True,
-                timeout=5,
-                check=True,
-            )
-        except Exception as e:  # noqa: BLE001
-            msg = "ldd failed."
-            stderr = p.stderr.decode() if p and p.stderr else None
-            # Log failure as INFO rather than WARNING so that it's hidden by default,
-            # since browser may succeed even if ldd fails
-            _logger.info(
-                msg  # noqa: G003 + in log
-                + f" e: {e}, stderr: {stderr}",
-            )
-            return False
-        if b"not found" in p.stdout:
-            msg = "Found deps missing in chrome"
-            _logger.debug2(msg + f" {p.stdout.decode()}")
-            return False
-        _logger.debug("No problems found with dependencies")
-        return True
-
     def __init__(
         self,
         channel: ChannelInterface,
@@ -220,7 +180,6 @@ class Chromium:
             path=self._tmp_dir_path,
             sneak=self._is_isolated,
         )
-        self.missing_libs = not self._libs_ok()
         _logger.info(f"Temporary directory at: {self.tmp_dir.path}")
 
     def is_isolated(self) -> bool:
