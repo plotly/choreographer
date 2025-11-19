@@ -1,3 +1,4 @@
+- Add a set of helper functions to await for tab loading and send javascript
 v1.2.1
 - Use custom threadpool for functions that could be running during shutdown:
   Python's stdlib threadpool isn't available during interpreter shutdown, nor
