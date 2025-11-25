@@ -3,16 +3,21 @@ from __future__ import annotations
 import queue
 import threading
 from concurrent.futures import Executor, Future
-from typing import TYPE_CHECKING, ParamSpec
+from typing import TYPE_CHECKING
 
 import logistro
 
 if TYPE_CHECKING:
     from typing import Any, Callable, TypeVar
 
+    try:
+        from typing import ParamSpec
+    except ImportError:
+        from typing_extensions import ParamSpec
+
+    _P = ParamSpec("_P")  # Runtime special generic that gives you access to fn sig
     _T = TypeVar("_T")
 
-_P = ParamSpec("_P")  # Runtime special generic that gives you access to fn sig
 
 _logger = logistro.getLogger(__name__)
 
