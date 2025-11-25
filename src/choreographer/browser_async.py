@@ -32,7 +32,8 @@ if TYPE_CHECKING:
     from .browsers._interface_type import BrowserImplInterface
     from .channels._interface_type import ChannelInterface
 
-_N = MAX_POPULATE_LOOPS = 20
+
+MAX_POPULATE_LOOPS = 40 if "CI" in os.environ else 20
 
 
 _logger = logistro.getLogger(__name__)
@@ -174,7 +175,7 @@ class Browser(Target):
                 await self.populate_targets()
                 await asyncio.sleep(0.1)
                 counter += 1
-                if counter == MAX_POPULATE_LOOPS:
+                if counter >= MAX_POPULATE_LOOPS:
                     break
         except (BrowserClosedError, BrowserFailedError, asyncio.CancelledError) as e:
             raise BrowserFailedError(
