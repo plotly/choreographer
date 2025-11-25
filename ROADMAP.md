@@ -1,8 +1,9 @@
 # Roadmap
 
-- [ ] Fix up browser deps error (eliminate in-package analysis)
-- [ ] Switch to process group and kill that to catch all chromium children
-- [ ] Add helpers for running javascript
+- [x] Fix up browser deps error (eliminate in-package analysis)
+- [x] Switch to process group and kill that to catch all chromium children
+- [x] Add helpers for running javascript
+- [ ] Add helper just for refreshing page
 - [ ] Working on better diagnostic information
   - [ ] Explain to user when their system has security restrictions
 - [ ] Eliminate synchronous API: it's unused, hard to maintain, and nearly
