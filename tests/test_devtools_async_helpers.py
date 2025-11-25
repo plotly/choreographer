@@ -31,7 +31,7 @@ async def test_create_and_wait(browser):
     data_url = "chrome://version"
 
     # Test 1: Create tab with data URL - should succeed
-    tab1 = await create_and_wait(browser, url=data_url, timeout=10.0)
+    tab1 = await create_and_wait(browser, url=data_url, timeout=5.0)
     assert tab1 is not None
 
     # Verify the page loaded correctly using execute_js_and_wait
