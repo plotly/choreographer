@@ -1,4 +1,4 @@
-v1.3.0
+v1.3.0rc0
 - Change to process group for better killing of multi-process chrome
 - Add argument to Session/Target `send_command(..., *, with_perf: bool)` to
   return timing information about browser write/read.
