@@ -1,6 +1,7 @@
+v1.3.0
 - Change to process group for better killing of multi-process chrome
-- Add argument to Session/Target send_command with_perf to return
-  timing information about browser write/read.
+- Add argument to Session/Target `send_command(..., *, with_perf: bool)` to
+  return timing information about browser write/read.
 - Update default chrome from 135.0.7011.0/1418433 to 144.0.7527.0/1544685
 - Fix: New chrome takes longer/doesn't populate targets right away, so add a
   retry loop to populate targets
