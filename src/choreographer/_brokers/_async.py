@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import asyncio
-import time
 import warnings
 from functools import partial
 from typing import TYPE_CHECKING
@@ -147,7 +146,7 @@ class Broker:
         async def read_loop() -> None:  # noqa: PLR0912, PLR0915, C901
             loop = asyncio.get_running_loop()
             fn = partial(self._channel.read_jsons, blocking=True)
-            responses = await loop.run_in_executor(
+            responses, perf = await loop.run_in_executor(
                 executor=self._executor,
                 func=fn,
             )
@@ -222,6 +221,7 @@ class Broker:
                                 event_session.unsubscribe(query)
 
                 elif key:
+                    self.read_perfs[key] = perf
                     _logger.debug(f"Have a response with key {key}")
                     if key in self.futures:
                         _logger.debug(f"Found future for key {key}")
@@ -232,7 +232,6 @@ class Broker:
                         raise RuntimeError(f"Couldn't find a future for key: {key}")
                     if not future.done():
                         future.set_result(response)
-                        self.read_perfs[key] = time.perf_counter()
                         if len(self.write_perfs) > PERFS_MAX:
                             self.write_perfs = dict(
                                 list(self.write_perfs.items())[TRIM_SIZE:],
@@ -281,15 +280,14 @@ class Broker:
         self.futures[key] = future
         _logger.debug(f"Created future: {key} {future}")
         try:
-            perf_start = time.perf_counter()
             async with self._write_lock:  # this should be a queue not a lock
                 loop = asyncio.get_running_loop()
-                await loop.run_in_executor(
+                perf = await loop.run_in_executor(
                     self._executor,
                     self._channel.write_json,
                     obj,
                 )
-            self.write_perfs[key] = (perf_start, time.perf_counter())
+            self.write_perfs[key] = perf
         except (_manual_thread_pool.ExecutorClosedError, asyncio.CancelledError) as e:
             if not future.cancel() or not future.cancelled():
                 await future  # it wasn't canceled, so listen to it before raising
