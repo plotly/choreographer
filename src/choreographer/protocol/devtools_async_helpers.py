@@ -71,9 +71,10 @@ async def navigate_and_wait(
     temp_session = await tab.create_session()
 
     try:
+        # Subscribe BEFORE enabling domains to avoid race condition
+        load_future = temp_session.subscribe_once("Page.loadEventFired")
         await temp_session.send_command("Page.enable")
         await temp_session.send_command("Runtime.enable")
-        load_future = temp_session.subscribe_once("Page.loadEventFired")
         try:
 
             async def _freezers() -> None:
