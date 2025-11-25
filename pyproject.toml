@@ -55,6 +55,7 @@ dev = [
   "pytest-asyncio; python_version < '3.14'",
   "pytest-asyncio>=1.2.0; python_version >= '3.14'",
   "pytest-xdist",
+  "typing-extensions>=4.13.2",
 ]
 
 # uv doens't allow dependency groups to have separate python requirements

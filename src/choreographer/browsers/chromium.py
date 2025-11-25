@@ -204,6 +204,8 @@ class Chromium:
             if isinstance(self._channel, Pipe):
                 args["stdin"] = self._channel.from_choreo_to_external
                 args["stdout"] = self._channel.from_external_to_choreo
+            args["start_new_session"] = True
+
         _logger.debug(f"Returning args: {args}")
         return args
 

@@ -274,7 +274,12 @@ class Target:
         if not self.sessions.values():
             raise RuntimeError("Cannot send_command without at least one valid session")
         session = self.get_session()
-        return await session.send_command(command, params, with_perf=with_perf)
+        # so mypy can't handle bool = Literal[True, False]
+        # so this is suboptimal but it quiets typer
+        if with_perf:
+            return await session.send_command(command, params, with_perf=True)
+        else:
+            return await session.send_command(command, params, with_perf=False)
 
     async def create_session(self) -> Session:
         """Create a new session on this target."""

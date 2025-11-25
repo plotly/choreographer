@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import platform
 import sys
+import time
 import warnings
 from threading import Lock
 from typing import TYPE_CHECKING
@@ -78,7 +79,7 @@ class Pipe:
         if not self._open_lock.acquire(blocking=False):
             raise RuntimeError("Cannot open same pipe twice.")
 
-    def write_json(self, obj: Mapping[str, Any]) -> None:
+    def write_json(self, obj: Mapping[str, Any]) -> tuple[float, float]:
         """
         Send one json down the pipe.
 
@@ -97,6 +98,7 @@ class Pipe:
             f"size: {len(encoded_message)}.",
         )
         _logger.debug2(f"Full Message: {encoded_message!r}")
+        start = time.perf_counter()
         try:
             ret = os.write(self._write_to_browser, encoded_message)
             _logger.debug(
@@ -109,12 +111,13 @@ class Pipe:
         except OSError as e:
             self.close()
             raise ChannelClosedError from e
+        return (start, time.perf_counter())
 
     def read_jsons(  # noqa: PLR0912, PLR0915, C901 branches, complexity
         self,
         *,
         blocking: bool = True,
-    ) -> Sequence[BrowserResponse]:
+    ) -> tuple[Sequence[BrowserResponse], float]:
         """
         Read from the pipe and return one or more jsons in a list.
 
@@ -168,7 +171,7 @@ class Pipe:
                 raw_buffer += os.read(self._read_from_browser, 10000)
         except BlockingIOError:
             _logger.debug("BlockingIOError")
-            return jsons
+            return jsons, time.perf_counter()
         except OSError as e:
             _logger.debug("OSError")
             self.close()
@@ -182,7 +185,7 @@ class Pipe:
             )
             _logger.debug2(f"Whole buffer: {raw_buffer!r}")
         if raw_buffer is None:
-            return jsons
+            return jsons, time.perf_counter()
         decoded_buffer = raw_buffer.decode("utf-8")
         raw_messages = decoded_buffer.split("\0")
         _logger.debug(f"Received {len(raw_messages)} raw_messages.")
@@ -195,7 +198,7 @@ class Pipe:
                 except:
                     _logger.exception("Error in trying to decode JSON off our read.")
                     raise
-        return jsons
+        return jsons, time.perf_counter()
 
     def _unblock_fd(self, fd: int) -> None:
         try:

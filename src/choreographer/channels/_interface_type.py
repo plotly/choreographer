@@ -14,7 +14,7 @@ class ChannelInterface(Protocol):
     """Defines the basic interface of a channel."""
 
     # Not sure I like the obj type
-    def write_json(self, obj: Mapping[str, Any]) -> None:
+    def write_json(self, obj: Mapping[str, Any]) -> tuple[float, float]:
         ...
         # """
         # Accept an object and send it doesnt the channel serialized.
@@ -24,7 +24,11 @@ class ChannelInterface(Protocol):
         #
         # """
 
-    def read_jsons(self, *, blocking: bool = True) -> Sequence[BrowserResponse]:
+    def read_jsons(
+        self,
+        *,
+        blocking: bool = True,
+    ) -> tuple[Sequence[BrowserResponse], float]:
         ...
         # """
         # Read all available jsons in the channel and returns a list of complete ones.

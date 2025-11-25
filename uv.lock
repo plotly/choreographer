@@ -58,6 +58,8 @@ dev = [
     { name = "pytest-xdist", version = "3.8.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
     { name = "types-simplejson", version = "3.19.0.20241221", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
     { name = "types-simplejson", version = "3.20.0.20250822", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
+    { name = "typing-extensions", version = "4.13.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
 ]
 
 [package.metadata]
@@ -80,6 +82,7 @@ dev = [
     { name = "pytest-asyncio", marker = "python_full_version >= '3.14'", specifier = ">=1.2.0" },
     { name = "pytest-xdist" },
     { name = "types-simplejson", specifier = ">=3.19.0.20241221" },
+    { name = "typing-extensions", specifier = ">=4.13.2" },
 ]
 
 [[package]]

@@ -73,7 +73,7 @@ def diagnose() -> None:
         b._browser_impl.pre_open()
         cli = b._browser_impl.get_cli()
         env = b._browser_impl.get_env()  # noqa: F841
-        args = b._browser_impl.get_popen_args()
+        pargs = b._browser_impl.get_popen_args()
         b._browser_impl.clean()
         del b
         print("*** cli:")
@@ -86,7 +86,7 @@ def diagnose() -> None:
         #     print(" " * 8 + f"{k}:{v}")
 
         print("*** Popen args:")
-        for k, v in args.items():
+        for k, v in pargs.items():
             print(" " * 8 + f"{k}:{v}")
     print("*".center(50, "*"))
     print("VERSION INFO:".center(50, "*"))

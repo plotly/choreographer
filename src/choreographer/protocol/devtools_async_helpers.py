@@ -76,7 +76,7 @@ async def navigate_and_wait(
         load_future = temp_session.subscribe_once("Page.loadEventFired")
         try:
 
-            async def _freezers():
+            async def _freezers() -> None:
                 # If no resolve, will freeze
                 await temp_session.send_command("Page.navigate", params={"url": url})
                 # Can freeze if resolve bad
