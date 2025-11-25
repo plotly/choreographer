@@ -39,7 +39,49 @@ async def create_and_wait(
 
         if url:
             try:
-                await asyncio.wait_for(load_future, timeout=timeout)
+                # JavaScript evaluation to check if document is loaded
+                async def check_document_ready() -> None:
+                    await temp_session.send_command(
+                        "Runtime.evaluate",
+                        params={
+                            "expression": """
+                                new Promise((resolve) => {
+                                    if (document.readyState === 'complete') {
+                                        resolve(true);
+                                    } else {
+                                        window.addEventListener(
+                                            'load', () => resolve(true)
+                                        );
+                                    }
+                                })
+                            """,
+                            "awaitPromise": True,
+                            "returnByValue": True,
+                        },
+                    )
+
+                js_ready_future = asyncio.create_task(check_document_ready())
+
+                # Race between the two methods: first one to complete wins
+                done, pending = await asyncio.wait(
+                    [
+                        load_future,
+                        js_ready_future,
+                    ],
+                    return_when=asyncio.FIRST_COMPLETED,
+                    timeout=timeout,
+                )
+
+                # Cancel pending tasks
+                for task in pending:
+                    task.cancel()
+
+                # Check if timeout occurred
+                if not done:
+                    raise asyncio.TimeoutError(  # noqa: TRY301
+                        "Page load timeout",
+                    )
+
             except (asyncio.TimeoutError, asyncio.CancelledError, TimeoutError):
                 # Stop the page load when timeout occurs
                 await temp_session.send_command("Page.stopLoading")
