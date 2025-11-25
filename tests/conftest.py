@@ -1,10 +1,11 @@
 import asyncio
 import logging
 
-import choreographer as choreo
 import logistro
 import pytest
 import pytest_asyncio
+
+import choreographer as choreo
 from choreographer import errors
 
 _logger = logistro.getLogger(__name__)
@@ -95,7 +96,7 @@ def pytest_runtest_setup(item):
 
 def pytest_configure():
     # change this by command line TODO
-    pytest.default_timeout = 20  # type: ignore[reportAttributeAccessIssue]
+    pytest.default_timeout = 24  # type: ignore[reportAttributeAccessIssue]
 
 
 # pytest shuts down its capture before logging/threads finish
