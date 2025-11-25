@@ -28,7 +28,7 @@ async def test_create_and_wait(browser):
     initial_tab_count = len(browser.tabs)
 
     # Create a simple HTML page as a data URL
-    data_url = "chrome://version"
+    data_url = "https://example.com"
 
     # Test 1: Create tab with data URL - should succeed
     tab1 = await create_and_wait(browser, url=data_url, timeout=5.0)
