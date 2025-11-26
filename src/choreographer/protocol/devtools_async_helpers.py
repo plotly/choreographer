@@ -7,8 +7,45 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from choreographer import Browser, Tab
+    from choreographer.protocol.devtools_async import Session
 
     from . import BrowserResponse
+
+# Abit about the mechanics of chrome:
+# Whether or not a Page.loadEventFired event fires is a bit
+# racey. Optimistically, it's buffered and fired after subscription
+# even if the event happened in the past.
+# Doesn't seem to always work out that way, so we also use
+# javascript to create a "loaded" event, but for the case
+# where we need to timeout- loading a page that never resolves,
+# the browser might actually load an about:blank instead and then
+# fire the event, misleading the user, so we check the url.
+
+
+async def _check_document_ready(session: Session, url: str) -> BrowserResponse:
+    return await session.send_command(
+        "Runtime.evaluate",
+        params={
+            "expression": """
+                new Promise((resolve) => {
+                    if (
+                        (document.readyState === 'complete') &&
+                        (window.location==`"""  # CONCATENATE!
+            f"{url!s}"
+            """`)
+                    ){
+                        resolve("Was complete");
+                    } else {
+                        window.addEventListener(
+                            'load', () => resolve("Event loaded")
+                        );
+                    }
+                })
+            """,
+            "awaitPromise": True,
+            "returnByValue": True,
+        },
+    )
 
 
 async def create_and_wait(
@@ -40,27 +77,9 @@ async def create_and_wait(
         if url:
             try:
                 # JavaScript evaluation to check if document is loaded
-                async def check_document_ready() -> None:
-                    await temp_session.send_command(
-                        "Runtime.evaluate",
-                        params={
-                            "expression": """
-                                new Promise((resolve) => {
-                                    if (document.readyState === 'complete') {
-                                        resolve(true);
-                                    } else {
-                                        window.addEventListener(
-                                            'load', () => resolve(true)
-                                        );
-                                    }
-                                })
-                            """,
-                            "awaitPromise": True,
-                            "returnByValue": True,
-                        },
-                    )
-
-                js_ready_future = asyncio.create_task(check_document_ready())
+                js_ready_future = asyncio.create_task(
+                    _check_document_ready(temp_session, url),
+                )
 
                 # Race between the two methods: first one to complete wins
                 done, pending = await asyncio.wait(
@@ -72,11 +91,9 @@ async def create_and_wait(
                     timeout=timeout,
                 )
 
-                # Cancel pending tasks
                 for task in pending:
                     task.cancel()
 
-                # Check if timeout occurred
                 if not done:
                     raise asyncio.TimeoutError(  # noqa: TRY301
                         "Page load timeout",
