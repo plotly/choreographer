@@ -87,7 +87,7 @@ async def create_and_wait(
                 js_ready_future = asyncio.create_task(
                     _check_document_ready(temp_session, url),
                 )
-
+                _logger.debug(f"Starting wait: timeout={timeout}")
                 # Race between the two methods: first one to complete wins
                 done, pending = await asyncio.wait(
                     [
@@ -97,20 +97,27 @@ async def create_and_wait(
                     return_when=asyncio.FIRST_COMPLETED,
                     timeout=timeout,
                 )
+                _logger.debug(f"Finish wait, is done? {bool(done)}")
 
                 for task in pending:
+                    _logger.debug(f"Cancelling: {task}")
                     task.cancel()
 
                 if not done:
+                    _logger.debug("Timeout waiting for js or event")
                     raise asyncio.TimeoutError(  # noqa: TRY301
                         "Page load timeout",
                     )
                 else:
-                    _logger.debug(done)
+                    _logger.debug(f"Task which finished: {done}")
 
-            except (asyncio.TimeoutError, asyncio.CancelledError, TimeoutError):
+            except (
+                asyncio.TimeoutError,
+                asyncio.CancelledError,
+                TimeoutError,
+            ) as e:
                 # Stop the page load when timeout occurs
-                _logger.debug("Need to stop page loading, error.")
+                _logger.debug("Need to stop page loading, error.", exc_info=e)
                 await temp_session.send_command("Page.stopLoading")
                 raise
     finally:
