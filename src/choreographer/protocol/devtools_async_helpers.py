@@ -5,11 +5,15 @@ from __future__ import annotations
 import asyncio
 from typing import TYPE_CHECKING
 
+import logistro
+
 if TYPE_CHECKING:
     from choreographer import Browser, Tab
     from choreographer.protocol.devtools_async import Session
 
     from . import BrowserResponse
+
+_logger = logistro.getLogger(__name__)
 
 # Abit about the mechanics of chrome:
 # Whether or not a Page.loadEventFired event fires is a bit
@@ -66,10 +70,13 @@ async def create_and_wait(
         The created Tab
 
     """
+    _logger.debug("Creating tab")
     tab = await browser.create_tab(url)
+    _logger.debug("Creating session")
     temp_session = await tab.create_session()
 
     try:
+        _logger.debug("Subscribing to loadEven and enabling events.")
         load_future = temp_session.subscribe_once("Page.loadEventFired")
         await temp_session.send_command("Page.enable")
         await temp_session.send_command("Runtime.enable")
@@ -98,14 +105,19 @@ async def create_and_wait(
                     raise asyncio.TimeoutError(  # noqa: TRY301
                         "Page load timeout",
                     )
+                else:
+                    _logger.debug(done)
 
             except (asyncio.TimeoutError, asyncio.CancelledError, TimeoutError):
                 # Stop the page load when timeout occurs
+                _logger.debug("Need to stop page loading, error.")
                 await temp_session.send_command("Page.stopLoading")
                 raise
     finally:
+        _logger.debug("Closing session")
         await tab.close_session(temp_session.session_id)
 
+    _logger.debug("Returning tab.")
     return tab
 
 
