@@ -1,5 +1,6 @@
 # Roadmap
 
+- [ ] Extract local download check to chromium implementation class
 - [x] Fix up browser deps error (eliminate in-package analysis)
 - [x] Switch to process group and kill that to catch all chromium children
 - [x] Add helpers for running javascript
