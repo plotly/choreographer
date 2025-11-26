@@ -5,10 +5,51 @@ from __future__ import annotations
 import asyncio
 from typing import TYPE_CHECKING
 
+import logistro
+
 if TYPE_CHECKING:
     from choreographer import Browser, Tab
+    from choreographer.protocol.devtools_async import Session
 
     from . import BrowserResponse
+
+_logger = logistro.getLogger(__name__)
+
+# Abit about the mechanics of chrome:
+# Whether or not a Page.loadEventFired event fires is a bit
+# racey. Optimistically, it's buffered and fired after subscription
+# even if the event happened in the past.
+# Doesn't seem to always work out that way, so we also use
+# javascript to create a "loaded" event, but for the case
+# where we need to timeout- loading a page that never resolves,
+# the browser might actually load an about:blank instead and then
+# fire the event, misleading the user, so we check the url.
+
+
+async def _check_document_ready(session: Session, url: str) -> BrowserResponse:
+    return await session.send_command(
+        "Runtime.evaluate",
+        params={
+            "expression": """
+                new Promise((resolve) => {
+                    if (
+                        (document.readyState === 'complete') &&
+                        (window.location==`"""  # CONCATENATE!
+            f"{url!s}"
+            """`)
+                    ){
+                        resolve("Was complete");
+                    } else {
+                        window.addEventListener(
+                            'load', () => resolve("Event loaded")
+                        );
+                    }
+                })
+            """,
+            "awaitPromise": True,
+            "returnByValue": True,
+        },
+    )
 
 
 async def create_and_wait(
@@ -29,24 +70,61 @@ async def create_and_wait(
         The created Tab
 
     """
+    _logger.debug("Creating tab")
     tab = await browser.create_tab(url)
+    _logger.debug("Creating session")
     temp_session = await tab.create_session()
 
     try:
+        _logger.debug("Subscribing to loadEven and enabling events.")
         load_future = temp_session.subscribe_once("Page.loadEventFired")
         await temp_session.send_command("Page.enable")
         await temp_session.send_command("Runtime.enable")
 
         if url:
             try:
-                await asyncio.wait_for(load_future, timeout=timeout)
-            except (asyncio.TimeoutError, asyncio.CancelledError, TimeoutError):
+                # JavaScript evaluation to check if document is loaded
+                js_ready_future = asyncio.create_task(
+                    _check_document_ready(temp_session, url),
+                )
+                _logger.debug(f"Starting wait: timeout={timeout}")
+                # Race between the two methods: first one to complete wins
+                done, pending = await asyncio.wait(
+                    [
+                        load_future,
+                        js_ready_future,
+                    ],
+                    return_when=asyncio.FIRST_COMPLETED,
+                    timeout=timeout,
+                )
+                _logger.debug(f"Finish wait, is done? {bool(done)}")
+
+                for task in pending:
+                    _logger.debug(f"Cancelling: {task}")
+                    task.cancel()
+
+                if not done:
+                    _logger.debug("Timeout waiting for js or event")
+                    raise asyncio.TimeoutError(  # noqa: TRY301
+                        "Page load timeout",
+                    )
+                else:
+                    _logger.debug(f"Task which finished: {done}")
+
+            except (
+                asyncio.TimeoutError,
+                asyncio.CancelledError,
+                TimeoutError,
+            ) as e:
                 # Stop the page load when timeout occurs
+                _logger.debug("Need to stop page loading, error.", exc_info=e)
                 await temp_session.send_command("Page.stopLoading")
                 raise
     finally:
+        _logger.debug("Closing session")
         await tab.close_session(temp_session.session_id)
 
+    _logger.debug("Returning tab.")
     return tab
 
 
@@ -71,9 +149,10 @@ async def navigate_and_wait(
     temp_session = await tab.create_session()
 
     try:
+        # Subscribe BEFORE enabling domains to avoid race condition
+        load_future = temp_session.subscribe_once("Page.loadEventFired")
         await temp_session.send_command("Page.enable")
         await temp_session.send_command("Runtime.enable")
-        load_future = temp_session.subscribe_once("Page.loadEventFired")
         try:
 
             async def _freezers() -> None:
