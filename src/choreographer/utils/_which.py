@@ -8,8 +8,6 @@ from typing import TYPE_CHECKING
 
 import logistro
 
-from choreographer.cli._cli_utils import get_chrome_download_path
-
 _logger = logistro.getLogger()
 
 if TYPE_CHECKING:
@@ -47,40 +45,18 @@ def _which_from_windows_reg(key: str) -> str | None:
 def browser_which(
     executable_names: Sequence[str],
     *,
-    skip_local: bool = False,
     ms_prog_id: str | None = None,
-    verify_local: bool = False,
 ) -> str | None:
     """
     Look for and return first name found in PATH.
 
     Args:
         executable_names: the list of names to look for
-        skip_local: (default False) don't look for a choreo download of anything.
         ms_prog_id: A windows registry ID string to lookup program paths
-        verify_local: (default False) force using local install.
 
     """
-    _logger.debug(f"Looking for browser, skipping local? {skip_local}")
-    path = None
-
     if isinstance(executable_names, str):
         executable_names = [executable_names]
-
-    if skip_local:
-        _logger.debug("Skipping searching for local download of chrome.")
-        if verify_local:
-            raise ValueError("Cannot set both skip_local and verify_local.")
-    else:
-        local_chrome = get_chrome_download_path()
-        _logger.debug(f"Looking for at local chrome download path: {local_chrome}")
-        if local_chrome is not None and local_chrome.exists():
-            _logger.debug("Returning local chrome.")
-            return str(local_chrome)
-        else:
-            _logger.debug(f"Local chrome not found at path: {local_chrome}.")
-            if verify_local:
-                raise RuntimeError("verify_local set to True, local not found.")
 
     if platform.system() == "Windows":
         os.environ["NoDefaultCurrentDirectoryInExePath"] = "0"  # noqa: SIM112 var name set by windows

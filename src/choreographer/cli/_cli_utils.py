@@ -14,7 +14,7 @@ from pathlib import Path
 
 import logistro
 
-from choreographer.cli.defaults import default_download_path
+from choreographer.cli.defaults import default_download_path, old_download_path
 
 _logger = logistro.getLogger(__name__)
 
@@ -42,34 +42,42 @@ def get_google_supported_platform_string() -> str | None:
     return platform_string
 
 
-def get_chrome_download_path() -> Path | None:
+def get_chrome_download_path(
+    root=default_download_path,
+    *,
+    mkdir=True,
+) -> Path | None:
     _chrome_platform_detected = get_google_supported_platform_string()
 
     if not _chrome_platform_detected:
         return None
 
-    _default_exe_path = default_download_path
-    _default_exe_path.mkdir(parents=True, exist_ok=True)
+    _default_exe_path = root
+    if mkdir:
+        _default_exe_path.mkdir(parents=True, exist_ok=True)
 
     if platform.system().startswith("Linux"):
-        _default_exe_path = (
-            default_download_path / f"chrome-{_chrome_platform_detected}" / "chrome"
-        )
+        _default_exe_path /= f"chrome-{_chrome_platform_detected}/chrome"
     elif platform.system().startswith("Darwin"):
-        _default_exe_path = (
-            default_download_path
-            / f"chrome-{_chrome_platform_detected}"
-            / "Google Chrome for Testing.app"
-            / "Contents"
-            / "MacOS"
-            / "Google Chrome for Testing"
+        _default_exe_path /= (
+            f"chrome-{_chrome_platform_detected}"
+            "/Google Chrome for Testing.app"
+            "/Contents"
+            "/MacOS"
+            "/Google Chrome for Testing"
         )
     elif platform.system().startswith("Win"):
-        _default_exe_path = (
-            default_download_path / f"chrome-{_chrome_platform_detected}" / "chrome.exe"
-        )
+        _default_exe_path /= f"chrome-{_chrome_platform_detected}/chrome.exe"
 
     return _default_exe_path
+
+
+# can remove this and it's default after some time - 2025/11/29
+def get_old_chrome_download_path():
+    return get_chrome_download_path(
+        root=old_download_path,
+        mkdir=False,
+    )
 
 
 # https://stackoverflow.com/questions/39296101/python-zipfile-removes-execute-permissions-from-binaries

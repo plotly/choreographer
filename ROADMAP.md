@@ -2,7 +2,7 @@
 
 - [ ] What happens to the underlying task when we cancel a future in a
   `protocol.devtools_async_helpers` timeout situation?
-- [ ] Extract local download check to chromium implementation class
+- [x] Extract local download check to chromium implementation class
 - [x] Fix up browser deps error (eliminate in-package analysis)
 - [x] Switch to process group and kill that to catch all chromium children
 - [x] Add helpers for running javascript
