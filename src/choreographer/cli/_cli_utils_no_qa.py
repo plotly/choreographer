@@ -55,11 +55,11 @@ def diagnose() -> None:
     print("*".center(50, "*"))
     print("BROWSER:".center(50, "*"))
     try:
-        local_path = browser_which([], verify_local=True)
-        if local_path and not Path(local_path).exists():
+        local_path = Chromium.find_browser(skip_local=False, verify_local=True)
+        if not local_path or Path(local_path).exists():
             print(f"Local doesn't exist at {local_path}")
         else:
-            print(f"Found local: {browser_which([], verify_local=True)}")
+            print(f"Found local: {local_path}")
     except RuntimeError:
         print("Didn't find local.")
     browser_path = Chromium.find_browser(skip_local=True)

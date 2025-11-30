@@ -16,6 +16,10 @@ if platform.system() == "Windows":
     import msvcrt
 
 from choreographer.channels import Pipe
+from choreographer.cli._cli_utils import (
+    get_chrome_download_path,
+    get_old_chrome_download_path,
+)
 from choreographer.utils import TmpDirectory, get_browser_path
 
 from ._chrome_constants import chromium_based_browsers
@@ -75,13 +79,23 @@ class Chromium:
         *,
         skip_local: bool,
         skip_typical: bool = False,
+        verify_local: bool = False,
     ) -> str | None:
         """Find a chromium based browser."""
+        if not skip_local:
+            if ((p := get_chrome_download_path(mkdir=False)) and p.exists()) or (
+                (p := get_old_chrome_download_path()) and p.exists()
+            ):
+                return str(p)
+            elif verify_local:
+                raise RuntimeError("verify_local set to True, local not found.")
+        elif verify_local:
+            raise ValueError("Cannot set both skip_local and verify_local.")
+
         for name, browser_data in chromium_based_browsers.items():
             _logger.debug(f"Looking for a {name} browser.")
             path = get_browser_path(
                 executable_names=browser_data.exe_names,
-                skip_local=skip_local,
                 ms_prog_id=browser_data.ms_prog_id,
             )
             if not path and not skip_typical:
