@@ -11,3 +11,5 @@ default_download_path = (
     / "deps"
 )
 """The path where we download chrome if no path argument is supplied."""
+
+old_download_path = Path(__file__).resolve().parent / "browser_exe"
