@@ -40,11 +40,18 @@ def diagnose() -> None:
     )
     parser.add_argument("--no-run", dest="run", action="store_false")
     parser.add_argument("--show", dest="headless", action="store_false")
+    parser.add_argument(
+        "--verify_local",
+        dest="verify_local",
+        action="store_true",
+    )
     parser.set_defaults(run=True)
     parser.set_defaults(headless=True)
+    parser.set_defaults(verify_local=False)
     args, _ = parser.parse_known_args()
     run = args.run
     headless = args.headless
+    verify_local = args.verify_local
     fail = []
     print("*".center(50, "*"))
     print("SYSTEM:".center(50, "*"))
@@ -56,12 +63,14 @@ def diagnose() -> None:
     print("BROWSER:".center(50, "*"))
     try:
         local_path = Chromium.find_browser(skip_local=False, verify_local=True)
-        if not local_path or Path(local_path).exists():
+        if not local_path or not Path(local_path).exists():
             print(f"Local doesn't exist at {local_path}")
         else:
             print(f"Found local: {local_path}")
     except RuntimeError:
         print("Didn't find local.")
+        if verify_local:
+            raise
     browser_path = Chromium.find_browser(skip_local=True)
     print(browser_path)
     print("*".center(50, "*"))

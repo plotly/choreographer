@@ -1,3 +1,6 @@
+v1.3.0rc2
+- Check path validity for browser with is_file()
+- Add option --verify_local in choreo_diagnose and fix local reporting logic
 v1.3.0rc1
 - We now look for old download path as well as new download path
 v1.3.0rc0
