@@ -47,7 +47,7 @@ def diagnose() -> None:
     )
     parser.set_defaults(run=True)
     parser.set_defaults(headless=True)
-    parser.set_defaults(verify_local=True)
+    parser.set_defaults(verify_local=False)
     args, _ = parser.parse_known_args()
     run = args.run
     headless = args.headless
