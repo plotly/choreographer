@@ -112,8 +112,8 @@ def get_chrome_sync(  # noqa: C901, PLR0912
     if isinstance(path, str):
         path = Path(path)
 
-    arch = arch or get_google_supported_platform_string()
-    if not arch:
+    arch = arch or get_google_platform_string()
+    if arch not in supported_platform_strings:
         raise RuntimeError(
             "You must specify an arch, one of: "
             f"{', '.join(supported_platform_strings)}. "
