@@ -23,23 +23,29 @@ _chrome_for_testing_url = "https://googlechromelabs.github.io/chrome-for-testing
 supported_platform_strings = ["linux64", "win32", "win64", "mac-x64", "mac-arm64"]
 
 
-def get_google_supported_platform_string() -> str | None:
-    arch_size_detected = "64" if sys.maxsize > 2**32 else "32"
-    arch_detected = "arm" if platform.processor() == "arm" else "x"
+def get_google_platform_string() -> str | None:
+    arch_size_detected = "64" if sys.maxsize > 2 ** 32 else "32"
+    is_x86 = platform.processor() not in {"arm", "aarch64"}
+    arch_detected = "x" if is_x86 else "arm"
 
-    chrome_platform_detected: str | None = None
     if platform.system() == "Windows":
-        chrome_platform_detected = "win" + arch_size_detected
-    elif platform.system() == "Linux":
-        chrome_platform_detected = "linux" + arch_size_detected
-    elif platform.system() == "Darwin":
-        chrome_platform_detected = "mac-" + arch_detected + arch_size_detected
+        if is_x86:
+            return "win" + arch_size_detected
+        return "win-" + arch_detected + arch_size_detected
+    if platform.system() == "Linux":
+        if is_x86:
+            return "linux" + arch_size_detected
+        return "linux-" + arch_detected + arch_size_detected
+    if platform.system() == "Darwin":
+        return "mac-" + arch_detected + arch_size_detected
+    return None
 
-    platform_string = ""
+
+def get_google_supported_platform_string() -> str | None:
+    chrome_platform_detected = get_google_platform_string()
     if chrome_platform_detected in supported_platform_strings:
-        platform_string = chrome_platform_detected
-
-    return platform_string
+        return chrome_platform_detected
+    return ""
 
 
 def get_chrome_download_path(
@@ -106,8 +112,8 @@ def get_chrome_sync(  # noqa: C901, PLR0912
     if isinstance(path, str):
         path = Path(path)
 
-    arch = arch or get_google_supported_platform_string()
-    if not arch:
+    arch = arch or get_google_platform_string()
+    if arch not in supported_platform_strings:
         raise RuntimeError(
             "You must specify an arch, one of: "
             f"{', '.join(supported_platform_strings)}. "
