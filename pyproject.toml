@@ -19,7 +19,6 @@ name = "choreographer"
 description = "Devtools Protocol implementation for chrome."
 readme = "README.md"
 requires-python = ">=3.8"
-[project]
 license = "MIT"
 license-files = [ "LICENSE.md" ]
 dynamic = ["version"]
