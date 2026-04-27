@@ -19,7 +19,9 @@ name = "choreographer"
 description = "Devtools Protocol implementation for chrome."
 readme = "README.md"
 requires-python = ">=3.8"
-license = { "file" = "LICENSE.md" }
+[project]
+license = "MIT"
+license-files = [ "LICENSE.md" ]
 dynamic = ["version"]
 authors = [
   {name = "Andrew Pikul", email="ajpikul@gmail.com"},
