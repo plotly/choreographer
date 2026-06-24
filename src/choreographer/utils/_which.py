@@ -79,13 +79,20 @@ def get_browser_path(*args: Any, **kwargs: Any) -> str | None:  # noqa: D417, do
     """
     Call `browser_which()` but check for user override first.
 
-    It looks for the browser in path.
+    Returns the path set by the ``BROWSER_PATH`` environment variable if set,
+    otherwise searches ``PATH`` via `browser_which()`.
 
-    Accepts the same arguments as `browser_which':
+    Accepts the same arguments as `browser_which()`:
 
     Args:
         executable_names: the list of names to look for
-        skip_local: (default False) don't look for a choreo download of anything.
+        ms_prog_id: A windows registry ID string to lookup program paths
+
+    Note:
+        This function does not handle the choreographer-managed local browser
+        download. To include (or skip) a locally downloaded browser in the
+        search, use `choreographer.browsers.chromium.Chromium.find_browser`,
+        which accepts a ``skip_local`` argument.
 
     """
     return os.environ.get("BROWSER_PATH", browser_which(*args, **kwargs))
