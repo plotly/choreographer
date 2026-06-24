@@ -16,6 +16,7 @@ where X.Y.Z is the semver of the most recent choreographer release.
 ### Fixed
 - Improve platform architecture detection for arm on Linux and Windows [[#290](https://github.com/plotly/choreographer/pull/290)], with thanks to @juliabeliaeva for the contribution!
 - Fix license file and add a valid SPDX identifier to project settings [[#294](https://github.com/plotly/choreographer/pull/294)], with thanks to @ecederstrand for the contribution!
+- Fix out-of-date docstring on `get_browser_path` [[#300](https://github.com/plotly/choreographer/issues/300)]
 
 
 ## [1.3.0] -- 2026-04-28
