@@ -23,23 +23,33 @@ _chrome_for_testing_url = "https://googlechromelabs.github.io/chrome-for-testing
 supported_platform_strings = ["linux64", "win32", "win64", "mac-x64", "mac-arm64"]
 
 
-def get_google_supported_platform_string() -> str | None:
+# Returns the detected platform string, including ones not in
+# supported_platform_strings (e.g. linux-arm64, win-arm64) so callers
+# can surface them in error messages.
+def get_google_platform_string() -> str | None:
     arch_size_detected = "64" if sys.maxsize > 2**32 else "32"
-    arch_detected = "arm" if platform.processor() == "arm" else "x"
+    machine = platform.machine().lower()
+    is_arm = machine in {"arm64", "aarch64"}
+    arch_detected = "arm" if is_arm else "x"
 
-    chrome_platform_detected: str | None = None
     if platform.system() == "Windows":
-        chrome_platform_detected = "win" + arch_size_detected
-    elif platform.system() == "Linux":
-        chrome_platform_detected = "linux" + arch_size_detected
-    elif platform.system() == "Darwin":
-        chrome_platform_detected = "mac-" + arch_detected + arch_size_detected
+        if not is_arm:
+            return "win" + arch_size_detected
+        return "win-" + arch_detected + arch_size_detected
+    if platform.system() == "Linux":
+        if not is_arm:
+            return "linux" + arch_size_detected
+        return "linux-" + arch_detected + arch_size_detected
+    if platform.system() == "Darwin":
+        return "mac-" + arch_detected + arch_size_detected
+    return None
 
-    platform_string = ""
+
+def get_google_supported_platform_string() -> str | None:
+    chrome_platform_detected = get_google_platform_string()
     if chrome_platform_detected in supported_platform_strings:
-        platform_string = chrome_platform_detected
-
-    return platform_string
+        return chrome_platform_detected
+    return None
 
 
 def get_chrome_download_path(
@@ -94,7 +104,7 @@ class _ZipFilePermissions(zipfile.ZipFile):
         return path
 
 
-def get_chrome_sync(  # noqa: C901, PLR0912
+def get_chrome_sync(  # noqa: C901, PLR0912, PLR0915
     arch: str | None = None,
     i: int | None = None,
     path: str | Path = default_download_path,
@@ -106,12 +116,17 @@ def get_chrome_sync(  # noqa: C901, PLR0912
     if isinstance(path, str):
         path = Path(path)
 
-    arch = arch or get_google_supported_platform_string()
-    if not arch:
+    arch = arch or get_google_platform_string()
+    if arch is None:
         raise RuntimeError(
-            "You must specify an arch, one of: "
-            f"{', '.join(supported_platform_strings)}. "
-            f"Detected {arch} is not supported.",
+            f"Could not detect a supported platform on {platform.system()!r}. "
+            f"Pass --arch explicitly, one of: "
+            f"{', '.join(supported_platform_strings)}.",
+        )
+    if arch not in supported_platform_strings:
+        raise RuntimeError(
+            f"Detected platform {arch!r} is not supported by Chrome for Testing. "
+            f"Supported: {', '.join(supported_platform_strings)}.",
         )
 
     if i:

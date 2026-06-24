@@ -1,3 +1,5 @@
+Unreleased
+- Improve platform architecture detection for arm on Linux and Windows [[#290](https://github.com/plotly/choreographer/pull/290)], with thanks to @juliabeliaeva for the contribution!
 v1.3.0
 v1.3.0rc2
 - Check path validity for browser with is_file()
