@@ -25,6 +25,10 @@ def gpu(request):
 def headless(request):
     return request.param
 
+@pytest.fixture(params=[True, False], ids=["enable_extensions", ""])
+def extension(request):
+    return request.param
+
 
 # --headless is the default flag for most tests,
 # but you can set --no-headless if you want to watch

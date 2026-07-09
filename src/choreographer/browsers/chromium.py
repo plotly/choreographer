@@ -62,6 +62,8 @@ class Chromium:
 
     path: str | Path | None
     """The path to the chromium executable."""
+    extension_enabled: bool
+    """True to enable browser extensions. True by default."""
     gpu_enabled: bool
     """True if we should use the gpu. False by default for compatibility."""
     headless: bool
@@ -142,6 +144,7 @@ class Chromium:
             channel: the `choreographer.Channel` we'll be using (WebSockets? Pipe?)
             path: path to the browser
             kwargs:
+                extension_enabled (default True): Enable extensions?
                 gpu_enabled (default False): Turn on GPU? Doesn't work in all envs.
                 headless (default True): Actually launch a browser?
                 sandbox_enabled (default False): Enable sandbox-
@@ -155,6 +158,7 @@ class Chromium:
         """
         _logger.info(f"Chromium init'ed with kwargs {kwargs}")
         self.path = path
+        self.extension_enabled = kwargs.pop("enable_extensions", True)
         self.gpu_enabled = kwargs.pop("enable_gpu", False)
         self.headless = kwargs.pop("headless", True)
         self.sandbox_enabled = kwargs.pop("enable_sandbox", False)
@@ -237,6 +241,8 @@ class Chromium:
                 str(self.path),
             ]
 
+        if not self.extension_enabled:
+            cli.append("--disable-extensions")
         if not self.gpu_enabled:
             cli.append("--disable-gpu")
         if self.headless:
