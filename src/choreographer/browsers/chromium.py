@@ -158,7 +158,7 @@ class Chromium:
         """
         _logger.info(f"Chromium init'ed with kwargs {kwargs}")
         self.path = path
-        self.extension_enabled = kwargs.pop("enable_extensions", True)
+        self.extensions_enabled = kwargs.pop("enable_extensions", True)
         self.gpu_enabled = kwargs.pop("enable_gpu", False)
         self.headless = kwargs.pop("headless", True)
         self.sandbox_enabled = kwargs.pop("enable_sandbox", False)
@@ -241,7 +241,7 @@ class Chromium:
                 str(self.path),
             ]
 
-        if not self.extension_enabled:
+        if not self.extensions_enabled:
             cli.append("--disable-extensions")
         if not self.gpu_enabled:
             cli.append("--disable-gpu")
