@@ -62,7 +62,7 @@ class Chromium:
 
     path: str | Path | None
     """The path to the chromium executable."""
-    extension_enabled: bool
+    extensions_enabled: bool
     """True to enable browser extensions. True by default."""
     gpu_enabled: bool
     """True if we should use the gpu. False by default for compatibility."""
@@ -144,10 +144,10 @@ class Chromium:
             channel: the `choreographer.Channel` we'll be using (WebSockets? Pipe?)
             path: path to the browser
             kwargs:
-                extension_enabled (default True): Enable extensions?
-                gpu_enabled (default False): Turn on GPU? Doesn't work in all envs.
+                enable_extensions (default True): Enable extensions?
+                enable_gpu (default False): Turn on GPU? Doesn't work in all envs.
                 headless (default True): Actually launch a browser?
-                sandbox_enabled (default False): Enable sandbox-
+                enable_sandbox (default False): Enable sandbox-
                     a persnickety thing depending on environment, OS, user, etc
                 tmp_dir (default None): Manually set the temporary directory
 
