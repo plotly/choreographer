@@ -67,7 +67,7 @@ class Chromium:
     gpu_enabled: bool
     """True if we should use the gpu. False by default for compatibility."""
     headless: bool
-    """True if we should not show the browser, true by default."""
+    """True if we should not show the browser. True by default."""
     sandbox_enabled: bool
     """True to enable the sandbox. False by default."""
     skip_local: bool
@@ -146,7 +146,7 @@ class Chromium:
             kwargs:
                 enable_extensions (default True): Enable extensions?
                 enable_gpu (default False): Turn on GPU? Doesn't work in all envs.
-                headless (default True): Actually launch a browser?
+                headless (default True): Run the browser in headless mode?
                 enable_sandbox (default False): Enable sandbox-
                     a persnickety thing depending on environment, OS, user, etc
                 tmp_dir (default None): Manually set the temporary directory
