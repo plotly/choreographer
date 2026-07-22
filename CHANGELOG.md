@@ -13,6 +13,9 @@ where X.Y.Z is the semver of the most recent choreographer release.
 
 ## [Unreleased]
 
+### Added
+- Add `enable_extensions` option to control browser extension loading [[#303](https://github.com/plotly/choreographer/pull/303)], with thanks to @hirohira9119 for the contribution!
+
 ### Fixed
 - Improve platform architecture detection for arm on Linux and Windows [[#290](https://github.com/plotly/choreographer/pull/290)], with thanks to @juliabeliaeva for the contribution!
 - Fix license file and add a valid SPDX identifier to project settings [[#294](https://github.com/plotly/choreographer/pull/294)], with thanks to @ecederstrand for the contribution!

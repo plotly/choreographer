@@ -62,10 +62,12 @@ class Chromium:
 
     path: str | Path | None
     """The path to the chromium executable."""
+    extensions_enabled: bool
+    """True to enable browser extensions. True by default."""
     gpu_enabled: bool
     """True if we should use the gpu. False by default for compatibility."""
     headless: bool
-    """True if we should not show the browser, true by default."""
+    """True if we should not show the browser. True by default."""
     sandbox_enabled: bool
     """True to enable the sandbox. False by default."""
     skip_local: bool
@@ -142,9 +144,10 @@ class Chromium:
             channel: the `choreographer.Channel` we'll be using (WebSockets? Pipe?)
             path: path to the browser
             kwargs:
-                gpu_enabled (default False): Turn on GPU? Doesn't work in all envs.
-                headless (default True): Actually launch a browser?
-                sandbox_enabled (default False): Enable sandbox-
+                enable_extensions (default True): Enable extensions?
+                enable_gpu (default False): Turn on GPU? Doesn't work in all envs.
+                headless (default True): Run the browser in headless mode?
+                enable_sandbox (default False): Enable sandbox-
                     a persnickety thing depending on environment, OS, user, etc
                 tmp_dir (default None): Manually set the temporary directory
 
@@ -155,6 +158,7 @@ class Chromium:
         """
         _logger.info(f"Chromium init'ed with kwargs {kwargs}")
         self.path = path
+        self.extensions_enabled = kwargs.pop("enable_extensions", True)
         self.gpu_enabled = kwargs.pop("enable_gpu", False)
         self.headless = kwargs.pop("headless", True)
         self.sandbox_enabled = kwargs.pop("enable_sandbox", False)
@@ -237,6 +241,8 @@ class Chromium:
                 str(self.path),
             ]
 
+        if not self.extensions_enabled:
+            cli.append("--disable-extensions")
         if not self.gpu_enabled:
             cli.append("--disable-gpu")
         if self.headless:
