@@ -26,6 +26,26 @@ not absolutely required. The synchronous functions in this package are intended
 as building blocks for other asynchronous strategies that Python may favor over
 async/await in the future.
 
+## Proxy Configuration
+
+Pass `proxy_server` when constructing a browser to route Chromium traffic
+through a proxy:
+
+```python
+browser = await choreo.Browser(proxy_server="http://proxy.example:8080")
+```
+
+For callers such as Kaleido and Plotly that construct the browser internally,
+set `CHOREO_PROXY_SERVER` before starting the Python process:
+
+```shell
+CHOREO_PROXY_SERVER=http://proxy.example:8080 python app.py
+```
+
+The value is passed directly to Chromium's `--proxy-server` command-line flag.
+Avoid including credentials in the URL because command-line arguments may be
+visible to other users on the system.
+
 ## Testing
 
 ### Process Control Tests
