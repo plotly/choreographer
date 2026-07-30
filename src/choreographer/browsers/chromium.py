@@ -160,17 +160,13 @@ class Chromium:
             NotImplementedError: Pipe is the only channel type it'll accept right now.
 
         """
-        log_kwargs = kwargs.copy()
-        if "proxy_server" in log_kwargs:
-            log_kwargs["proxy_server"] = "<redacted>"
-        _logger.info(f"Chromium init'ed with kwargs {log_kwargs}")
+        _logger.info(f"Chromium init'ed with kwargs {kwargs}")
         self.path = path
         self.extensions_enabled = kwargs.pop("enable_extensions", True)
         self.gpu_enabled = kwargs.pop("enable_gpu", False)
         self.headless = kwargs.pop("headless", True)
-        self.proxy_server = kwargs.pop(
-            "proxy_server",
-            os.environ.get("CHOREO_PROXY_SERVER"),
+        self.proxy_server = kwargs.pop("proxy_server", None) or os.environ.get(
+            "CHOREO_PROXY_SERVER",
         )
         self.sandbox_enabled = kwargs.pop("enable_sandbox", False)
         self._tmp_dir_path = kwargs.pop("tmp_dir", None)
@@ -304,11 +300,7 @@ class Chromium:
                 cli += [
                     f"--remote-debugging-io-pipes={r_handle!s},{w_handle!s}",
                 ]
-        log_cli = [
-            "--proxy-server=<redacted>" if arg.startswith("--proxy-server=") else arg
-            for arg in cli
-        ]
-        _logger.debug(f"Returning cli: {log_cli}")
+        _logger.debug(f"Returning cli: {cli}")
         return cli
 
     def get_env(self) -> MutableMapping[str, str]:
