@@ -68,6 +68,8 @@ class Chromium:
     """True if we should use the gpu. False by default for compatibility."""
     headless: bool
     """True if we should not show the browser. True by default."""
+    proxy_server: str | None
+    """Proxy server passed to Chromium, if configured."""
     sandbox_enabled: bool
     """True to enable the sandbox. False by default."""
     skip_local: bool
@@ -147,6 +149,8 @@ class Chromium:
                 enable_extensions (default True): Enable extensions?
                 enable_gpu (default False): Turn on GPU? Doesn't work in all envs.
                 headless (default True): Run the browser in headless mode?
+                proxy_server (default None): Proxy server URL passed to Chromium.
+                    Falls back to the `CHOREO_PROXY_SERVER` environment variable.
                 enable_sandbox (default False): Enable sandbox-
                     a persnickety thing depending on environment, OS, user, etc
                 tmp_dir (default None): Manually set the temporary directory
@@ -161,6 +165,9 @@ class Chromium:
         self.extensions_enabled = kwargs.pop("enable_extensions", True)
         self.gpu_enabled = kwargs.pop("enable_gpu", False)
         self.headless = kwargs.pop("headless", True)
+        self.proxy_server = kwargs.pop("proxy_server", None) or os.environ.get(
+            "CHOREO_PROXY_SERVER",
+        )
         self.sandbox_enabled = kwargs.pop("enable_sandbox", False)
         self._tmp_dir_path = kwargs.pop("tmp_dir", None)
         if kwargs:
@@ -247,6 +254,8 @@ class Chromium:
             cli.append("--disable-gpu")
         if self.headless:
             cli.append("--headless")
+        if self.proxy_server:
+            cli.append(f"--proxy-server={self.proxy_server}")
         if not self.sandbox_enabled:
             cli.append("--no-sandbox")
 
