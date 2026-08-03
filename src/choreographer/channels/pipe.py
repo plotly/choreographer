@@ -13,7 +13,12 @@ from typing import TYPE_CHECKING
 import logistro
 
 from . import _wire as wire
-from ._errors import BlockWarning, ChannelClosedError, JSONError
+from ._errors import (
+    BlockWarning,
+    ChannelClosedError,
+    JSONError,
+    MessageTooLargeError,
+)
 
 if TYPE_CHECKING:
     from typing import Any, Mapping, Sequence
@@ -23,6 +28,14 @@ if TYPE_CHECKING:
 _with_block = bool(sys.version_info[:3] >= (3, 12) or platform.system() != "Windows")
 
 _logger = logistro.getLogger(__name__)
+
+MAX_MESSAGE_SIZE = 100 * 1024 * 1024
+"""
+The biggest message Chrome will read off the pipe, in bytes.
+
+This mirrors `kReceiveBufferSizeForDevTools` in Chrome's
+`content/browser/devtools/devtools_pipe_handler.cc`.
+"""
 
 # should be closing my ends from the start?
 
@@ -84,7 +97,20 @@ class Pipe:
         Send one json down the pipe.
 
         Args:
-            obj: any python object that serializes to json.
+            obj: Any python object that serializes to JSON.
+
+        Raises:
+            ChannelClosedError: If the pipe was never opened or is already
+                closed, or if the OS write fails. A failed write closes the
+                pipe, so nothing can be sent after this.
+            MessageTooLargeError: If the message won't fit in Chrome's buffer.
+                Nothing is written, so the channel is still good afterwards.
+                The error carries the serialized message so that callers who
+                can break it up don't have to serialize it a second time.
+            TypeError: If `obj` contains something the encoder doesn't know how
+                to turn into JSON.
+            UnicodeEncodeError: If the serialized message contains lone
+                surrogates, which have no UTF-8 representation.
 
         """
         if not self.is_ready():
@@ -92,7 +118,15 @@ class Pipe:
                 "The communication channel was either never "
                 "opened or closed. Was .open() or .close() called?",
             )
-        encoded_message = wire.serialize(obj) + b"\0"
+        message = wire.serialize_str(obj)
+        encoded_message = message.encode("utf-8") + b"\0"
+        if len(encoded_message) > MAX_MESSAGE_SIZE:
+            # Don't close(): we haven't written anything, the pipe is fine.
+            raise MessageTooLargeError(
+                len(encoded_message),
+                MAX_MESSAGE_SIZE,
+                payload=message,
+            )
         _logger.debug(
             f"Writing message {encoded_message[:15]!r}...{encoded_message[-15:]!r}, "
             f"size: {len(encoded_message)}.",
