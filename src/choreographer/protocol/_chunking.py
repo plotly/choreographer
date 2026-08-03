@@ -77,17 +77,32 @@ def is_chunkable(command: BrowserCommand) -> bool:
         command: The command that was too big to send
 
     """
-    if command.get("method") != _CHUNKABLE_METHOD:
+    method = command.get("method")
+    if method != _CHUNKABLE_METHOD:
+        _logger.debug(f"Can't chunk {method}: only {_CHUNKABLE_METHOD} can be.")
         return False
     params = command.get("params") or {}
+    if params.get("throwOnSideEffect"):
+        _logger.debug(
+            "Can't chunk a command with throwOnSideEffect: breaking it up means "
+            "writing to the page, which is what the flag forbids.",
+        )
+        return False
     if not params.get("functionDeclaration"):
+        _logger.debug("Can't chunk: no functionDeclaration to wrap.")
         return False
     arguments = params.get("arguments") or []
     # If even one argument is a browser-side handle we can't rebuild the call
     # from the message text, so we don't try
-    return bool(arguments) and all(
+    if not arguments or not all(
         isinstance(argument, dict) and _VALUE_KEY in argument for argument in arguments
-    )
+    ):
+        _logger.debug(
+            "Can't chunk: every argument has to be a plain "
+            f"{_VALUE_KEY!r}, and at least one has to exist.",
+        )
+        return False
+    return True
 
 
 def _build_wrapper(user_fn: str) -> str:
@@ -163,9 +178,11 @@ async def send_chunked(
 
     """
     params: MutableMapping[str, Any] = dict(command["params"])
-    # The pieces have to run in the same execution context as the real call
+    # Grab all potential identifiers for the execution context
     execution_context_params = {
-        key: params[key] for key in ("executionContextId", "objectId") if key in params
+        key: params[key]
+        for key in ("executionContextId", "objectId", "uniqueContextId")
+        if key in params
     }
     # Two calls in one page must not share a store, or they'd eat each other.
     key = f"{session.session_id or 'browser'}:{next(_counter)}"
