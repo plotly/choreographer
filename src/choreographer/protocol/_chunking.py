@@ -36,9 +36,8 @@ CHUNK_SIZE = 10 * 1024 * 1024
 """
 How much of the message to put in each piece, in characters.
 
-Deliberately well under `MAX_MESSAGE_SIZE`. Each piece travels as a JSON
-string, and escaping can (in the worst case, a payload of nothing but
-quotes) double its length, so we leave a lot of room.
+Deliberately well under `MAX_MESSAGE_SIZE` to avoid issues with
+high byte count UTF-8 characters and escaped characters.
 """
 
 _CHUNKABLE_METHOD = "Runtime.callFunctionOn"

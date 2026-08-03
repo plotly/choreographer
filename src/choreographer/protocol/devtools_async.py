@@ -101,6 +101,13 @@ class Session:
             A message key (session, message id) tuple or None
             (Optional) A tuple[float, float, float] representing
             perf_counters() for write start, end, and read end.
+            On a chunked command, this covers only the final message, not
+            the pieces that carried the payload, so it reads as far quicker
+            than the call really was.
+
+        Raises:
+            MessageTooLargeError: If the message is too big for Chrome's
+                buffer and isn't a `Runtime.callFunctionOn` we can break up.
 
         """
         json_command = self._build_command(command, params)

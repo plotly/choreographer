@@ -64,6 +64,11 @@ class SessionSync:
         Returns:
             A message key (session, message id) tuple or None
 
+        Raises:
+            MessageTooLargeError: If the message is too big for Chrome's
+                buffer. Use the async `Session` if you need to send something
+                that big.
+
         """
         current_id = self.message_id
         self.message_id += 1
