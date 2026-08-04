@@ -81,12 +81,14 @@ src = ["src"]
 select = ["ALL"]
 ignore = [
           "ANN", # no types
-          "EM", # allow strings in raise(), despite python being ugly about it
-          "TRY003", # allow long error messages inside raise()
+          "COM812", # manual says linter rule conflicts with formatter
+          "CPY001", # Don't require a copyright notice at the top of a file
           "D203", # No blank before class docstring (D211 = require blank line)
           "D212", # Commit message style docstring is D213, ignore D212
-          "COM812", # manual says linter rule conflicts with formatter
+          "EM", # allow strings in raise(), despite python being ugly about it
+          "G004", # fstrings in my logs
           "ISC001", # manual says litner rule conflicts with formatter
+          "PT003", # scope="function" implied but I like readability
           "RET504", # Allow else if unnecessary because more readable
           "RET505", # Allow else if unnecessary because more readable
           "RET506", # Allow else if unnecessary because more readable
@@ -94,8 +96,7 @@ ignore = [
           "RET508", # Allow else if unnecessary because more readable
           "RUF012", # We don't do typing, so no typing
           "SIM105", # Too opionated (try-except-pass)
-          "PT003", # scope="function" implied but I like readability
-          "G004", # fstrings in my logs
+          "TRY003", # allow long error messages inside raise()
           ]
 
 [tool.ruff.lint.per-file-ignores]
@@ -112,6 +113,9 @@ asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 log_cli = false
 addopts = "--import-mode=append"
+markers = [
+  "slow: moves enough data to be worth skipping by default (`-m 'not slow'`)",
+]
 
 # tell poe to use the env we give it, otherwise it detects uv and overrides flags
 [tool.poe]
@@ -119,7 +123,10 @@ executor.type = "simple"
 
 [tool.poe.tasks]
 test_proc = "pytest --log-level=1 -W error -n auto -v -rfE --capture=fd tests/test_process.py"
-test_fn = "pytest --log-level=1 -W error -n auto -v -rfE --capture=fd --ignore=tests/test_process.py"
+test_fn = "pytest --log-level=1 -W error -n auto -v -rfE --capture=fd -m 'not slow' --ignore=tests/test_process.py"
+# Skip `--log-level=1` and `-n auto` to allow slow tests to complete without
+# formatting wall of text and to avoid tests using up all memory (~1GB per thread)
+test_slow = "pytest -W error -v -rfE --capture=fd -m slow --ignore=tests/test_process.py"
 debug-test_proc = "pytest --log-level=1 -W error -vvvx -rA --show-capture=no --capture=no tests/test_process.py"
 debug-test_fn = "pytest --log-level=1 -W error -vvvx -rA --show-capture=no --capture=no --ignore=tests/test_process.py"
 

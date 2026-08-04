@@ -41,7 +41,17 @@ class MultiEncoder(simplejson.JSONEncoder):
         return simplejson.JSONEncoder.default(self, o)
 
 
-def serialize(obj: Any) -> bytes:
+def serialize_str(obj: Any) -> str:
+    """
+    Serialize an object to a JSON string.
+
+    Use `serialize()` to return a value that's ready to send to Chrome.
+    This exists for callers that need to slice the string up first.
+
+    Args:
+        obj: Any Python object that serializes to JSON.
+
+    """
     try:
         if not _custom_encoder:
             message = simplejson.dumps(
@@ -57,7 +67,11 @@ def serialize(obj: Any) -> bytes:
     _logger.debug(f"Serialized: {message[:15]}...{message[-15:]}, size: {len(message)}")
     _logger.debug2(f"Whole message: {message}")
 
-    return message.encode("utf-8")
+    return message
+
+
+def serialize(obj: Any) -> bytes:
+    return serialize_str(obj).encode("utf-8")
 
 
 def deserialize(message: str) -> Any:

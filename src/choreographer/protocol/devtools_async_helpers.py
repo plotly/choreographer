@@ -20,7 +20,7 @@ _logger = logistro.getLogger(__name__)
 # racey. Optimistically, it's buffered and fired after subscription
 # even if the event happened in the past.
 # Doesn't seem to always work out that way, so we also use
-# javascript to create a "loaded" event, but for the case
+# JavaScript to create a "loaded" event, but for the case
 # where we need to timeout- loading a page that never resolves,
 # the browser might actually load an about:blank instead and then
 # fire the event, misleading the user, so we check the url.
