@@ -7,7 +7,7 @@ from .browsers import (
     BrowserFailedError,
     ChromeNotFoundError,
 )
-from .channels import BlockWarning, ChannelClosedError
+from .channels import BlockWarning, ChannelClosedError, MessageTooLargeError
 from .protocol import (
     DevtoolsProtocolError,
     ExperimentalFeatureWarning,
@@ -25,6 +25,7 @@ __all__ = [
     "ChromeNotFoundError",
     "DevtoolsProtocolError",
     "ExperimentalFeatureWarning",
+    "MessageTooLargeError",
     "MessageTypeError",
     "MissingKeyError",
     "TmpDirWarning",
