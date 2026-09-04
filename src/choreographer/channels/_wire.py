@@ -45,8 +45,14 @@ def serialize_str(obj: Any) -> str:
     """
     Serialize an object to a JSON string.
 
-    Use `serialize()` to return a value that's ready to send to Chrome.
-    This exists for callers that need to slice the string up first.
+    Use `serialize()` to return a value encoded as bytes,
+    which is the format accepted by Chrome.
+    `serialize_str()` exists for callers that need to split a large string
+    along character boundaries before encoding as bytes.
+
+    Encoding uses the encoder given to `register_custom_encoder()`, or
+    `MultiEncoder` on top of `simplejson` when none is registered. Which one
+    is in use decides what counts as serializable.
 
     Args:
         obj: Any Python object that serializes to JSON.
@@ -71,10 +77,24 @@ def serialize_str(obj: Any) -> str:
 
 
 def serialize(obj: Any) -> bytes:
+    """
+    Serialize an object to UTF-8 encoded JSON, ready for the wire.
+
+    Args:
+        obj: Any Python object that serializes to JSON.
+
+    """
     return serialize_str(obj).encode("utf-8")
 
 
 def deserialize(message: str) -> Any:
+    """
+    Read one JSON message from the browser back into Python objects.
+
+    Args:
+        message: One JSON message, already decoded from bytes.
+
+    """
     try:
         return simplejson.loads(message)
     except sjerrors.JSONDecodeError as e:

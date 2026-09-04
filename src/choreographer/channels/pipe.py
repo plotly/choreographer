@@ -94,7 +94,7 @@ class Pipe:
 
     def write_json(self, obj: Mapping[str, Any]) -> tuple[float, float]:
         """
-        Send one json down the pipe.
+        Send one json message down the pipe.
 
         Args:
             obj: Any python object that serializes to JSON.

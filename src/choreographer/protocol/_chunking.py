@@ -3,6 +3,7 @@ Break up `Runtime.callFunctionOn` commands that are too big for the pipe.
 
 Chrome reads one complete JSON message at a time off the devtools pipe, and
 it won't read one bigger than 100MB (see `channels.pipe.MAX_MESSAGE_SIZE`).
+Write more than that and Chrome closes the connection rather than reading it.
 The devtools protocol has no way to split a message, so in general an
 oversized command is simply an error.
 
@@ -18,6 +19,7 @@ difference: it still receives the same parsed arguments it always would.
 from __future__ import annotations
 
 import itertools
+import math
 from typing import TYPE_CHECKING
 
 import logistro
@@ -187,8 +189,7 @@ async def send_chunked(
     # Two calls in one page must not share a store, or they'd eat each other.
     key = f"{session.session_id or 'browser'}:{next(_counter)}"
 
-    # Use ceiling division to ensure whole number of chunks
-    n_chunks = -(-len(payload) // CHUNK_SIZE)
+    n_chunks = math.ceil(len(payload) / CHUNK_SIZE)
     _logger.info(
         f"Message too big for one write, sending it as {n_chunks} pieces "
         f"under key {key}.",
