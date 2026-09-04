@@ -131,7 +131,7 @@ def get_chrome_sync(  # noqa: C901, PLR0912, PLR0915
 
     if i:
         _logger.info("Loading chrome from list")
-        raw_json = urllib.request.urlopen(  # noqa: S310 audit url for schemes
+        raw_json = urllib.request.urlopen(
             _chrome_for_testing_url,
         ).read()
         browser_list = json.loads(

@@ -10,10 +10,11 @@ except ImportError:
 import json
 from typing import TYPE_CHECKING
 
-import choreographer.channels._wire as wire
 import logistro
 import numpy as np
 import pytest
+
+import choreographer.channels._wire as wire
 from choreographer.channels import register_custom_encoder
 
 if TYPE_CHECKING:

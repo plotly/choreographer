@@ -40,6 +40,14 @@ jobs:
         run: xvfb-run uv run --no-sources poe test
         timeout-minutes: 7
 
+      # Linux only: this is the one test that uses chrome's real 100MB buffer
+      # rather than a shrunken one, so it is worth running somewhere, but it
+      # peaks near 1GB and has been seen to fail once without explanation.
+      - name: Test large messages (Linux)
+        if: ${{ ! runner.debug && matrix.os == 'ubuntu-latest' }}
+        run: xvfb-run uv run --no-sources poe test_slow
+        timeout-minutes: 5
+
       - name: Test (Debug)
         if: ${{ runner.debug && matrix.os != 'ubuntu-latest' }}
         env:

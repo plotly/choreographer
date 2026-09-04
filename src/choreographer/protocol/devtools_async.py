@@ -8,6 +8,9 @@ from typing import TYPE_CHECKING, overload
 import logistro
 
 from choreographer import protocol
+from choreographer.channels import MessageTooLargeError
+
+from . import _chunking
 
 if TYPE_CHECKING:
     import asyncio
@@ -98,8 +101,43 @@ class Session:
             A message key (session, message id) tuple or None
             (Optional) A tuple[float, float, float] representing
             perf_counters() for write start, end, and read end.
+            On a chunked command, this covers only the final message, not
+            the pieces that carried the payload, so it reads as far quicker
+            than the call really was.
+
+        Raises:
+            MessageTooLargeError: If the message is too big for Chrome's
+                buffer and isn't a `Runtime.callFunctionOn` we can break up.
 
         """
+        json_command = self._build_command(command, params)
+        _logger.debug(
+            f"Cmd '{command}', param keys '{params.keys() if params else ''}', "
+            f"sessionId '{self.session_id}'",
+        )
+        _logger.debug2(f"Full params: {str(params).replace('%', '%%')}")
+        try:
+            response = await self._send_built(json_command)
+        except MessageTooLargeError as e:
+            if e.payload is None or not _chunking.is_chunkable(json_command):
+                raise
+            # Break the command up into chunks so they can be sent piece by piece
+            # and reassmbled without hitting the CDP limit
+            response, json_command = await _chunking.send_chunked(
+                self,
+                json_command,
+                e.payload,
+            )
+        if with_perf:
+            return (response, self._broker.get_perf(json_command))
+        return response
+
+    def _build_command(
+        self,
+        command: str,
+        params: MutableMapping[str, Any] | None = None,
+    ) -> protocol.BrowserCommand:
+        """Give a command an id and wrap it up for the browser."""
         current_id = self.message_id
         self.message_id += 1
         json_command = protocol.BrowserCommand(
@@ -113,17 +151,22 @@ class Session:
             json_command["sessionId"] = self.session_id
         if params:
             json_command["params"] = params
-        _logger.debug(
-            f"Cmd '{command}', param keys '{params.keys() if params else ''}', "
-            f"sessionId '{self.session_id}'",
-        )
-        _logger.debug2(f"Full params: {str(params).replace('%', '%%')}")
-        if with_perf:
-            return (
-                await self._broker.write_json(json_command),
-                self._broker.get_perf(json_command),
-            )
+        return json_command
+
+    async def _send_built(
+        self,
+        json_command: protocol.BrowserCommand,
+    ) -> protocol.BrowserResponse:
+        """Write a command with no too-big fallback, so we can't recurse."""
         return await self._broker.write_json(json_command)
+
+    async def _send_no_retry(
+        self,
+        command: str,
+        params: MutableMapping[str, Any] | None = None,
+    ) -> protocol.BrowserResponse:
+        """Build and write a command with no too-big fallback."""
+        return await self._send_built(self._build_command(command, params))
 
     def subscribe(
         self,
