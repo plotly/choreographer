@@ -128,7 +128,7 @@ test_fn = "pytest --log-level=1 -W error -n auto -v -rfE --capture=fd -m 'not sl
 # formatting wall of text and to avoid tests using up all memory (~1GB per thread)
 test_slow = "pytest -W error -v -rfE --capture=fd -m slow --ignore=tests/test_process.py"
 debug-test_proc = "pytest --log-level=1 -W error -vvvx -rA --show-capture=no --capture=no tests/test_process.py"
-debug-test_fn = "pytest --log-level=1 -W error -vvvx -rA --show-capture=no --capture=no --ignore=tests/test_process.py"
+debug-test_fn = "pytest --log-level=1 -W error -vvvx -rA --show-capture=no --capture=no -m 'not slow' --ignore=tests/test_process.py"
 
 [tool.poe.tasks.test]
 sequence = ["test_proc", "test_fn"]
