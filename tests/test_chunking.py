@@ -223,6 +223,22 @@ async def test_with_perf_survives_chunking(js, monkeypatch):
     assert write_start <= write_end <= read_end
 
 
+async def test_function_ending_in_a_comment(js, monkeypatch):
+    _logger.info("testing...")
+    session, js_id = js
+    _shrink(monkeypatch)
+
+    response = await _call(
+        session,
+        js_id,
+        fn="function(spec){ return spec.values.length; } // trailing comment",
+        args=[_spec()],
+        returnByValue=True,
+    )
+
+    assert _value(response) == _N_VALUES
+
+
 async def test_non_ascii_survives_the_split(js, monkeypatch):
     _logger.info("testing...")
     session, js_id = js

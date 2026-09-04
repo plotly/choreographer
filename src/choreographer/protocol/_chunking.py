@@ -118,7 +118,8 @@ def _build_wrapper(user_fn: str) -> str:
         "try{"
         f"var cmd = JSON.parse({_STORE}[k].join(''));"
         "var args = cmd.params.arguments.map(function(a){ return a.value; });"
-        f"return ({user_fn}).apply(this, args);"
+        # Add newline to make sure a trailing comment doesn't swallow `apply``
+        f"return ({user_fn}\n).apply(this, args);"
         "}finally{"
         f"delete {_STORE}[k];"
         "}"
