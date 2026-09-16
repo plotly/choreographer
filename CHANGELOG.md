@@ -19,6 +19,9 @@ where X.Y.Z is the semver of the most recent choreographer release.
 - Add `proxy_server` browser configuration with a `CHOREO_PROXY_SERVER` environment fallback [[#304](https://github.com/plotly/choreographer/pull/304)], with thanks to @ColumbusLabs for the contribution!
 - Send `Runtime.callFunctionOn` commands in chunks when they are too big for Chrome's 100MiB devtools buffer [[#306](https://github.com/plotly/choreographer/pull/306)]
 
+### Removed
+- Drop support for Python 3.8 [[#294](https://github.com/plotly/choreographer/pull/294)]
+
 ### Fixed
 - Improve platform architecture detection for arm on Linux and Windows [[#290](https://github.com/plotly/choreographer/pull/290)], with thanks to @juliabeliaeva for the contribution!
 - Fix license file and add a valid SPDX identifier to project settings [[#294](https://github.com/plotly/choreographer/pull/294)], with thanks to @ecederstrand for the contribution!
