@@ -220,7 +220,10 @@ async def test_with_perf_survives_chunking(js, monkeypatch):
 
     assert json.loads(_value(response))["n"] == _N_VALUES
     write_start, write_end, read_end = perf
-    assert write_start <= write_end <= read_end
+    assert write_start <= write_end
+    # The read loop takes read_end on a different thread, so read_end can
+    # precede write_end. We do the same thing in test_browser.py.
+    assert write_start <= read_end
 
 
 async def test_function_ending_in_a_comment(js, monkeypatch):
