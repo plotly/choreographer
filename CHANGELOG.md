@@ -1,10 +1,8 @@
-# choreographer changelog
+# Choreographer changelog
 
-For more context, please read through the
-[release notes](https://github.com/plotly/choreographer/releases).
+For more context, please read through the [release notes](https://github.com/plotly/choreographer/releases).
 
-To see all merged commits on the main branch that will be part of the next
-choreographer release, go to:
+To see all merged commits on the main branch that will be part of the next choreographer release, go to:
 
 <https://github.com/plotly/choreographer/compare/vX.Y.Z...main>
 
@@ -12,6 +10,9 @@ where X.Y.Z is the semver of the most recent choreographer release.
 
 
 ## [Unreleased]
+
+
+## [1.4.0] -- 2026-09-16
 
 ### Added
 - Add `enable_extensions` option to control browser extension loading [[#303](https://github.com/plotly/choreographer/pull/303)], with thanks to @hirohira9119 for the contribution!
