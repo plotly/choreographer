@@ -6,15 +6,16 @@ It includes helpers and constants for the Chrome Devtools Protocol.
 
 from __future__ import annotations
 
+from collections.abc import MutableMapping
 from enum import Enum
-from typing import Any, MutableMapping, NewType, Optional, Tuple, cast
+from typing import Any, NewType, Optional, cast
 
 BrowserResponse = NewType("BrowserResponse", MutableMapping[str, Any])
 """The type for a response from the browser. Is really a `dict()`."""
 BrowserCommand = NewType("BrowserCommand", MutableMapping[str, Any])
 """The type for a command to the browser. Is really a `dict()`."""
 
-MessageKey = NewType("MessageKey", Tuple[str, Optional[int]])
+MessageKey = NewType("MessageKey", tuple[str, Optional[int]])
 """The type for id'ing a message/response. It is `tuple(session_id, message_id)`."""
 
 

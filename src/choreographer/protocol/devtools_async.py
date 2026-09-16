@@ -14,7 +14,8 @@ from . import _chunking
 
 if TYPE_CHECKING:
     import asyncio
-    from typing import Any, Callable, Coroutine, Literal, MutableMapping
+    from collections.abc import Coroutine, MutableMapping
+    from typing import Any, Callable, Literal
 
     from choreographer._brokers import Broker
 

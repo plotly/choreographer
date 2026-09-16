@@ -26,7 +26,8 @@ from ._chrome_constants import chromium_based_browsers
 
 if TYPE_CHECKING:
     import logging
-    from typing import Any, Mapping, MutableMapping, Sequence
+    from collections.abc import Mapping, MutableMapping, Sequence
+    from typing import Any
 
     from choreographer.channels._interface_type import ChannelInterface
 

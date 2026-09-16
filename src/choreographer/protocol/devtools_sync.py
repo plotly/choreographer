@@ -9,7 +9,8 @@ import logistro
 from choreographer import protocol
 
 if TYPE_CHECKING:
-    from typing import Any, MutableMapping
+    from collections.abc import MutableMapping
+    from typing import Any
 
     from choreographer._brokers import BrokerSync
 
