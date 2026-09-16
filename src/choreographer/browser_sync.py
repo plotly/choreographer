@@ -16,9 +16,10 @@ from .protocol.devtools_sync import SessionSync, TargetSync
 from .utils._kill import kill
 
 if TYPE_CHECKING:
+    from collections.abc import MutableMapping
     from pathlib import Path
     from types import TracebackType
-    from typing import Any, MutableMapping
+    from typing import Any
 
     from typing_extensions import Self  # 3.9 needs this, could be from typing in 3.10
 

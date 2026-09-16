@@ -11,8 +11,9 @@ import logistro
 _logger = logistro.getLogger()
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
     from pathlib import Path
-    from typing import Any, Sequence
+    from typing import Any
 
 
 def _is_exe(path: str | Path) -> bool:

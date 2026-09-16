@@ -6,8 +6,9 @@ from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
     import logging
+    from collections.abc import Mapping, MutableMapping, Sequence
     from pathlib import Path
-    from typing import Any, Mapping, MutableMapping, Sequence
+    from typing import Any
 
     from choreographer.channels._interface_type import ChannelInterface
 
