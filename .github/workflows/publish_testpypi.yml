@@ -68,32 +68,3 @@ jobs:
           CHOREO_ENABLE_DEBUG: 1
         run: xvfb-run uv run --no-sync poe debug-test
         timeout-minutes: 8
-
-  testpypi-publish:
-    name: Upload release to TestPyPI
-    needs: super-test
-    if: ${{ !cancelled() &&
-            !failure() &&
-            github.event_name == 'push' &&
-            github.run_attempt == 1 }}
-    runs-on: ubuntu-latest
-    environment:
-      name: testpypi
-      url: https://test.pypi.org/p/choreographer
-    # Signs this workflow so pypi trusts it
-    permissions:
-      id-token: write
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version-file: "pyproject.toml"
-      - run: git checkout ${{ github.ref_name }}
-      - run: uv sync --locked --all-extras --no-sources
-      - run: uv build
-      - name: Publish package distributions to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          repository-url: https://test.pypi.org/legacy/.
