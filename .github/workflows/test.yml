@@ -1,5 +1,5 @@
 ---
-name: test-wf
+name: test
 on:
   pull_request:
   push:
