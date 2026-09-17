@@ -8,15 +8,19 @@ on:
 jobs:
   test-all:
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
+        # The oldest and the newest supported python: version-specific
+        # breakage lives at the floor, and the tag workflow covers the middle
+        python_v: ['3.9', '3.14']
     runs-on: ${{ matrix.os }}
+    env:
+      UV_PYTHON: ${{ matrix.python_v }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v5
-      - uses: actions/setup-python@v5
-        with:
-          python-version-file: "pyproject.toml"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4  # v10.1.0
+      - run: uv python install ${{ matrix.python_v }}
 
       - name: Install Dependencies
         if: ${{ matrix.os == 'ubuntu-latest' }}
