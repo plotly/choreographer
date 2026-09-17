@@ -1,6 +1,6 @@
-# .github/workflows/publish_testpypi.yml
+# .github/workflows/test_and_build.yml
 ---
-name: test-n-build
+name: test-and-build
 on:
   workflow_dispatch:
   push:
