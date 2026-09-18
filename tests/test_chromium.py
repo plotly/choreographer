@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from choreographer.browsers.chromium import Chromium
+import pytest
+
+from choreographer.browsers.chromium import ChromeNotFoundError, Chromium
 from choreographer.channels import Pipe
 
 
@@ -64,3 +66,16 @@ def test_empty_proxy_server_uses_environment_fallback(tmp_path, monkeypatch):
     cli = _get_cli(tmp_path, proxy_server="")
 
     assert "--proxy-server=http://environment.example:8080" in cli
+
+
+def test_browser_not_found_message_is_one_string(tmp_path):
+    missing = tmp_path / "chrome"
+    channel = Pipe()
+    try:
+        with pytest.raises(ChromeNotFoundError) as excinfo:
+            Chromium(channel, missing)
+    finally:
+        channel.close()
+
+    assert len(excinfo.value.args) == 1
+    assert f"Path calculated: {missing}." in str(excinfo.value)

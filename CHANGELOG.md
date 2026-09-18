@@ -11,6 +11,9 @@ where X.Y.Z is the semver of the most recent choreographer release.
 
 ## [Unreleased]
 
+### Fixed
+- Build the `ChromeNotFoundError` message as one string, so it no longer prints as a tuple
+
 
 ## [1.4.0] -- 2026-09-16
 
