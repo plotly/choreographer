@@ -1,0 +1,48 @@
+# .github/workflows/publish_pypi.yml
+---
+name: publish-pypi
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Tag to publish, for example v1.4.0
+        required: true
+        type: string
+jobs:
+  pypi-publish:
+    name: Upload release to PyPI
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/choreographer
+    # Signs this workflow so pypi trusts it
+    permissions:
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          ref: ${{ inputs.tag }}
+          # setuptools-git-versioning reads the tags to set the version
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4  # v10.1.0
+      - run: uv sync --locked --all-extras --no-sources
+      - run: git diff --quiet HEAD || { echo "Working tree dirty"; exit 1; }
+      - run: uv build
+      - name: Verify that the build matches the tag
+        run: |
+          expected="${{ inputs.tag }}"
+          expected="${expected#v}"
+          wheel="dist/choreographer-$expected-py3-none-any.whl"
+          sdist="dist/choreographer-$expected.tar.gz"
+          if [ ! -f "$wheel" ] || [ ! -f "$sdist" ]; then
+            echo "Expected version $expected, but dist/ holds:"
+            ls -1 dist/
+            exit 1
+          fi
+          echo "Built $expected from ${{ inputs.tag }}"
+      - name: Publish package distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33  # v1.14.2
+        with:
+          # A re-run of a tag already on PyPI skips instead of failing
+          skip-existing: true
