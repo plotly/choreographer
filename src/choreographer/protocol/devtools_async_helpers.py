@@ -34,9 +34,9 @@ async def _check_document_ready(session: Session, url: str) -> BrowserResponse:
                 new Promise((resolve) => {
                     if (
                         (document.readyState === 'complete') &&
-                        (window.location==`"""  # CONCATENATE!
+                        (window.location.href.startsWith(`"""  # CONCATENATE!
             f"{url!s}"
-            """`)
+            """`))
                     ){
                         resolve("Was complete");
                     } else {
