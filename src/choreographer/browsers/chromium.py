@@ -190,8 +190,8 @@ class Chromium:
             raise ChromeNotFoundError(
                 "Browser not found. You can use get_chrome() or "
                 "choreo_get_chrome from bash. please see documentation. "
-                f"Local copy ignored: {self.skip_local}. ",
-                f"Path calculated:: {self.path}.",
+                f"Local copy ignored: {self.skip_local}. "
+                f"Path calculated: {self.path}.",
             )
         _logger.info(f"Found chromium path: {self.path}")
 
