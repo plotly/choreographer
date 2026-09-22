@@ -12,6 +12,7 @@ where X.Y.Z is the semver of the most recent choreographer release.
 ## [Unreleased]
 
 ### Fixed
+- Fix the page-ready check so that a URL without a trailing slash no longer causes a false load timeout [[#295](https://github.com/plotly/choreographer/pull/295)]
 - Build the `ChromeNotFoundError` message as one string, so it no longer prints as a tuple [[#314](https://github.com/plotly/choreographer/pull/314)], with thanks to @Blizzeq for the contribution!
 
 
