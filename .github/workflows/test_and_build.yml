@@ -1,6 +1,6 @@
-# .github/workflows/publish_testpypi.yml
+# .github/workflows/test_and_build.yml
 ---
-name: test-n-build
+name: test-and-build
 on:
   workflow_dispatch:
   push:
@@ -12,17 +12,17 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python_v: ['3.8', '3.9', '3.10', '3.12', '3.13', '3.14', '3.14t']
+        python_v: ['3.9', '3.10', '3.11', '3.12', '3.13', '3.14', '3.14t']
         # chrome_v: ['-1']
     name: Build and Test
     runs-on: ${{ matrix.os }}
     env:
       UV_PYTHON: ${{ matrix.python_v }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           fetch-depth: 1
-      - uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4  # v10.1.0
       - name: Install Dependencies
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: sudo apt-get update && sudo apt-get install xvfb
@@ -68,32 +68,3 @@ jobs:
           CHOREO_ENABLE_DEBUG: 1
         run: xvfb-run uv run --no-sync poe debug-test
         timeout-minutes: 8
-
-  testpypi-publish:
-    name: Upload release to TestPyPI
-    needs: super-test
-    if: ${{ !cancelled() &&
-            !failure() &&
-            github.event_name == 'push' &&
-            github.run_attempt == 1 }}
-    runs-on: ubuntu-latest
-    environment:
-      name: testpypi
-      url: https://test.pypi.org/p/choreographer
-    # Signs this workflow so pypi trusts it
-    permissions:
-      id-token: write
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version-file: "pyproject.toml"
-      - run: git checkout ${{ github.ref_name }}
-      - run: uv sync --locked --all-extras --no-sources
-      - run: uv build
-      - name: Publish package distributions to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          repository-url: https://test.pypi.org/legacy/.

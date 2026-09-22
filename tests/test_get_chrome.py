@@ -48,9 +48,12 @@ def test_get_chrome_sync_download_behavior(
         return zip_buffer
 
     # Patch json.load to return our mock data (avoid broad Path.read_text patch)
-    with patch("json.loads", return_value=mock_last_known_good_json), patch(
-        "urllib.request.urlopen",
-        side_effect=lambda url: create_mock_zip_response(),  # noqa: ARG005
+    with (
+        patch("json.loads", return_value=mock_last_known_good_json),
+        patch(
+            "urllib.request.urlopen",
+            side_effect=lambda url: create_mock_zip_response(),  # noqa: ARG005
+        ),
     ):
         # a) First call without force - should return existing, no download
         result = get_chrome_sync(arch="linux64", path=tmp_path, force=False)

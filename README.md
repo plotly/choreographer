@@ -101,26 +101,26 @@ See [the devtools reference][devtools-ref] for a list of possible commands.
 Try adding the following to the example shown above:
 
 ```python
-    # Callback for printing result
-    async def dump_event(response):
-        print(str(response))
+# Callback for printing result
+async def dump_event(response):
+    print(str(response))
 
 
-    # Callback for raising result as error
-    async def error_event(response):
-        raise Exception(str(response))
+# Callback for raising result as error
+async def error_event(response):
+    raise Exception(str(response))
 
 
-    browser.subscribe("Target.targetCrashed", error_event)
-    new_tab.subscribe("Page.loadEventFired", dump_event)
-    browser.subscribe("Target.*", dump_event) # dumps all "Target" events
-    response = await new_tab.subscribe_once("Page.lifecycleEvent")
-    # do something with response
-    browser.unsubscribe("Target.*")
-    # events are always sent to a browser or tab,
-    # but the documentation isn't always clear which.
-    # Dumping all: `browser.subscribe("*", dump_event)` (on tab too)
-    # can be useful (but verbose) for debugging.
+browser.subscribe("Target.targetCrashed", error_event)
+new_tab.subscribe("Page.loadEventFired", dump_event)
+browser.subscribe("Target.*", dump_event)  # dumps all "Target" events
+response = await new_tab.subscribe_once("Page.lifecycleEvent")
+# do something with response
+browser.unsubscribe("Target.*")
+# events are always sent to a browser or tab,
+# but the documentation isn't always clear which.
+# Dumping all: `browser.subscribe("*", dump_event)` (on tab too)
+# can be useful (but verbose) for debugging.
 ```
 
 ## Synchronous Use
@@ -128,7 +128,7 @@ Try adding the following to the example shown above:
 You can use this library without `asyncio`,
 
 ```python
-my_browser = choreo.Browser() # blocking until open
+my_browser = choreo.Browser()  # blocking until open
 ```
 
 However, you must call `browser.pipe.read_jsons(blocking=True|False)` manually,

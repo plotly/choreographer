@@ -18,7 +18,7 @@ _logger = logistro.getLogger(__name__)
 
 
 @pytest.mark.asyncio(loop_scope="function")
-async def test_context(headless, sandbox, gpu):
+async def test_context(headless, sandbox, gpu, extension):
     _logger.info("testing...")
     if sandbox and "ubuntu" in platform.version().lower():
         pytest.skip(
@@ -35,6 +35,7 @@ async def test_context(headless, sandbox, gpu):
             headless=headless,
             enable_sandbox=sandbox,
             enable_gpu=gpu,
+            enable_extensions=extension,
         ) as browser:
             response = await browser.send_command(command="Target.getTargets")
             assert "result" in response and "targetInfos" in response["result"]  # noqa: PT018 combined assert
@@ -51,7 +52,7 @@ async def test_context(headless, sandbox, gpu):
 
 
 @pytest.mark.asyncio(loop_scope="function")
-async def test_no_context(headless, sandbox, gpu):
+async def test_no_context(headless, sandbox, gpu, extension):
     _logger.info("testing...")
     if sandbox and "ubuntu" in platform.version().lower():
         pytest.skip("Ubuntu doesn't support sandbox unless installed from snap.")
@@ -59,6 +60,7 @@ async def test_no_context(headless, sandbox, gpu):
         headless=headless,
         enable_sandbox=sandbox,
         enable_gpu=gpu,
+        enable_extensions=extension,
     )
     try:
         async with timeout(pytest.default_timeout):  # type: ignore[reportAttributeAccessIssue]

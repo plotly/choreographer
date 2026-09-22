@@ -9,7 +9,8 @@ import logistro
 from choreographer import protocol
 
 if TYPE_CHECKING:
-    from typing import Any, MutableMapping
+    from collections.abc import MutableMapping
+    from typing import Any
 
     from choreographer._brokers import BrokerSync
 
@@ -63,6 +64,11 @@ class SessionSync:
 
         Returns:
             A message key (session, message id) tuple or None
+
+        Raises:
+            MessageTooLargeError: If the message is too big for Chrome's
+                buffer. Use the async `Session` if you need to send something
+                that big.
 
         """
         current_id = self.message_id

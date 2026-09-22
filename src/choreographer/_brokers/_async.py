@@ -13,7 +13,8 @@ from choreographer.utils import _manual_thread_pool
 # afrom choreographer.channels import ChannelClosedError
 
 if TYPE_CHECKING:
-    from typing import Any, MutableMapping
+    from collections.abc import MutableMapping
+    from typing import Any
 
     from choreographer.browser_async import Browser
     from choreographer.channels._interface_type import ChannelInterface

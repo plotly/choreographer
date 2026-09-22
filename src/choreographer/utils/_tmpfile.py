@@ -14,7 +14,8 @@ from typing import TYPE_CHECKING
 import logistro
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, MutableMapping, Sequence
+    from collections.abc import MutableMapping, Sequence
+    from typing import Any, Callable
 
 _logger = logistro.getLogger(__name__)
 
@@ -183,7 +184,7 @@ class TmpDirectory:
             if hasattr(self, "temp_dir"):
                 del self.temp_dir
             _logger.info("shutil.rmtree worked.")
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             _logger.debug("Error during tmp file removal.", exc_info=e)
             self._delete_manually(check_only=True)
             if not self.exists:

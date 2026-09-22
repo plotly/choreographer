@@ -12,7 +12,7 @@ import logistro
 # ruff has line-level and file-level QA suppression
 # so lets give diagnose a separate file
 
-# ruff: noqa: PLR0915, C901, S603, BLE001, S607, PERF203, TRY002, T201, PLR0912, SLF001
+# ruff: noqa: PLR0915, C901, BLE001, S607, PERF203, TRY002, T201, PLR0912, SLF001
 # ruff: noqa: PLC0415
 # ruff: noqa: F401, ERA001 # temporary, sync
 # ruff: noqa: PLC0415 - import at time of file
