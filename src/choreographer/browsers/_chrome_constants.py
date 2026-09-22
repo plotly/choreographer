@@ -50,10 +50,10 @@ if platform.system() == "Windows":
     typical_edge_paths = tuple(_p + _edge_suffix for _p in _windows_app_dirs)
 
     _brave_suffix = r"\BraveSoftware\Brave-Browser\Application\brave.exe"
-    typical_brave_paths = tuple(_p + _edge_suffix for _p in _windows_app_dirs)
+    typical_brave_paths = tuple(_p + _brave_suffix for _p in _windows_app_dirs)
 
     _vivaldi_suffix = r"\Vivaldi\Application\vivaldi.exe"
-    typical_vivaldi_paths = tuple(_p + _brave_suffix for _p in _windows_app_dirs)
+    typical_vivaldi_paths = tuple(_p + _vivaldi_suffix for _p in _windows_app_dirs)
 
 elif platform.system() == "Linux":
     typical_chrome_paths = (
