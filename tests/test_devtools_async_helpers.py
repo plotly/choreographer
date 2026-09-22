@@ -4,6 +4,7 @@ import logistro
 import pytest
 
 from choreographer.protocol.devtools_async_helpers import (
+    _check_document_ready,
     create_and_wait,
     execute_js_and_wait,
     navigate_and_wait,
@@ -50,6 +51,31 @@ async def test_create_and_wait(browser):
     # Test 3: Create tab with bad URL that won't load - should timeout
     with pytest.raises(asyncio.TimeoutError):
         await create_and_wait(browser, url="http://192.0.2.1:9999", timeout=0.5)
+
+
+@pytest.mark.asyncio
+async def test_check_document_ready_tolerates_missing_trailing_slash(browser):
+    """Test that the ready check tolerates a missing trailing slash"""
+    _logger.info("testing _check_document_ready...")
+    # Chrome normalizes "https://www.example.com" to "https://www.example.com/",
+    # so an exact comparison against the input URL never matches
+    url = "https://www.example.com"
+    tab = await create_and_wait(browser, url=url, timeout=5.0)
+
+    session = await tab.create_session()
+    try:
+        # Chrome already fired the load event for this tab, so it never fires
+        # again. The check must take the readyState branch or it hangs
+        response = await asyncio.wait_for(
+            _check_document_ready(session, url),
+            timeout=5.0,
+        )
+    except TimeoutError:
+        pytest.fail("The ready check hung, so it did not match the normalized URL")
+    finally:
+        await tab.close_session(session.session_id)
+
+    assert response["result"]["result"]["value"] == "Was complete"
 
 
 @pytest.mark.asyncio
