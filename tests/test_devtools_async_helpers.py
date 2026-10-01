@@ -53,6 +53,23 @@ async def test_create_and_wait(browser):
 
 
 @pytest.mark.asyncio
+async def test_create_and_wait_escapes_url(browser):
+    """Test that create_and_wait treats JS template characters in the URL as text."""
+    _logger.info("testing create_and_wait with template characters...")
+
+    # Test 1: A backtick used to end the template literal in the ready check.
+    # The resulting SyntaxError was counted as a load, so this returned a tab
+    with pytest.raises(asyncio.TimeoutError):
+        await create_and_wait(browser, url="http://192.0.2.1:9999/`", timeout=0.5)
+
+    # Test 2: A ${...} sequence used to run as JavaScript in the page
+    url = "about:blank?${window.injected=1}"
+    tab = await create_and_wait(browser, url=url, timeout=5.0)
+    result = await execute_js_and_wait(tab, "typeof window.injected", timeout=5.0)
+    assert result["result"]["result"]["value"] == "undefined"
+
+
+@pytest.mark.asyncio
 async def test_navigate_and_wait(browser):
     """Test navigate_and_wait with both valid data URL and bad URL."""
     _logger.info("testing navigate_and_wait...")

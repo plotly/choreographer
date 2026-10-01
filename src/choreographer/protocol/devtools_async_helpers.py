@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 from typing import TYPE_CHECKING
 
 import logistro
@@ -34,9 +35,9 @@ async def _check_document_ready(session: Session, url: str) -> BrowserResponse:
                 new Promise((resolve) => {
                     if (
                         (document.readyState === 'complete') &&
-                        (window.location==`"""  # CONCATENATE!
-            f"{url!s}"
-            """`)
+                        (window.location=="""  # CONCATENATE!
+            f"{json.dumps(url)}"
+            """)
                     ){
                         resolve("Was complete");
                     } else {

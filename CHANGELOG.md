@@ -13,6 +13,7 @@ where X.Y.Z is the semver of the most recent choreographer release.
 
 ### Fixed
 - Build the `ChromeNotFoundError` message as one string, so it no longer prints as a tuple [[#314](https://github.com/plotly/choreographer/pull/314)], with thanks to @Blizzeq for the contribution!
+- Escape the URL in the page-ready check, so a backtick no longer counts as a loaded page and a `${...}` sequence no longer runs as JavaScript [[#317](https://github.com/plotly/choreographer/pull/317)]
 
 
 ## [1.4.0] -- 2026-09-16
