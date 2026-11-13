@@ -98,7 +98,8 @@ class BrowserSync(TargetSync):
                 "browser_proc",
                 parser=parser,
             )
-        else self._logger_pipe = None
+        else:
+            self._logger_pipe = None
 
     def open(self) -> None:
         """Open the browser."""
