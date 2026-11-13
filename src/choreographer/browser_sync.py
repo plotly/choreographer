@@ -93,10 +93,13 @@ class BrowserSync(TargetSync):
             parser = browser_cls.logger_parser
         else:
             parser = None
-        self._logger_pipe, _ = logistro.getPipeLogger(
-            "browser_proc",
-            parser=parser,
-        )
+        if _logger.isEnabledFor(logistro.DEBUG):
+            self._logger_pipe, _ = logistro.getPipeLogger(
+                "browser_proc",
+                parser=parser,
+            )
+        else:
+            self._logger_pipe = None
 
     def open(self) -> None:
         """Open the browser."""
@@ -104,7 +107,7 @@ class BrowserSync(TargetSync):
             raise RuntimeError("Can't re-open the browser")
         self.subprocess = subprocess.Popen(  # noqa: S603
             self._browser_impl.get_cli(),
-            stderr=self._logger_pipe,
+            stderr=self._logger_pipe or subprocess.DEVNULL,
             env=self._browser_impl.get_env(),
             **self._browser_impl.get_popen_args(),
         )
