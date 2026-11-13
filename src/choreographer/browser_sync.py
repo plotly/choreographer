@@ -93,7 +93,7 @@ class BrowserSync(TargetSync):
             parser = browser_cls.logger_parser
         else:
             parser = None
-        if _logger.isEnabledFor(logging.DEBUG):
+        if _logger.isEnabledFor(logistro.DEBUG):
             self._logger_pipe, _ = logistro.getPipeLogger(
                 "browser_proc",
                 parser=parser,
