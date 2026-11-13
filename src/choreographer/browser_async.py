@@ -134,10 +134,13 @@ class Browser(Target):
             parser = self._browser_impl.logger_parser
         else:
             parser = None
-        self._logger_pipe, _ = logistro.getPipeLogger(
-            "browser_proc",
-            parser=parser,
-        )
+        if _logger.isEnabledFor(logistro.DEBUG):
+            self._logger_pipe, _ = logistro.getPipeLogger(
+                "browser_proc",
+                parser=parser,
+            )
+        else:
+            self._logger_pipe = None
 
         def run() -> subprocess.Popen[bytes] | subprocess.Popen[str]:  # depends on args
             self._browser_impl.pre_open()
