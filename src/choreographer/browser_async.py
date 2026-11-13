@@ -140,7 +140,7 @@ class Browser(Target):
                 parser=parser,
             )
         else:
-            self._logger_pipe = None
+            self._logger_pipe = subprocess.DEVNULL
 
         def run() -> subprocess.Popen[bytes] | subprocess.Popen[str]:  # depends on args
             self._browser_impl.pre_open()
