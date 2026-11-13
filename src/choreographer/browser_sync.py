@@ -93,10 +93,11 @@ class BrowserSync(TargetSync):
             parser = browser_cls.logger_parser
         else:
             parser = None
-        self._logger_pipe, _ = logistro.getPipeLogger(
-            "browser_proc",
-            parser=parser,
-        )
+        if _logger.isEnabledFor(logging.DEBUG):
+            self._logger_pipe, _ = logistro.getPipeLogger(
+                "browser_proc",
+                parser=parser,
+            )
 
     def open(self) -> None:
         """Open the browser."""
